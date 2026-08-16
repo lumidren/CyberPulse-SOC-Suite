@@ -1,4 +1,4 @@
-# 🛡️ AegisSOC: Automated SIEM & SOAR Security Operations Center Laboratory
+# 🛡️ CyberPulse SOC Suite: Automated SIEM & SOAR Operations Laboratory
 
 ![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
 ![SIEM](https://img.shields.io/badge/SIEM-Wazuh%20%7C%20Sysmon-orange)
@@ -6,7 +6,7 @@
 ![MITRE ATT&CK](https://img.shields.io/badge/Framework-MITRE%20ATT%26CK-red)
 ![License](https://img.shields.io/badge/License-MIT-purple)
 
-**AegisSOC** is a portfolio-ready, self-contained Security Operations Center (SOC) lab environment. It features real-time adversary emulation, endpoint telemetry processing, custom MITRE ATT&CK-mapped detection engineering (Sigma & Wazuh rules), automated threat intelligence enrichment (VirusTotal & AbuseIPDB), and an interactive dark-mode Web Operations Center.
+**CyberPulse SOC Suite** is a portfolio-ready, self-contained Security Operations Center (SOC) lab environment. It features real-time adversary emulation, endpoint telemetry processing, custom MITRE ATT&CK-mapped detection engineering (Sigma & Wazuh rules), automated threat intelligence enrichment (VirusTotal & AbuseIPDB), and an interactive dark-mode Web Operations Center.
 
 ---
 
