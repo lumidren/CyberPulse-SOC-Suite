@@ -1,0 +1,30 @@
+title: OS Credential Dumping via LSASS Memory Access
+id: 4b29381e-7f61-419b-a312-d9c0e3528b10
+status: experimental
+description: Detects process access requests targeting lsass.exe memory space (GrantedAccess 0x1010 or 0x1400), indicative of Mimikatz or ProcDump credential dumping.
+references:
+    - https://attack.mitre.org/techniques/T1003/001/
+author: SOC Portfolio Lab Team
+date: 2026/08/15
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+logsource:
+    category: process_access
+    product: windows
+detection:
+    selection:
+        TargetImage|endswith: '\lsass.exe'
+        GrantedAccess|contains:
+            - '0x1010'
+            - '0x1400'
+            - '0x1F0FFF'
+    filter:
+        SourceImage|endswith:
+            - '\svchost.exe'
+            - '\csrss.exe'
+            - '\MsMpEng.exe'
+    condition: selection and not filter
+falsepositives:
+    - Legitimate endpoint protection tools or administrative software dumping diagnostic logs.
+level: critical

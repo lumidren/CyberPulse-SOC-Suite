@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisSOC - Automated SIEM & SOAR Operations Center</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="soc-container">
+        <!-- Top Navigation Header -->
+        <header class="soc-header">
+            <div class="logo-area">
+                <div class="cyber-shield-icon">🛡️</div>
+                <div>
+                    <h1>AEGIS<span class="highlight">SOC</span></h1>
+                    <p class="subtitle">AUTOMATED SIEM & SOAR RESPONSE LAB</p>
+                </div>
+            </div>
+            
+            <div class="metrics-header">
+                <div class="metric-badge">
+                    <span class="label">SIEM STATUS</span>
+                    <span class="value status-online">● ACTIVE</span>
+                </div>
+                <div class="metric-badge">
+                    <span class="label">SOAR ENGINE</span>
+                    <span class="value status-online">● AUTO-CONTAIN</span>
+                </div>
+                <div class="metric-badge">
+                    <span class="label">TOTAL ALERTS</span>
+                    <span class="value" id="total-alerts-count">0</span>
+                </div>
+                <div class="metric-badge">
+                    <span class="label">CRITICAL THREATS</span>
+                    <span class="value text-critical" id="critical-alerts-count">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content -->
+        <main class="dashboard-grid">
+            <!-- Left Column: Controls & MITRE ATT&CK Matrix -->
+            <section class="panel-left">
+                <!-- Attack Simulation Launcher -->
+                <div class="card control-card">
+                    <div class="card-header">
+                        <h2>⚡ ATTACK SIMULATOR (ADVERSARY EMULATION)</h2>
+                    </div>
+                    <p class="card-desc">Trigger simulated MITRE ATT&CK adversary tactics to test real-time detection & automated SOAR playbooks.</p>
+                    <div class="attack-buttons">
+                        <button class="btn btn-attack" onclick="triggerAttack('t1003')">
+                            <span class="btn-icon">🔓</span> T1003.001 LSASS Dump
+                        </button>
+                        <button class="btn btn-attack" onclick="triggerAttack('t1110')">
+                            <span class="btn-icon">🔨</span> T1110.001 RDP Brute Force
+                        </button>
+                        <button class="btn btn-attack" onclick="triggerAttack('t1053')">
+                            <span class="btn-icon">📌</span> T1053.005 Scheduled Task
+                        </button>
+                        <button class="btn btn-attack" onclick="triggerAttack('t1059')">
+                            <span class="btn-icon">💻</span> T1059.001 Encoded PowerShell
+                        </button>
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="triggerAttack('random')">
+                        🚀 RUN AUTOMATED ATTACK STREAM
+                    </button>
+                </div>
+
+                <!-- MITRE ATT&CK Heatmap -->
+                <div class="card matrix-card">
+                    <div class="card-header">
+                        <h2>🎯 MITRE ATT&CK COVERAGE MATRIX</h2>
+                    </div>
+                    <div class="mitre-grid">
+                        <div class="mitre-cell" id="mitre-t1003">
+                            <span class="tactic">CREDENTIAL ACCESS</span>
+                            <span class="tech-id">T1003.001</span>
+                            <span class="tech-name">LSASS Memory Dump</span>
+                            <span class="hits-badge" id="hits-t1003">0 Hits</span>
+                        </div>
+                        <div class="mitre-cell" id="mitre-t1110">
+                            <span class="tactic">CREDENTIAL ACCESS</span>
+                            <span class="tech-id">T1110.001</span>
+                            <span class="tech-name">Password Brute Force</span>
+                            <span class="hits-badge" id="hits-t1110">0 Hits</span>
+                        </div>
+                        <div class="mitre-cell" id="mitre-t1053">
+                            <span class="tactic">PERSISTENCE</span>
+                            <span class="tech-id">T1053.005</span>
+                            <span class="tech-name">Scheduled Task</span>
+                            <span class="hits-badge" id="hits-t1053">0 Hits</span>
+                        </div>
+                        <div class="mitre-cell" id="mitre-t1059">
+                            <span class="tactic">EXECUTION</span>
+                            <span class="tech-id">T1059.001</span>
+                            <span class="tech-name">PowerShell Scripting</span>
+                            <span class="hits-badge" id="hits-t1059">0 Hits</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Threat Intelligence Enrichment Box -->
+                <div class="card intel-card">
+                    <div class="card-header">
+                        <h2>🌐 THREAT INTEL REPUTATION ENGINE</h2>
+                    </div>
+                    <div id="intel-details-container" class="intel-content">
+                        <p class="placeholder-text">Select an alert from the stream to view VirusTotal & AbuseIPDB threat intelligence enrichment details.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Live SIEM Feed & SOAR Log -->
+            <section class="panel-right">
+                <!-- Live SIEM Alerts Table -->
+                <div class="card alerts-card">
+                    <div class="card-header">
+                        <h2>🚨 REAL-TIME SIEM DETECTIONS</h2>
+                        <button class="btn btn-sm" onclick="clearAlerts()">Clear Stream</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="alerts-table">
+                            <thead>
+                                <tr>
+                                    <th>TIME</th>
+                                    <th>SEVERITY</th>
+                                    <th>RULE NAME</th>
+                                    <th>TECHNIQUE</th>
+                                    <th>TARGET HOST</th>
+                                    <th>ATTACKER IP</th>
+                                    <th>STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alerts-tbody">
+                                <tr id="empty-row">
+                                    <td colspan="7" class="text-center placeholder-text">Waiting for attack telemetry... Click an attack button on the left to simulate a threat.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SOAR Automated Remediation Log -->
+                <div class="card soar-log-card">
+                    <div class="card-header">
+                        <h2>🤖 SOAR AUTOMATED CONTAINMENT AUDIT LOG</h2>
+                    </div>
+                    <div class="terminal-box" id="soar-terminal">
+                        <div class="term-line"><span class="term-time">[SYSTEM]</span> SOAR Engine v2.4 initialized. Monitoring detection queue for automated playbooks...</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

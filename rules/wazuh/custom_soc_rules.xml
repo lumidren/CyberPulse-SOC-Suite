@@ -1,0 +1,36 @@
+<!-- Custom Wazuh SIEM Detection Rules for SOC Laboratory -->
+<group name="sysmon,windows,soc_custom_rules,">
+  <!-- LSASS Memory Dumping Rule -->
+  <rule id="100010" level="14">
+    <if_sid>61612</if_sid>
+    <field name="win.eventdata.targetImage">\\lsass.exe$</field>
+    <field name="win.eventdata.grantedAccess">^0x1010$|^0x1400$</field>
+    <description>SOC-ALERT: LSASS memory access handle acquired by $(win.eventdata.sourceImage) [MITRE T1003.001]</description>
+    <mitre>
+      <id>T1003.001</id>
+    </mitre>
+    <group>credential_access,lsass_dump,</group>
+  </rule>
+
+  <!-- Password Brute Force Rule -->
+  <rule id="100011" level="10" frequency="10" timeframe="300">
+    <if_matched_sid>60109</if_matched_sid>
+    <same_srcip />
+    <description>SOC-ALERT: Multiple failed RDP/Network logon attempts from $(win.eventdata.ipAddress) [MITRE T1110.001]</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+    <group>credential_access,brute_force,</group>
+  </rule>
+
+  <!-- Suspicious Scheduled Task Rule -->
+  <rule id="100012" level="12">
+    <if_sid>60144</if_sid>
+    <field name="win.eventdata.taskContent">powershell|cmd\.exe|http</field>
+    <description>SOC-ALERT: Scheduled task created with script payload $(win.eventdata.taskName) [MITRE T1053.005]</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+    <group>persistence,scheduled_task,</group>
+  </rule>
+</group>
