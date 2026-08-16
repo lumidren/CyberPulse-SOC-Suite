@@ -1,0 +1,25 @@
+title: Password Brute Force Authentication Failure Spike
+id: 9a8d420f-21b4-4e12-b91c-223405fae38e
+status: production
+description: Detects a high volume of failed logon attempts (EventID 4625) originating from a single source workstation or external IP within a short threshold.
+references:
+    - https://attack.mitre.org/techniques/T1110/001/
+author: SOC Portfolio Lab Team
+date: 2026/08/15
+tags:
+    - attack.credential_access
+    - attack.t1110.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4625
+        LogonType:
+            - 3 # Network
+            - 10 # RDP
+    timeframe: 5m
+    condition: selection | count() by IpAddress > 10
+falsepositives:
+    - Misconfigured service accounts or password typos by legitimate users.
+level: high

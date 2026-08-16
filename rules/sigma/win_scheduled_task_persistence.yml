@@ -1,0 +1,29 @@
+title: Suspicious Scheduled Task Creation for Persistence
+id: 5e61234a-9c2b-4781-a901-d85712ef9100
+status: production
+description: Detects creation of a new Windows Scheduled Task containing suspicious script interpreters or web download strings.
+references:
+    - https://attack.mitre.org/techniques/T1053/005/
+author: SOC Portfolio Lab Team
+date: 2026/08/15
+tags:
+    - attack.persistence
+    - attack.t1053.005
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4698
+    keywords:
+        TaskContent|contains:
+            - 'powershell'
+            - 'cmd.exe'
+            - 'http:'
+            - 'https:'
+            - 'wscript'
+            - 'cscript'
+    condition: selection and keywords
+falsepositives:
+    - Legitimate software installers creating scheduled update tasks with network installers.
+level: high
