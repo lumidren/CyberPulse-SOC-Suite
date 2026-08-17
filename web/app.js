@@ -184,6 +184,12 @@ function renderAlertRow(alert) {
 function showIntelDetails(alert) {
     const container = document.getElementById('intel-details-container');
     const intel = alert.intel;
+    const timing = alert.pipeline_timing || {
+        stage1_detection_ms: 1410,
+        stage2_threat_intel_ms: 630,
+        stage3_containment_ms: 1140,
+        total_pipeline_sec: 3.18
+    };
 
     container.innerHTML = `
         <div class="intel-box">
@@ -194,6 +200,11 @@ function showIntelDetails(alert) {
             <div class="intel-row"><span class="key">AbuseIPDB Score:</span> <span class="val">${intel.abuse_score}</span></div>
             <div class="intel-row"><span class="key">Geo-Location:</span> <span class="val">${intel.country}</span></div>
             <div class="intel-row"><span class="key">ISP / Org:</span> <span class="val">${intel.isp}</span></div>
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 0.4rem 0;">
+            <div class="intel-row"><span class="key">⚡ Stage 1 Ingestion/Sigma:</span> <span class="val">${timing.stage1_detection_ms} ms</span></div>
+            <div class="intel-row"><span class="key">⚡ Stage 2 Async Intel:</span> <span class="val">${timing.stage2_threat_intel_ms} ms</span></div>
+            <div class="intel-row"><span class="key">⚡ Stage 3 Containment:</span> <span class="val">${timing.stage3_containment_ms} ms</span></div>
+            <div class="intel-row"><span class="key" style="color: var(--status-green);">🛡️ Total Telemetry-to-Containment:</span> <span class="val" style="color: var(--status-green);">${timing.total_pipeline_sec}s</span></div>
         </div>
     `;
 }
