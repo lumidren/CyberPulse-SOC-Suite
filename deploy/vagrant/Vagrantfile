@@ -1,0 +1,51 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Vagrantfile for CyberPulse Multi-VLAN Enterprise Lab Environment
+# Provisions: Windows Server 2022 AD DC (10.0.0.10), Windows 11 Workstation (10.0.0.45), Wazuh Server (10.0.1.5)
+
+Vagrant.configure("2") do |config|
+  
+  # 1. Windows Server 2022 Active Directory Domain Controller
+  config.vm.define "ad-dc01" do |dc|
+    dc.vm.box = "gusztavvargadr/windows-server-2022-standard"
+    dc.vm.hostname = "WIN-DC01"
+    dc.vm.network "private_network", ip: "10.0.0.10", virtualbox__intnet: "vlan10-enterprise"
+    dc.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+      vb.cpus = 2
+    end
+    dc.vm.provision "shell", inline: <<-SHELL
+      # Install Sysmon v14 with Olaf Hartong modular config
+      Invoke-WebRequest -Uri "https://live.sysinternals.com/Sysmon64.exe" -OutFile "C:\\Windows\\Temp\\Sysmon64.exe"
+      Invoke-WebRequest -Uri "https://raw.githubusercontent.com/olafhartong/sysmon-modular/master/sysmonconfig.xml" -OutFile "C:\\Windows\\Temp\\sysmonconfig.xml"
+      C:\\Windows\\Temp\\Sysmon64.exe -accepteula -i C:\\Windows\\Temp\\sysmonconfig.xml
+      
+      # Configure WinRM over TLS for automated SOAR containment
+      Enable-PSRemoting -Force -SkipNetworkProfileCheck
+    SHELL
+  end
+
+  # 2. Windows 11 Enterprise Workstation
+  config.vm.define "win11-client" do |ws|
+    ws.vm.box = "gusztavvargadr/windows-11-enterprise"
+    ws.vm.hostname = "WIN-WORKSTATION09"
+    ws.vm.network "private_network", ip: "10.0.0.45", virtualbox__intnet: "vlan10-enterprise"
+    ws.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+      vb.cpus = 2
+    end
+  end
+
+  # 3. Wazuh SIEM & SOAR Manager Cluster
+  config.vm.define "wazuh-manager" do |wz|
+    wz.vm.box = "generic/ubuntu2204"
+    wz.vm.hostname = "wazuh-core"
+    wz.vm.network "private_network", ip: "10.0.1.5", virtualbox__intnet: "vlan20-soc"
+    wz.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+      vb.cpus = 2
+    end
+  end
+
+end
