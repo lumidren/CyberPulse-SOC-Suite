@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  wazuh-indexer:
+    image: opensearchproject/opensearch:2.11.0
+    container_name: wazuh-indexer
+    hostname: wazuh.indexer
+    restart: always
+    ports:
+      - "9200:9200"
+    environment:
+      - "discovery.type=single-node"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=SecretPassword123!"
+      - "plugins.security.ssl.http.enabled=false"
+    volumes:
+      - wazuh-indexer-data:/usr/share/opensearch/data
+    networks:
+      soc-net:
+        ipv4_address: 10.0.1.5
+
+  wazuh-manager:
+    image: wazuh/wazuh-manager:4.7.2
+    container_name: wazuh-manager
+    hostname: wazuh.manager
+    restart: always
+    ports:
+      - "1514:1514/tcp"
+      - "1515:1515/tcp"
+      - "55000:55000/tcp"
+    environment:
+      - INDEXER_URL=http://wazuh-indexer:9200
+    volumes:
+      - ./wazuh/local_rules.xml:/var/ossec/etc/rules/local_rules.xml:ro
+      - ./wazuh/local_decoder.xml:/var/ossec/etc/decoders/local_decoder.xml:ro
+    depends_on:
+      - wazuh-indexer
+    networks:
+      soc-net:
+        ipv4_address: 10.0.1.10
+
+  soar-engine:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.soar
+    container_name: cyberpulse-soar
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - WAZUH_API_URL=https://wazuh-manager:55000
+      - WAZUH_USER=wazuh-wui
+      - WAZUH_PASS=wazuh-wui
+    depends_on:
+      - wazuh-manager
+    networks:
+      soc-net:
+        ipv4_address: 10.0.1.15
+
+networks:
+  soc-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.1.0/24
+
+volumes:
+  wazuh-indexer-data:

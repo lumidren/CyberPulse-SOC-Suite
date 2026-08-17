@@ -1,0 +1,20 @@
+<!-- Custom Wazuh Decoders for Sysmon and Windows Security Telemetry -->
+<decoder name="sysmon-processaccess">
+  <parent>windows</parent>
+  <prematch>Microsoft-Windows-Sysmon/Operational: </prematch>
+  <regex offset="after_prematch">EventID: 10</regex>
+  <order>event_id</order>
+</decoder>
+
+<decoder name="sysmon-processaccess-fields">
+  <parent>sysmon-processaccess</parent>
+  <regex>SourceImage: (\S+) \.* TargetImage: (\S+) \.* GrantedAccess: (\S+)</regex>
+  <order>source_image, target_image, granted_access</order>
+</decoder>
+
+<decoder name="win-rdp-auth-fail">
+  <parent>windows</parent>
+  <prematch>Microsoft-Windows-Security-Auditing: </prematch>
+  <regex offset="after_prematch">EventID: 4625 \.* LogonType: 10 \.* SourceNetworkAddress: (\S+)</regex>
+  <order>src_ip</order>
+</decoder>

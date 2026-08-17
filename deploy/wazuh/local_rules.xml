@@ -1,0 +1,38 @@
+<!-- Production Wazuh Rules Mapped from Sigma YAML -->
+<group name="sysmon,windows_security,soc_custom_rules,">
+
+  <!-- Rule 100010: T1003.001 LSASS Memory Dumping -->
+  <rule id="100010" level="14">
+    <decoded_as>sysmon-processaccess</decoded_as>
+    <field name="target_image">\\lsass\.exe$</field>
+    <field name="granted_access">^0x1010$|^0x1400$</field>
+    <description>SOC-ALERT: Unauthorized process memory handle acquired targeting lsass.exe by $(source_image) [MITRE T1003.001]</description>
+    <mitre>
+      <id>T1003.001</id>
+    </mitre>
+    <group>credential_access,lsass_dump,</group>
+  </rule>
+
+  <!-- Rule 100011: T1110.001 RDP Password Brute Force Threshold -->
+  <rule id="100011" level="11" frequency="10" timeframe="300">
+    <decoded_as>win-rdp-auth-fail</decoded_as>
+    <same_srcip />
+    <description>SOC-ALERT: RDP Authentication failure spike (>10 failures in 5m) from $(src_ip) [MITRE T1110.001]</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+    <group>credential_access,brute_force,</group>
+  </rule>
+
+  <!-- Rule 100012: T1053.005 Persistence via Scheduled Task -->
+  <rule id="100012" level="12">
+    <if_sid>60144</if_sid>
+    <field name="win.eventdata.taskContent">powershell|cmd\.exe|http:|https:</field>
+    <description>SOC-ALERT: High-risk Scheduled Task creation with script execution payload $(win.eventdata.taskName) [MITRE T1053.005]</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+    <group>persistence,scheduled_task,</group>
+  </rule>
+
+</group>
