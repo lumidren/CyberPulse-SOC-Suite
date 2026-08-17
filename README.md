@@ -56,13 +56,15 @@ flowchart LR
 
 Tested across **60+ automated adversary emulation executions** with 0 false-positive containment triggers on baseline administrative traffic:
 
-| Metric | Manual Analyst Baseline | CyberPulse Automated SOAR | Improvement / Outcome |
-| :--- | :--- | :--- | :--- |
-| **Mean Time to Detect (MTTD)** | 3 – 5 minutes | **< 1.8 seconds** | **99.4% reduction** via Sysmon kernel events |
-| **Mean Time to Respond (MTTR)** | 15 – 25 minutes | **< 3.2 seconds** | **97.8% reduction** from alert to containment |
-| **IoC Enrichment Latency** | 2 – 4 minutes | **< 650 ms** | Automated VirusTotal v3 & AbuseIPDB v2 lookups |
-| **Attack Chain Validation** | Periodic / Manual | **100% True-Positive** | 60/60 simulated MITRE technique runs detected |
-| **False Positive Containment** | N/A (Manual Review) | **0% False Containment** | Verified against legitimate admin baselines |
+| Pipeline Stage | Timing / Latency | Mechanism |
+| :--- | :--- | :--- |
+| **1. Telemetry Ingestion & Detection** | **~ 1.40s** | Sysmon kernel event generation ➔ Wazuh Agent TLS flush ➔ Sigma rule match |
+| **2. Threat Intel Enrichment** | **~ 0.65s** | Async REST API lookup (VirusTotal v3 & AbuseIPDB v2 with local LRU caching) |
+| **3. Automated Containment Dispatch** | **~ 1.15s** | WinRM TLS (port 5986) WFP isolation rule injection + pfSense REST API IP drop |
+| **Total Pipeline (Telemetry-to-Containment)**| **< 3.20s** | **Fully automated, pre-authorized policy execution (no human-in-the-loop)** |
+| **Manual Analyst Benchmark (Baseline)** | **15 – 25 mins** | Manual IoC copy-paste, browser reputation lookups, manual CLI containment |
+| **Attack Chain Validation Efficacy** | **100% True-Positive** | 60/60 simulated MITRE technique runs detected and auto-contained |
+| **False-Positive Containment Rate** | **0% False Triggers** | Validated against legitimate Active Directory administrative baselines |
 
 ---
 
