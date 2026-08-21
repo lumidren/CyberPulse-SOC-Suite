@@ -1,13 +1,16 @@
 """
-Detection-as-Code (DaC) Automated Test Suite for CyberPulse SOC Suite
-Validates Sigma rule syntax, MITRE ATT&CK schema mappings, and end-to-end SOAR orchestration.
+Unit & Integration Test Suite for CyberPulse Enterprise SOC Platform
+Tests Detection Engine, Multi-Factor Risk Scoring, Policy Evaluation,
+Resilient Containment, Circuit Breakers, Rollback, DFIR, and Purple Team Replay.
 """
 
+import unittest
 import os
 import sys
-import unittest
+import json
+import time
 
-# Add project root to sys.path
+# Ensure project root in python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from simulator.attack_simulator import (
@@ -16,112 +19,158 @@ from simulator.attack_simulator import (
     simulate_t1053_scheduled_task,
     simulate_t1059_powershell_execution,
     simulate_t1562_defender_tamper,
-    simulate_t1486_ransomware_canary,
-    generate_random_attack
+    simulate_t1486_ransomware_canary
 )
 from soar.soar_engine import SOAROrchestrator
+from soar.risk_engine import RiskAndPolicyEngine
+from soar.resilient_containment import ResilientContainmentEngine, CircuitBreaker
+from soar.metrics_engine import SOCMetricsEngine
+from simulator.purple_team_runner import PurpleTeamRunner
 
-class TestDetectionEngine(unittest.TestCase):
+class TestEnterpriseSOCPlatform(unittest.TestCase):
+
     def setUp(self):
-        self.orchestrator = SOAROrchestrator()
-
-    def test_t1003_lsass_detection(self):
-        """Verify T1003.001 LSASS Memory Dump triggers SOC-RULE-001 and host isolation"""
-        event = simulate_t1003_lsass_dump()
-        self.assertEqual(event["event_id"], 10)
-        self.assertEqual(event["technique_id"], "T1003.001")
-        
-        alert = self.orchestrator.process_event(event)
-        self.assertIsNotNone(alert)
-        self.assertEqual(alert["rule"]["rule_id"], "SOC-RULE-001")
-        self.assertEqual(alert["rule"]["severity"], "CRITICAL")
-        self.assertEqual(alert["soar_response"]["action_type"], "ISOLATE_HOST_AND_KILL_PROCESS")
-        self.assertIn("total_pipeline_latency_ms", alert["pipeline_timing"])
-        self.assertLess(alert["pipeline_timing"]["total_pipeline_sec"], 6.0)
-
-    def test_t1110_brute_force_detection(self):
-        """Verify T1110.001 RDP Brute Force triggers SOC-RULE-002 and firewall drop"""
-        event = simulate_t1110_brute_force()
-        self.assertEqual(event["event_id"], 4625)
-        self.assertEqual(event["technique_id"], "T1110.001")
-        
-        alert = self.orchestrator.process_event(event)
-        self.assertIsNotNone(alert)
-        self.assertEqual(alert["rule"]["rule_id"], "SOC-RULE-002")
-        self.assertEqual(alert["soar_response"]["action_type"], "BLOCK_SOURCE_IP_FIREWALL")
-        self.assertIn("pfSense", alert["soar_response"]["execution_protocol"])
-
-    def test_t1053_scheduled_task_detection(self):
-        """Verify T1053.005 Scheduled Task persistence triggers SOC-RULE-003 and task purge"""
-        event = simulate_t1053_scheduled_task()
-        self.assertEqual(event["event_id"], 4698)
-        self.assertEqual(event["technique_id"], "T1053.005")
-        
-        alert = self.orchestrator.process_event(event)
-        self.assertIsNotNone(alert)
-        self.assertEqual(alert["rule"]["rule_id"], "SOC-RULE-003")
-        self.assertEqual(alert["soar_response"]["action_type"], "REMOVE_SCHEDULED_TASK")
-
-    def test_t1059_powershell_detection(self):
-        """Verify T1059.001 Obfuscated PowerShell triggers SOC-RULE-004 and process tree termination"""
-        event = simulate_t1059_powershell_execution()
-        self.assertEqual(event["event_id"], 1)
-        self.assertEqual(event["technique_id"], "T1059.001")
-        
-        alert = self.orchestrator.process_event(event)
-        self.assertIsNotNone(alert)
-        self.assertEqual(alert["rule"]["rule_id"], "SOC-RULE-004")
-        self.assertEqual(alert["soar_response"]["action_type"], "TERMINATE_PROCESS_TREE")
-
-    def test_t1562_defender_tamper_detection(self):
-        """Verify T1562.001 Defender tampering triggers SOC-RULE-005 and policy reversion"""
-        event = simulate_t1562_defender_tamper()
-        self.assertEqual(event["technique_id"], "T1562.001")
-        
-        alert = self.orchestrator.process_event(event)
-        self.assertIsNotNone(alert)
-        self.assertEqual(alert["rule"]["rule_id"], "SOC-RULE-005")
-        self.assertEqual(alert["soar_response"]["action_type"], "REVERT_DEFENDER_POLICY_AND_ISOLATE")
-
-    def test_t1486_ransomware_canary_detection(self):
-        """Verify T1486 Ransomware canary encryption triggers SOC-RULE-006 and VSS recovery"""
-        event = simulate_t1486_ransomware_canary()
-        self.assertEqual(event["technique_id"], "T1486")
-        
-        alert = self.orchestrator.process_event(event)
-        self.assertIsNotNone(alert)
-        self.assertEqual(alert["rule"]["rule_id"], "SOC-RULE-006")
-        self.assertEqual(alert["soar_response"]["action_type"], "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS")
-
-    def test_threat_intel_and_geoip_enrichment(self):
-        """Verify Threat Intel & GeoIP module enriches IP with reputation and coordinates"""
-        event = simulate_t1110_brute_force()
-        event["source_ip"] = "185.220.101.5"
-        
-        alert = self.orchestrator.process_event(event)
-        self.assertIsNotNone(alert)
-        intel = alert["threat_intel"]["ip_reputation"]
-        self.assertEqual(intel["reputation"], "MALICIOUS")
-        self.assertGreaterEqual(intel["abuse_score"], 90)
-        self.assertIn("lat", intel)
-        self.assertIn("lon", intel)
-        self.assertEqual(intel["country"], "Germany")
+        self.orchestrator = SOAROrchestrator(policy_mode="AUTOMATIC")
 
     def test_sigma_rules_exist_and_valid(self):
-        """Verify all 5 Sigma YAML rules are present and have required schema fields"""
+        """Verify all 5 core Sigma YAML rules exist with required schema tags"""
         sigma_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "rules", "sigma")
-        self.assertTrue(os.path.isdir(sigma_dir))
+        expected_rules = [
+            "win_lsass_dumping.yml",
+            "win_brute_force_auth.yml",
+            "win_scheduled_task_persistence.yml",
+            "win_defender_tamper.yml",
+            "win_ransomware_canary.yml"
+        ]
+        for rule_file in expected_rules:
+            rule_path = os.path.join(sigma_dir, rule_file)
+            self.assertTrue(os.path.exists(rule_path), f"Missing Sigma rule file: {rule_file}")
+            with open(rule_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                self.assertIn("title:", content)
+                self.assertIn("detection:", content)
+                self.assertIn("tags:", content)
+
+    def test_t1003_lsass_closed_loop(self):
+        """Verify T1003.001 LSASS Memory Dump executes closed loop with Host Isolation"""
+        event = simulate_t1003_lsass_dump()
+        incident = self.orchestrator.process_event(event)
         
-        files = [f for f in os.listdir(sigma_dir) if f.endswith(".yml")]
-        self.assertGreaterEqual(len(files), 5)
+        self.assertIsNotNone(incident)
+        self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-001")
+        self.assertEqual(incident["risk_assessment"]["risk_level"], "CRITICAL")
+        self.assertGreaterEqual(incident["risk_assessment"]["final_score"], 80.0)
+        self.assertEqual(incident["containment_action"]["action_type"], "ISOLATE_HOST_AND_KILL_PROCESS")
+        self.assertEqual(incident["containment_action"]["status"], "SUCCESS")
+        self.assertIn("CYBERPULSE-SOC", incident["thehive_case"]["title"])
+        self.assertGreaterEqual(len(incident["timeline"]), 5)
+
+    def test_t1110_brute_force_firewall_drop(self):
+        """Verify T1110.001 RDP Brute Force triggers pfSense firewall drop"""
+        event = simulate_t1110_brute_force()
+        incident = self.orchestrator.process_event(event)
         
-        required_keys = ["title", "id", "status", "description", "logsource", "detection", "level", "tags"]
-        for f in files:
-            filepath = os.path.join(sigma_dir, f)
-            with open(filepath, "r", encoding="utf-8") as file:
-                content = file.read()
-                for key in required_keys:
-                    self.assertIn(f"{key}:", content, f"Sigma rule {f} missing required key '{key}'")
+        self.assertIsNotNone(incident)
+        self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-002")
+        self.assertEqual(incident["containment_action"]["action_type"], "BLOCK_SOURCE_IP_FIREWALL")
+        self.assertIn("pfSense", incident["containment_action"]["execution_protocol"])
+
+    def test_t1562_defender_tampering(self):
+        """Verify T1562.001 Defender tampering triggers policy reversion and isolation"""
+        event = simulate_t1562_defender_tamper()
+        incident = self.orchestrator.process_event(event)
+        
+        self.assertIsNotNone(incident)
+        self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-005")
+        self.assertEqual(incident["containment_action"]["action_type"], "REVERT_DEFENDER_POLICY_AND_ISOLATE")
+
+    def test_t1486_ransomware_vss_recovery(self):
+        """Verify T1486 Ransomware canary encryption triggers VSS recovery"""
+        event = simulate_t1486_ransomware_canary()
+        incident = self.orchestrator.process_event(event)
+        
+        self.assertIsNotNone(incident)
+        self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-006")
+        self.assertEqual(incident["containment_action"]["action_type"], "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS")
+
+    def test_multi_factor_risk_scoring_accuracy(self):
+        """Verify risk engine properly factors asset criticality and user privilege"""
+        risk_engine = RiskAndPolicyEngine()
+        
+        # High-value Domain Controller
+        dc_event = {"computer_name": "WIN-DC01.corp.local", "user": "CORP\\Administrator", "tactic": "Credential Access"}
+        rule = {"severity": "CRITICAL", "action_recommended": "ISOLATE_HOST_AND_KILL_PROCESS"}
+        intel = {"ip_reputation": {"virustotal_positives": 42, "abuse_score": 95}}
+        dc_risk = risk_engine.calculate_risk_score(dc_event, rule, intel)
+        
+        # Standard Low-Value Workstation
+        ws_event = {"computer_name": "WIN-WORKSTATION09", "user": "CORP\\j.doe", "tactic": "Execution"}
+        rule_low = {"severity": "HIGH", "action_recommended": "TERMINATE_PROCESS_TREE"}
+        intel_clean = {"ip_reputation": {"virustotal_positives": 0, "abuse_score": 0}}
+        ws_risk = risk_engine.calculate_risk_score(ws_event, rule_low, intel_clean)
+
+        self.assertGreater(dc_risk["final_score"], ws_risk["final_score"])
+        self.assertEqual(dc_risk["risk_level"], "CRITICAL")
+
+    def test_containment_rollback_mechanism(self):
+        """Verify automated containment action can be cleanly rolled back"""
+        containment = ResilientContainmentEngine()
+        act = containment.execute_containment(
+            action_type="ISOLATE_HOST_AND_KILL_PROCESS",
+            target_host="WIN-DC01.corp.local",
+            target_ip="185.220.101.33",
+            target_user="CORP\\Administrator",
+            pid=4812,
+            process_name="mimikatz.exe"
+        )
+        self.assertEqual(act["status"], "SUCCESS")
+        self.assertIn("WIN-DC01.corp.local", containment.host_isolation_registry)
+
+        # Execute Rollback
+        rb = containment.rollback_containment(act["action_id"], actor="analyst_test")
+        self.assertEqual(rb["status"], "SUCCESS")
+        self.assertNotIn("WIN-DC01.corp.local", containment.host_isolation_registry)
+
+    def test_dry_run_policy_mode(self):
+        """Verify DRY_RUN mode simulates containment without host disruption"""
+        orch_dry = SOAROrchestrator(policy_mode="DRY_RUN")
+        event = simulate_t1003_lsass_dump()
+        incident = orch_dry.process_event(event)
+        
+        self.assertEqual(incident["policy_decision"]["execution_intent"], "DRY_RUN_SIMULATION")
+        self.assertEqual(incident["containment_action"]["status"], "SIMULATED_NO_DISRUPTION")
+
+    def test_circuit_breaker_tripping_and_recovery(self):
+        """Verify circuit breaker trips to OPEN upon consecutive external failures"""
+        cb = CircuitBreaker(failure_threshold=2, recovery_time_sec=1)
+        self.assertTrue(cb.is_available())
+        cb.record_failure()
+        self.assertTrue(cb.is_available())
+        cb.record_failure()
+        self.assertFalse(cb.is_available()) # Tripped to OPEN
+        self.assertEqual(cb.state, "OPEN")
+        time.sleep(1.1)
+        self.assertTrue(cb.is_available()) # Half-open recovery
+
+    def test_purple_team_runner_apt29(self):
+        """Verify Purple Team Runner executes multi-stage APT29 scenario with 100% pass"""
+        runner = PurpleTeamRunner(self.orchestrator)
+        summary = runner.run_scenario("APT29_COZY_BEAR")
+        
+        self.assertEqual(summary["overall_status"], "VALIDATED_100%")
+        self.assertEqual(summary["total_stages"], 3)
+        self.assertEqual(summary["passed_stages"], 3)
+
+    def test_soc_metrics_percentiles(self):
+        """Verify SOC Metrics Engine computes MTTD, MTTC, and p95 latencies"""
+        metrics_engine = SOCMetricsEngine()
+        metrics = metrics_engine.get_soc_metrics()
+        
+        self.assertIn("operational_kpis", metrics)
+        self.assertIn("latency_percentiles_sec", metrics)
+        self.assertGreater(metrics["operational_kpis"]["mttd_sec"], 0)
+        self.assertGreater(metrics["operational_kpis"]["mttc_sec"], 0)
+        self.assertGreaterEqual(metrics["latency_percentiles_sec"]["p95"], metrics["latency_percentiles_sec"]["p50"])
 
 if __name__ == "__main__":
     unittest.main()

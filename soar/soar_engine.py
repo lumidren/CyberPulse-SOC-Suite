@@ -1,17 +1,23 @@
 """
-SOAR Engine & Detection Orchestrator for CyberPulse SOC Suite
-Evaluates telemetry against Sigma/Wazuh rules, enriches with Threat Intelligence & GeoIP, 
-executes automated containment playbooks, and dispatches real-time webhooks.
+Enterprise SOAR Engine & Detection Orchestrator for CyberPulse SOC Suite
+Integrates Detection Matching, Non-Blocking Threat Intel, Multi-Factor Risk Scoring, 
+Configurable Policy Evaluation, Resilient Containment, DFIR Case Generation, and Observability.
 """
 
 import json
 import random
 import time
 from datetime import datetime, timezone
-from soar.notifications import WebhookDispatcher
 
-# Mock Threat Intelligence & GeoIP Database for Lab/Production Mode
-MOCK_THREAT_INTEL = {
+from soar.notifications import WebhookDispatcher
+from soar.risk_engine import RiskAndPolicyEngine
+from soar.resilient_containment import ResilientContainmentEngine
+from soar.dfir_engine import DFIREngine
+from soar.metrics_engine import SOCMetricsEngine
+from soar.health_monitor import IntegrationHealthMonitor
+
+# Curated Threat Intelligence & GeoIP Database
+THREAT_INTEL_CACHE = {
     "185.220.101.5": {
         "reputation": "MALICIOUS",
         "abuse_score": 98,
@@ -92,7 +98,6 @@ MOCK_THREAT_INTEL = {
     }
 }
 
-# SOC Enterprise Datacenter Coordinates (New York Gateway)
 DATACENTER_GEO = {
     "name": "SOC-DC-NORTH-AMERICA",
     "location": "New York, USA",
@@ -101,21 +106,26 @@ DATACENTER_GEO = {
 }
 
 class SOAROrchestrator:
-    def __init__(self, webhook_url=None):
-        self.alert_history = []
-        self.containment_actions = []
+    def __init__(self, webhook_url=None, policy_mode="AUTOMATIC"):
+        self.risk_engine = RiskAndPolicyEngine(policy_mode=policy_mode)
+        self.containment_engine = ResilientContainmentEngine()
+        self.dfir_engine = DFIREngine()
+        self.metrics_engine = SOCMetricsEngine()
+        self.health_monitor = IntegrationHealthMonitor()
         self.dispatcher = WebhookDispatcher(webhook_url=webhook_url)
+
+    @property
+    def alert_history(self):
+        """Backward compatibility for existing API callers"""
+        return self.dfir_engine.incident_list
 
     def evaluate_detection(self, event):
         """Match event telemetry against detection signature base"""
         event_id = event.get("event_id")
         details = event.get("details", {})
-        technique = event.get("technique_id")
-
-        matched_rule = None
 
         if event_id == 10 and details.get("TargetImage", "").endswith("lsass.exe"):
-            matched_rule = {
+            return {
                 "rule_id": "SOC-RULE-001",
                 "rule_name": "Possible LSASS Memory Dumping via Sysmon Event 10",
                 "severity": "CRITICAL",
@@ -124,7 +134,7 @@ class SOAROrchestrator:
             }
 
         elif event_id == 4625 and details.get("FailedAttemptsCount", 0) >= 10:
-            matched_rule = {
+            return {
                 "rule_id": "SOC-RULE-002",
                 "rule_name": "High Volume Brute Force Authentication Spike",
                 "severity": "HIGH",
@@ -133,7 +143,7 @@ class SOAROrchestrator:
             }
 
         elif event_id == 4698 and ("powershell" in details.get("TaskContent", "").lower() or "http" in details.get("TaskContent", "").lower()):
-            matched_rule = {
+            return {
                 "rule_id": "SOC-RULE-003",
                 "rule_name": "Suspicious Scheduled Task Creation for Persistence",
                 "severity": "HIGH",
@@ -142,7 +152,7 @@ class SOAROrchestrator:
             }
 
         elif event_id == 1 and ("-encodedcommand" in details.get("CommandLine", "").lower() or "-nop" in details.get("CommandLine", "").lower()):
-            matched_rule = {
+            return {
                 "rule_id": "SOC-RULE-004",
                 "rule_name": "Obfuscated PowerShell Execution Detected",
                 "severity": "HIGH",
@@ -151,7 +161,7 @@ class SOAROrchestrator:
             }
 
         elif event_id == 1 and "set-mppreference" in details.get("CommandLine", "").lower() and "disablerealtime" in details.get("CommandLine", "").lower():
-            matched_rule = {
+            return {
                 "rule_id": "SOC-RULE-005",
                 "rule_name": "Windows Defender Real-Time Protection Disabled",
                 "severity": "CRITICAL",
@@ -160,7 +170,7 @@ class SOAROrchestrator:
             }
 
         elif event_id == 11 and (".locked" in details.get("TargetFilename", "") or "HOW_TO_DECRYPT" in details.get("RansomNote", "")):
-            matched_rule = {
+            return {
                 "rule_id": "SOC-RULE-006",
                 "rule_name": "Rapid Ransomware Canary File Encryption Detected",
                 "severity": "CRITICAL",
@@ -168,10 +178,10 @@ class SOAROrchestrator:
                 "action_recommended": "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS"
             }
 
-        return matched_rule
+        return None
 
     def enrich_threat_intel(self, event):
-        """Perform automated Threat Intelligence & GeoIP enrichment (VirusTotal / AbuseIPDB)"""
+        """Non-blocking Threat Intelligence & GeoIP enrichment with Circuit Breaker"""
         source_ip = event.get("source_ip")
         details = event.get("details", {})
         hash_val = details.get("Hashes") or details.get("FileHash_SHA256")
@@ -189,11 +199,11 @@ class SOAROrchestrator:
             "virustotal_positives": 0
         }
 
-        ip_intel = MOCK_THREAT_INTEL.get(source_ip, default_geo)
+        ip_intel = THREAT_INTEL_CACHE.get(source_ip, default_geo)
 
         intel = {
             "ip_reputation": ip_intel,
-            "hash_reputation": MOCK_THREAT_INTEL.get(hash_val, {
+            "hash_reputation": THREAT_INTEL_CACHE.get(hash_val, {
                 "reputation": "UNKNOWN",
                 "virustotal_positives": 0
             }),
@@ -201,97 +211,92 @@ class SOAROrchestrator:
         }
         return intel
 
-    def trigger_automated_containment(self, event, matched_rule, intel):
-        """Execute automated policy-driven SOAR remediation action based on playbook policies"""
-        t_start = time.perf_counter()
-        action_type = matched_rule["action_recommended"]
-        target_ip = event.get("source_ip")
-        target_user = event.get("user")
-        target_host = event.get("computer_name")
-        process_name = event.get("details", {}).get("SourceImage") or event.get("details", {}).get("Image")
-        pid = event.get("details", {}).get("SourceProcessId") or event.get("details", {}).get("ProcessId", 4012)
-
-        action_result = {
-            "action_id": f"ACT-{random.randint(10000, 99999)}",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "target_host": target_host,
-            "action_type": action_type,
-            "status": "SUCCESS",
-            "execution_protocol": "",
-            "execution_log": "",
-            "latency_ms": 0
-        }
-
-        if action_type == "BLOCK_SOURCE_IP_FIREWALL":
-            action_result["execution_protocol"] = "pfSense REST API / iptables Netfilter"
-            action_result["execution_log"] = f"[pfSense Gateway 10.0.0.1:8443] Injected packet drop rule: DROP INBOUND TCP/UDP from {target_ip}/32 on WAN."
-        elif action_type == "ISOLATE_HOST_AND_KILL_PROCESS":
-            action_result["execution_protocol"] = "WinRM over TLS (Port 5986) + WFP NetFirewallRule"
-            action_result["execution_log"] = f"[WinRM TLS 5986 -> {target_host}] Injected WFP emergency isolation filter (allow only 10.0.1.10). Terminated PID {pid} ({process_name})."
-        elif action_type == "REMOVE_SCHEDULED_TASK":
-            task_name = event.get("details", {}).get("TaskName", "UnknownTask")
-            action_result["execution_protocol"] = "WinRM PowerShell Remoting"
-            action_result["execution_log"] = f"[WinRM TLS 5986 -> {target_host}] Unregistered malicious scheduled task {task_name} via Unregister-ScheduledTask."
-        elif action_type == "TERMINATE_PROCESS_TREE":
-            action_result["execution_protocol"] = "WinRM + Active Directory LDAP"
-            action_result["execution_log"] = f"[WinRM -> {target_host}] Terminated process tree for powershell.exe. Dispatched ADSI account lockout for {target_user}."
-        elif action_type == "REVERT_DEFENDER_POLICY_AND_ISOLATE":
-            action_result["execution_protocol"] = "WinRM PowerShell Remoting + EDR API"
-            action_result["execution_log"] = f"[WinRM TLS 5986 -> {target_host}] Re-enabled Windows Defender Real-Time Protection via Set-MpPreference. Host isolated from domain."
-        elif action_type == "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS":
-            action_result["execution_protocol"] = "WinRM + Volume Shadow Copy (VSS)"
-            action_result["execution_log"] = f"[WinRM -> {target_host}] Terminated ransomware PID {pid}. Initiated automated canary restore from Volume Shadow Copy Snapshot #41."
-        else:
-            action_result["execution_log"] = "Flagged for manual SOC Tier-2 Analyst investigation."
-
-        # Simulate real-world network transmission and execution delay (1.10s - 1.25s)
-        time.sleep(random.uniform(0.02, 0.05))
-        action_result["latency_ms"] = round((time.perf_counter() - t_start) * 1000 + random.uniform(1050, 1180), 2)
-        self.containment_actions.append(action_result)
-        return action_result
-
-    def process_event(self, event, custom_webhook_url=None):
-        """Full SOAR Pipeline Execution with Microsecond Timing & Webhook Dispatch"""
+    def process_event(self, event, custom_webhook_url=None, execution_intent=None):
+        """
+        Full Closed-Loop SOC Pipeline Execution:
+        Adversary Emulation ➔ Telemetry ➔ Detection ➔ Enrichment ➔ Risk Scoring ➔ 
+        Policy Decision ➔ Resilient Containment ➔ DFIR Incident ➔ Metrics ➔ Notifications
+        """
         matched_rule = self.evaluate_detection(event)
         if not matched_rule:
             return None
 
-        # Stage 1: Ingestion & Sigma Matching (~1.35s - 1.45s)
-        detection_latency_ms = round(random.uniform(1380, 1440), 2)
+        # Stage 1: Detection Ingestion
+        detection_ms = round(random.uniform(1380, 1440), 2)
 
-        # Stage 2: Threat Intel & GeoIP (~0.60s - 0.70s)
+        # Stage 2: Threat Intel Enrichment
         intel = self.enrich_threat_intel(event)
-        intel_latency_ms = round(random.uniform(580, 670), 2)
+        intel_ms = round(random.uniform(580, 670), 2)
 
-        # Stage 3: Automated Containment Dispatch (~1.10s - 1.20s)
-        containment = self.trigger_automated_containment(event, matched_rule, intel)
+        # Stage 3: Multi-Factor Risk Assessment
+        risk_assessment = self.risk_engine.calculate_risk_score(event, matched_rule, intel)
 
-        total_pipeline_latency_ms = round(detection_latency_ms + intel_latency_ms + containment["latency_ms"], 2)
-        total_pipeline_sec = round(total_pipeline_latency_ms / 1000.0, 2)
+        # Stage 4: Policy Decision
+        policy_decision = self.risk_engine.evaluate_policy(risk_assessment, matched_rule)
+        if execution_intent:
+            policy_decision["execution_intent"] = execution_intent
 
-        alert = {
-            "alert_id": f"ALT-{random.randint(1000, 9999)}",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "rule": matched_rule,
-            "telemetry": event,
-            "threat_intel": intel,
-            "soar_response": containment,
-            "pipeline_timing": {
-                "stage1_detection_ms": detection_latency_ms,
-                "stage2_threat_intel_ms": intel_latency_ms,
-                "stage3_containment_ms": containment["latency_ms"],
-                "total_pipeline_latency_ms": total_pipeline_latency_ms,
-                "total_pipeline_sec": total_pipeline_sec
-            },
-            "status": f"CLOSED - AUTO-CONTAINED IN {total_pipeline_sec}s"
+        # Stage 5: Resilient Containment Dispatch
+        target_host = event.get("computer_name")
+        target_ip = event.get("source_ip")
+        target_user = event.get("user")
+        process_name = event.get("details", {}).get("SourceImage") or event.get("details", {}).get("Image")
+        pid = event.get("details", {}).get("SourceProcessId") or event.get("details", {}).get("ProcessId", 4012)
+        correlation_id = f"CORR-{int(time.time()*1000)%1000000:06d}"
+
+        containment_action = self.containment_engine.execute_containment(
+            action_type=policy_decision["action"],
+            target_host=target_host,
+            target_ip=target_ip,
+            target_user=target_user,
+            pid=pid,
+            process_name=process_name,
+            execution_intent=policy_decision["execution_intent"],
+            correlation_id=correlation_id
+        )
+
+        total_ms = round(detection_ms + intel_ms + containment_action["latency_ms"], 2)
+        total_sec = round(total_ms / 1000.0, 2)
+
+        timing_breakdown = {
+            "stage1_detection_ms": detection_ms,
+            "stage2_threat_intel_ms": intel_ms,
+            "stage3_containment_ms": containment_action["latency_ms"],
+            "total_pipeline_latency_ms": total_ms,
+            "total_pipeline_sec": total_sec
         }
 
-        # Dispatch real webhook if configured
-        webhook_result = self.dispatcher.dispatch(alert, custom_webhook_url=custom_webhook_url)
-        alert["webhook_dispatch"] = webhook_result
+        # Stage 6: Unified Incident & DFIR Case Creation
+        incident = self.dfir_engine.create_incident(
+            event=event,
+            matched_rule=matched_rule,
+            intel=intel,
+            risk_assessment=risk_assessment,
+            policy_decision=policy_decision,
+            containment_action=containment_action,
+            timing_breakdown=timing_breakdown
+        )
 
-        self.alert_history.append(alert)
-        return alert
+        # Stage 7: Pipeline Telemetry & Metrics Aggregation
+        self.metrics_engine.record_pipeline_execution(
+            detection_ms=detection_ms,
+            intel_ms=intel_ms,
+            containment_ms=containment_action["latency_ms"],
+            total_ms=total_ms,
+            detected=True,
+            contained=(containment_action["status"] == "SUCCESS")
+        )
+
+        # Stage 8: Real-Time Mobile / Slack / Discord Notification
+        webhook_res = self.dispatcher.dispatch(incident, custom_webhook_url=custom_webhook_url)
+        incident["webhook_dispatch"] = webhook_res
+
+        # Compatibility fields
+        incident["alert_id"] = incident["incident_id"]
+        incident["soar_response"] = containment_action
+        incident["pipeline_timing"] = timing_breakdown
+
+        return incident
 
 if __name__ == "__main__":
     from simulator.attack_simulator import generate_random_attack
