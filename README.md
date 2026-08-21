@@ -42,41 +42,73 @@ flowchart LR
 
 ---
 
+## 🔬 Detection Engineering Lifecycle (DELC)
+
+Rather than maintaining unvetted rule dumps, every detection in CyberPulse follows the SANS/MITRE Detection Engineering Lifecycle (*Hypothesis ➔ Telemetry Analysis ➔ Draft Rule ➔ False Positive Exposure ➔ Tuning Iteration ➔ Documented Blindspots*):
+
+* 📑 **[DELC-001: OS Credential Dumping via LSASS Memory Access (T1003.001)](docs/lifecycle/DELC-001_LSASS_Memory_Access.md)**: Tuning process handle access masks against Windows Defender (`MsMpEng.exe`) and legitimate sysadmin crash diagnostics.
+* 📑 **[DELC-002: RDP Password Brute Force & Account Spraying (T1110.001)](docs/lifecycle/DELC-002_RDP_Authentication_Spraying.md)**: Calibrating sliding aggregation windows (5m threshold) to eliminate user password fatigue false positives.
+* 📑 **[DELC-003: Impair Host Defenses via Defender Modification (T1562.001)](docs/lifecycle/DELC-003_Windows_Defender_Tampering.md)**: Catching script-based antivirus evasion and enforcing tamper protection baselines.
+
+---
+
+## ⚔️ Multi-Stage Adversary Attack Chain (Kill Chain Simulation)
+
+CyberPulse includes an automated 5-phase chronological kill chain emulator ([`simulator/attack_chain.py`](simulator/attack_chain.py)):
+
+```text
+[Phase 1: Initial Foothold]  ➔ Obfuscated PowerShell execution (T1059.001)
+            │
+[Phase 2: Defense Evasion]   ➔ Disabling Windows Defender real-time monitoring (T1562.001)
+            │
+[Phase 3: Credential Access] ➔ LSASS process memory handle scraping (T1003.001)
+            │
+[Phase 4: Persistence]       ➔ High-privilege scheduled task creation (T1053.005)
+            │
+[Phase 5: Impact / Canary]   ➔ Rapid ransomware file encryption in decoy directory (T1486)
+```
+
+Execute the full kill chain from your terminal:
+```bash
+python simulator/attack_chain.py
+```
+
+---
+
+## 🎯 MITRE ATT&CK Coverage & Honest Gap Analysis
+
+For complete transparency, we explicitly document **what we detect** alongside **consciously accepted blindspots**:
+
+👉 **[Read the Full MITRE Coverage & Gap Analysis Matrix](docs/MITRE_COVERAGE_AND_GAPS.md)**
+
+| Technique ID | Technique Name | Tactic | Primary Telemetry | Automated Containment |
+| :--- | :--- | :--- | :--- | :--- |
+| **T1003.001** | OS Credential Dumping: LSASS | Credential Access | Sysmon EventID 10 (`GrantedAccess: 0x1010`) | WinRM Host Isolation + Process Kill |
+| **T1110.001** | Brute Force: Password Guessing | Credential Access | Security EventID 4625 (`LogonType: 10`) | Perimeter Firewall Gateway Drop |
+| **T1053.005** | Scheduled Task Persistence | Persistence | Security EventID 4698 (`TaskContent: script`) | Remote Scheduled Task Purge |
+| **T1059.001** | Command & Scripting: PowerShell | Execution | Sysmon EventID 1 (`-EncodedCommand`) | Process Tree Kill + Session Revoke |
+| **T1562.001** | Impair Defenses: Disable Tools | Defense Evasion | Sysmon EventID 1 (`Set-MpPreference`) | Revert AV Policy + Host Isolation |
+| **T1486** | Data Encrypted for Impact | Impact | Sysmon EventID 11 (`.locked` in Canary) | Process Kill + Volume Shadow Recovery |
+
+---
+
+## 🔍 SOC Analyst L1/L2 Alert Triage Case Studies
+Demonstrating human analytical reasoning, hypothesis verification, and incident root cause analysis:
+* 📑 **[Case Study 01: LSASS False Positive Triage (Authorized Sysadmin Diagnostics)](docs/triage/TRIAGE_CASE_STUDY_01_LSASS_FALSE_ALARM.md)**: Investigating `procdump.exe` execution during a scheduled maintenance window.
+* 📑 **[Case Study 02: True Positive Defense Evasion Triage (Malicious Intrusion)](docs/triage/TRIAGE_CASE_STUDY_02_STEALTH_DEFENDER_TAMPER.md)**: Tracing macro-phishing parentage to off-hours Defender tampering.
+* 📑 **[Purple Team Collaborative Exercise Report](docs/PURPLE_TEAM_EXERCISE.md)**: Full offensive tradecraft vs. defensive sensor validation matrix.
+
+---
+
 ## 🏗️ Dual Operational Architecture: IaC Lab vs. CI/CD Emulation Harness
 
 To bridge the gap between persistent enterprise deployment and rapid detection validation, CyberPulse provides **two complementary operational workflows**:
 
-```
-                               ┌──────────────────────────────────────────────────────────┐
-                               │                 CyberPulse Architecture                  │
-                               └──────────────────────────────────────────────────────────┘
-                                             │                              │
-                    ┌────────────────────────┴─────────┐   ┌────────────────┴─────────────────────────┐
-                    ▼                                  ▼   ▼                                          ▼
-     [ Mode A: Live Enterprise Lab (IaC) ]                 [ Mode B: CI/CD Adversary Harness & Web UI ]
-     • Docker: deploy/docker-compose.yml                   • Simulator: simulator/attack_simulator.py
-     • Vagrant: deploy/vagrant/Vagrantfile                 • Engine: soar/soar_engine.py
-     • Target: Windows Server 2022 AD DC + Sysmon v14      • Web UI: Interactive Web Operations Center
-     • SIEM: Wazuh Manager v4.7 + OpenSearch 2.11          • Purpose: Deterministic regression testing & demo
-```
-
 1. **Mode A: Live Enterprise Lab Infrastructure (IaC)**:
-   * Multi-container SIEM cluster (`deploy/docker-compose.yml`) deploying Wazuh Manager v4.7, OpenSearch 2.11 Indexer, and custom Wazuh XML decoders.
-   * Multi-VM enterprise network (`deploy/vagrant/Vagrantfile`) provisioning a Windows Server 2022 Domain Controller (`10.0.0.10`), Windows 11 client (`10.0.0.45`), and pfSense 2.7 gateway.
+   * Multi-container SIEM cluster ([`deploy/docker-compose.yml`](deploy/docker-compose.yml)) deploying Wazuh Manager v4.7, OpenSearch 2.11 Indexer, and custom Wazuh XML decoders ([`deploy/wazuh/local_decoder.xml`](deploy/wazuh/local_decoder.xml)).
+   * Multi-VM enterprise network ([`deploy/vagrant/Vagrantfile`](deploy/vagrant/Vagrantfile)) provisioning a Windows Server 2022 Domain Controller (`10.0.0.10`), Windows 11 client (`10.0.0.45`), and pfSense 2.7 gateway.
 2. **Mode B: CI/CD Adversary Emulation & Regression Harness**:
-   * Standalone adversary emulation engine (`simulator/attack_simulator.py`) for automated Sigma rule testing, CI/CD pipeline validation, and low-overhead demonstration without requiring 16GB RAM VM clusters.
-
----
-
-## 🔬 Lab Topology & Technical Stack
-
-| Component | Technology / Version | Deployment Specs | Network Role |
-| :--- | :--- | :--- | :--- |
-| **Domain Controller** | Windows Server 2022 Standard | 10.0.0.10/24 (VLAN 10) | AD DS, Kerberos, DNS, Sysmon v14 (Olaf Hartong modular config) |
-| **Workstation Endpoint** | Windows 11 Enterprise | 10.0.0.45/24 (VLAN 10) | Standard User Segment, WinRM enabled over TLS 5986 |
-| **SIEM & Log Indexer** | Wazuh Manager v4.7 / OpenSearch 2.11 | Ubuntu 22.04 LTS (10.0.1.5) | Ingests TLS agent streams (:1514), custom decoders & rules |
-| **SOAR Orchestrator** | Custom Python Async Engine | Python 3.11 / REST API | Webhook Receiver, Threat Intel Aggregator, WinRM Controller |
-| **Perimeter Firewall** | pfSense 2.7 / Linux `iptables` | 10.0.0.1 (Gateway) | Dynamic rule injection via REST API / SSH netfilter |
+   * Standalone adversary emulation engine ([`simulator/attack_simulator.py`](simulator/attack_simulator.py)) for automated Sigma rule testing, CI/CD pipeline validation, and low-overhead demonstration without requiring 16GB RAM VM clusters.
 
 ---
 
@@ -95,49 +127,18 @@ Benchmarked across **60+ adversary emulation executions** under simulated enterp
 
 ---
 
-## 🛠️ Detection Engineering: False Positive Tuning Case Study
-
-A detection rule is only as good as its tuning against benign administrative baselines:
-
-### Case 1: LSASS Access False Positives from Windows Defender & Diagnostic Tools
-* **Problem**: Sysmon Event ID 10 triggered false positives when `MsMpEng.exe` (Windows Defender Antivirus) and legitimate IT diagnostic tools (`procdump.exe` without malicious intent) accessed `lsass.exe`.
-* **Resolution**: In [`rules/sigma/win_lsass_dumping.yml`](rules/sigma/win_lsass_dumping.yml), we tuned the rule to filter trusted signed system binaries (`\MsMpEng.exe`, `\svchost.exe`, `\csrss.exe`) and validated process parent-child lineage in [`deploy/wazuh/local_rules.xml`](deploy/wazuh/local_rules.xml).
-
-### Case 2: RDP Brute Force Threshold Calibration
-* **Problem**: Setting a flat threshold of 5 failed logons caused false containment on legitimate users mistyping passwords.
-* **Resolution**: In [`rules/sigma/win_brute_force_auth.yml`](rules/sigma/win_brute_force_auth.yml), we calibrated the threshold to **>10 failed attempts within a 300-second window originating from external IPs (LogonType 10)**, completely eliminating internal user lockouts while catching automated hydra/crowbar password spraying.
-
----
-
-## 🎯 MITRE ATT&CK Detection Engineering Matrix
-
-| Technique ID | Technique Name | Tactic | Log Source & Event ID | Detection Rule | Automated Containment |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **T1003.001** | OS Credential Dumping: LSASS | Credential Access | Sysmon EventID 10 (`GrantedAccess: 0x1010/0x1400`) | [`win_lsass_dumping.yml`](rules/sigma/win_lsass_dumping.yml) | WinRM Host Isolation + Process Kill |
-| **T1110.001** | Brute Force: Password Guessing | Credential Access | Security EventID 4625 (`LogonType: 10`, >10 fails/5m) | [`win_brute_force_auth.yml`](rules/sigma/win_brute_force_auth.yml) | Perimeter Firewall Gateway Drop |
-| **T1053.005** | Scheduled Task Persistence | Persistence | Security EventID 4698 (`TaskContent: powershell/http`) | [`win_scheduled_task_persistence.yml`](rules/sigma/win_scheduled_task_persistence.yml) | Remote Scheduled Task De-registration |
-| **T1059.001** | Command & Scripting: PowerShell | Execution | Sysmon EventID 1 (`-EncodedCommand / -NoP`) | Custom Sysmon Process Rule | Process Tree Kill + Session Revoke |
-| **T1562.001** | Impair Defenses: Disable Tools | Defense Evasion | Sysmon EventID 1 (`Set-MpPreference -DisableRealtime`) | [`win_defender_tamper.yml`](rules/sigma/win_defender_tamper.yml) | Policy Reversion + Host Isolation |
-| **T1486** | Data Encrypted for Impact | Impact | Sysmon EventID 11 (`.locked` in Canary Directory) | [`win_ransomware_canary.yml`](rules/sigma/win_ransomware_canary.yml) | Process Kill + Volume Shadow Recovery |
-
----
-
 ## 🚀 Quickstart Guide
 
 ### Option 1: Interactive Management CLI
 ```bash
 python start_lab.py
 ```
-* Select options to launch the web dashboard, run CI/CD tests, test live Discord/Slack webhooks, or export incident reports.
 
 ### Option 2: Launch the Web Operations Center Directly
 ```bash
 python server.py
 ```
-Open **`http://localhost:5000`** in your browser.
-* View the **Live Cyber Attack Threat Map** with animated GeoIP attack vectors.
-* Paste an optional Discord/Slack webhook URL to receive instant alerts on your phone.
-* Trigger adversary simulations and observe sub-second SOAR containment audit logs.
+Open **`http://localhost:5000`** in your browser to view the **Live Cyber Threat Map**, trigger attack chains, and inspect automated SOAR containment audit logs.
 
 ### Option 3: Run Detection-as-Code CI/CD Tests
 ```bash
@@ -146,21 +147,14 @@ python -m unittest discover -s tests -p "test_*.py" -v
 
 ---
 
-## 📑 Formal Incident Response Reports (NIST SP 800-61 Aligned)
-- 📄 [INC-2026-0815-01: Credential Dumping via LSASS Read Handle](docs/INCIDENT_REPORT_T1003.md)
-- 📄 [INC-2026-0815-02: RDP Password Brute Force Campaign](docs/INCIDENT_REPORT_T1110.md)
-- 📄 [Complete Lab Architectural Specification](docs/ARCHITECTURE.md)
-
----
-
 ## 💼 Technical Resume Summary
 
 ```text
 CyberPulse SOC Suite – Detection Engineering & Automated SOAR Ecosystem
 GitHub: https://github.com/lumidren/CyberPulse-SOC-Suite
-• Architected a multi-VLAN SOC lab (VLAN 10 Enterprise 10.0.0.0/24, VLAN 20 SOC Cluster 10.0.1.0/24) integrating Windows Server 2022 AD DS, Sysmon v14, Wazuh v4.7 SIEM, and an asynchronous Python SOAR engine.
-• Authored 5+ vendor-agnostic Sigma YAML and Wazuh XML detection rules targeting MITRE ATT&CK techniques (T1003.001 LSASS dumping, T1110.001 brute force, T1562.001 defender tampering, T1486 ransomware canary).
-• Implemented policy-driven automated containment (WinRM host isolation and pfSense REST API firewall drops) and Discord/Slack webhook dispatchers, compressing MTTR from 20 minutes down to < 3.2 seconds.
-• Built a GitHub Actions CI/CD Detection-as-Code pipeline running automated regression tests across adversary emulation scenarios with 100% True-Positive capture and 0% false containment on baseline traffic.
-• Designed an interactive dark-mode Web Operations Center featuring a live GeoIP attack visualizer map and real-time telemetry streaming.
+• Architected an enterprise Detection Engineering & SOAR ecosystem covering 6 core MITRE ATT&CK tactics across a multi-VLAN virtualized Active Directory environment and pfSense perimeter gateway.
+• Authored 5+ vendor-agnostic Sigma YAML and Wazuh XML detection rules following the complete Detection Engineering Lifecycle (DELC), tuning false positives for Windows Defender and Sysinternals utilities.
+• Built a closed-loop Python async SOAR engine automating Threat Intel enrichment (VirusTotal/AbuseIPDB) and deterministic containment (WinRM WFP host isolation, pfSense API IP drops, VSS snapshot recovery), reducing MTTR to < 3.2s.
+• Engineered a Detection-as-Code GitHub Actions CI/CD pipeline executing automated regression tests across adversary kill-chain scenarios with 100% test coverage.
+• Authored comprehensive L1/L2 alert triage case studies, MITRE gap analyses, and NIST SP 800-61 incident response reports.
 ```
