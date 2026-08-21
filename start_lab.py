@@ -14,6 +14,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from simulator.attack_simulator import generate_random_attack
+from simulator.attack_chain import run_adversary_kill_chain
 from soar.soar_engine import SOAROrchestrator
 from server import run_server
 
@@ -35,6 +36,7 @@ def print_banner():
     print("=" * 78)
     print("  [✓] Detection Engineering (Sigma + Wazuh) | [✓] Sub-second SOAR Automation")
     print("  [✓] Dual Mode (IaC Lab + CI/CD Harness)  | [✓] Live GeoIP Threat Visualizer")
+    print("  [✓] Full Multi-Stage Kill Chain Emulation | [✓] Purple Team Exercise Docs")
     print("=" * 78)
     print()
 
@@ -42,9 +44,10 @@ def menu():
     print("\033[93m[OPERATIONS MENU]\033[0m")
     print("  \033[92m[1]\033[0m Launch Web Operations Center Dashboard (http://localhost:5000)")
     print("  \033[92m[2]\033[0m Run Detection-as-Code (DaC) Automated Test Suite")
-    print("  \033[92m[3]\033[0m Execute Real-Time Adversary Emulation Stream (Terminal Mode)")
-    print("  \033[92m[4]\033[0m Test Live Discord / Slack Webhook Dispatch")
-    print("  \033[92m[5]\033[0m Export Latest Incident Triage Report (Markdown/JSON)")
+    print("  \033[92m[3]\033[0m Execute Full 5-Stage Chronological Adversary Kill Chain")
+    print("  \033[92m[4]\033[0m Execute Random Adversary Emulation Stream")
+    print("  \033[92m[5]\033[0m Test Live Discord / Slack Webhook Dispatch")
+    print("  \033[92m[6]\033[0m Export Latest Incident Triage Report (Markdown/JSON)")
     print("  \033[91m[0]\033[0m Exit")
     print()
 
@@ -111,7 +114,7 @@ def main():
     print_banner()
     while True:
         menu()
-        choice = input("Enter choice [0-5]: ").strip()
+        choice = input("Enter choice [0-6]: ").strip()
         if choice == "1":
             print("\n[*] Starting Web Server on http://localhost:5000 ...")
             run_server(5000)
@@ -119,16 +122,18 @@ def main():
         elif choice == "2":
             run_tests()
         elif choice == "3":
-            run_emulation_stream()
+            run_adversary_kill_chain(delay_between_phases=1)
         elif choice == "4":
-            test_webhook()
+            run_emulation_stream()
         elif choice == "5":
+            test_webhook()
+        elif choice == "6":
             export_report()
         elif choice == "0":
             print("\nExiting CyberPulse. Stay secure!\n")
             break
         else:
-            print("\n\033[91m[!] Invalid option. Please select 0-5.\033[0m\n")
+            print("\n\033[91m[!] Invalid option. Please select 0-6.\033[0m\n")
 
 if __name__ == "__main__":
     main()
