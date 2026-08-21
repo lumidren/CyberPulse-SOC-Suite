@@ -1,0 +1,52 @@
+{
+  "Event": {
+    "info": "CyberPulse SOC Emulated Multi-Stage Intrusion IoC Feed",
+    "threat_level_id": "1",
+    "analysis": "2",
+    "distribution": "0",
+    "date": "2026-08-21",
+    "Tag": [
+      {"name": "tlp:amber"},
+      {"name": "misp-galaxy:mitre-attack-pattern=\"OS Credential Dumping - T1003.001\""},
+      {"name": "misp-galaxy:mitre-attack-pattern=\"Data Encrypted for Impact - T1486\""},
+      {"name": "cyberpulse:source=\"Detection Engineering Lab\""}
+    ],
+    "Attribute": [
+      {
+        "category": "Network activity",
+        "type": "ip-src",
+        "value": "185.220.101.5",
+        "to_ids": true,
+        "comment": "RDP Brute Force Threat Source (Hostinger / TOR Exit Node)"
+      },
+      {
+        "category": "Network activity",
+        "type": "ip-src",
+        "value": "185.220.101.33",
+        "to_ids": true,
+        "comment": "C2 Server / Mimikatz Stager Infrastructure"
+      },
+      {
+        "category": "Payload delivery",
+        "type": "sha256",
+        "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "to_ids": true,
+        "comment": "Mimikatz LSASS Reader SHA256"
+      },
+      {
+        "category": "Payload delivery",
+        "type": "sha256",
+        "value": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+        "to_ids": true,
+        "comment": "Cryptolocker Ransomware Canary Executable Hash"
+      },
+      {
+        "category": "Artifacts dropped",
+        "type": "filename",
+        "value": "financial_q3_forecast.xlsx.locked",
+        "to_ids": false,
+        "comment": "Ransomware Canary Decoy Extension"
+      }
+    ]
+  }
+}

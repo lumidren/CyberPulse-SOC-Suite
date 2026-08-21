@@ -1,0 +1,24 @@
+name: Windows.Detection.LsassMemoryAccess
+author: lumidren (CyberPulse SOC Suite)
+description: |
+  Velociraptor VQL forensic triage artifact to hunt for active or historical handles 
+  targeting lsass.exe and extract process parentage, hashes, and open handles.
+
+reference:
+  - https://attack.mitre.org/techniques/T1003/001/
+
+type: CLIENT
+
+sources:
+  - query: |
+      SELECT 
+          Pid,
+          Ppid,
+          Name,
+          CommandLine,
+          Exe,
+          Username,
+          CreateTime
+      FROM pslist()
+      WHERE Name =~ "mimikatz|procdump|lsass_dump|dumpert"
+         OR CommandLine =~ "lsass|minidump|sekurlsa"

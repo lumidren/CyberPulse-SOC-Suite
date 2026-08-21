@@ -1,0 +1,39 @@
+<Sysmon schemaversion="4.90">
+  <!-- Hash algorithms: SHA256 and IMPHASH -->
+  <HashAlgorithms>SHA256,IMPHASH</HashAlgorithms>
+  <CheckRevocation/>
+  <EventFiltering>
+    <!-- Event ID 1: Process Creation -->
+    <RuleGroup name="" groupRelation="or">
+      <ProcessCreate onmatch="include">
+        <CommandLine condition="contains">Set-MpPreference</CommandLine>
+        <CommandLine condition="contains">-EncodedCommand</CommandLine>
+        <CommandLine condition="contains">mimikatz</CommandLine>
+        <CommandLine condition="contains">procdump</CommandLine>
+        <Image condition="begin with">C:\Windows\Temp\</Image>
+        <Image condition="begin with">C:\Users\</Image>
+      </ProcessCreate>
+    </RuleGroup>
+
+    <!-- Event ID 10: ProcessAccess -->
+    <RuleGroup name="" groupRelation="or">
+      <ProcessAccess onmatch="include">
+        <TargetImage condition="end with">\lsass.exe</TargetImage>
+      </ProcessAccess>
+      <ProcessAccess onmatch="exclude">
+        <SourceImage condition="end with">\svchost.exe</SourceImage>
+        <SourceImage condition="end with">\csrss.exe</SourceImage>
+        <SourceImage condition="end with">\MsMpEng.exe</SourceImage>
+      </ProcessAccess>
+    </RuleGroup>
+
+    <!-- Event ID 11: FileCreate -->
+    <RuleGroup name="" groupRelation="or">
+      <FileCreate onmatch="include">
+        <TargetFilename condition="end with">.locked</TargetFilename>
+        <TargetFilename condition="end with">.encrypted</TargetFilename>
+        <TargetFilename condition="contains">HOW_TO_DECRYPT</TargetFilename>
+      </FileCreate>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>

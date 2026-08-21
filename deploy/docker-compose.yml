@@ -38,6 +38,18 @@ services:
       soc-net:
         ipv4_address: 10.0.1.10
 
+  thehive:
+    image: thehiveproject/thehive:5.2
+    container_name: thehive-cases
+    restart: always
+    ports:
+      - "9000:9000"
+    environment:
+      - "JAVA_OPTS=-Xms256m -Xmx512m"
+    networks:
+      soc-net:
+        ipv4_address: 10.0.1.20
+
   soar-engine:
     build:
       context: ..
@@ -48,8 +60,8 @@ services:
       - "5000:5000"
     environment:
       - WAZUH_API_URL=https://wazuh-manager:55000
-      - WAZUH_USER=wazuh-wui
-      - WAZUH_PASS=wazuh-wui
+      - THEHIVE_URL=http://thehive:9000
+      - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
     depends_on:
       - wazuh-manager
     networks:

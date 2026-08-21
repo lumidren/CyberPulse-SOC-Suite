@@ -1,0 +1,22 @@
+name: Windows.Forensics.CanaryRansomware
+author: lumidren (CyberPulse SOC Suite)
+description: |
+  Velociraptor VQL artifact to identify rapid filesystem modifications, enumerate
+  canary decoy files with ransomware extensions (.locked, .encrypted), and hash offending binaries.
+
+reference:
+  - https://attack.mitre.org/techniques/T1486/
+
+type: CLIENT
+
+sources:
+  - query: |
+      SELECT 
+          OSPath,
+          Size,
+          Mtime,
+          Ctime,
+          upload(file=OSPath) AS UploadedEvidence
+      FROM glob(globs="C:/Users/*/Documents/**")
+      WHERE OSPath =~ "\\.(locked|encrypted|crypted)$" 
+         OR OSPath =~ "HOW_TO_DECRYPT"

@@ -1,0 +1,16 @@
+attack_technique: T1562.001
+display_name: "Impair Defenses: Disable Windows Defender"
+atomic_tests:
+- name: Disable Windows Defender Real-Time Protection via PowerShell
+  auto_generated_guid: 7891234a-9b12-4112-a123-018274619284
+  description: |
+    Attempts to disable real-time monitoring and script scanning using Set-MpPreference cmdlet.
+  supported_platforms:
+  - windows
+  executor:
+    name: powershell
+    elevation_required: true
+    command: |
+      Set-MpPreference -DisableRealtimeMonitoring $true -DisableScriptScanning $true
+    cleanup_command: |
+      Set-MpPreference -DisableRealtimeMonitoring $false -DisableScriptScanning $false

@@ -1,0 +1,53 @@
+{
+  "name": "CyberPulse-High-Severity-Incident-Template",
+  "titlePrefix": "[CYBERPULSE-SOC]",
+  "description": "Standardized Tier-1 / Tier-2 Incident Response Case Template following NIST SP 800-61 incident handling lifecycle (Identification, Containment, Eradication, Recovery, Lessons Learned).",
+  "severity": 3,
+  "flag": true,
+  "tlp": 2,
+  "pap": 2,
+  "tags": [
+    "CyberPulse",
+    "AutomatedSOAR",
+    "MITRE-ATT&CK",
+    "Wazuh",
+    "Sysmon"
+  ],
+  "tasks": [
+    {
+      "title": "1. Identification & IoC Verification",
+      "description": "Verify alert telemetry, extract source IP, process hash, parent lineage, and confirm VirusTotal/AbuseIPDB reputation scores."
+    },
+    {
+      "title": "2. Verify Automated SOAR Containment",
+      "description": "Confirm WinRM host network isolation filter active on target endpoint and verify pfSense firewall drop rule on perimeter gateway."
+    },
+    {
+      "title": "3. Scope Lateral Movement & Credential Audit",
+      "description": "Review Active Directory Kerberos TGT requests (EventID 4768) and check other endpoints in same VLAN for matching C2 hashes."
+    },
+    {
+      "title": "4. Eradication & Malware Purge",
+      "description": "Terminate persistence scheduled tasks, remove malicious payloads from \\Windows\\Temp\\, and re-enable Windows Defender Real-Time Monitoring."
+    },
+    {
+      "title": "5. Active Directory Account Reset & Recovery",
+      "description": "Enforce mandatory password reset for affected domain user accounts and revoke all active OAuth/Azure AD refresh tokens."
+    },
+    {
+      "title": "6. Post-Incident Review & Detection Tuning",
+      "description": "Document root cause, update Detection Engineering Lifecycle (DELC) rule thresholds if necessary, and file final incident summary report."
+    }
+  ],
+  "customFields": {
+    "mitreTechnique": {
+      "string": "T1003.001 / T1110.001 / T1562.001 / T1486"
+    },
+    "containmentDurationSec": {
+      "number": 3.18
+    },
+    "assignedTier": {
+      "string": "Tier-1 Automated Playbook / Tier-2 Analyst"
+    }
+  }
+}
