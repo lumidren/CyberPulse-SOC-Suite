@@ -1,4 +1,4 @@
-// AegisSOC Web Dashboard Logic & Event Handlers
+// CyberPulse SOC Web Operations Center Logic
 
 let alertsData = [];
 let totalAlerts = 0;
@@ -7,8 +7,18 @@ let mitreCounts = {
     't1003': 0,
     't1110': 0,
     't1053': 0,
-    't1059': 0
+    't1059': 0,
+    't1562': 0,
+    't1486': 0
 };
+let activeWebhookUrl = "";
+
+// Leaflet Cyber Map State
+let map;
+let datacenterMarker;
+let activeAttackLayers = [];
+
+const DATACENTER_COORDS = [40.7128, -74.0060]; // New York
 
 // Attack Data Presets (client-side fallback & API trigger)
 const ATTACK_PRESETS = {
@@ -19,14 +29,16 @@ const ATTACK_PRESETS = {
         computer_name: 'WIN-DC01.corp.local',
         source_ip: '185.220.101.33',
         action: 'ISOLATE_HOST_AND_KILL_PROCESS',
-        action_log: 'Isolated host WIN-DC01 via EDR API. Terminated malicious process PID 4812 (mimikatz.exe).',
+        action_log: '[WinRM TLS 5986 -> WIN-DC01] Injected WFP emergency isolation filter. Terminated PID 4812 (mimikatz.exe).',
         intel: {
             ip: '185.220.101.33',
             reputation: 'MALICIOUS',
-            abuse_score: '98/100',
-            vt_positives: '42 / 72 Security Vendors',
-            country: 'Russia (RU)',
-            isp: 'BadHost Ltd / TOR Exit Node'
+            abuse_score: '95/100',
+            vt_positives: '38 / 72 Security Vendors',
+            country: 'Russia (RU) 🇷🇺',
+            isp: 'BadHost Ltd / C2 Harvester',
+            lat: 55.7558,
+            lon: 37.6173
         }
     },
     't1110': {
@@ -36,14 +48,16 @@ const ATTACK_PRESETS = {
         computer_name: 'CORP-RDP-GW01',
         source_ip: '185.220.101.5',
         action: 'BLOCK_SOURCE_IP_FIREWALL',
-        action_log: 'Pushed automated firewall rule: BLOCK INBOUND TCP/UDP from 185.220.101.5 on Perimeter Gateway.',
+        action_log: '[pfSense Gateway 10.0.0.1:8443] Injected packet drop rule: DROP INBOUND TCP/UDP from 185.220.101.5/32 on WAN.',
         intel: {
             ip: '185.220.101.5',
             reputation: 'MALICIOUS',
-            abuse_score: '95/100',
-            vt_positives: '38 / 72 Security Vendors',
-            country: 'Germany (DE)',
-            isp: 'Hostinger International / Scanner'
+            abuse_score: '98/100',
+            vt_positives: '42 / 72 Security Vendors',
+            country: 'Germany (DE) 🇩🇪',
+            isp: 'Hostinger International / Scanner',
+            lat: 52.5200,
+            lon: 13.4050
         }
     },
     't1053': {
@@ -53,14 +67,16 @@ const ATTACK_PRESETS = {
         computer_name: 'WIN-WORKSTATION09',
         source_ip: '10.0.2.15',
         action: 'REMOVE_SCHEDULED_TASK',
-        action_log: 'Purged malicious scheduled task \\SystemHealthUpdate on WIN-WORKSTATION09 via PowerShell Remoting.',
+        action_log: '[WinRM TLS 5986 -> WIN-WORKSTATION09] Unregistered malicious scheduled task \\SystemHealthUpdate via Unregister-ScheduledTask.',
         intel: {
             ip: '10.0.2.15 (Internal Host)',
             reputation: 'INTERNAL COMPROMISED',
             abuse_score: 'N/A (LAN)',
             vt_positives: 'N/A',
-            country: 'Internal Domain',
-            isp: 'CORP.LOCAL Intranet'
+            country: 'Internal Domain 🏢',
+            isp: 'CORP.LOCAL Intranet',
+            lat: 40.7128,
+            lon: -74.0060
         }
     },
     't1059': {
@@ -70,21 +86,139 @@ const ATTACK_PRESETS = {
         computer_name: 'CORP-FINANCE-02',
         source_ip: '10.0.4.88',
         action: 'TERMINATE_PROCESS_TREE',
-        action_log: 'Terminated process tree for powershell.exe on CORP-FINANCE-02. Revoked user session for CORP\\m.worker.',
+        action_log: '[WinRM -> CORP-FINANCE-02] Terminated process tree for powershell.exe. Dispatched ADSI account lockout for CORP\\m.worker.',
         intel: {
             ip: '10.0.4.88 (Internal Host)',
             reputation: 'SUSPICIOUS SCRIPT',
             abuse_score: 'N/A',
             vt_positives: '54 / 72 (PowerShell.Empire.Stager Hash)',
-            country: 'Internal Network',
-            isp: 'CORP Finance Segment'
+            country: 'Internal Network 🏢',
+            isp: 'CORP Finance Segment',
+            lat: 40.7128,
+            lon: -74.0060
+        }
+    },
+    't1562': {
+        technique_id: 'T1562.001',
+        rule_name: 'Windows Defender Real-Time Protection Disabled',
+        severity: 'CRITICAL',
+        computer_name: 'WIN-WORKSTATION09',
+        source_ip: '91.240.118.172',
+        action: 'REVERT_DEFENDER_POLICY_AND_ISOLATE',
+        action_log: '[WinRM TLS 5986 -> WIN-WORKSTATION09] Re-enabled Windows Defender Real-Time Protection via Set-MpPreference. Host isolated from domain.',
+        intel: {
+            ip: '91.240.118.172',
+            reputation: 'MALICIOUS',
+            abuse_score: '88/100',
+            vt_positives: '33 / 72 Security Vendors',
+            country: 'Ukraine (UA) 🇺🇦',
+            isp: 'Hostlife LLC / C2 Stager',
+            lat: 50.4501,
+            lon: 30.5234
+        }
+    },
+    't1486': {
+        technique_id: 'T1486',
+        rule_name: 'Rapid Ransomware Canary File Encryption Detected',
+        severity: 'CRITICAL',
+        computer_name: 'CORP-FINANCE-02',
+        source_ip: '193.142.146.210',
+        action: 'KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS',
+        action_log: '[WinRM -> CORP-FINANCE-02] Terminated ransomware PID 6140. Initiated automated canary restore from Volume Shadow Copy Snapshot #41.',
+        intel: {
+            ip: '193.142.146.210',
+            reputation: 'MALICIOUS',
+            abuse_score: '92/100',
+            vt_positives: '49 / 72 Security Vendors',
+            country: 'Romania (RO) 🇷🇴',
+            isp: 'M247 Europe / Ransomware C2',
+            lat: 44.4268,
+            lon: 26.1025
         }
     }
 };
 
+// Initialize Map on Page Load
+window.addEventListener('DOMContentLoaded', () => {
+    initCyberMap();
+});
+
+function initCyberMap() {
+    try {
+        map = L.map('cyber-map', {
+            center: [30, 0],
+            zoom: 2,
+            minZoom: 1.5,
+            maxZoom: 6,
+            zoomControl: false,
+            attributionControl: false
+        });
+
+        // CartoDB DarkMatter Tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Add SOC Datacenter Target Marker
+        const dcIcon = L.divIcon({
+            className: 'dc-marker',
+            iconSize: [14, 14]
+        });
+        datacenterMarker = L.marker(DATACENTER_COORDS, { icon: dcIcon }).addTo(map);
+        datacenterMarker.bindPopup('<b>🏢 Enterprise SOC Gateway (New York Datacenter)</b>');
+    } catch (e) {
+        console.warn("Leaflet Map failed to load (offline):", e);
+    }
+}
+
+function renderAttackOnMap(lat, lon, country, ip, technique) {
+    if (!map || !lat || !lon) return;
+    if (lat === DATACENTER_COORDS[0] && lon === DATACENTER_COORDS[1]) return; // Skip internal LAN IPs
+
+    // Create Pulsing Attacker Marker
+    const attackerIcon = L.divIcon({
+        className: 'pulsing-marker',
+        iconSize: [12, 12]
+    });
+    const attackerMarker = L.marker([lat, lon], { icon: attackerIcon }).addTo(map);
+    attackerMarker.bindPopup(`<b>🚨 Threat Source:</b> ${country}<br><b>IP:</b> ${ip}<br><b>Tactic:</b> ${technique}`).openPopup();
+
+    // Draw glowing animated attack vector line to Datacenter
+    const attackLine = L.polyline([[lat, lon], DATACENTER_COORDS], {
+        color: '#FF2A55',
+        weight: 2,
+        opacity: 0.85,
+        dashArray: '6, 6'
+    }).addTo(map);
+
+    activeAttackLayers.push(attackerMarker, attackLine);
+
+    // Auto-clean old layers after 10 seconds to keep map clean
+    setTimeout(() => {
+        if (map.hasLayer(attackerMarker)) map.removeLayer(attackerMarker);
+        if (map.hasLayer(attackLine)) map.removeLayer(attackLine);
+    }, 10000);
+}
+
+function saveWebhookUrl() {
+    const input = document.getElementById('webhook-input');
+    const statusText = document.getElementById('webhook-status');
+    const url = input.value.trim();
+    if (url.startsWith('http')) {
+        activeWebhookUrl = url;
+        statusText.innerText = "● Webhook Active (Broadcasting Live Alerts)";
+        statusText.className = "webhook-status-text status-online";
+    } else {
+        activeWebhookUrl = "";
+        statusText.innerText = "Local Mode (Offline)";
+        statusText.className = "webhook-status-text";
+    }
+}
+
 async function triggerAttack(attackType) {
     if (attackType === 'random') {
-        const types = ['t1003', 't1110', 't1053', 't1059'];
+        const types = ['t1003', 't1110', 't1053', 't1059', 't1562', 't1486'];
         const selected = types[Math.floor(Math.random() * types.length)];
         return executeAttackPreset(selected);
     }
@@ -94,7 +228,10 @@ async function triggerAttack(attackType) {
         const response = await fetch('/api/simulate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: attackType })
+            body: JSON.stringify({ 
+                type: attackType,
+                webhook_url: activeWebhookUrl 
+            })
         });
         if (response.ok) {
             const data = await response.json();
@@ -102,7 +239,7 @@ async function triggerAttack(attackType) {
             return;
         }
     } catch (e) {
-        // Silent fallback to client simulation if server offline
+        // Silent fallback to client simulation
     }
     
     executeAttackPreset(attackType);
@@ -123,6 +260,12 @@ function executeAttackPreset(key) {
         status: 'CONTAINED',
         action_log: preset.action_log,
         intel: preset.intel,
+        pipeline_timing: {
+            stage1_detection_ms: Math.floor(1380 + Math.random() * 60),
+            stage2_threat_intel_ms: Math.floor(590 + Math.random() * 70),
+            stage3_containment_ms: Math.floor(1090 + Math.random() * 80),
+            total_pipeline_sec: 3.16
+        },
         key: key
     };
 
@@ -141,9 +284,10 @@ function processAlertObject(alert) {
     // Update MITRE Matrix
     if (mitreCounts.hasOwnProperty(alert.key)) {
         mitreCounts[alert.key]++;
-        document.getElementById(`hits-${alert.key}`).innerText = `${mitreCounts[alert.key]} Hits`;
+        const badge = document.getElementById(`hits-${alert.key}`);
+        if (badge) badge.innerText = `${mitreCounts[alert.key]} Hits`;
         const cell = document.getElementById(`mitre-${alert.key}`);
-        cell.classList.add('active-hit');
+        if (cell) cell.classList.add('active-hit');
     }
 
     // Render Table Row
@@ -154,12 +298,15 @@ function processAlertObject(alert) {
 
     // Auto inspect intel for latest alert
     showIntelDetails(alert);
+
+    // Render GeoIP vector on Threat Map
+    if (alert.intel && alert.intel.lat && alert.intel.lon) {
+        renderAttackOnMap(alert.intel.lat, alert.intel.lon, alert.intel.country, alert.source_ip, alert.technique_id);
+    }
 }
 
 function renderAlertRow(alert) {
     const tbody = document.getElementById('alerts-tbody');
-    
-    // Remove placeholder if present
     const emptyRow = document.getElementById('empty-row');
     if (emptyRow) emptyRow.remove();
 
@@ -222,14 +369,16 @@ function clearAlerts() {
     alertsData = [];
     totalAlerts = 0;
     criticalAlerts = 0;
-    mitreCounts = { 't1003': 0, 't1110': 0, 't1053': 0, 't1059': 0 };
+    mitreCounts = { 't1003': 0, 't1110': 0, 't1053': 0, 't1059': 0, 't1562': 0, 't1486': 0 };
 
     document.getElementById('total-alerts-count').innerText = '0';
     document.getElementById('critical-alerts-count').innerText = '0';
     
-    ['t1003', 't1110', 't1053', 't1059'].forEach(k => {
-        document.getElementById(`hits-${k}`).innerText = '0 Hits';
-        document.getElementById(`mitre-${k}`).classList.remove('active-hit');
+    ['t1003', 't1110', 't1053', 't1059', 't1562', 't1486'].forEach(k => {
+        const badge = document.getElementById(`hits-${k}`);
+        if (badge) badge.innerText = '0 Hits';
+        const cell = document.getElementById(`mitre-${k}`);
+        if (cell) cell.classList.remove('active-hit');
     });
 
     const tbody = document.getElementById('alerts-tbody');
@@ -240,6 +389,6 @@ function clearAlerts() {
     `;
 
     document.getElementById('intel-details-container').innerHTML = `
-        <p class="placeholder-text">Select an alert from the stream to view VirusTotal & AbuseIPDB threat intelligence enrichment details.</p>
+        <p class="placeholder-text">Select an alert from the stream to view VirusTotal, AbuseIPDB, GeoIP and sub-second pipeline latency metrics.</p>
     `;
 }

@@ -1,5 +1,5 @@
 """
-Attack Simulator Engine for SOC SIEM/SOAR Lab
+Attack Simulator Engine for CyberPulse SOC Suite
 Simulates adversary tactics mapped to MITRE ATT&CK framework and generates realistic event telemetry.
 """
 
@@ -14,7 +14,7 @@ def generate_timestamp():
 def simulate_t1003_lsass_dump():
     """MITRE ATT&CK T1003.001: Credential Dumping via LSASS Read Access"""
     tool = random.choice(["mimikatz.exe", "procdump.exe", "lsass_dumper.ps1", "comsvcs.dll"])
-    attacker_ip = random.choice(["192.168.1.105", "10.0.0.45", "185.220.101.33"])
+    attacker_ip = random.choice(["185.220.101.33", "91.240.118.172", "193.142.146.210"])
     target_user = "CORP\\Administrator"
     
     event = {
@@ -43,7 +43,7 @@ def simulate_t1003_lsass_dump():
 
 def simulate_t1110_brute_force():
     """MITRE ATT&CK T1110.001: Password Brute Force Attack"""
-    attacker_ip = random.choice(["185.220.101.5", "45.142.214.12", "193.142.146.210"])
+    attacker_ip = random.choice(["185.220.101.5", "45.142.214.12", "194.26.29.112"])
     target_user = random.choice(["admin", "administrator", "root", "j.smith", "service_acct"])
     
     event = {
@@ -121,12 +121,66 @@ def simulate_t1059_powershell_execution():
     }
     return event
 
+def simulate_t1562_defender_tamper():
+    """MITRE ATT&CK T1562.001: Impair Defenses - Disable Windows Defender"""
+    attacker_ip = random.choice(["185.220.101.33", "10.0.0.45"])
+    
+    event = {
+        "event_id": 1, # Sysmon Process Creation
+        "event_source": "Microsoft-Windows-Sysmon",
+        "provider": "Sysmon",
+        "timestamp": generate_timestamp(),
+        "technique_id": "T1562.001",
+        "technique_name": "Impair Defenses: Disable or Modify Tools",
+        "tactic": "Defense Evasion",
+        "computer_name": "WIN-WORKSTATION09",
+        "user": "CORP\\j.doe",
+        "source_ip": attacker_ip,
+        "details": {
+            "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "CommandLine": "powershell.exe -Command Set-MpPreference -DisableRealtimeMonitoring $true -DisableScriptScanning $true -DisableBehaviorMonitoring $true",
+            "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+            "ParentCommandLine": "cmd.exe /c disable_security.bat",
+            "SourceProcessId": random.randint(3000, 8500)
+        },
+        "severity": "CRITICAL"
+    }
+    return event
+
+def simulate_t1486_ransomware_canary():
+    """MITRE ATT&CK T1486: Data Encrypted for Impact (Canary File Modification)"""
+    attacker_ip = random.choice(["193.142.146.210", "45.142.214.12"])
+    
+    event = {
+        "event_id": 11, # Sysmon File Creation
+        "event_source": "Microsoft-Windows-Sysmon",
+        "provider": "Sysmon",
+        "timestamp": generate_timestamp(),
+        "technique_id": "T1486",
+        "technique_name": "Data Encrypted for Impact: Ransomware",
+        "tactic": "Impact",
+        "computer_name": "CORP-FINANCE-02",
+        "user": "CORP\\finance_admin",
+        "source_ip": attacker_ip,
+        "details": {
+            "TargetFilename": "C:\\Users\\finance_admin\\Documents\\Canary\\financial_q3_forecast.xlsx.locked",
+            "Image": "C:\\Windows\\Temp\\cryptolocker.exe",
+            "ProcessId": random.randint(4000, 9500),
+            "RansomNote": "C:\\Users\\finance_admin\\Documents\\HOW_TO_DECRYPT.txt",
+            "FileHash_SHA256": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a"
+        },
+        "severity": "CRITICAL"
+    }
+    return event
+
 def generate_random_attack():
     attack_funcs = [
         simulate_t1003_lsass_dump,
         simulate_t1110_brute_force,
         simulate_t1053_scheduled_task,
-        simulate_t1059_powershell_execution
+        simulate_t1059_powershell_execution,
+        simulate_t1562_defender_tamper,
+        simulate_t1486_ransomware_canary
     ]
     selected = random.choice(attack_funcs)
     return selected()

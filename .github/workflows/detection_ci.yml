@@ -1,0 +1,41 @@
+name: Detection-as-Code CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-detections:
+    name: Sigma & SOAR Validation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Run Detection-as-Code Unit Tests
+      run: |
+        python -m unittest discover -s tests -p "test_*.py" -v
+
+    - name: Validate Sigma YAML Syntax
+      run: |
+        python -c "
+        import os, yaml
+        sigma_dir = 'rules/sigma'
+        for f in os.listdir(sigma_dir):
+            if f.endswith('.yml'):
+                path = os.path.join(sigma_dir, f)
+                with open(path, 'r', encoding='utf-8') as fp:
+                    data = yaml.safe_load(fp)
+                    assert 'title' in data, f'Missing title in {f}'
+                    assert 'detection' in data, f'Missing detection block in {f}'
+                    assert 'tags' in data, f'Missing MITRE tags in {f}'
+                    print(f'✓ Validated {f}: {data[\"title\"]}')
+        "
