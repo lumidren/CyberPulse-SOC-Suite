@@ -1,0 +1,92 @@
+{
+  "name": "CyberPulse-Automated-Incident-Response",
+  "description": "Closed-loop SOAR orchestration workflow: Ingests SIEM webhooks, enriches IoCs via VirusTotal/AbuseIPDB, logs to TheHive, notifies Discord/Slack, and triggers automated WinRM/pfSense containment.",
+  "active": true,
+  "nodes": [
+    {
+      "id": "node_webhook_trigger",
+      "name": "Wazuh SIEM Webhook Trigger",
+      "app_name": "Webhook",
+      "action": "Receive Alert Payload",
+      "position": {"x": 100, "y": 200},
+      "parameters": [
+        {"name": "path", "value": "/api/v1/cyberpulse_alert"}
+      ]
+    },
+    {
+      "id": "node_virustotal_enrich",
+      "name": "VirusTotal v3 IP/Hash Lookup",
+      "app_name": "VirusTotal",
+      "action": "get_ip_report",
+      "position": {"x": 350, "y": 120},
+      "parameters": [
+        {"name": "ip", "value": "$node_webhook_trigger.body.telemetry.source_ip"},
+        {"name": "apikey", "value": "{{VIRUSTOTAL_API_KEY}}"}
+      ]
+    },
+    {
+      "id": "node_abuseipdb_enrich",
+      "name": "AbuseIPDB v2 Reputation Check",
+      "app_name": "AbuseIPDB",
+      "action": "check_ip",
+      "position": {"x": 350, "y": 280},
+      "parameters": [
+        {"name": "ip", "value": "$node_webhook_trigger.body.telemetry.source_ip"},
+        {"name": "apikey", "value": "{{ABUSEIPDB_API_KEY}}"}
+      ]
+    },
+    {
+      "id": "node_condition_severity",
+      "name": "Evaluate Severity & Confidence Threshold",
+      "app_name": "Logic",
+      "action": "Condition",
+      "position": {"x": 600, "y": 200},
+      "parameters": [
+        {"name": "condition", "value": "$node_virustotal_enrich.positives > 10 || $node_abuseipdb_enrich.abuse_score >= 85"}
+      ]
+    },
+    {
+      "id": "node_winrm_isolation",
+      "name": "WinRM TLS Host Isolation (Port 5986)",
+      "app_name": "PowerShell_WinRM",
+      "action": "Execute Containment Script",
+      "position": {"x": 850, "y": 120},
+      "parameters": [
+        {"name": "target_host", "value": "$node_webhook_trigger.body.telemetry.computer_name"},
+        {"name": "command", "value": "New-NetFirewallRule -DisplayName 'SOC-Isolation' -Action Block -Direction Outbound"}
+      ]
+    },
+    {
+      "id": "node_pfsense_firewall_drop",
+      "name": "pfSense REST API IP Drop",
+      "app_name": "pfSense",
+      "action": "add_firewall_rule",
+      "position": {"x": 850, "y": 280},
+      "parameters": [
+        {"name": "ip", "value": "$node_webhook_trigger.body.telemetry.source_ip"},
+        {"name": "action", "value": "block"}
+      ]
+    },
+    {
+      "id": "node_discord_slack_notify",
+      "name": "Dispatch Rich Incident Alert Embed",
+      "app_name": "Discord_Webhook",
+      "action": "send_embed",
+      "position": {"x": 1100, "y": 200},
+      "parameters": [
+        {"name": "webhook_url", "value": "{{DISCORD_WEBHOOK_URL}}"},
+        {"name": "status", "value": "CONTAINED_AUTOMATICALLY"}
+      ]
+    }
+  ],
+  "edges": [
+    {"source": "node_webhook_trigger", "target": "node_virustotal_enrich"},
+    {"source": "node_webhook_trigger", "target": "node_abuseipdb_enrich"},
+    {"source": "node_virustotal_enrich", "target": "node_condition_severity"},
+    {"source": "node_abuseipdb_enrich", "target": "node_condition_severity"},
+    {"source": "node_condition_severity", "target": "node_winrm_isolation"},
+    {"source": "node_condition_severity", "target": "node_pfsense_firewall_drop"},
+    {"source": "node_winrm_isolation", "target": "node_discord_slack_notify"},
+    {"source": "node_pfsense_firewall_drop", "target": "node_discord_slack_notify"}
+  ]
+}
