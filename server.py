@@ -1,6 +1,6 @@
 """
-Lightweight Backend & API Server for SOC SIEM/SOAR Laboratory
-Runs with 0 external dependencies (uses standard library http.server)
+Lightweight Backend & API Server for CyberPulse SOC Suite
+Serves the Web Operations Center, drives Adversary Emulation, and executes SOAR pipelines.
 """
 
 import http.server
@@ -17,6 +17,8 @@ from simulator.attack_simulator import (
     simulate_t1110_brute_force,
     simulate_t1053_scheduled_task,
     simulate_t1059_powershell_execution,
+    simulate_t1562_defender_tamper,
+    simulate_t1486_ransomware_canary,
     generate_random_attack
 )
 from soar.soar_engine import SOAROrchestrator
@@ -39,6 +41,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 data = {}
 
             attack_type = data.get("type", "random")
+            webhook_url = data.get("webhook_url", None)
 
             if attack_type == "t1003":
                 evt = simulate_t1003_lsass_dump()
@@ -48,10 +51,14 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 evt = simulate_t1053_scheduled_task()
             elif attack_type == "t1059":
                 evt = simulate_t1059_powershell_execution()
+            elif attack_type == "t1562":
+                evt = simulate_t1562_defender_tamper()
+            elif attack_type == "t1486":
+                evt = simulate_t1486_ransomware_canary()
             else:
                 evt = generate_random_attack()
 
-            processed_alert = orchestrator.process_event(evt)
+            processed_alert = orchestrator.process_event(evt, custom_webhook_url=webhook_url)
 
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -69,10 +76,10 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
-def run_server():
+def run_server(port=PORT):
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), SOCHttpRequestHandler) as httpd:
-        print(f"[*] AEGIS SOC Laboratory Dashboard Running at http://localhost:{PORT}")
+    with socketserver.TCPServer(("", port), SOCHttpRequestHandler) as httpd:
+        print(f"[*] CyberPulse SOC Web Operations Center Running at http://localhost:{port}")
         print(f"[*] Serving web UI from {WEB_DIR}")
         print("[*] Press Ctrl+C to stop.")
         try:

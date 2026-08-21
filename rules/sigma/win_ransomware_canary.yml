@@ -1,0 +1,26 @@
+title: Rapid File Encryption and Ransomware Canary Modification
+id: a74198c2-3e21-4f12-a892-38472910cdee
+status: production
+description: Detects suspicious mass file creation with known ransomware extension patterns (.locked, .encrypted, HOW_TO_DECRYPT) targeting canary decoy directories.
+references:
+    - https://attack.mitre.org/techniques/T1486/
+author: CyberPulse SOC Suite
+date: 2026/08/21
+tags:
+    - attack.impact
+    - attack.t1486
+logsource:
+    category: file_event
+    product: windows
+detection:
+    selection:
+        TargetFilename|endswith:
+            - '.locked'
+            - '.encrypted'
+            - '.crypted'
+            - 'HOW_TO_DECRYPT.txt'
+            - 'README_RESTORE.txt'
+    condition: selection
+falsepositives:
+    - Legitimate encryption software (e.g. VeraCrypt, 7-Zip encrypting explicit archives).
+level: critical

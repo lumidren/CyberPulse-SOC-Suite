@@ -1,4 +1,4 @@
-<!-- Custom Wazuh SIEM Detection Rules for SOC Laboratory -->
+<!-- Custom Wazuh SIEM Detection Rules for CyberPulse SOC Suite -->
 <group name="sysmon,windows,soc_custom_rules,">
   <!-- LSASS Memory Dumping Rule -->
   <rule id="100010" level="14">
@@ -32,5 +32,27 @@
       <id>T1053.005</id>
     </mitre>
     <group>persistence,scheduled_task,</group>
+  </rule>
+
+  <!-- Windows Defender Tampering Rule -->
+  <rule id="100013" level="14">
+    <if_sid>60103</if_sid>
+    <field name="win.eventdata.commandLine">Set-MpPreference.*DisableRealtimeMonitoring</field>
+    <description>SOC-ALERT: Windows Defender real-time protection disabled via PowerShell [MITRE T1562.001]</description>
+    <mitre>
+      <id>T1562.001</id>
+    </mitre>
+    <group>defense_evasion,defender_tamper,</group>
+  </rule>
+
+  <!-- Ransomware Canary File Rule -->
+  <rule id="100014" level="15">
+    <if_sid>60104</if_sid>
+    <field name="win.eventdata.targetFilename">\.locked$|\.encrypted$|HOW_TO_DECRYPT</field>
+    <description>SOC-ALERT: Mass file encryption in canary directory detected [MITRE T1486]</description>
+    <mitre>
+      <id>T1486</id>
+    </mitre>
+    <group>impact,ransomware,</group>
   </rule>
 </group>

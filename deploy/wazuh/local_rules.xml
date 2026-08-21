@@ -35,4 +35,26 @@
     <group>persistence,scheduled_task,</group>
   </rule>
 
+  <!-- Rule 100013: T1562.001 Impair Defenses (Windows Defender Tamper) -->
+  <rule id="100013" level="14">
+    <if_sid>60103</if_sid>
+    <field name="win.eventdata.commandLine">Set-MpPreference.*DisableRealtimeMonitoring</field>
+    <description>SOC-ALERT: Defense Evasion - Windows Defender real-time protection disabled [MITRE T1562.001]</description>
+    <mitre>
+      <id>T1562.001</id>
+    </mitre>
+    <group>defense_evasion,defender_tamper,</group>
+  </rule>
+
+  <!-- Rule 100014: T1486 Data Encrypted for Impact (Ransomware Canary) -->
+  <rule id="100014" level="15">
+    <if_sid>60104</if_sid>
+    <field name="win.eventdata.targetFilename">\.locked$|\.encrypted$|HOW_TO_DECRYPT</field>
+    <description>SOC-ALERT: Ransomware canary file encrypted in finance segment [MITRE T1486]</description>
+    <mitre>
+      <id>T1486</id>
+    </mitre>
+    <group>impact,ransomware,</group>
+  </rule>
+
 </group>

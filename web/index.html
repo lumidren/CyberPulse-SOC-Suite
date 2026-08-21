@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AegisSOC - Automated SIEM & SOAR Operations Center</title>
+    <title>CyberPulse SOC - Automated Detection Engineering & SOAR Operations</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
     <div class="soc-container">
@@ -24,7 +26,7 @@
             <div class="metrics-header">
                 <div class="metric-badge">
                     <span class="label">SIEM STATUS</span>
-                    <span class="value status-online">● ACTIVE</span>
+                    <span class="value status-online">● ACTIVE (WAZUH)</span>
                 </div>
                 <div class="metric-badge">
                     <span class="label">SOAR ENGINE</span>
@@ -41,6 +43,15 @@
             </div>
         </header>
 
+        <!-- Webhook Integration Bar -->
+        <section class="webhook-bar">
+            <span class="webhook-icon">🔔</span>
+            <span class="webhook-label">LIVE WEBHOOK ALERTS:</span>
+            <input type="text" id="webhook-input" class="webhook-input" placeholder="Paste optional Discord or Slack Webhook URL for instant phone alerts...">
+            <button class="btn btn-sm btn-primary" onclick="saveWebhookUrl()">Set Webhook</button>
+            <span id="webhook-status" class="webhook-status-text">Local Mode (Offline)</span>
+        </section>
+
         <!-- Main Dashboard Content -->
         <main class="dashboard-grid">
             <!-- Left Column: Controls & MITRE ATT&CK Matrix -->
@@ -48,9 +59,9 @@
                 <!-- Attack Simulation Launcher -->
                 <div class="card control-card">
                     <div class="card-header">
-                        <h2>⚡ ATTACK SIMULATOR (ADVERSARY EMULATION)</h2>
+                        <h2>⚡ ADVERSARY EMULATION (MITRE ATT&CK)</h2>
                     </div>
-                    <p class="card-desc">Trigger simulated MITRE ATT&CK adversary tactics to test real-time detection & automated SOAR playbooks.</p>
+                    <p class="card-desc">Trigger real-time adversary tactics to test custom Sigma detection rules, sub-second threat intel enrichment, and automated SOAR playbooks.</p>
                     <div class="attack-buttons">
                         <button class="btn btn-attack" onclick="triggerAttack('t1003')">
                             <span class="btn-icon">🔓</span> T1003.001 LSASS Dump
@@ -62,7 +73,13 @@
                             <span class="btn-icon">📌</span> T1053.005 Scheduled Task
                         </button>
                         <button class="btn btn-attack" onclick="triggerAttack('t1059')">
-                            <span class="btn-icon">💻</span> T1059.001 Encoded PowerShell
+                            <span class="btn-icon">💻</span> T1059.001 Encoded PS
+                        </button>
+                        <button class="btn btn-attack" onclick="triggerAttack('t1562')">
+                            <span class="btn-icon">🛡️</span> T1562.001 Defender Tamper
+                        </button>
+                        <button class="btn btn-attack" onclick="triggerAttack('t1486')">
+                            <span class="btn-icon">☣️</span> T1486 Ransomware Canary
                         </button>
                     </div>
                     <button class="btn btn-primary btn-full" onclick="triggerAttack('random')">
@@ -97,8 +114,20 @@
                         <div class="mitre-cell" id="mitre-t1059">
                             <span class="tactic">EXECUTION</span>
                             <span class="tech-id">T1059.001</span>
-                            <span class="tech-name">PowerShell Scripting</span>
+                            <span class="tech-name">PowerShell Script</span>
                             <span class="hits-badge" id="hits-t1059">0 Hits</span>
+                        </div>
+                        <div class="mitre-cell" id="mitre-t1562">
+                            <span class="tactic">DEFENSE EVASION</span>
+                            <span class="tech-id">T1562.001</span>
+                            <span class="tech-name">Defender Tamper</span>
+                            <span class="hits-badge" id="hits-t1562">0 Hits</span>
+                        </div>
+                        <div class="mitre-cell" id="mitre-t1486">
+                            <span class="tactic">IMPACT</span>
+                            <span class="tech-id">T1486</span>
+                            <span class="tech-name">Ransomware Canary</span>
+                            <span class="hits-badge" id="hits-t1486">0 Hits</span>
                         </div>
                     </div>
                 </div>
@@ -106,16 +135,25 @@
                 <!-- Threat Intelligence Enrichment Box -->
                 <div class="card intel-card">
                     <div class="card-header">
-                        <h2>🌐 THREAT INTEL REPUTATION ENGINE</h2>
+                        <h2>🌐 THREAT INTEL & PIPELINE LATENCY</h2>
                     </div>
                     <div id="intel-details-container" class="intel-content">
-                        <p class="placeholder-text">Select an alert from the stream to view VirusTotal & AbuseIPDB threat intelligence enrichment details.</p>
+                        <p class="placeholder-text">Select an alert from the stream to view VirusTotal, AbuseIPDB, GeoIP and sub-second pipeline latency metrics.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Right Column: Live SIEM Feed & SOAR Log -->
+            <!-- Right Column: Live Cyber Threat Map, SIEM Feed & SOAR Log -->
             <section class="panel-right">
+                <!-- Global Cyber Attack Threat Map -->
+                <div class="card map-card">
+                    <div class="card-header">
+                        <h2>🌍 GLOBAL CYBER ATTACK THREAT MAP (LIVE GEO-IP VECTOR)</h2>
+                        <span class="status-online" style="font-size: 0.75rem;">● LIVE TELEMETRY STREAM</span>
+                    </div>
+                    <div id="cyber-map" class="map-container"></div>
+                </div>
+
                 <!-- Live SIEM Alerts Table -->
                 <div class="card alerts-card">
                     <div class="card-header">
@@ -150,7 +188,7 @@
                         <h2>🤖 SOAR AUTOMATED CONTAINMENT AUDIT LOG</h2>
                     </div>
                     <div class="terminal-box" id="soar-terminal">
-                        <div class="term-line"><span class="term-time">[SYSTEM]</span> SOAR Engine v2.4 initialized. Monitoring detection queue for automated playbooks...</div>
+                        <div class="term-line"><span class="term-time">[SYSTEM]</span> CyberPulse SOAR v2.4 initialized. Connected to Wazuh Manager & WinRM controller...</div>
                     </div>
                 </div>
             </section>

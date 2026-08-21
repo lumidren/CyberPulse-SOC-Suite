@@ -1,7 +1,7 @@
 :root {
     --bg-dark: #0B0E14;
-    --card-bg: rgba(18, 24, 38, 0.75);
-    --card-border: rgba(38, 50, 77, 0.6);
+    --card-bg: rgba(18, 24, 38, 0.85);
+    --card-border: rgba(38, 50, 77, 0.7);
     --primary-blue: #0088FF;
     --accent-cyan: #00E5FF;
     --alert-critical: #FF2A55;
@@ -26,15 +26,15 @@ body {
     color: var(--text-main);
     font-family: 'Inter', sans-serif;
     min-height: 100vh;
-    padding: 1.5rem;
+    padding: 1.25rem;
 }
 
 .soc-container {
-    max-width: 1600px;
+    max-width: 1650px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 /* Header */
@@ -46,7 +46,7 @@ body {
     border: 1px solid var(--card-border);
     backdrop-filter: blur(12px);
     border-radius: 12px;
-    padding: 1rem 1.5rem;
+    padding: 0.85rem 1.5rem;
 }
 
 .logo-area {
@@ -56,12 +56,12 @@ body {
 }
 
 .cyber-shield-icon {
-    font-size: 2.2rem;
+    font-size: 2rem;
     filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5));
 }
 
 .logo-area h1 {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     letter-spacing: 2px;
     font-weight: 700;
 }
@@ -71,28 +71,28 @@ body {
 }
 
 .subtitle {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: var(--text-muted);
     letter-spacing: 1px;
 }
 
 .metrics-header {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .metric-badge {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    background: rgba(10, 15, 26, 0.6);
-    padding: 0.5rem 1rem;
+    background: rgba(10, 15, 26, 0.7);
+    padding: 0.4rem 0.85rem;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .metric-badge .label {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     color: var(--text-muted);
     letter-spacing: 1px;
 }
@@ -100,7 +100,7 @@ body {
 .metric-badge .value {
     font-family: var(--font-mono);
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .status-online {
@@ -113,17 +113,63 @@ body {
     text-shadow: 0 0 8px rgba(255, 42, 85, 0.4);
 }
 
+/* Webhook Bar */
+.webhook-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(10, 15, 26, 0.8);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+}
+
+.webhook-icon {
+    font-size: 1rem;
+}
+
+.webhook-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    white-space: nowrap;
+}
+
+.webhook-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    outline: none;
+}
+
+.webhook-input:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+.webhook-status-text {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
 /* Dashboard Grid Layout */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 420px 1fr;
-    gap: 1.5rem;
+    grid-template-columns: 440px 1fr;
+    gap: 1.25rem;
 }
 
 .panel-left, .panel-right {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 /* Card General Styling */
@@ -132,10 +178,10 @@ body {
     border: 1px solid var(--card-border);
     backdrop-filter: blur(12px);
     border-radius: 12px;
-    padding: 1.25rem;
+    padding: 1.1rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.85rem;
 }
 
 .card-header {
@@ -143,18 +189,18 @@ body {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 0.75rem;
+    padding-bottom: 0.6rem;
 }
 
 .card-header h2 {
-    font-size: 0.95rem;
+    font-size: 0.88rem;
     letter-spacing: 1px;
     color: var(--accent-cyan);
     font-weight: 600;
 }
 
 .card-desc {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     color: var(--text-muted);
     line-height: 1.4;
 }
@@ -163,7 +209,7 @@ body {
 .attack-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
+    gap: 0.6rem;
 }
 
 .btn {
@@ -171,15 +217,15 @@ body {
     outline: none;
     cursor: pointer;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     font-weight: 600;
-    padding: 0.75rem 1rem;
+    padding: 0.65rem 0.85rem;
     border-radius: 8px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .btn-attack {
@@ -212,8 +258,8 @@ body {
 }
 
 .btn-sm {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.72rem;
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-muted);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -228,46 +274,46 @@ body {
 .mitre-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
+    gap: 0.6rem;
 }
 
 .mitre-cell {
     background: rgba(10, 15, 26, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 8px;
-    padding: 0.75rem;
+    padding: 0.65rem;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.2rem;
     transition: all 0.3s ease;
 }
 
 .mitre-cell .tactic {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     color: var(--text-muted);
     letter-spacing: 0.5px;
 }
 
 .mitre-cell .tech-id {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: var(--primary-blue);
     font-weight: 700;
 }
 
 .mitre-cell .tech-name {
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     font-weight: 600;
 }
 
 .mitre-cell .hits-badge {
     align-self: flex-start;
     font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     background: rgba(255, 255, 255, 0.08);
-    padding: 0.2rem 0.5rem;
+    padding: 0.15rem 0.45rem;
     border-radius: 4px;
-    margin-top: 0.4rem;
+    margin-top: 0.3rem;
 }
 
 .mitre-cell.active-hit {
@@ -281,17 +327,54 @@ body {
     color: #FFF;
 }
 
+/* Map Card */
+.map-card {
+    padding: 0.85rem;
+}
+
+.map-container {
+    height: 240px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 229, 255, 0.25);
+    background: #0B0E14;
+}
+
+/* Leaflet Custom Styling for Cyber Theme */
+.leaflet-container {
+    background: #0B0E14 !important;
+}
+
+.pulsing-marker {
+    background: rgba(255, 42, 85, 0.9);
+    border-radius: 50%;
+    box-shadow: 0 0 12px #FF2A55, 0 0 24px #FF2A55;
+    animation: pulse 1.5s infinite;
+}
+
+.dc-marker {
+    background: rgba(0, 229, 255, 0.9);
+    border-radius: 50%;
+    box-shadow: 0 0 12px #00E5FF, 0 0 24px #00E5FF;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.9); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.7; }
+    100% { transform: scale(0.9); opacity: 1; }
+}
+
 /* Intel Card Content */
 .intel-content {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     line-height: 1.5;
 }
 
 .intel-box {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    background: rgba(10, 15, 26, 0.6);
+    gap: 0.45rem;
+    background: rgba(10, 15, 26, 0.7);
     padding: 0.85rem;
     border-radius: 8px;
     border-left: 3px solid var(--accent-cyan);
@@ -313,27 +396,27 @@ body {
 
 /* SIEM Alerts Table */
 .alerts-card {
-    min-height: 380px;
+    min-height: 280px;
 }
 
 .table-responsive {
     overflow-x: auto;
-    max-height: 360px;
+    max-height: 260px;
     overflow-y: auto;
 }
 
 .alerts-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     text-align: left;
 }
 
 .alerts-table th {
-    background: rgba(10, 15, 26, 0.9);
+    background: rgba(10, 15, 26, 0.95);
     color: var(--text-muted);
-    padding: 0.75rem 1rem;
-    font-size: 0.7rem;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.68rem;
     letter-spacing: 1px;
     font-weight: 600;
     position: sticky;
@@ -342,7 +425,7 @@ body {
 }
 
 .alerts-table td {
-    padding: 0.75rem 1rem;
+    padding: 0.65rem 0.85rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
@@ -359,10 +442,10 @@ body {
     background: rgba(255, 42, 85, 0.2);
     color: var(--alert-critical);
     border: 1px solid var(--alert-critical);
-    padding: 0.25rem 0.5rem;
+    padding: 0.2rem 0.45rem;
     border-radius: 4px;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
 }
 
@@ -370,39 +453,39 @@ body {
     background: rgba(255, 159, 0, 0.2);
     color: var(--alert-high);
     border: 1px solid var(--alert-high);
-    padding: 0.25rem 0.5rem;
+    padding: 0.2rem 0.45rem;
     border-radius: 4px;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
 }
 
 .status-contained {
     color: var(--status-green);
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
 }
 
 /* SOAR Log Terminal */
 .soar-log-card {
-    height: 240px;
+    height: 200px;
 }
 
 .terminal-box {
     background: #05070B;
     border: 1px solid rgba(0, 229, 255, 0.2);
     border-radius: 8px;
-    padding: 1rem;
+    padding: 0.85rem;
     font-family: var(--font-mono);
-    font-size: 0.78rem;
-    line-height: 1.6;
+    font-size: 0.75rem;
+    line-height: 1.5;
     color: #33FF00;
-    height: 160px;
+    height: 135px;
     overflow-y: auto;
 }
 
 .term-line {
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.25rem;
 }
 
 .term-time {

@@ -1,0 +1,29 @@
+title: Windows Defender Real-Time Protection Disabled via PowerShell
+id: c382910a-814d-4b92-962a-8921df0102aa
+status: production
+description: Detects attempts to impair host defenses by disabling Windows Defender real-time monitoring and script scanning via Set-MpPreference or registry modification.
+references:
+    - https://attack.mitre.org/techniques/T1562/001/
+author: CyberPulse SOC Suite
+date: 2026/08/21
+tags:
+    - attack.defense_evasion
+    - attack.t1562.001
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\pwsh.exe'
+        CommandLine|contains:
+            - 'Set-MpPreference'
+            - '-DisableRealtimeMonitoring'
+            - '-DisableBehaviorMonitoring'
+            - '-DisableIOAVProtection'
+            - '-DisableScriptScanning'
+    condition: selection
+falsepositives:
+    - Rare administrative maintenance scripts during isolated software deployment.
+level: critical
