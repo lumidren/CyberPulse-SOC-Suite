@@ -3,198 +3,417 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberPulse SOC - Automated Detection Engineering & SOAR Operations</title>
+    <title>CyberPulse SOC Suite | Enterprise Operations Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS for Dark Threat Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
-    <div class="soc-container">
-        <!-- Top Navigation Header -->
-        <header class="soc-header">
-            <div class="logo-area">
-                <div class="cyber-shield-icon">🛡️</div>
-                <div>
-                    <h1>CYBER<span class="highlight">PULSE</span> SOC</h1>
-                    <p class="subtitle">AUTOMATED SIEM & SOAR RESPONSE LAB</p>
+    <!-- Top Header -->
+    <header class="soc-header">
+        <div class="header-left">
+            <div class="logo-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <h1>CYBERPULSE <span class="badge-tag">ENTERPRISE SOC v2.4</span></h1>
+                <p class="subtitle">Closed-Loop Detection Engineering, DFIR & Resilient SOAR Platform</p>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <!-- Navigation Tabs -->
+            <nav class="nav-tabs">
+                <button class="nav-btn active" onclick="switchTab('tab-overview')"><i class="fa-solid fa-chart-line"></i> SOC Overview</button>
+                <button class="nav-btn" onclick="switchTab('tab-incident')"><i class="fa-solid fa-timeline"></i> Incident DFIR</button>
+                <button class="nav-btn" onclick="switchTab('tab-detections')"><i class="fa-solid fa-book-skull"></i> Detection Catalogue</button>
+                <button class="nav-btn" onclick="switchTab('tab-soar')"><i class="fa-solid fa-robot"></i> SOAR Policies</button>
+                <button class="nav-btn" onclick="switchTab('tab-purple')"><i class="fa-solid fa-flag"></i> Purple Team Replay</button>
+                <button class="nav-btn" onclick="switchTab('tab-health')"><i class="fa-solid fa-heart-pulse"></i> System Health</button>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <div class="policy-mode-selector">
+                <label><i class="fa-solid fa-sliders"></i> Mode:</label>
+                <select id="policyModeSelect" onchange="updatePolicyMode()">
+                    <option value="AUTOMATIC" selected>🟢 AUTOMATIC (Active SOAR)</option>
+                    <option value="APPROVAL_REQUIRED">🟡 APPROVAL REQUIRED</option>
+                    <option value="DRY_RUN">🔵 DRY-RUN (Simulation)</option>
+                </select>
+            </div>
+            <div class="soc-live-status">
+                <span class="live-dot"></span>
+                <span>PIPELINE ARMED</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Webhook & Notification Bar -->
+    <div class="webhook-bar">
+        <div class="webhook-bar-content">
+            <i class="fa-solid fa-bell"></i>
+            <span class="webhook-label">Live Incident Broadcasts:</span>
+            <input type="text" id="webhookInput" placeholder="Paste Discord or Slack Webhook URL for instant mobile alerts..." />
+            <button class="btn-webhook" onclick="saveWebhook()"><i class="fa-solid fa-plug"></i> Connect</button>
+            <span id="webhookStatusBadge" class="webhook-badge standby">STANDBY</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- ========================================================================= -->
+        <!-- TAB 1: SOC OVERVIEW & THREAT MAP -->
+        <!-- ========================================================================= -->
+        <div id="tab-overview" class="tab-content active">
+            <!-- Metrics KPI Grid -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon icon-blue"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-title">MTTD (Detection)</span>
+                        <h2 id="kpiMttd">1.40s</h2>
+                        <span class="kpi-sub">Sysmon to Wazuh</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon icon-green"><i class="fa-solid fa-shield-virus"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-title">MTTC (Containment)</span>
+                        <h2 id="kpiMttc">1.15s</h2>
+                        <span class="kpi-sub">WinRM / pfSense API</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon icon-orange"><i class="fa-solid fa-stopwatch"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-title">Total MTTP (p95)</span>
+                        <h2 id="kpiP95">3.28s</h2>
+                        <span class="kpi-sub">Manual Baseline: 20m</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon icon-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="kpi-info">
+                        <span class="kpi-title">Total Incidents</span>
+                        <h2 id="kpiIncidents">0</h2>
+                        <span class="kpi-sub">Closed-Loop Contained</span>
+                    </div>
                 </div>
             </div>
-            
-            <div class="metrics-header">
-                <div class="metric-badge">
-                    <span class="label">SIEM STATUS</span>
-                    <span class="value status-online">● ACTIVE (WAZUH)</span>
-                </div>
-                <div class="metric-badge">
-                    <span class="label">SOAR ENGINE</span>
-                    <span class="value status-online">● AUTO-CONTAIN</span>
-                </div>
-                <div class="metric-badge">
-                    <span class="label">TOTAL ALERTS</span>
-                    <span class="value" id="total-alerts-count">0</span>
-                </div>
-                <div class="metric-badge">
-                    <span class="label">CRITICAL THREATS</span>
-                    <span class="value text-critical" id="critical-alerts-count">0</span>
-                </div>
-            </div>
-        </header>
 
-        <!-- Webhook Integration Bar -->
-        <section class="webhook-bar">
-            <span class="webhook-icon">🔔</span>
-            <span class="webhook-label">LIVE WEBHOOK ALERTS:</span>
-            <input type="text" id="webhook-input" class="webhook-input" placeholder="Paste optional Discord or Slack Webhook URL for instant phone alerts...">
-            <button class="btn btn-sm btn-primary" onclick="saveWebhookUrl()">Set Webhook</button>
-            <span id="webhook-status" class="webhook-status-text">Local Mode (Offline)</span>
-        </section>
-
-        <!-- Main Dashboard Content -->
-        <main class="dashboard-grid">
-            <!-- Left Column: Controls & MITRE ATT&CK Matrix -->
-            <section class="panel-left">
-                <!-- Attack Simulation Launcher -->
-                <div class="card control-card">
-                    <div class="card-header">
-                        <h2>⚡ ADVERSARY EMULATION (MITRE ATT&CK)</h2>
-                    </div>
-                    <p class="card-desc">Trigger real-time adversary tactics to test custom Sigma detection rules, sub-second threat intel enrichment, and automated SOAR playbooks.</p>
-                    <div class="attack-buttons">
-                        <button class="btn btn-attack" onclick="triggerAttack('t1003')">
-                            <span class="btn-icon">🔓</span> T1003.001 LSASS Dump
-                        </button>
-                        <button class="btn btn-attack" onclick="triggerAttack('t1110')">
-                            <span class="btn-icon">🔨</span> T1110.001 RDP Brute Force
-                        </button>
-                        <button class="btn btn-attack" onclick="triggerAttack('t1053')">
-                            <span class="btn-icon">📌</span> T1053.005 Scheduled Task
-                        </button>
-                        <button class="btn btn-attack" onclick="triggerAttack('t1059')">
-                            <span class="btn-icon">💻</span> T1059.001 Encoded PS
-                        </button>
-                        <button class="btn btn-attack" onclick="triggerAttack('t1562')">
-                            <span class="btn-icon">🛡️</span> T1562.001 Defender Tamper
-                        </button>
-                        <button class="btn btn-attack" onclick="triggerAttack('t1486')">
-                            <span class="btn-icon">☣️</span> T1486 Ransomware Canary
-                        </button>
-                    </div>
-                    <button class="btn btn-primary btn-full" onclick="triggerAttack('random')">
-                        🚀 RUN AUTOMATED ATTACK STREAM
-                    </button>
-                </div>
-
-                <!-- MITRE ATT&CK Heatmap -->
-                <div class="card matrix-card">
-                    <div class="card-header">
-                        <h2>🎯 MITRE ATT&CK COVERAGE MATRIX</h2>
-                    </div>
-                    <div class="mitre-grid">
-                        <div class="mitre-cell" id="mitre-t1003">
-                            <span class="tactic">CREDENTIAL ACCESS</span>
-                            <span class="tech-id">T1003.001</span>
-                            <span class="tech-name">LSASS Memory Dump</span>
-                            <span class="hits-badge" id="hits-t1003">0 Hits</span>
-                        </div>
-                        <div class="mitre-cell" id="mitre-t1110">
-                            <span class="tactic">CREDENTIAL ACCESS</span>
-                            <span class="tech-id">T1110.001</span>
-                            <span class="tech-name">Password Brute Force</span>
-                            <span class="hits-badge" id="hits-t1110">0 Hits</span>
-                        </div>
-                        <div class="mitre-cell" id="mitre-t1053">
-                            <span class="tactic">PERSISTENCE</span>
-                            <span class="tech-id">T1053.005</span>
-                            <span class="tech-name">Scheduled Task</span>
-                            <span class="hits-badge" id="hits-t1053">0 Hits</span>
-                        </div>
-                        <div class="mitre-cell" id="mitre-t1059">
-                            <span class="tactic">EXECUTION</span>
-                            <span class="tech-id">T1059.001</span>
-                            <span class="tech-name">PowerShell Script</span>
-                            <span class="hits-badge" id="hits-t1059">0 Hits</span>
-                        </div>
-                        <div class="mitre-cell" id="mitre-t1562">
-                            <span class="tactic">DEFENSE EVASION</span>
-                            <span class="tech-id">T1562.001</span>
-                            <span class="tech-name">Defender Tamper</span>
-                            <span class="hits-badge" id="hits-t1562">0 Hits</span>
-                        </div>
-                        <div class="mitre-cell" id="mitre-t1486">
-                            <span class="tactic">IMPACT</span>
-                            <span class="tech-id">T1486</span>
-                            <span class="tech-name">Ransomware Canary</span>
-                            <span class="hits-badge" id="hits-t1486">0 Hits</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Threat Intelligence Enrichment Box -->
-                <div class="card intel-card">
-                    <div class="card-header">
-                        <h2>🌐 THREAT INTEL & PIPELINE LATENCY</h2>
-                    </div>
-                    <div id="intel-details-container" class="intel-content">
-                        <p class="placeholder-text">Select an alert from the stream to view VirusTotal, AbuseIPDB, GeoIP and sub-second pipeline latency metrics.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Right Column: Live Cyber Threat Map, SIEM Feed & SOAR Log -->
-            <section class="panel-right">
-                <!-- Global Cyber Attack Threat Map -->
+            <!-- Threat Map & Attack Controls -->
+            <div class="map-and-controls-grid">
                 <div class="card map-card">
                     <div class="card-header">
-                        <h2>🌍 GLOBAL CYBER ATTACK THREAT MAP (LIVE GEO-IP VECTOR)</h2>
-                        <span class="status-online" style="font-size: 0.75rem;">● LIVE TELEMETRY STREAM</span>
+                        <h3><i class="fa-solid fa-earth-americas"></i> Live GeoIP Cyber Attack Threat Map</h3>
+                        <span class="badge-blue">Real-Time Ingestion Vectors</span>
                     </div>
-                    <div id="cyber-map" class="map-container"></div>
+                    <div id="cyber-threat-map"></div>
                 </div>
 
-                <!-- Live SIEM Alerts Table -->
-                <div class="card alerts-card">
+                <div class="card controls-card">
                     <div class="card-header">
-                        <h2>🚨 REAL-TIME SIEM DETECTIONS</h2>
-                        <button class="btn btn-sm" onclick="clearAlerts()">Clear Stream</button>
+                        <h3><i class="fa-solid fa-crosshairs"></i> Adversary Emulation Launcher</h3>
+                        <span class="badge-red">Deterministic Triggers</span>
                     </div>
+                    <p class="section-desc">Trigger controlled ATT&CK adversary tactics to execute the closed-loop pipeline:</p>
+
+                    <div class="attack-btn-grid">
+                        <button class="attack-btn" onclick="triggerSimulation('t1003')">
+                            <i class="fa-solid fa-key"></i>
+                            <div><strong>T1003.001: LSASS Memory Dump</strong><br><small>Sysmon 10 -> WinRM Host Isolate</small></div>
+                        </button>
+                        <button class="attack-btn" onclick="triggerSimulation('t1110')">
+                            <i class="fa-solid fa-network-wired"></i>
+                            <div><strong>T1110.001: RDP Password Spray</strong><br><small>Security 4625 -> pfSense Drop</small></div>
+                        </button>
+                        <button class="attack-btn" onclick="triggerSimulation('t1562')">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <div><strong>T1562.001: Defender Tamper</strong><br><small>PowerShell -> Policy Reversion</small></div>
+                        </button>
+                        <button class="attack-btn" onclick="triggerSimulation('t1486')">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                            <div><strong>T1486: Ransomware Canary</strong><br><small>Sysmon 11 -> VSS Recovery</small></div>
+                        </button>
+                        <button class="attack-btn" onclick="triggerSimulation('t1053')">
+                            <i class="fa-solid fa-clock"></i>
+                            <div><strong>T1053.005: Task Persistence</strong><br><small>Security 4698 -> Task Purge</small></div>
+                        </button>
+                        <button class="attack-btn" onclick="triggerSimulation('t1059')">
+                            <i class="fa-solid fa-terminal"></i>
+                            <div><strong>T1059.001: Obfuscated PowerShell</strong><br><small>Sysmon 1 -> Account Lockout</small></div>
+                        </button>
+                    </div>
+
+                    <div class="quick-actions">
+                        <button class="btn-primary" onclick="triggerSimulation('random')"><i class="fa-solid fa-shuffle"></i> Random Adversary Simulation</button>
+                        <button class="btn-purple" onclick="runPurpleScenario('APT29_COZY_BEAR')"><i class="fa-solid fa-play"></i> Run APT29 Kill Chain</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Incident Stream -->
+            <div class="card incident-stream-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-list-check"></i> Live Incident & SOAR Response Log</h3>
+                    <span class="badge-green">Closed-Loop Telemetry Stream</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="incidentTable">
+                        <thead>
+                            <tr>
+                                <th>Incident ID</th>
+                                <th>Timestamp (UTC)</th>
+                                <th>Target Asset</th>
+                                <th>Threat Origin</th>
+                                <th>Fired Rule & MITRE ID</th>
+                                <th>Risk Score</th>
+                                <th>Containment Action</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidentTableBody">
+                            <tr>
+                                <td colspan="9" class="empty-state">No incidents recorded yet. Launch an attack above to observe the pipeline!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 2: INCIDENT DFIR & TIMELINE INVESTIGATION -->
+        <!-- ========================================================================= -->
+        <div id="tab-incident" class="tab-content">
+            <div class="incident-triage-header">
+                <div class="selector-group">
+                    <label><i class="fa-solid fa-magnifying-glass"></i> Select Incident to Investigate:</label>
+                    <select id="incidentSelect" onchange="loadIncidentDetails()">
+                        <option value="">No incidents available</option>
+                    </select>
+                </div>
+                <div id="incidentActionsBar" class="incident-actions">
+                    <button class="btn-danger" id="rollbackBtn" onclick="rollbackActiveIncident()"><i class="fa-solid fa-rotate-left"></i> Rollback Containment</button>
+                </div>
+            </div>
+
+            <div id="incidentDetailView" class="incident-layout">
+                <!-- Left: Triage Dossier -->
+                <div class="incident-left">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 id="dossierTitle"><i class="fa-solid fa-folder-open"></i> Incident Dossier</h3>
+                            <span id="dossierSeverityBadge" class="badge-red">CRITICAL</span>
+                        </div>
+                        <div class="dossier-grid">
+                            <div class="dossier-item"><span>Incident ID:</span> <strong id="dosIncId">-</strong></div>
+                            <div class="dossier-item"><span>Correlation ID:</span> <strong id="dosCorrId">-</strong></div>
+                            <div class="dossier-item"><span>Target Asset:</span> <strong id="dosHost">-</strong></div>
+                            <div class="dossier-item"><span>Target User:</span> <strong id="dosUser">-</strong></div>
+                            <div class="dossier-item"><span>Threat Origin:</span> <strong id="dosOrigin">-</strong></div>
+                            <div class="dossier-item"><span>MITRE Technique:</span> <strong id="dosMitre">-</strong></div>
+                        </div>
+
+                        <div class="risk-breakdown-box">
+                            <h4><i class="fa-solid fa-chart-pie"></i> Multi-Factor Risk Assessment</h4>
+                            <div class="risk-meter-container">
+                                <div class="risk-meter-bar" id="riskMeterBar" style="width: 85%;"></div>
+                            </div>
+                            <div class="risk-score-text">Composite Risk Score: <strong id="riskScoreVal">85.0 / 100</strong> (<span id="riskLevelVal">CRITICAL</span>)</div>
+                            <div class="factors-grid" id="factorsGrid"></div>
+                        </div>
+
+                        <div class="observables-box">
+                            <h4><i class="fa-solid fa-fingerprint"></i> Extracted Observables & IoCs</h4>
+                            <div id="observablesList" class="observables-pills"></div>
+                        </div>
+
+                        <div class="thehive-box">
+                            <h4><i class="fa-solid fa-box-archive"></i> TheHive 5 Case Dossier</h4>
+                            <p id="thehiveTitle">-</p>
+                            <div class="thehive-tasks" id="thehiveTasks"></div>
+                        </div>
+                    </div>
+
+                    <!-- Analyst Notes -->
+                    <div class="card notes-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-comment-dots"></i> SOC Analyst Triage Notes</h3>
+                        </div>
+                        <div class="notes-history" id="notesHistory"></div>
+                        <div class="notes-input-group">
+                            <input type="text" id="newNoteInput" placeholder="Add verified investigative finding..." />
+                            <button class="btn-primary" onclick="addAnalystNote()"><i class="fa-solid fa-plus"></i> Post Note</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Microsecond Chronological Timeline -->
+                <div class="incident-right">
+                    <div class="card timeline-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-timeline"></i> Microsecond Incident Chronology</h3>
+                            <span class="badge-blue">Closed-Loop Execution Audit</span>
+                        </div>
+                        <div class="timeline-container" id="timelineContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 3: DETECTION ENGINEERING CATALOGUE -->
+        <!-- ========================================================================= -->
+        <div id="tab-detections" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-book-skull"></i> Detection Engineering Rulebase & DELC Artifacts</h3>
+                    <span class="badge-blue">SANS / MITRE Lifecycle Aligned</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Rule ID</th>
+                                <th>Detection Title</th>
+                                <th>MITRE ATT&CK</th>
+                                <th>Severity</th>
+                                <th>Data Source</th>
+                                <th>Sigma YAML Rule</th>
+                                <th>Wazuh Rule ID</th>
+                                <th>Automated Containment Action</th>
+                                <th>Lifecycle & Gaps</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detectionCatalogueBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 4: SOAR POLICIES & ROLLBACKS -->
+        <!-- ========================================================================= -->
+        <div id="tab-soar" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-robot"></i> SOAR Policy Execution Matrix</h3>
+                    <span class="badge-green">Policy-Driven Automation</span>
+                </div>
+                <p class="section-desc">CyberPulse evaluates multi-factor risk scores against configurable enterprise containment policies:</p>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Risk Tier</th>
+                                <th>Score Range</th>
+                                <th>Policy Playbook Action</th>
+                                <th>Disruption Level</th>
+                                <th>Containment Protocol</th>
+                                <th>Rollback Capability</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge-red">CRITICAL</span></td>
+                                <td><strong>85.0 – 100.0</strong></td>
+                                <td>Immediate Emergency Host Isolation & PID Kill</td>
+                                <td>High (Network Disruption)</td>
+                                <td>WinRM over TLS (Port 5986) WFP Rule</td>
+                                <td><span class="badge-green">100% Automated</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge-orange">HIGH</span></td>
+                                <td><strong>70.0 – 84.9</strong></td>
+                                <td>Perimeter IP Drop / Scheduled Task De-register</td>
+                                <td>Medium (External Gateway)</td>
+                                <td>pfSense REST API / iptables</td>
+                                <td><span class="badge-green">100% Automated</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge-yellow">MEDIUM</span></td>
+                                <td><strong>40.0 – 69.9</strong></td>
+                                <td>Threat Intel Enrichment & Tier-1 SOC Alert</td>
+                                <td>Zero (Passive)</td>
+                                <td>Discord / Slack Rich Embeds</td>
+                                <td>N/A</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge-blue">LOW</span></td>
+                                <td><strong>0.0 – 39.9</strong></td>
+                                <td>SIEM Baseline Indexing & Background Monitoring</td>
+                                <td>Zero (Passive)</td>
+                                <td>OpenSearch / Elasticsearch Ingest</td>
+                                <td>N/A</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 5: PURPLE TEAM & ATTACK REPLAY -->
+        <!-- ========================================================================= -->
+        <div id="tab-purple" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-flag"></i> Purple Team Attack Replay & Validation Engine</h3>
+                    <span class="badge-purple">Offensive vs Defensive Validation</span>
+                </div>
+                <p class="section-desc">Execute multi-stage adversary campaigns and validate sensor detection and automated containment across every stage:</p>
+
+                <div class="purple-launcher-bar">
+                    <button class="btn-purple" onclick="runPurpleScenario('APT29_COZY_BEAR')"><i class="fa-solid fa-play"></i> Run APT29 Cozy Bear Intrusion Campaign</button>
+                    <button class="btn-primary" onclick="runPurpleScenario('LOCKBIT_RANSOMWARE')"><i class="fa-solid fa-play"></i> Run LockBit 3.0 Ransomware Lifecycle</button>
+                </div>
+
+                <div id="purpleResultsView" style="display:none; margin-top: 20px;">
+                    <div class="purple-summary-box" id="purpleSummaryBox"></div>
                     <div class="table-responsive">
-                        <table class="alerts-table">
+                        <table class="data-table" id="purpleTable">
                             <thead>
                                 <tr>
-                                    <th>TIME</th>
-                                    <th>SEVERITY</th>
-                                    <th>RULE NAME</th>
-                                    <th>TECHNIQUE</th>
-                                    <th>TARGET HOST</th>
-                                    <th>ATTACKER IP</th>
-                                    <th>STATUS</th>
+                                    <th>Stage #</th>
+                                    <th>Stage Name</th>
+                                    <th>Technique ID</th>
+                                    <th>Expected Sensor</th>
+                                    <th>Expected Rule</th>
+                                    <th>Matched Rule</th>
+                                    <th>Status</th>
+                                    <th>Risk Score</th>
+                                    <th>Containment</th>
+                                    <th>Latency</th>
                                 </tr>
                             </thead>
-                            <tbody id="alerts-tbody">
-                                <tr id="empty-row">
-                                    <td colspan="7" class="text-center placeholder-text">Waiting for attack telemetry... Click an attack button on the left to simulate a threat.</td>
-                                </tr>
-                            </tbody>
+                            <tbody id="purpleTableBody"></tbody>
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- SOAR Automated Remediation Log -->
-                <div class="card soar-log-card">
-                    <div class="card-header">
-                        <h2>🤖 SOAR AUTOMATED CONTAINMENT AUDIT LOG</h2>
-                    </div>
-                    <div class="terminal-box" id="soar-terminal">
-                        <div class="term-line"><span class="term-time">[SYSTEM]</span> CyberPulse SOAR v2.4 initialized. Connected to Wazuh Manager & WinRM controller...</div>
-                    </div>
+        <!-- ========================================================================= -->
+        <!-- TAB 6: SYSTEM HEALTH & INTEGRATION DIAGNOSTICS -->
+        <!-- ========================================================================= -->
+        <div id="tab-health" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-heart-pulse"></i> Real-Time Integration Health & Latency Monitor</h3>
+                    <button class="btn-secondary" onclick="loadHealthStatus()"><i class="fa-solid fa-rotate"></i> Refresh Diagnostics</button>
                 </div>
-            </section>
-        </main>
-    </div>
+                <p class="section-desc">Active socket probes, latency meters, and connection status for the entire cybersecurity toolchain:</p>
+                <div class="health-grid" id="healthGrid"></div>
+            </div>
+        </div>
+    </main>
 
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

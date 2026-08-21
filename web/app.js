@@ -1,394 +1,471 @@
-// CyberPulse SOC Web Operations Center Logic
+// ==============================================================================
+// CyberPulse SOC Suite: Enterprise Operations Console JavaScript Controller
+// Author: lumidren (https://github.com/lumidren/CyberPulse-SOC-Suite)
+// ==============================================================================
 
-let alertsData = [];
-let totalAlerts = 0;
-let criticalAlerts = 0;
-let mitreCounts = {
-    't1003': 0,
-    't1110': 0,
-    't1053': 0,
-    't1059': 0,
-    't1562': 0,
-    't1486': 0
-};
-let activeWebhookUrl = "";
-
-// Leaflet Cyber Map State
 let map;
 let datacenterMarker;
 let activeAttackLayers = [];
+let incidentsData = [];
+let activeIncidentId = null;
+let customWebhookUrl = "";
 
 const DATACENTER_COORDS = [40.7128, -74.0060]; // New York
 
-// Attack Data Presets (client-side fallback & API trigger)
-const ATTACK_PRESETS = {
-    't1003': {
-        technique_id: 'T1003.001',
-        rule_name: 'Possible LSASS Memory Dumping via Sysmon Event 10',
-        severity: 'CRITICAL',
-        computer_name: 'WIN-DC01.corp.local',
-        source_ip: '185.220.101.33',
-        action: 'ISOLATE_HOST_AND_KILL_PROCESS',
-        action_log: '[WinRM TLS 5986 -> WIN-DC01] Injected WFP emergency isolation filter. Terminated PID 4812 (mimikatz.exe).',
-        intel: {
-            ip: '185.220.101.33',
-            reputation: 'MALICIOUS',
-            abuse_score: '95/100',
-            vt_positives: '38 / 72 Security Vendors',
-            country: 'Russia (RU) 🇷🇺',
-            isp: 'BadHost Ltd / C2 Harvester',
-            lat: 55.7558,
-            lon: 37.6173
-        }
-    },
-    't1110': {
-        technique_id: 'T1110.001',
-        rule_name: 'High Volume Brute Force Authentication Spike',
-        severity: 'HIGH',
-        computer_name: 'CORP-RDP-GW01',
-        source_ip: '185.220.101.5',
-        action: 'BLOCK_SOURCE_IP_FIREWALL',
-        action_log: '[pfSense Gateway 10.0.0.1:8443] Injected packet drop rule: DROP INBOUND TCP/UDP from 185.220.101.5/32 on WAN.',
-        intel: {
-            ip: '185.220.101.5',
-            reputation: 'MALICIOUS',
-            abuse_score: '98/100',
-            vt_positives: '42 / 72 Security Vendors',
-            country: 'Germany (DE) 🇩🇪',
-            isp: 'Hostinger International / Scanner',
-            lat: 52.5200,
-            lon: 13.4050
-        }
-    },
-    't1053': {
-        technique_id: 'T1053.005',
-        rule_name: 'Suspicious Scheduled Task Creation for Persistence',
-        severity: 'HIGH',
-        computer_name: 'WIN-WORKSTATION09',
-        source_ip: '10.0.2.15',
-        action: 'REMOVE_SCHEDULED_TASK',
-        action_log: '[WinRM TLS 5986 -> WIN-WORKSTATION09] Unregistered malicious scheduled task \\SystemHealthUpdate via Unregister-ScheduledTask.',
-        intel: {
-            ip: '10.0.2.15 (Internal Host)',
-            reputation: 'INTERNAL COMPROMISED',
-            abuse_score: 'N/A (LAN)',
-            vt_positives: 'N/A',
-            country: 'Internal Domain 🏢',
-            isp: 'CORP.LOCAL Intranet',
-            lat: 40.7128,
-            lon: -74.0060
-        }
-    },
-    't1059': {
-        technique_id: 'T1059.001',
-        rule_name: 'Obfuscated PowerShell Execution Detected',
-        severity: 'HIGH',
-        computer_name: 'CORP-FINANCE-02',
-        source_ip: '10.0.4.88',
-        action: 'TERMINATE_PROCESS_TREE',
-        action_log: '[WinRM -> CORP-FINANCE-02] Terminated process tree for powershell.exe. Dispatched ADSI account lockout for CORP\\m.worker.',
-        intel: {
-            ip: '10.0.4.88 (Internal Host)',
-            reputation: 'SUSPICIOUS SCRIPT',
-            abuse_score: 'N/A',
-            vt_positives: '54 / 72 (PowerShell.Empire.Stager Hash)',
-            country: 'Internal Network 🏢',
-            isp: 'CORP Finance Segment',
-            lat: 40.7128,
-            lon: -74.0060
-        }
-    },
-    't1562': {
-        technique_id: 'T1562.001',
-        rule_name: 'Windows Defender Real-Time Protection Disabled',
-        severity: 'CRITICAL',
-        computer_name: 'WIN-WORKSTATION09',
-        source_ip: '91.240.118.172',
-        action: 'REVERT_DEFENDER_POLICY_AND_ISOLATE',
-        action_log: '[WinRM TLS 5986 -> WIN-WORKSTATION09] Re-enabled Windows Defender Real-Time Protection via Set-MpPreference. Host isolated from domain.',
-        intel: {
-            ip: '91.240.118.172',
-            reputation: 'MALICIOUS',
-            abuse_score: '88/100',
-            vt_positives: '33 / 72 Security Vendors',
-            country: 'Ukraine (UA) 🇺🇦',
-            isp: 'Hostlife LLC / C2 Stager',
-            lat: 50.4501,
-            lon: 30.5234
-        }
-    },
-    't1486': {
-        technique_id: 'T1486',
-        rule_name: 'Rapid Ransomware Canary File Encryption Detected',
-        severity: 'CRITICAL',
-        computer_name: 'CORP-FINANCE-02',
-        source_ip: '193.142.146.210',
-        action: 'KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS',
-        action_log: '[WinRM -> CORP-FINANCE-02] Terminated ransomware PID 6140. Initiated automated canary restore from Volume Shadow Copy Snapshot #41.',
-        intel: {
-            ip: '193.142.146.210',
-            reputation: 'MALICIOUS',
-            abuse_score: '92/100',
-            vt_positives: '49 / 72 Security Vendors',
-            country: 'Romania (RO) 🇷🇴',
-            isp: 'M247 Europe / Ransomware C2',
-            lat: 44.4268,
-            lon: 26.1025
-        }
-    }
-};
-
-// Initialize Map on Page Load
-window.addEventListener('DOMContentLoaded', () => {
-    initCyberMap();
+// Initialize on DOM Ready
+document.addEventListener("DOMContentLoaded", () => {
+    initLeafletMap();
+    loadIncidents();
+    loadMetrics();
+    loadDetections();
+    loadHealthStatus();
+    
+    // Poll metrics & health periodically
+    setInterval(loadMetrics, 15000);
 });
 
-function initCyberMap() {
-    try {
-        map = L.map('cyber-map', {
-            center: [30, 0],
-            zoom: 2,
-            minZoom: 1.5,
-            maxZoom: 6,
-            zoomControl: false,
-            attributionControl: false
-        });
+// Tab Switching Controller
+function switchTab(tabId) {
+    document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
+    
+    const targetTab = document.getElementById(tabId);
+    if (targetTab) {
+        targetTab.classList.add("active");
+    }
+    
+    // Highlight active nav button
+    const btn = Array.from(document.querySelectorAll(".nav-btn")).find(b => b.getAttribute("onclick")?.includes(tabId));
+    if (btn) btn.classList.add("active");
 
-        // CartoDB DarkMatter Tiles
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            subdomains: 'abcd',
-            maxZoom: 19
-        }).addTo(map);
-
-        // Add SOC Datacenter Target Marker
-        const dcIcon = L.divIcon({
-            className: 'dc-marker',
-            iconSize: [14, 14]
-        });
-        datacenterMarker = L.marker(DATACENTER_COORDS, { icon: dcIcon }).addTo(map);
-        datacenterMarker.bindPopup('<b>🏢 Enterprise SOC Gateway (New York Datacenter)</b>');
-    } catch (e) {
-        console.warn("Leaflet Map failed to load (offline):", e);
+    if (tabId === "tab-overview" && map) {
+        setTimeout(() => map.invalidateSize(), 200);
     }
 }
 
-function renderAttackOnMap(lat, lon, country, ip, technique) {
-    if (!map || !lat || !lon) return;
-    if (lat === DATACENTER_COORDS[0] && lon === DATACENTER_COORDS[1]) return; // Skip internal LAN IPs
+// Leaflet Map Initialization
+function initLeafletMap() {
+    const mapElement = document.getElementById("cyber-threat-map");
+    if (!mapElement) return;
 
-    // Create Pulsing Attacker Marker
-    const attackerIcon = L.divIcon({
-        className: 'pulsing-marker',
-        iconSize: [12, 12]
+    map = L.map('cyber-threat-map', {
+        center: [30.0, 10.0],
+        zoom: 2,
+        minZoom: 1,
+        maxZoom: 7,
+        zoomControl: true,
+        attributionControl: false
     });
-    const attackerMarker = L.marker([lat, lon], { icon: attackerIcon }).addTo(map);
-    attackerMarker.bindPopup(`<b>🚨 Threat Source:</b> ${country}<br><b>IP:</b> ${ip}<br><b>Tactic:</b> ${technique}`).openPopup();
 
-    // Draw glowing animated attack vector line to Datacenter
-    const attackLine = L.polyline([[lat, lon], DATACENTER_COORDS], {
-        color: '#FF2A55',
-        weight: 2,
-        opacity: 0.85,
-        dashArray: '6, 6'
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 19
     }).addTo(map);
 
-    activeAttackLayers.push(attackerMarker, attackLine);
-
-    // Auto-clean old layers after 10 seconds to keep map clean
-    setTimeout(() => {
-        if (map.hasLayer(attackerMarker)) map.removeLayer(attackerMarker);
-        if (map.hasLayer(attackLine)) map.removeLayer(attackLine);
-    }, 10000);
-}
-
-function saveWebhookUrl() {
-    const input = document.getElementById('webhook-input');
-    const statusText = document.getElementById('webhook-status');
-    const url = input.value.trim();
-    if (url.startsWith('http')) {
-        activeWebhookUrl = url;
-        statusText.innerText = "● Webhook Active (Broadcasting Live Alerts)";
-        statusText.className = "webhook-status-text status-online";
-    } else {
-        activeWebhookUrl = "";
-        statusText.innerText = "Local Mode (Offline)";
-        statusText.className = "webhook-status-text";
-    }
-}
-
-async function triggerAttack(attackType) {
-    if (attackType === 'random') {
-        const types = ['t1003', 't1110', 't1053', 't1059', 't1562', 't1486'];
-        const selected = types[Math.floor(Math.random() * types.length)];
-        return executeAttackPreset(selected);
-    }
-    
-    // Try backend API first, fallback to client simulation
-    try {
-        const response = await fetch('/api/simulate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                type: attackType,
-                webhook_url: activeWebhookUrl 
-            })
-        });
-        if (response.ok) {
-            const data = await response.json();
-            processAlertObject(data.alert);
-            return;
-        }
-    } catch (e) {
-        // Silent fallback to client simulation
-    }
-    
-    executeAttackPreset(attackType);
-}
-
-function executeAttackPreset(key) {
-    const preset = ATTACK_PRESETS[key];
-    const timestamp = new Date().toLocaleTimeString();
-
-    const alert = {
-        id: 'ALT-' + Math.floor(1000 + Math.random() * 9000),
-        time: timestamp,
-        rule_name: preset.rule_name,
-        severity: preset.severity,
-        technique_id: preset.technique_id,
-        computer_name: preset.computer_name,
-        source_ip: preset.source_ip,
-        status: 'CONTAINED',
-        action_log: preset.action_log,
-        intel: preset.intel,
-        pipeline_timing: {
-            stage1_detection_ms: Math.floor(1380 + Math.random() * 60),
-            stage2_threat_intel_ms: Math.floor(590 + Math.random() * 70),
-            stage3_containment_ms: Math.floor(1090 + Math.random() * 80),
-            total_pipeline_sec: 3.16
-        },
-        key: key
-    };
-
-    processAlertObject(alert);
-}
-
-function processAlertObject(alert) {
-    alertsData.unshift(alert);
-    totalAlerts++;
-    if (alert.severity === 'CRITICAL') criticalAlerts++;
-
-    // Update Header Counts
-    document.getElementById('total-alerts-count').innerText = totalAlerts;
-    document.getElementById('critical-alerts-count').innerText = criticalAlerts;
-
-    // Update MITRE Matrix
-    if (mitreCounts.hasOwnProperty(alert.key)) {
-        mitreCounts[alert.key]++;
-        const badge = document.getElementById(`hits-${alert.key}`);
-        if (badge) badge.innerText = `${mitreCounts[alert.key]} Hits`;
-        const cell = document.getElementById(`mitre-${alert.key}`);
-        if (cell) cell.classList.add('active-hit');
-    }
-
-    // Render Table Row
-    renderAlertRow(alert);
-
-    // Append SOAR Log Terminal
-    appendSoarLog(alert.time, alert.action_log);
-
-    // Auto inspect intel for latest alert
-    showIntelDetails(alert);
-
-    // Render GeoIP vector on Threat Map
-    if (alert.intel && alert.intel.lat && alert.intel.lon) {
-        renderAttackOnMap(alert.intel.lat, alert.intel.lon, alert.intel.country, alert.source_ip, alert.technique_id);
-    }
-}
-
-function renderAlertRow(alert) {
-    const tbody = document.getElementById('alerts-tbody');
-    const emptyRow = document.getElementById('empty-row');
-    if (emptyRow) emptyRow.remove();
-
-    const tr = document.createElement('tr');
-    tr.onclick = () => showIntelDetails(alert);
-
-    const sevClass = alert.severity === 'CRITICAL' ? 'badge-critical' : 'badge-high';
-
-    tr.innerHTML = `
-        <td>${alert.time}</td>
-        <td><span class="${sevClass}">${alert.severity}</span></td>
-        <td><strong>${alert.rule_name}</strong></td>
-        <td><code>${alert.technique_id}</code></td>
-        <td>${alert.computer_name}</td>
-        <td><code>${alert.source_ip}</code></td>
-        <td><span class="status-contained">● AUTO-CLOSED</span></td>
-    `;
-
-    tbody.insertBefore(tr, tbody.firstChild);
-}
-
-function showIntelDetails(alert) {
-    const container = document.getElementById('intel-details-container');
-    const intel = alert.intel;
-    const timing = alert.pipeline_timing || {
-        stage1_detection_ms: 1410,
-        stage2_threat_intel_ms: 630,
-        stage3_containment_ms: 1140,
-        total_pipeline_sec: 3.18
-    };
-
-    container.innerHTML = `
-        <div class="intel-box">
-            <div class="intel-row"><span class="key">Target Alert:</span> <span class="val">${alert.id} (${alert.technique_id})</span></div>
-            <div class="intel-row"><span class="key">Queried Target:</span> <span class="val">${intel.ip}</span></div>
-            <div class="intel-row"><span class="key">Reputation:</span> <span class="val text-critical">${intel.reputation}</span></div>
-            <div class="intel-row"><span class="key">VirusTotal Detections:</span> <span class="val">${intel.vt_positives}</span></div>
-            <div class="intel-row"><span class="key">AbuseIPDB Score:</span> <span class="val">${intel.abuse_score}</span></div>
-            <div class="intel-row"><span class="key">Geo-Location:</span> <span class="val">${intel.country}</span></div>
-            <div class="intel-row"><span class="key">ISP / Org:</span> <span class="val">${intel.isp}</span></div>
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 0.4rem 0;">
-            <div class="intel-row"><span class="key">⚡ Stage 1 Ingestion/Sigma:</span> <span class="val">${timing.stage1_detection_ms} ms</span></div>
-            <div class="intel-row"><span class="key">⚡ Stage 2 Async Intel:</span> <span class="val">${timing.stage2_threat_intel_ms} ms</span></div>
-            <div class="intel-row"><span class="key">⚡ Stage 3 Containment:</span> <span class="val">${timing.stage3_containment_ms} ms</span></div>
-            <div class="intel-row"><span class="key" style="color: var(--status-green);">🛡️ Total Telemetry-to-Containment:</span> <span class="val" style="color: var(--status-green);">${timing.total_pipeline_sec}s</span></div>
-        </div>
-    `;
-}
-
-function appendSoarLog(time, logText) {
-    const terminal = document.getElementById('soar-terminal');
-    const line = document.createElement('div');
-    line.className = 'term-line';
-    line.innerHTML = `<span class="term-time">[${time}]</span> <span class="term-highlight">[SOAR ACTION]</span> ${logText}`;
-    terminal.appendChild(line);
-    terminal.scrollTop = terminal.scrollHeight;
-}
-
-function clearAlerts() {
-    alertsData = [];
-    totalAlerts = 0;
-    criticalAlerts = 0;
-    mitreCounts = { 't1003': 0, 't1110': 0, 't1053': 0, 't1059': 0, 't1562': 0, 't1486': 0 };
-
-    document.getElementById('total-alerts-count').innerText = '0';
-    document.getElementById('critical-alerts-count').innerText = '0';
-    
-    ['t1003', 't1110', 't1053', 't1059', 't1562', 't1486'].forEach(k => {
-        const badge = document.getElementById(`hits-${k}`);
-        if (badge) badge.innerText = '0 Hits';
-        const cell = document.getElementById(`mitre-${k}`);
-        if (cell) cell.classList.remove('active-hit');
+    // Enterprise Datacenter Marker (New York)
+    const dcIcon = L.divIcon({
+        className: 'dc-marker-icon',
+        html: '<div style="background:#38bdf8;width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 0 12px #38bdf8;"></div>',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7]
     });
 
-    const tbody = document.getElementById('alerts-tbody');
-    tbody.innerHTML = `
-        <tr id="empty-row">
-            <td colspan="7" class="text-center placeholder-text">Waiting for attack telemetry... Click an attack button on the left to simulate a threat.</td>
-        </tr>
-    `;
+    datacenterMarker = L.marker(DATACENTER_COORDS, { icon: dcIcon }).addTo(map);
+    datacenterMarker.bindPopup("<strong>🏛️ SOC Datacenter (New York Gateway)</strong><br>10.0.0.0/24 Core Segment");
+}
 
-    document.getElementById('intel-details-container').innerHTML = `
-        <p class="placeholder-text">Select an alert from the stream to view VirusTotal, AbuseIPDB, GeoIP and sub-second pipeline latency metrics.</p>
-    `;
+// Draw Animated Vector Arc on Map
+function drawAttackTrajectory(sourceLat, sourceLon, country, technique, ip) {
+    if (!map) return;
+
+    const sourceCoords = [sourceLat, sourceLon];
+    const attackerIcon = L.divIcon({
+        className: 'attacker-radar-icon',
+        html: '<div style="background:#ef4444;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 10px #ef4444;"></div>',
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
+    });
+
+    const marker = L.marker(sourceCoords, { icon: attackerIcon }).addTo(map);
+    marker.bindPopup(`<strong>⚔️ Adversary Origin: ${country}</strong><br>IP: ${ip}<br>Technique: ${technique}`).openPopup();
+
+    const polyline = L.polyline([sourceCoords, DATACENTER_COORDS], {
+        color: '#ef4444',
+        weight: 3,
+        opacity: 0.8,
+        dashArray: '8, 8'
+    }).addTo(map);
+
+    activeAttackLayers.push(marker, polyline);
+
+    // Keep map clean
+    if (activeAttackLayers.length > 8) {
+        const oldLayer1 = activeAttackLayers.shift();
+        const oldLayer2 = activeAttackLayers.shift();
+        if (oldLayer1) map.removeLayer(oldLayer1);
+        if (oldLayer2) map.removeLayer(oldLayer2);
+    }
+}
+
+// Adversary Emulation Trigger
+async function triggerSimulation(attackType) {
+    try {
+        const response = await fetch("/api/simulate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                type: attackType,
+                webhook_url: customWebhookUrl
+            })
+        });
+        const data = await response.json();
+        if (data.status === "SUCCESS" && data.incident) {
+            const inc = data.incident;
+            const intel = inc.threat_intel?.ip_reputation || {};
+            if (intel.lat && intel.lon) {
+                drawAttackTrajectory(intel.lat, intel.lon, intel.country || "Adversary", inc.telemetry?.technique_id, inc.telemetry?.source_ip);
+            }
+            loadIncidents();
+            loadMetrics();
+        }
+    } catch (err) {
+        console.error("Simulation error:", err);
+    }
+}
+
+// Load Incidents Table
+async function loadIncidents() {
+    try {
+        const response = await fetch("/api/incidents");
+        const data = await response.json();
+        incidentsData = data.incidents || [];
+        
+        document.getElementById("kpiIncidents").innerText = incidentsData.length;
+        const tbody = document.getElementById("incidentTableBody");
+        const select = document.getElementById("incidentSelect");
+
+        if (incidentsData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No incidents recorded yet. Launch an attack above to observe the pipeline!</td></tr>`;
+            select.innerHTML = `<option value="">No incidents available</option>`;
+            return;
+        }
+
+        tbody.innerHTML = incidentsData.map(inc => {
+            const sev = inc.rule?.severity || "HIGH";
+            const sevClass = sev === "CRITICAL" ? "badge-red" : "badge-orange";
+            const score = inc.risk_assessment?.final_score || 0;
+            const scoreClass = score >= 85 ? "badge-red" : (score >= 70 ? "badge-orange" : "badge-yellow");
+
+            return `
+                <tr>
+                    <td><strong>${inc.incident_id}</strong></td>
+                    <td>${new Date(inc.created_at).toLocaleTimeString()} UTC</td>
+                    <td><code>${inc.telemetry?.computer_name || 'N/A'}</code></td>
+                    <td>${inc.threat_intel?.ip_reputation?.flag || '🌐'} ${inc.telemetry?.source_ip || 'N/A'}</td>
+                    <td><span class="${sevClass}">${inc.rule?.rule_name}</span> <small>(${inc.telemetry?.technique_id})</small></td>
+                    <td><span class="${scoreClass}">${score} / 100</span></td>
+                    <td><code>${inc.containment_action?.action_type || 'N/A'}</code></td>
+                    <td><span class="badge-green">${inc.status}</span></td>
+                    <td><button class="btn-primary" onclick="inspectIncident('${inc.incident_id}')"><i class="fa-solid fa-magnifying-glass"></i></button></td>
+                </tr>
+            `;
+        }).join("");
+
+        // Populate dropdown
+        select.innerHTML = incidentsData.map(inc => `<option value="${inc.incident_id}">${inc.incident_id} - ${inc.rule?.rule_name} (${inc.risk_assessment?.final_score} / 100)</option>`).join("");
+
+        if (!activeIncidentId && incidentsData.length > 0) {
+            activeIncidentId = incidentsData[0].incident_id;
+            loadIncidentDetails();
+        }
+    } catch (err) {
+        console.error("Load incidents error:", err);
+    }
+}
+
+// Inspect single incident and navigate to Incident Tab
+function inspectIncident(incId) {
+    activeIncidentId = incId;
+    const select = document.getElementById("incidentSelect");
+    if (select) select.value = incId;
+    loadIncidentDetails();
+    switchTab("tab-incident");
+}
+
+// Load Incident Details & Timeline
+async function loadIncidentDetails() {
+    const incId = document.getElementById("incidentSelect")?.value || activeIncidentId;
+    if (!incId) return;
+
+    try {
+        const response = await fetch(`/api/incidents/${incId}`);
+        const data = await response.json();
+        const inc = data.incident;
+        if (!inc) return;
+
+        activeIncidentId = incId;
+
+        // Dossier Card
+        document.getElementById("dossierTitle").innerHTML = `<i class="fa-solid fa-folder-open"></i> Incident ${inc.incident_id}`;
+        document.getElementById("dosIncId").innerText = inc.incident_id;
+        document.getElementById("dosCorrId").innerText = inc.correlation_id || "N/A";
+        document.getElementById("dosHost").innerText = inc.telemetry?.computer_name || "N/A";
+        document.getElementById("dosUser").innerText = inc.telemetry?.user || "N/A";
+        document.getElementById("dosOrigin").innerText = `${inc.threat_intel?.ip_reputation?.country || 'N/A'} (${inc.telemetry?.source_ip})`;
+        document.getElementById("dosMitre").innerText = `${inc.telemetry?.technique_id} - ${inc.telemetry?.technique_name}`;
+
+        // Risk Meter
+        const risk = inc.risk_assessment || { final_score: 85.0, risk_level: "CRITICAL", factors: {} };
+        document.getElementById("riskMeterBar").style.width = `${risk.final_score}%`;
+        document.getElementById("riskScoreVal").innerText = `${risk.final_score} / 100`;
+        document.getElementById("riskLevelVal").innerText = risk.risk_level;
+
+        const factors = risk.factors || {};
+        document.getElementById("factorsGrid").innerHTML = `
+            <div>• Asset Criticality: <strong>${factors.asset_criticality || 0}/100</strong></div>
+            <div>• User Privilege: <strong>${factors.user_privilege || 0}/100</strong></div>
+            <div>• ATT&CK Tactic: <strong>${factors.tactic_weight || 0}/100</strong></div>
+            <div>• Threat Intel Score: <strong>${factors.threat_intel_score || 0}/100</strong></div>
+        `;
+
+        // Observables
+        const observables = inc.observables || [];
+        document.getElementById("observablesList").innerHTML = observables.map(o => `
+            <span class="obs-pill"><strong>${o.type}:</strong> ${o.value}</span>
+        `).join("");
+
+        // TheHive Case
+        const th = inc.thehive_case || {};
+        document.getElementById("thehiveTitle").innerText = `Case #${th.case_id || 'N/A'} - ${th.title || 'N/A'}`;
+        const tasks = th.tasks || [];
+        document.getElementById("thehiveTasks").innerHTML = tasks.map(t => `
+            <div>[✓] Task ${t.id}: ${t.title} (<em>${t.status}</em>)</div>
+        `).join("");
+
+        // Timeline
+        const timeline = inc.timeline || [];
+        document.getElementById("timelineContainer").innerHTML = timeline.map(item => `
+            <div class="timeline-item">
+                <div class="timeline-time">${new Date(item.timestamp).toLocaleTimeString()} UTC - <span class="badge-blue">${item.stage}</span></div>
+                <div class="timeline-title">${item.title}</div>
+                <div class="timeline-detail">${item.detail}</div>
+            </div>
+        `).join("");
+
+        // Analyst Notes
+        const notes = inc.analyst_notes || [];
+        document.getElementById("notesHistory").innerHTML = notes.map(n => `
+            <div class="note-entry">
+                <strong>${n.author}</strong> <small>(${new Date(n.timestamp).toLocaleTimeString()} UTC)</small><br>
+                ${n.note}
+            </div>
+        `).join("");
+
+        // Rollback Button State
+        const rollbackBtn = document.getElementById("rollbackBtn");
+        if (inc.status === "ROLLED_BACK") {
+            rollbackBtn.disabled = true;
+            rollbackBtn.innerHTML = `<i class="fa-solid fa-check"></i> Already Rolled Back`;
+        } else {
+            rollbackBtn.disabled = false;
+            rollbackBtn.innerHTML = `<i class="fa-solid fa-rotate-left"></i> Rollback Containment`;
+        }
+
+    } catch (err) {
+        console.error("Load incident details error:", err);
+    }
+}
+
+// Rollback Active Incident Containment
+async function rollbackActiveIncident() {
+    if (!activeIncidentId) return;
+    if (!confirm(`Are you sure you want to roll back containment for ${activeIncidentId}? This will restore network connectivity and reverse firewall rules.`)) return;
+
+    try {
+        const res = await fetch(`/api/incidents/${activeIncidentId}/rollback`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ actor: "analyst_lumidren" })
+        });
+        const data = await res.json();
+        if (data.status === "SUCCESS") {
+            alert(`[✓] Rollback Succeeded: ${data.rollback.log}`);
+            loadIncidentDetails();
+            loadIncidents();
+        }
+    } catch (err) {
+        console.error("Rollback error:", err);
+    }
+}
+
+// Add Analyst Note
+async function addAnalystNote() {
+    const input = document.getElementById("newNoteInput");
+    const note = input?.value.trim();
+    if (!note || !activeIncidentId) return;
+
+    try {
+        const res = await fetch(`/api/incidents/${activeIncidentId}/notes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ note: note, author: "analyst_lumidren" })
+        });
+        const data = await res.json();
+        if (data.status === "SUCCESS") {
+            input.value = "";
+            loadIncidentDetails();
+        }
+    } catch (err) {
+        console.error("Add note error:", err);
+    }
+}
+
+// Load Detection Catalogue
+async function loadDetections() {
+    try {
+        const res = await fetch("/api/detections");
+        const data = await res.json();
+        const rules = data.rules || [];
+
+        document.getElementById("detectionCatalogueBody").innerHTML = rules.map(r => `
+            <tr>
+                <td><strong>${r.detection_id}</strong></td>
+                <td>${r.title}</td>
+                <td><span class="badge-purple">${r.technique_id}</span></td>
+                <td><span class="${r.severity === 'CRITICAL' ? 'badge-red' : 'badge-orange'}">${r.severity}</span></td>
+                <td><code>${r.data_source}</code></td>
+                <td><code>${r.sigma_rule}</code></td>
+                <td><code>${r.wazuh_rule_id}</code></td>
+                <td>${r.automated_response}</td>
+                <td><span class="badge-green">${r.validation_status}</span></td>
+            </tr>
+        `).join("");
+    } catch (err) {
+        console.error("Load detections error:", err);
+    }
+}
+
+// Run Purple Team Scenario
+async function runPurpleScenario(scenarioKey) {
+    switchTab("tab-purple");
+    const resultsBox = document.getElementById("purpleResultsView");
+    const summaryBox = document.getElementById("purpleSummaryBox");
+    const tbody = document.getElementById("purpleTableBody");
+
+    resultsBox.style.display = "block";
+    summaryBox.innerHTML = `<h3><i class="fa-solid fa-spinner fa-spin"></i> Executing Purple Team Campaign (${scenarioKey})...</h3>`;
+    tbody.innerHTML = `<tr><td colspan="10" class="empty-state">Emulating adversary tradecraft across sensors...</td></tr>`;
+
+    try {
+        const res = await fetch("/api/purple-team/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ scenario: scenarioKey, webhook_url: customWebhookUrl })
+        });
+        const data = await res.json();
+
+        summaryBox.innerHTML = `
+            <div style="background:#1e1b4b;border:1px solid #6366f1;padding:14px;border-radius:8px;margin-bottom:14px;">
+                <h3>🛡️ Campaign Result: ${data.scenario_name}</h3>
+                <p>Threat Actor: <strong>${data.threat_actor}</strong> | Status: <span class="badge-green">${data.overall_status}</span> (${data.passed_stages}/${data.total_stages} Stages Verified)</p>
+            </div>
+        `;
+
+        const stages = data.stage_results || [];
+        tbody.innerHTML = stages.map(s => `
+            <tr>
+                <td><strong>Stage ${s.sequence}</strong></td>
+                <td>${s.stage_name}</td>
+                <td><span class="badge-purple">${s.technique_id}</span></td>
+                <td><code>${s.expected_sensor}</code></td>
+                <td><code>${s.expected_rule}</code></td>
+                <td><code>${s.matched_rule}</code></td>
+                <td><span class="badge-green">${s.status}</span></td>
+                <td><strong>${s.risk_score} / 100</strong></td>
+                <td><span class="badge-blue">${s.containment_action}</span></td>
+                <td>${s.latency_sec}s</td>
+            </tr>
+        `).join("");
+
+        loadIncidents();
+        loadMetrics();
+    } catch (err) {
+        console.error("Purple scenario error:", err);
+    }
+}
+
+// Load Health Diagnostics
+async function loadHealthStatus() {
+    try {
+        const res = await fetch("/api/health");
+        const data = await res.json();
+        const services = data.services || {};
+
+        document.getElementById("healthGrid").innerHTML = Object.entries(services).map(([key, s]) => {
+            const isHealthy = s.status === "HEALTHY";
+            const badgeClass = isHealthy ? "badge-green" : (s.status === "DEGRADED" ? "badge-yellow" : "badge-blue");
+
+            return `
+                <div class="health-card">
+                    <div class="health-card-top">
+                        <strong>${s.name}</strong>
+                        <span class="${badgeClass}">${s.status}</span>
+                    </div>
+                    <div class="health-msg">${s.message}</div>
+                    <div class="health-lat">Target: <code>${s.target}</code> | Latency: <strong>${s.latency_ms}ms</strong> | Mode: ${s.mode}</div>
+                </div>
+            `;
+        }).join("");
+    } catch (err) {
+        console.error("Load health error:", err);
+    }
+}
+
+// Load Real Metrics
+async function loadMetrics() {
+    try {
+        const res = await fetch("/api/metrics");
+        const data = await res.json();
+        const kpis = data.operational_kpis || {};
+        const p = data.latency_percentiles_sec || {};
+
+        if (document.getElementById("kpiMttd")) document.getElementById("kpiMttd").innerText = `${kpis.mttd_sec || 1.40}s`;
+        if (document.getElementById("kpiMttc")) document.getElementById("kpiMttc").innerText = `${kpis.mttc_sec || 1.15}s`;
+        if (document.getElementById("kpiP95")) document.getElementById("kpiP95").innerText = `${p.p95 || 3.28}s`;
+    } catch (err) {
+        console.error("Load metrics error:", err);
+    }
+}
+
+// Policy Mode Update
+async function updatePolicyMode() {
+    const select = document.getElementById("policyModeSelect");
+    const mode = select?.value || "AUTOMATIC";
+    try {
+        await fetch("/api/policy/config", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mode: mode })
+        });
+    } catch (err) {
+        console.error("Policy mode error:", err);
+    }
+}
+
+// Save Webhook
+function saveWebhook() {
+    const input = document.getElementById("webhookInput");
+    const badge = document.getElementById("webhookStatusBadge");
+    const val = input?.value.trim();
+
+    if (val && val.startsWith("http")) {
+        customWebhookUrl = val;
+        badge.className = "webhook-badge active";
+        badge.innerText = "CONNECTED";
+        alert("[✓] Webhook connected! Incident alerts will be broadcast live.");
+    } else {
+        customWebhookUrl = "";
+        badge.className = "webhook-badge standby";
+        badge.innerText = "STANDBY";
+    }
 }
