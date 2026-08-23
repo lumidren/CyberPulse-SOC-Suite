@@ -125,6 +125,14 @@
                             <i class="fa-solid fa-key"></i>
                             <div><strong>T1003.001: LSASS Memory Dump</strong><br><small>Sysmon 10 -> WinRM Host Isolate</small></div>
                         </button>
+                        <button class="attack-btn" onclick="triggerSimulation('t1003_dcsync')">
+                            <i class="fa-solid fa-server"></i>
+                            <div><strong>T1003.006: AD DCSync Attack</strong><br><small>Security 4662 -> Privilege Revoke</small></div>
+                        </button>
+                        <button class="attack-btn" onclick="triggerSimulation('t1558')">
+                            <i class="fa-solid fa-ticket"></i>
+                            <div><strong>T1558.001: Kerberoasting TGS</strong><br><small>Security 4769 -> Account Reset</small></div>
+                        </button>
                         <button class="attack-btn" onclick="triggerSimulation('t1110')">
                             <i class="fa-solid fa-network-wired"></i>
                             <div><strong>T1110.001: RDP Password Spray</strong><br><small>Security 4625 -> pfSense Drop</small></div>
@@ -136,14 +144,6 @@
                         <button class="attack-btn" onclick="triggerSimulation('t1486')">
                             <i class="fa-solid fa-file-invoice-dollar"></i>
                             <div><strong>T1486: Ransomware Canary</strong><br><small>Sysmon 11 -> VSS Recovery</small></div>
-                        </button>
-                        <button class="attack-btn" onclick="triggerSimulation('t1053')">
-                            <i class="fa-solid fa-clock"></i>
-                            <div><strong>T1053.005: Task Persistence</strong><br><small>Security 4698 -> Task Purge</small></div>
-                        </button>
-                        <button class="attack-btn" onclick="triggerSimulation('t1059')">
-                            <i class="fa-solid fa-terminal"></i>
-                            <div><strong>T1059.001: Obfuscated PowerShell</strong><br><small>Sysmon 1 -> Account Lockout</small></div>
                         </button>
                     </div>
 
@@ -320,7 +320,7 @@
                         <tbody>
                             <tr>
                                 <td><span class="badge-red">CRITICAL</span></td>
-                                <td><strong>85.0 – 100.0</strong></td>
+                                <td><strong>80.0 – 100.0</strong></td>
                                 <td>Immediate Emergency Host Isolation & PID Kill</td>
                                 <td>High (Network Disruption)</td>
                                 <td>WinRM over TLS (Port 5986) WFP Rule</td>
@@ -328,7 +328,7 @@
                             </tr>
                             <tr>
                                 <td><span class="badge-orange">HIGH</span></td>
-                                <td><strong>70.0 – 84.9</strong></td>
+                                <td><strong>65.0 – 79.9</strong></td>
                                 <td>Perimeter IP Drop / Scheduled Task De-register</td>
                                 <td>Medium (External Gateway)</td>
                                 <td>pfSense REST API / iptables</td>
@@ -336,7 +336,7 @@
                             </tr>
                             <tr>
                                 <td><span class="badge-yellow">MEDIUM</span></td>
-                                <td><strong>40.0 – 69.9</strong></td>
+                                <td><strong>40.0 – 64.9</strong></td>
                                 <td>Threat Intel Enrichment & Tier-1 SOC Alert</td>
                                 <td>Zero (Passive)</td>
                                 <td>Discord / Slack Rich Embeds</td>

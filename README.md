@@ -19,7 +19,7 @@ CyberPulse processes security events through a traceable, microsecond-instrument
 ```mermaid
 flowchart TD
     subgraph 1. Adversary Emulation Layer
-        APT[Purple Team Runner: APT29 / LockBit 3.0 / Atomic Tests] -->|Kernel Telemetry| EP[Windows Server 2022 AD DC / Endpoints]
+        APT[Purple Team Runner: APT29 / LockBit 3.0 / Kerberoasting / DCSync] -->|Kernel Telemetry| EP[Windows Server 2022 AD DC / Endpoints]
     end
 
     subgraph 2. Ingestion & Detection Layer
@@ -38,8 +38,9 @@ flowchart TD
     subgraph 4. Resilient Containment & Recovery Layer
         POL -->|WinRM TLS 5986| ISO[Emergency WFP Host Isolation & PID Kill]
         POL -->|pfSense REST API| FW[Perimeter Gateway Inbound IP Drop]
+        POL -->|ADSI LDAP| AD[Service Account Password Rotation & Privilege Revoke]
         POL -->|VSS API| VSS[Ransomware Canary Snapshot Recovery]
-        ISO & FW & VSS --> ROLLBACK[Automated Rollback Engine]
+        ISO & FW & AD & VSS --> ROLLBACK[Automated Rollback Engine]
     end
 
     subgraph 5. DFIR Case & Observability Layer
@@ -86,7 +87,7 @@ CyberPulse provides production configurations across **11 industry-standard cybe
 
 ## 🧠 Multi-Factor Risk & Policy Decision Engine
 
-CyberPulse avoids simplistic rule-to-action scripts by calculating an explainable composite risk score ($0.0 - 100.0$):
+CyberPulse calculates an explainable composite risk score ($0.0 - 100.0$):
 
 $$\text{Risk Score} = (S_{\text{rule}} \times 0.35) + (W_{\text{tactic}} \times 0.25) + (C_{\text{asset}} \times 0.15) + (P_{\text{user}} \times 0.10) + (I_{\text{intel}} \times 0.15) + B_{\text{repeat}}$$
 
@@ -107,48 +108,36 @@ $$\text{Risk Score} = (S_{\text{rule}} \times 0.35) + (W_{\text{tactic}} \times 
 | **MEDIUM** | **40.0 – 64.9** | Threat Intel Enrichment & Tier-1 SOC Alert | Discord / Slack Rich Embeds | N/A |
 | **LOW** | **0.0 – 39.9** | SIEM Baseline Indexing & Background Monitoring | OpenSearch Ingestion | N/A |
 
-### Configurable Execution Modes:
-1. **`AUTOMATIC`**: Executes containment immediately upon threshold match.
-2. **`APPROVAL_REQUIRED`**: Flags action as `PENDING_APPROVAL` with an analyst sign-off token.
-3. **`DRY_RUN`**: Simulates and logs actions with zero network disruption.
-
 ---
 
-## 🛡️ Resilient Containment, Circuit Breakers & Rollbacks
+## 🎯 Production Detection Rulebase Matrix
 
-* **Circuit Breakers (`soar/resilient_containment.py`)**: Automatically trips after 3 consecutive external API timeouts, gracefully falling back to heuristic scoring without stalling the containment pipeline.
-* **Idempotency & Action Registry**: Every action generates an idempotency key preventing duplicate isolation storms.
-* **Rollback Engine (`rollback_containment(action_id)`)**: Reverses WFP isolation filters, deletes pfSense drop rules, and re-enables Active Directory user accounts with a single click.
-
----
-
-## ⚔️ Purple Team Attack Replay & Validation Engine
-
-Executes reproducible adversary campaigns and verifies Blue Team detection sensors across every stage ([`simulator/purple_team_runner.py`](simulator/purple_team_runner.py)):
-
-### 1. APT29 / Cozy Bear Intrusion Campaign
-* **Stage 1 (Execution)**: Obfuscated PowerShell cradle (`T1059.001`) ➔ Fired `SOC-RULE-004` (Sysmon Event ID 1) ➔ Process Tree Terminated.
-* **Stage 2 (Defense Evasion)**: Disabling Defender Real-Time Protection (`T1562.001`) ➔ Fired `SOC-RULE-005` (Sysmon Event ID 1) ➔ Policy Reverted & Host Isolated.
-* **Stage 3 (Credential Access)**: LSASS memory dump (`T1003.001`) ➔ Fired `SOC-RULE-001` (Sysmon Event ID 10) ➔ WinRM WFP Isolation Enforced.
-
-### 2. LockBit 3.0 Ransomware Lifecycle
-* **Stage 1 (Initial Access)**: External RDP brute force (`T1110.001`) ➔ Fired `SOC-RULE-002` (Security Event ID 4625) ➔ pfSense Inbound IP Blocked.
-* **Stage 2 (Persistence)**: Scheduled task creation (`T1053.005`) ➔ Fired `SOC-RULE-003` (Security Event ID 4698) ➔ Remote Task Purged.
-* **Stage 3 (Impact)**: Decoy canary encryption (`T1486`) ➔ Fired `SOC-RULE-006` (Sysmon Event ID 11) ➔ Volume Shadow Copy (VSS) Snapshot Restored.
+| Technique ID | Technique Name | Tactic | Primary Telemetry | Risk Score | Automated Containment |
+| :--- | :--- | :--- | :--- | :---: | :--- |
+| **`T1003.001`** | LSASS Memory Dumping | Credential Access | Sysmon Event 10 | **94.5 (CRITICAL)** | WinRM WFP Host Isolation + PID Kill |
+| **`T1003.006`** | AD Replication Abuse (DCSync) | Credential Access | Security Event 4662 | **96.0 (CRITICAL)** | Isolate Account & Revoke Replication Rights |
+| **`T1558.001`** | Kerberoasting TGS Request | Credential Access | Security Event 4769 | **78.0 (HIGH)** | Reset Service Account & Revoke Kerberos Ticket |
+| **`T1110.001`** | RDP Password Guessing | Credential Access | Security Event 4625 | **82.0 (HIGH)** | pfSense REST API IP Drop |
+| **`T1053.005`** | Scheduled Task Hook | Persistence | Security Event 4698 | **78.5 (HIGH)** | Remote Task De-registration |
+| **`T1059.001`** | Obfuscated PowerShell | Execution | Sysmon Event 1 | **76.0 (HIGH)** | Process Kill + AD Account Lockout |
+| **`T1562.001`** | Defender Impairment | Defense Evasion | Sysmon Event 1 | **92.0 (CRITICAL)** | Revert Policy + Host Isolation |
+| **`T1486`** | Ransomware Canary Encryption | Impact | Sysmon Event 11 | **95.0 (CRITICAL)** | PID Kill + VSS Snapshot Recovery |
 
 ---
 
 ## 🔬 Detection Engineering Lifecycle (DELC) Artifacts
 
-Every detection rule in CyberPulse follows the formal SANS/MITRE Detection Engineering Lifecycle (*Hypothesis ➔ Telemetry Analysis ➔ Draft Rule ➔ False Positive Exposure ➔ Tuning Iteration ➔ Documented Blindspots*):
+Every detection rule in CyberPulse follows the formal SANS/MITRE Detection Engineering Lifecycle:
 
-* 📑 **[DELC-001: OS Credential Dumping via LSASS (T1003.001)](docs/lifecycle/DELC-001_LSASS_Memory_Access.md)**: Tuning process handle access masks against Windows Defender (`MsMpEng.exe`) and sysadmin crash diagnostics.
-* 📑 **[DELC-002: RDP Password Spraying & Brute Force (T1110.001)](docs/lifecycle/DELC-002_RDP_Authentication_Spraying.md)**: Calibrating sliding aggregation windows (5m threshold) to eliminate user password fatigue false positives.
-* 📑 **[DELC-003: Defense Evasion via Defender Impairment (T1562.001)](docs/lifecycle/DELC-003_Windows_Defender_Tampering.md)**: Catching script-based antivirus evasion and enforcing tamper protection baselines.
-* 🎯 **[Honest MITRE ATT&CK Coverage & Accepted Gap Matrix](docs/MITRE_COVERAGE_AND_GAPS.md)**: Detailed mapping of active detections alongside consciously accepted blindspots (e.g. BYOVD drivers, in-memory thread hijacking).
-* 🔍 **[Triage Case Study 01: LSASS False Positive Analysis](docs/triage/TRIAGE_CASE_STUDY_01_LSASS_FALSE_ALARM.md)**: Investigating `procdump.exe` execution during a scheduled maintenance window.
-* 🔍 **[Triage Case Study 02: True Positive Defense Evasion Triage](docs/triage/TRIAGE_CASE_STUDY_02_STEALTH_DEFENDER_TAMPER.md)**: Tracing macro-phishing parentage to off-hours Defender tampering.
-* 🛡️ **[Collaborative Purple Team Exercise Report](docs/PURPLE_TEAM_EXERCISE.md)**: Full offensive tradecraft vs. defensive sensor validation matrix.
+* 📑 **[DELC-001: OS Credential Dumping via LSASS (T1003.001)](docs/lifecycle/DELC-001_LSASS_Memory_Access.md)**
+* 📑 **[DELC-002: RDP Password Spraying & Brute Force (T1110.001)](docs/lifecycle/DELC-002_RDP_Authentication_Spraying.md)**
+* 📑 **[DELC-003: Defense Evasion via Defender Impairment (T1562.001)](docs/lifecycle/DELC-003_Windows_Defender_Tampering.md)**
+* 📑 **[DELC-004: Kerberoasting TGS Ticket Extraction (T1558.001)](docs/lifecycle/DELC-004_Kerberoasting_TGS.md)**
+* 📑 **[DELC-005: Active Directory DCSync Replication Abuse (T1003.006)](docs/lifecycle/DELC-005_DCSync_Replication_Abuse.md)**
+* 🎯 **[Honest MITRE ATT&CK Coverage & Accepted Gap Matrix](docs/MITRE_COVERAGE_AND_GAPS.md)**
+* 🔍 **[Triage Case Study 01: LSASS False Positive Analysis](docs/triage/TRIAGE_CASE_STUDY_01_LSASS_FALSE_ALARM.md)**
+* 🔍 **[Triage Case Study 02: True Positive Defense Evasion Triage](docs/triage/TRIAGE_CASE_STUDY_02_STEALTH_DEFENDER_TAMPER.md)**
+* 🛡️ **[Collaborative Purple Team Exercise Report](docs/PURPLE_TEAM_EXERCISE.md)**
 
 ---
 
@@ -167,33 +156,14 @@ Instrumented across **60+ adversary emulation executions**:
 
 ---
 
-## 🏗️ Infrastructure-as-Code (IaC) Deployment
-
-### 1. Multi-Service Docker Compose Stack ([`deploy/docker-compose.yml`](deploy/docker-compose.yml))
-Deploys Wazuh Manager v4.7.2, OpenSearch 2.11 Indexer, TheHive 5 Case Management, and CyberPulse SOAR:
-```bash
-cd deploy
-docker-compose up -d
-```
-
-### 2. Multi-VM Active Directory Enterprise Lab ([`deploy/vagrant/Vagrantfile`](deploy/vagrant/Vagrantfile))
-Provisions Windows Server 2022 AD DC (`10.0.0.10`), Windows 11 client (`10.0.0.45`), pfSense 2.7 gateway (`10.0.0.1`), and Sysmon v14 ([`deploy/sysmon/sysmonconfig.xml`](deploy/sysmon/sysmonconfig.xml)):
-```bash
-cd deploy/vagrant
-vagrant up
-```
-
----
-
 ## 🚀 Quickstart & Verification Commands
 
-### 1. Run the All-in-One CLI Management Suite:
+### 1. Interactive Enterprise CLI Operations Suite:
 ```bash
 python start_lab.py
 ```
-*(Interactive menu to launch web consoles, run purple team campaigns, probe system health, and test live webhooks).*
 
-### 2. Run the Automated Detection & SOAR Test Suite (11 Test Scenarios):
+### 2. Run the Automated Detection & SOAR Test Suite (13 Test Scenarios):
 ```bash
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
@@ -202,13 +172,7 @@ python -m unittest discover -s tests -p "test_*.py" -v
 ```bash
 python server.py
 ```
-Open **`http://localhost:5000`** in your browser to access:
-* **SOC Overview**: Real-time Leaflet GeoIP Threat Map and live attack triggers.
-* **Incident DFIR**: Microsecond chronological timeline, risk breakdown, observables, and **one-click containment rollback**.
-* **Detection Catalogue**: Searchable rulebase and MITRE ATT&CK matrix.
-* **SOAR Policies**: Risk tier matrix and dry-run simulation mode toggles.
-* **Purple Team Replay**: Interactive APT29 and LockBit campaign runners.
-* **System Health**: Active socket diagnostics for Wazuh, OpenSearch, WinRM, and APIs.
+Open **`http://localhost:5000`** in your browser.
 
 ---
 
@@ -219,8 +183,8 @@ CyberPulse SOC Suite – Enterprise Detection Engineering, DFIR & Resilient SOAR
 GitHub: https://github.com/lumidren/CyberPulse-SOC-Suite
 • Architected a closed-loop Detection Engineering & SOAR platform integrating Windows Server 2022 AD DS, Sysmon v14, Wazuh v4.7 SIEM, Splunk SPL searches, and TheHive 5 case management.
 • Engineered a multi-factor Risk & Policy Engine incorporating Asset Criticality, Account Privilege, ATT&CK Tactic Weights, and Threat Intelligence reputation into configurable containment policies.
-• Authored 5+ vendor-agnostic Sigma YAML and Wazuh XML detection rules following the formal Detection Engineering Lifecycle (DELC), tuning false positives for Windows Defender and Sysinternals utilities.
+• Authored 7+ vendor-agnostic Sigma YAML and Wazuh XML detection rules following the formal Detection Engineering Lifecycle (DELC), covering Kerberoasting (T1558.001), DCSync (T1003.006), LSASS dumping (T1003.001), and Defender tampering (T1562.001).
 • Built a fault-tolerant SOAR containment engine with circuit breakers, idempotent actions, and one-click rollback capabilities for WinRM host isolation and pfSense firewall drops.
 • Implemented an automated Purple Team Replay Engine validating multi-stage APT29 and LockBit campaigns with a 100% stage verification rate and < 3.2s MTTC.
-• Built an automated GitHub Actions CI/CD pipeline running 11 unit and integration test scenarios on every commit.
+• Built an automated GitHub Actions CI/CD pipeline running 13 unit and integration test scenarios on every commit.
 ```

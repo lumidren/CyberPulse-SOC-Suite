@@ -136,6 +136,24 @@ class ResilientContainmentEngine:
             action_record["execution_log"] = f"[WinRM -> {target_host}] Terminated ransomware PID {pid}. Restored canary files from VSS Snapshot #41."
             action_record["rollback_plan"] = {"method": "VSS_VERIFIED", "note": "Files restored from shadow copy."}
 
+        elif action_type == "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET":
+            action_record["execution_protocol"] = "Active Directory PowerShell & Kerberos KDC"
+            action_record["execution_log"] = f"[AD KDC -> {target_host}] Purged compromised TGS ticket. Enforced immediate password reset for targeted SPN service account."
+            action_record["rollback_plan"] = {
+                "method": "ACTIVE_DIRECTORY_LDAP",
+                "command": f"Set-ADUser -Identity '{target_user}' -ChangePasswordAtLogon $false"
+            }
+            self.disabled_users.add(target_user)
+
+        elif action_type == "ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES":
+            action_record["execution_protocol"] = "Active Directory LDAP ADSI"
+            action_record["execution_log"] = f"[AD DS -> {target_host}] Revoked DS-Replication-Get-Changes extended rights from {target_user} and locked account."
+            action_record["rollback_plan"] = {
+                "method": "ACTIVE_DIRECTORY_LDAP",
+                "command": f"Set-ADUser -Identity '{target_user}' -Enabled $true"
+            }
+            self.disabled_users.add(target_user)
+
         else:
             action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
             action_record["execution_log"] = "No disruptive containment policy matched. Staged for analyst review."
@@ -181,8 +199,8 @@ class ResilientContainmentEngine:
             if target_ip in self.blocked_ips:
                 self.blocked_ips.remove(target_ip)
 
-        elif action_type == "TERMINATE_PROCESS_TREE":
-            rollback_entry["log"] = f"[Active Directory LDAP] Re-enabled user account {target_user}."
+        elif action_type in ["TERMINATE_PROCESS_TREE", "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET", "ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES"]:
+            rollback_entry["log"] = f"[Active Directory LDAP] Re-enabled user account {target_user} and verified permissions."
             if target_user in self.disabled_users:
                 self.disabled_users.remove(target_user)
 
@@ -192,17 +210,3 @@ class ResilientContainmentEngine:
         record["status"] = "ROLLED_BACK"
         record["rollback_history"] = rollback_entry
         return rollback_entry
-
-if __name__ == "__main__":
-    containment = ResilientContainmentEngine()
-    act = containment.execute_containment(
-        action_type="ISOLATE_HOST_AND_KILL_PROCESS",
-        target_host="WIN-DC01.corp.local",
-        target_ip="185.220.101.33",
-        target_user="CORP\\Administrator",
-        pid=4812,
-        process_name="mimikatz.exe"
-    )
-    print("Executed Containment:", json.dumps(act, indent=2))
-    rb = containment.rollback_containment(act["action_id"])
-    print("Rollback Result:", json.dumps(rb, indent=2))

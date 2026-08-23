@@ -19,7 +19,9 @@ from simulator.attack_simulator import (
     simulate_t1053_scheduled_task,
     simulate_t1059_powershell_execution,
     simulate_t1562_defender_tamper,
-    simulate_t1486_ransomware_canary
+    simulate_t1486_ransomware_canary,
+    simulate_t1558_kerberoasting,
+    simulate_t1003_dcsync
 )
 from soar.soar_engine import SOAROrchestrator
 from soar.risk_engine import RiskAndPolicyEngine
@@ -33,14 +35,16 @@ class TestEnterpriseSOCPlatform(unittest.TestCase):
         self.orchestrator = SOAROrchestrator(policy_mode="AUTOMATIC")
 
     def test_sigma_rules_exist_and_valid(self):
-        """Verify all 5 core Sigma YAML rules exist with required schema tags"""
+        """Verify all 7 core Sigma YAML rules exist with required schema tags"""
         sigma_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "rules", "sigma")
         expected_rules = [
             "win_lsass_dumping.yml",
             "win_brute_force_auth.yml",
             "win_scheduled_task_persistence.yml",
             "win_defender_tamper.yml",
-            "win_ransomware_canary.yml"
+            "win_ransomware_canary.yml",
+            "win_kerberoasting.yml",
+            "win_dcsync.yml"
         ]
         for rule_file in expected_rules:
             rule_path = os.path.join(sigma_dir, rule_file)
@@ -92,6 +96,24 @@ class TestEnterpriseSOCPlatform(unittest.TestCase):
         self.assertIsNotNone(incident)
         self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-006")
         self.assertEqual(incident["containment_action"]["action_type"], "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS")
+
+    def test_t1558_kerberoasting_detection(self):
+        """Verify T1558.001 Kerberoasting TGS request triggers SOC-RULE-007 and account reset"""
+        event = simulate_t1558_kerberoasting()
+        incident = self.orchestrator.process_event(event)
+        
+        self.assertIsNotNone(incident)
+        self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-007")
+        self.assertEqual(incident["containment_action"]["action_type"], "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET")
+
+    def test_t1003_dcsync_detection(self):
+        """Verify T1003.006 DCSync replication abuse triggers SOC-RULE-008 and privilege revocation"""
+        event = simulate_t1003_dcsync()
+        incident = self.orchestrator.process_event(event)
+        
+        self.assertIsNotNone(incident)
+        self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-008")
+        self.assertEqual(incident["containment_action"]["action_type"], "ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES")
 
     def test_multi_factor_risk_scoring_accuracy(self):
         """Verify risk engine properly factors asset criticality and user privilege"""
