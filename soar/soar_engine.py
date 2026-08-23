@@ -178,6 +178,24 @@ class SOAROrchestrator:
                 "action_recommended": "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS"
             }
 
+        elif event_id == 4769 and details.get("TicketEncryptionType") == "0x17":
+            return {
+                "rule_id": "SOC-RULE-007",
+                "rule_name": "Kerberoasting TGS Ticket Request with RC4 Encryption",
+                "severity": "HIGH",
+                "mitre_id": "T1558.001",
+                "action_recommended": "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET"
+            }
+
+        elif event_id == 4662 and "1131f6aa-9c07-11d1-f79f-00c04fc2dcd2" in details.get("Properties", ""):
+            return {
+                "rule_id": "SOC-RULE-008",
+                "rule_name": "Active Directory Replication Abuse (DCSync) Detected",
+                "severity": "CRITICAL",
+                "mitre_id": "T1003.006",
+                "action_recommended": "ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES"
+            }
+
         return None
 
     def enrich_threat_intel(self, event):
@@ -240,7 +258,7 @@ class SOAROrchestrator:
         target_host = event.get("computer_name")
         target_ip = event.get("source_ip")
         target_user = event.get("user")
-        process_name = event.get("details", {}).get("SourceImage") or event.get("details", {}).get("Image")
+        process_name = event.get("details", {}).get("SourceImage") or event.get("details", {}).get("Image", "system")
         pid = event.get("details", {}).get("SourceProcessId") or event.get("details", {}).get("ProcessId", 4012)
         correlation_id = f"CORR-{int(time.time()*1000)%1000000:06d}"
 

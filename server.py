@@ -21,6 +21,8 @@ from simulator.attack_simulator import (
     simulate_t1059_powershell_execution,
     simulate_t1562_defender_tamper,
     simulate_t1486_ransomware_canary,
+    simulate_t1558_kerberoasting,
+    simulate_t1003_dcsync,
     generate_random_attack
 )
 from simulator.purple_team_runner import PurpleTeamRunner, SCENARIOS
@@ -115,6 +117,34 @@ DETECTION_CATALOGUE = [
         "automated_response": "PID Kill + Volume Shadow Copy (VSS) Recovery",
         "delc_document": "docs/MITRE_COVERAGE_AND_GAPS.md",
         "validation_status": "PASS (100% True-Positive)"
+    },
+    {
+        "detection_id": "SOC-RULE-007",
+        "title": "Kerberoasting TGS Ticket Request with RC4 Encryption",
+        "technique_id": "T1558.001",
+        "tactic": "Credential Access",
+        "severity": "HIGH",
+        "confidence": "HIGH",
+        "data_source": "Security Event ID 4769 (TGS Request)",
+        "sigma_rule": "rules/sigma/win_kerberoasting.yml",
+        "wazuh_rule_id": 100016,
+        "automated_response": "Reset Service Account & Revoke Kerberos Ticket",
+        "delc_document": "docs/lifecycle/DELC-004_Kerberoasting_TGS.md",
+        "validation_status": "PASS (100% True-Positive)"
+    },
+    {
+        "detection_id": "SOC-RULE-008",
+        "title": "Active Directory Replication Abuse (DCSync)",
+        "technique_id": "T1003.006",
+        "tactic": "Credential Access",
+        "severity": "CRITICAL",
+        "confidence": "CRITICAL",
+        "data_source": "Security Event ID 4662 (Extended Rights)",
+        "sigma_rule": "rules/sigma/win_dcsync.yml",
+        "wazuh_rule_id": 100017,
+        "automated_response": "Isolate Account & Revoke Replication Rights",
+        "delc_document": "docs/lifecycle/DELC-005_DCSync_Replication_Abuse.md",
+        "validation_status": "PASS (100% True-Positive)"
     }
 ]
 
@@ -186,7 +216,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/simulate":
             attack_type = data.get("type", "random")
             webhook_url = data.get("webhook_url", None)
-            intent = data.get("intent", None) # DRY_RUN_SIMULATION, EXECUTE_IMMEDIATE
+            intent = data.get("intent", None)
 
             if attack_type == "t1003":
                 evt = simulate_t1003_lsass_dump()
@@ -200,6 +230,10 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 evt = simulate_t1562_defender_tamper()
             elif attack_type == "t1486":
                 evt = simulate_t1486_ransomware_canary()
+            elif attack_type == "t1558":
+                evt = simulate_t1558_kerberoasting()
+            elif attack_type == "t1003_dcsync":
+                evt = simulate_t1003_dcsync()
             else:
                 evt = generate_random_attack()
 

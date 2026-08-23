@@ -1,0 +1,27 @@
+title: Active Directory Replication Abuse (DCSync) via Non-DC Account
+id: b41289cf-1123-4482-9912-781290341829
+status: production
+description: Detects directory replication service requests (DS-Replication-Get-Changes) originating from non-domain controller accounts, indicative of Mimikatz lsadump::dcsync credential harvesting.
+references:
+    - https://attack.mitre.org/techniques/T1003/006/
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-08-23
+tags:
+    - attack.credential_access
+    - attack.t1003.006
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4662
+        AccessMask: '0x100'
+        Properties|contains:
+            - '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2' # DS-Replication-Get-Changes
+            - '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2' # DS-Replication-Get-Changes-All
+    filter:
+        SubjectUserName|endswith: '$' # Legitimate Domain Controller computer accounts
+    condition: selection and not filter
+falsepositives:
+    - Azure AD Connect synchronization accounts with explicit replication rights
+level: critical

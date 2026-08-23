@@ -1,0 +1,25 @@
+title: Kerberoasting TGS Ticket Request with RC4 Encryption
+id: 9a38df41-6c23-4e89-a112-984712019481
+status: production
+description: Detects suspicious Kerberos Service Ticket (TGS) requests with RC4-HMAC (0x17) encryption targeting Service Principal Names (SPNs), characteristic of Kerberoasting attacks.
+references:
+    - https://attack.mitre.org/techniques/T1558/001/
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-08-23
+tags:
+    - attack.credential_access
+    - attack.t1558.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4769
+        TicketOptions: '0x40810000'
+        TicketEncryptionType: '0x17' # RC4-HMAC
+    filter:
+        ServiceName|endswith: '$' # Filter computer/machine accounts
+    condition: selection and not filter
+falsepositives:
+    - Legacy legacy applications requiring RC4 encryption for Kerberos authentication
+level: high
