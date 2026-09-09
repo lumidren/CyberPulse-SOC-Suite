@@ -28,6 +28,11 @@ from soar.risk_engine import RiskAndPolicyEngine
 from soar.resilient_containment import ResilientContainmentEngine, CircuitBreaker
 from soar.metrics_engine import SOCMetricsEngine
 from simulator.purple_team_runner import PurpleTeamRunner
+from soar.attack_graph import AttackGraphEngine
+from soar.evidence_collector import VolatileEvidenceCollector
+from soar.ai_copilot import SOCCopilot
+from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
+from soar.identity_graph import IdentityBlastRadiusEngine
 
 class TestEnterpriseSOCPlatform(unittest.TestCase):
 
@@ -193,6 +198,95 @@ class TestEnterpriseSOCPlatform(unittest.TestCase):
         self.assertGreater(metrics["operational_kpis"]["mttd_sec"], 0)
         self.assertGreater(metrics["operational_kpis"]["mttc_sec"], 0)
         self.assertGreaterEqual(metrics["latency_percentiles_sec"]["p95"], metrics["latency_percentiles_sec"]["p50"])
+
+    def test_attack_graph_generation(self):
+        """Verify attack graph generates valid nodes and edges from incident data"""
+        event = simulate_t1003_lsass_dump()
+        incident = self.orchestrator.process_event(event)
+
+        self.assertIn("attack_graph", incident)
+        graph = incident["attack_graph"]
+        self.assertIn("nodes", graph)
+        self.assertIn("edges", graph)
+        self.assertGreaterEqual(len(graph["nodes"]), 4)
+        self.assertGreaterEqual(len(graph["edges"]), 3)
+        node_types = [n.get("type") for n in graph["nodes"]]
+        self.assertIn("attacker", node_types)
+        self.assertIn("host", node_types)
+
+    def test_evidence_collector_volatile_triage(self):
+        """Verify volatile evidence collector produces valid forensic artifact packages"""
+        event = simulate_t1003_lsass_dump()
+        incident = self.orchestrator.process_event(event)
+
+        self.assertIn("evidence_package", incident)
+        evidence = incident["evidence_package"]
+        self.assertIn("network_connections", evidence)
+        self.assertIn("loaded_dlls", evidence)
+        self.assertIn("prefetch_entries", evidence)
+        self.assertIn("autoruns_persistence", evidence)
+        self.assertIn("memory_strings", evidence)
+        self.assertIn("collection_metadata", evidence)
+        self.assertGreaterEqual(len(evidence["network_connections"]), 3)
+        self.assertGreaterEqual(len(evidence["loaded_dlls"]), 3)
+
+    def test_ai_copilot_incident_analysis(self):
+        """Verify AI SOC Copilot produces complete analysis reports from incident data"""
+        event = simulate_t1003_lsass_dump()
+        incident = self.orchestrator.process_event(event)
+
+        self.assertIn("ai_analysis", incident)
+        analysis = incident["ai_analysis"]
+        self.assertIn("executive_summary", analysis)
+        self.assertIn("root_cause_analysis", analysis)
+        self.assertIn("remediation_guidance", analysis)
+        self.assertIn("risk_verdict", analysis)
+        self.assertIn("mitre_context", analysis)
+        self.assertIsInstance(analysis["executive_summary"], str)
+        self.assertGreater(len(analysis["executive_summary"]), 50)
+        self.assertIsInstance(analysis["remediation_guidance"], list)
+        self.assertGreaterEqual(len(analysis["remediation_guidance"]), 3)
+        self.assertIn(analysis["risk_verdict"]["verdict"], ["TRUE_POSITIVE", "FALSE_POSITIVE", "REQUIRES_INVESTIGATION"])
+
+    def test_syslog_webhook_ingestion_handler(self):
+        """Verify webhook ingestion handler normalizes valid events and rejects invalid ones"""
+        handler = WebhookIngestionHandler()
+
+        valid_event = {
+            "event_id": 10,
+            "computer_name": "WIN-DC01.corp.local",
+            "source_ip": "185.220.101.33",
+            "user": "CORP\\Administrator",
+            "details": {
+                "SourceImage": "C:\\Windows\\Temp\\mimikatz.exe",
+                "TargetImage": "C:\\Windows\\System32\\lsass.exe",
+                "GrantedAccess": "0x1010"
+            }
+        }
+        result = handler.handle_ingest(valid_event)
+        self.assertEqual(result["status"], "SUCCESS")
+        self.assertIn("normalized_event", result)
+
+        invalid_event = {"random_field": "no_event_id"}
+        result_bad = handler.handle_ingest(invalid_event)
+        self.assertNotEqual(result_bad.get("status"), "SUCCESS")
+
+    def test_identity_blast_radius_analysis(self):
+        """Verify identity blast radius engine calculates compromise impact for AD users"""
+        engine = IdentityBlastRadiusEngine()
+
+        admin_analysis = engine.analyze_compromised_identity("Administrator")
+        self.assertIn("compromised_user", admin_analysis)
+        self.assertIn("blast_radius_score", admin_analysis)
+        self.assertGreaterEqual(admin_analysis["blast_radius_score"], 80)
+        self.assertIn("shortest_path_to_domain_admin", admin_analysis)
+        self.assertIn("recommended_containment", admin_analysis)
+
+        user_analysis = engine.analyze_compromised_identity("j.doe")
+        self.assertLess(user_analysis["blast_radius_score"], admin_analysis["blast_radius_score"])
+
+        delegation_risks = engine.get_kerberos_delegation_risks()
+        self.assertIsInstance(delegation_risks, list)
 
 if __name__ == "__main__":
     unittest.main()

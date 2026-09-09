@@ -199,6 +199,54 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/purple-team/scenarios":
             self._send_json(200, {"scenarios": list(SCENARIOS.keys())})
 
+        elif path.startswith("/api/incidents/") and path.endswith("/attack-graph"):
+            inc_id = path.split("/")[3]
+            if inc_id in orchestrator.dfir_engine.incidents:
+                inc = orchestrator.dfir_engine.incidents[inc_id]
+                graph = inc.get("attack_graph") or orchestrator.attack_graph_engine.build_attack_graph(inc)
+                self._send_json(200, {"attack_graph": graph})
+            else:
+                self._send_json(404, {"error": "Incident not found"})
+
+        elif path.startswith("/api/incidents/") and path.endswith("/evidence"):
+            inc_id = path.split("/")[3]
+            if inc_id in orchestrator.dfir_engine.incidents:
+                inc = orchestrator.dfir_engine.incidents[inc_id]
+                evidence = inc.get("evidence_package", {})
+                self._send_json(200, {"evidence_package": evidence})
+            else:
+                self._send_json(404, {"error": "Incident not found"})
+
+        elif path.startswith("/api/incidents/") and path.endswith("/ai-analysis"):
+            inc_id = path.split("/")[3]
+            if inc_id in orchestrator.dfir_engine.incidents:
+                inc = orchestrator.dfir_engine.incidents[inc_id]
+                analysis = inc.get("ai_analysis") or orchestrator.ai_copilot.generate_incident_analysis(inc)
+                self._send_json(200, {"ai_analysis": analysis})
+            else:
+                self._send_json(404, {"error": "Incident not found"})
+
+        elif path.startswith("/api/incidents/") and path.endswith("/identity"):
+            inc_id = path.split("/")[3]
+            if inc_id in orchestrator.dfir_engine.incidents:
+                inc = orchestrator.dfir_engine.incidents[inc_id]
+                identity = inc.get("identity_blast_radius", {})
+                self._send_json(200, {"identity_blast_radius": identity})
+            else:
+                self._send_json(404, {"error": "Incident not found"})
+
+        elif path == "/api/syslog/stats":
+            stats = orchestrator.syslog_receiver.get_stats()
+            self._send_json(200, stats)
+
+        elif path == "/api/identity/graph":
+            graph_data = orchestrator.identity_engine.generate_identity_graph_data()
+            self._send_json(200, graph_data)
+
+        elif path == "/api/identity/delegation-risks":
+            risks = orchestrator.identity_engine.get_kerberos_delegation_risks()
+            self._send_json(200, {"delegation_risks": risks})
+
         else:
             super().do_GET()
 
@@ -272,6 +320,31 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json(200, {"status": "SUCCESS", "active_policy_mode": new_mode})
             else:
                 self._send_json(400, {"error": "Invalid mode. Choose AUTOMATIC, APPROVAL_REQUIRED, or DRY_RUN."})
+
+        elif path == "/api/ingest":
+            result = orchestrator.webhook_ingest.handle_ingest(data)
+            if result.get("status") == "SUCCESS" and result.get("normalized_event"):
+                incident = orchestrator.process_event(result["normalized_event"])
+                self._send_json(200, {"status": "INGESTED_AND_PROCESSED", "incident": incident})
+            else:
+                self._send_json(400, result)
+
+        elif path == "/api/identity/analyze":
+            username = data.get("username", "")
+            if username:
+                analysis = orchestrator.identity_engine.analyze_compromised_identity(username)
+                self._send_json(200, analysis)
+            else:
+                self._send_json(400, {"error": "Missing 'username' field."})
+
+        elif path == "/api/identity/path":
+            from_user = data.get("from_user", "")
+            to_user = data.get("to_user", "Administrator")
+            if from_user:
+                path_result = orchestrator.identity_engine.get_shortest_path(from_user, to_user)
+                self._send_json(200, path_result)
+            else:
+                self._send_json(400, {"error": "Missing 'from_user' field."})
 
         else:
             self._send_json(404, {"error": "Endpoint Not Found"})

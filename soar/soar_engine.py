@@ -1,7 +1,9 @@
 """
 Enterprise SOAR Engine & Detection Orchestrator for CyberPulse SOC Suite
 Integrates Detection Matching, Non-Blocking Threat Intel, Multi-Factor Risk Scoring, 
-Configurable Policy Evaluation, Resilient Containment, DFIR Case Generation, and Observability.
+Configurable Policy Evaluation, Resilient Containment, DFIR Case Generation,
+Attack Graph Visualization, DFIR Evidence Collection, AI Analyst Copilot,
+Live Syslog Ingestion, Identity Blast Radius Analysis, and Observability.
 """
 
 import json
@@ -15,6 +17,11 @@ from soar.resilient_containment import ResilientContainmentEngine
 from soar.dfir_engine import DFIREngine
 from soar.metrics_engine import SOCMetricsEngine
 from soar.health_monitor import IntegrationHealthMonitor
+from soar.attack_graph import AttackGraphEngine
+from soar.evidence_collector import VolatileEvidenceCollector
+from soar.ai_copilot import SOCCopilot
+from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
+from soar.identity_graph import IdentityBlastRadiusEngine
 
 # Curated Threat Intelligence & GeoIP Database
 THREAT_INTEL_CACHE = {
@@ -113,6 +120,12 @@ class SOAROrchestrator:
         self.metrics_engine = SOCMetricsEngine()
         self.health_monitor = IntegrationHealthMonitor()
         self.dispatcher = WebhookDispatcher(webhook_url=webhook_url)
+        self.attack_graph_engine = AttackGraphEngine()
+        self.evidence_collector = VolatileEvidenceCollector()
+        self.ai_copilot = SOCCopilot()
+        self.syslog_receiver = SyslogReceiver(port=5514)
+        self.webhook_ingest = WebhookIngestionHandler()
+        self.identity_engine = IdentityBlastRadiusEngine()
 
     @property
     def alert_history(self):
@@ -305,7 +318,28 @@ class SOAROrchestrator:
             contained=(containment_action["status"] == "SUCCESS")
         )
 
-        # Stage 8: Real-Time Mobile / Slack / Discord Notification
+        # Stage 8: Pre-Containment Volatile Evidence Collection
+        evidence_package = self.evidence_collector.collect_volatile_evidence(event, containment_action)
+        incident["evidence_package"] = evidence_package
+        incident["thehive_evidence_attachment"] = self.evidence_collector.package_for_thehive(evidence_package)
+
+        # Stage 9: Interactive Attack Graph & Process Tree
+        attack_graph = self.attack_graph_engine.build_attack_graph(incident)
+        incident["attack_graph"] = attack_graph
+
+        # Stage 10: AI SOC Analyst Copilot Report
+        ai_analysis = self.ai_copilot.generate_incident_analysis(incident)
+        incident["ai_analysis"] = ai_analysis
+
+        # Stage 11: Identity Blast Radius Analysis
+        target_username = (event.get("user", "") or "").split("\\")[-1] if event.get("user") else None
+        if target_username:
+            identity_analysis = self.identity_engine.analyze_compromised_identity(target_username)
+            incident["identity_blast_radius"] = identity_analysis
+        else:
+            incident["identity_blast_radius"] = {"status": "NO_USER_CONTEXT"}
+
+        # Stage 12: Real-Time Mobile / Slack / Discord Notification
         webhook_res = self.dispatcher.dispatch(incident, custom_webhook_url=custom_webhook_url)
         incident["webhook_dispatch"] = webhook_res
 
