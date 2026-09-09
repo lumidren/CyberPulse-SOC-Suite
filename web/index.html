@@ -146,6 +146,14 @@
                             <i class="fa-solid fa-file-invoice-dollar"></i>
                             <div><strong>T1486: Ransomware Canary</strong><br><small>Sysmon 11 -> VSS Recovery</small></div>
                         </button>
+                        <button class="attack-btn" onclick="triggerSimulation('cloud_aws')">
+                            <i class="fa-brands fa-aws"></i>
+                            <div><strong>T1548: AWS AssumeRole Abuse</strong><br><small>CloudTrail -> STS Revoke & Deny</small></div>
+                        </button>
+                        <button class="attack-btn" onclick="triggerSimulation('cloud_entra')">
+                            <i class="fa-brands fa-microsoft"></i>
+                            <div><strong>T1078: Entra Impossible Travel</strong><br><small>SignInLogs -> Revoke Token & MFA</small></div>
+                        </button>
                     </div>
 
                     <div class="quick-actions">

@@ -209,6 +209,33 @@ class SOAROrchestrator:
                 "action_recommended": "ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES"
             }
 
+        elif event_id == 9901 or (event.get("event_source") == "aws:cloudtrail" and details.get("eventName") == "AssumeRole"):
+            return {
+                "rule_id": "SOC-RULE-009",
+                "rule_name": "Suspicious Cross-Account AWS STS AssumeRole Abuse",
+                "severity": "HIGH",
+                "mitre_id": "T1548",
+                "action_recommended": "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY"
+            }
+
+        elif event_id == 9902 or (event.get("event_source") == "azure:signinlogs" and "impossibleTravel" in str(details)):
+            return {
+                "rule_id": "SOC-RULE-010",
+                "rule_name": "Microsoft Entra ID Impossible Travel Anomaly",
+                "severity": "HIGH",
+                "mitre_id": "T1078",
+                "action_recommended": "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA"
+            }
+
+        elif event_id == 6 and any(drv in details.get("ImageLoaded", "").lower() for drv in ["gdrv.sys", "mhyprot2.sys", "procexp.sys"]):
+            return {
+                "rule_id": "SOC-RULE-011",
+                "rule_name": "Vulnerable Kernel Driver Load (BYOVD Defense Evasion)",
+                "severity": "CRITICAL",
+                "mitre_id": "T1068",
+                "action_recommended": "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK"
+            }
+
         return None
 
     def enrich_threat_intel(self, event):
