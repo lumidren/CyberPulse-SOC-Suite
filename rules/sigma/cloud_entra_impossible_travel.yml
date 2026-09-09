@@ -1,0 +1,27 @@
+title: Microsoft Entra ID Impossible Travel Anomaly
+id: e8f9a0b1-c2d3-4456-b789-0abcdef12345
+status: production
+description: Detects impossible travel login anomalies in Microsoft Entra ID (Azure AD) where user authentications originate from geographically disparate IP addresses within an unrealistic physical travel window.
+references:
+    - https://attack.mitre.org/techniques/T1078/
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-09-09
+tags:
+    - attack.initial_access
+    - attack.credential_access
+    - attack.t1078
+logsource:
+    product: azure
+    service: signinlogs
+detection:
+    selection:
+        Category: 'SignInLogs'
+        OperationName: 'Sign-in activity'
+        ResultType: '0' # Successful signin
+    anomaly:
+        RiskLevelDuringSignIn: 'high'
+        RiskEventTypes|contains: 'impossibleTravel'
+    condition: selection and anomaly
+falsepositives:
+    - Corporate VPN exit node transitions with split tunneling
+level: high

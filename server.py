@@ -23,6 +23,8 @@ from simulator.attack_simulator import (
     simulate_t1486_ransomware_canary,
     simulate_t1558_kerberoasting,
     simulate_t1003_dcsync,
+    simulate_cloud_aws_assumerole,
+    simulate_cloud_entra_impossible_travel,
     generate_random_attack
 )
 from simulator.purple_team_runner import PurpleTeamRunner, SCENARIOS
@@ -303,6 +305,10 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 evt = simulate_t1558_kerberoasting()
             elif attack_type == "t1003_dcsync":
                 evt = simulate_t1003_dcsync()
+            elif attack_type == "cloud_aws":
+                evt = simulate_cloud_aws_assumerole()
+            elif attack_type == "cloud_entra":
+                evt = simulate_cloud_entra_impossible_travel()
             else:
                 evt = generate_random_attack()
 

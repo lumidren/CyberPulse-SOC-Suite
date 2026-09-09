@@ -177,6 +177,46 @@ def simulate_t1003_dcsync():
         }
     }
 
+def simulate_cloud_aws_assumerole():
+    """T1548 / T1078.004: Cross-Account STS AssumeRole Abuse"""
+    return {
+        "event_id": 9901,
+        "event_source": "aws:cloudtrail",
+        "technique_id": "T1548",
+        "technique_name": "Abuse Elevation: Cross-Account AssumeRole",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "computer_name": "aws-prod-account-839201928",
+        "user": "contractor_temp",
+        "source_ip": "185.220.101.33",
+        "details": {
+            "eventName": "AssumeRole",
+            "eventSource": "sts.amazonaws.com",
+            "roleArn": "arn:aws:iam::123456789012:role/AdministratorAccess",
+            "durationSeconds": 3600
+        }
+    }
+
+def simulate_cloud_entra_impossible_travel():
+    """T1078: Microsoft Entra ID Impossible Travel Anomaly"""
+    return {
+        "event_id": 9902,
+        "event_source": "azure:signinlogs",
+        "technique_id": "T1078",
+        "technique_name": "Valid Accounts: Cloud Impossible Travel Anomaly",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "computer_name": "entra-tenant.onmicrosoft.com",
+        "user": "finance_admin",
+        "source_ip": "193.142.146.210",
+        "details": {
+            "Category": "SignInLogs",
+            "OperationName": "Sign-in activity",
+            "RiskLevelDuringSignIn": "high",
+            "RiskEventTypes": "impossibleTravel",
+            "Location": "Bucharest, Romania",
+            "PreviousLocation": "New York, USA"
+        }
+    }
+
 def generate_random_attack():
     """Selects and generates a random adversary emulation event"""
     generators = [
@@ -187,7 +227,9 @@ def generate_random_attack():
         simulate_t1562_defender_tamper,
         simulate_t1486_ransomware_canary,
         simulate_t1558_kerberoasting,
-        simulate_t1003_dcsync
+        simulate_t1003_dcsync,
+        simulate_cloud_aws_assumerole,
+        simulate_cloud_entra_impossible_travel
     ]
     chosen = random.choice(generators)
     return chosen()

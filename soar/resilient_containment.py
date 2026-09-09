@@ -154,6 +154,32 @@ class ResilientContainmentEngine:
             }
             self.disabled_users.add(target_user)
 
+        elif action_type == "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY":
+            action_record["execution_protocol"] = "AWS IAM & STS API (boto3)"
+            action_record["execution_log"] = f"[AWS IAM -> {target_user}] Attached AWSRevokeOlderSessions inline policy and invalidated active STS tokens."
+            action_record["rollback_plan"] = {
+                "method": "AWS_IAM_API",
+                "command": f"aws iam delete-user-policy --user-name '{target_user}' --policy-name AWSRevokeOlderSessions"
+            }
+            self.disabled_users.add(target_user)
+
+        elif action_type == "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA":
+            action_record["execution_protocol"] = "Microsoft Graph API / Azure AD"
+            action_record["execution_log"] = f"[MS Graph -> {target_user}] Revoked all OAuth refresh tokens via RevokeSignInSessions API and enforced immediate MFA re-challenge."
+            action_record["rollback_plan"] = {
+                "method": "MS_GRAPH_API",
+                "command": f"POST https://graph.microsoft.com/v1.0/users/{target_user}/reprocessLicenseAssignment"
+            }
+            self.disabled_users.add(target_user)
+
+        elif action_type == "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK":
+            action_record["execution_protocol"] = "WinRM fltmc / Service Controller + WDAC CI Policy"
+            action_record["execution_log"] = f"[WinRM -> {target_host}] Unloaded vulnerable kernel driver and refreshed WDAC CI Policy to enforce blocklist."
+            action_record["rollback_plan"] = {
+                "method": "WINRM_POWERSHELL",
+                "command": "CiTool.exe -r"
+            }
+
         else:
             action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
             action_record["execution_log"] = "No disruptive containment policy matched. Staged for analyst review."
@@ -203,6 +229,19 @@ class ResilientContainmentEngine:
             rollback_entry["log"] = f"[Active Directory LDAP] Re-enabled user account {target_user} and verified permissions."
             if target_user in self.disabled_users:
                 self.disabled_users.remove(target_user)
+
+        elif action_type == "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY":
+            rollback_entry["log"] = f"[AWS IAM API] Removed AWSRevokeOlderSessions policy from {target_user}. Normal STS session issuance restored."
+            if target_user in self.disabled_users:
+                self.disabled_users.remove(target_user)
+
+        elif action_type == "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA":
+            rollback_entry["log"] = f"[Microsoft Graph API] Cleared forced re-authentication flag on user {target_user}."
+            if target_user in self.disabled_users:
+                self.disabled_users.remove(target_user)
+
+        elif action_type == "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK":
+            rollback_entry["log"] = f"[WinRM TLS 5986 -> {target_host}] Reverted WDAC policy to audit mode. Driver loading restored."
 
         else:
             rollback_entry["log"] = f"Reversed audit flag for action {action_id}."

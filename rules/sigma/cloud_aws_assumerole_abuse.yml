@@ -1,0 +1,35 @@
+title: Suspicious AWS STS AssumeRole Abuse Across External Account
+id: d7e8f9a0-b1c2-4345-a678-9abcdef01234
+status: production
+description: Detects suspicious AWS STS AssumeRole calls originating from unapproved foreign IPs or anomalous role ARNs, characteristic of cloud privilege escalation and cross-account lateral movement.
+references:
+    - https://attack.mitre.org/techniques/T1548/
+    - https://attack.mitre.org/techniques/T1078/004/
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-09-09
+tags:
+    - attack.privilege_escalation
+    - attack.lateral_movement
+    - attack.t1548
+    - attack.t1078.004
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventName: 'AssumeRole'
+        eventSource: 'sts.amazonaws.com'
+    suspicious_arn:
+        requestParameters.roleArn|contains:
+            - 'OrganizationAccountAccessRole'
+            - 'AdministratorAccess'
+            - 'SecurityAudit'
+    filter:
+        sourceIPAddress|startswith:
+            - '10.'
+            - '172.16.'
+            - '192.168.'
+    condition: selection and suspicious_arn and not filter
+falsepositives:
+    - Authorized multi-account CI/CD deployment pipelines (e.g. Terraform / GitHub Actions runners)
+level: high
