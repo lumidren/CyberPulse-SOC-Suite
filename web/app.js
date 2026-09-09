@@ -19,9 +19,11 @@ document.addEventListener("DOMContentLoaded", () => {
     loadMetrics();
     loadDetections();
     loadHealthStatus();
+    loadSyslogStats();
     
     // Poll metrics & health periodically
     setInterval(loadMetrics, 15000);
+    setInterval(loadSyslogStats, 10000);
 });
 
 // Tab Switching Controller
@@ -261,6 +263,12 @@ async function loadIncidentDetails() {
             </div>
         `).join("");
 
+        // Render 5 New Enterprise Modules
+        renderAttackGraph(inc.attack_graph);
+        renderCopilotAnalysis(inc.ai_analysis);
+        renderEvidencePackage(inc.evidence_package);
+        renderIdentityAnalysis(inc.identity_blast_radius);
+
         // Rollback Button State
         const rollbackBtn = document.getElementById("rollbackBtn");
         if (inc.status === "ROLLED_BACK") {
@@ -469,3 +477,249 @@ function saveWebhook() {
         badge.innerText = "STANDBY";
     }
 }
+
+// ==============================================================================
+// 5 NEW ENTERPRISE MODULES JAVASCRIPT CONTROLLERS
+// ==============================================================================
+
+// 1. Attack Graph Renderer
+function renderAttackGraph(graph) {
+    const flowContainer = document.getElementById("attackGraphFlow");
+    if (!flowContainer) return;
+
+    if (!graph || !graph.nodes || graph.nodes.length === 0) {
+        flowContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 12px;">No attack graph data available.</span>`;
+        return;
+    }
+
+    const typeIcons = {
+        attacker: "fa-skull-crossbones",
+        host: "fa-server",
+        user: "fa-user-ninja",
+        process: "fa-gears",
+        containment: "fa-shield-halved",
+        observable: "fa-fingerprint"
+    };
+
+    let html = "";
+    graph.nodes.forEach((node, idx) => {
+        const nType = node.type || "process";
+        const icon = typeIcons[nType] || "fa-circle-dot";
+        const lbl = node.label || node.id;
+        
+        html += `
+            <div class="graph-node-box ${nType}">
+                <div class="graph-node-type"><i class="fa-solid ${icon}"></i> ${nType}</div>
+                <div class="graph-node-label">${lbl}</div>
+            </div>
+        `;
+
+        if (idx < graph.nodes.length - 1) {
+            html += `<div class="graph-arrow"><i class="fa-solid fa-arrow-right"></i></div>`;
+        }
+    });
+
+    flowContainer.innerHTML = html;
+}
+
+// 2. AI SOC Analyst Copilot Renderer
+function renderCopilotAnalysis(ai) {
+    if (!ai) return;
+
+    const summaryEl = document.getElementById("copilotExecSummary");
+    if (summaryEl && ai.executive_summary) {
+        summaryEl.innerHTML = `<i class="fa-solid fa-sparkles" style="color: var(--color-purple); margin-right: 6px;"></i> ${ai.executive_summary}`;
+    }
+
+    const rca = ai.root_cause_analysis || {};
+    if (document.getElementById("rcaVector")) document.getElementById("rcaVector").innerText = rca.initial_vector || "Unknown";
+    if (document.getElementById("rcaPrivEsc")) document.getElementById("rcaPrivEsc").innerText = rca.privilege_escalation_path || "None";
+    if (document.getElementById("rcaPersistence")) document.getElementById("rcaPersistence").innerText = rca.persistence_mechanism || "None";
+    if (document.getElementById("rcaDataRisk")) document.getElementById("rcaDataRisk").innerText = rca.data_at_risk || "Low";
+
+    const remList = document.getElementById("copilotRemediationList");
+    if (remList && Array.isArray(ai.remediation_guidance)) {
+        remList.innerHTML = ai.remediation_guidance.map(step => `
+            <li><i class="fa-solid fa-check" style="color: var(--color-green);"></i> ${step}</li>
+        `).join("");
+    }
+
+    const verdictBadge = document.getElementById("copilotVerdictBadge");
+    if (verdictBadge && ai.risk_verdict) {
+        const v = ai.risk_verdict.verdict || "TRUE_POSITIVE";
+        const conf = ai.risk_verdict.confidence_pct || 98;
+        verdictBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${v} (${conf}%)`;
+    }
+}
+
+// 3. DFIR Volatile Evidence Box Renderer
+let currentEvidencePackage = null;
+
+function renderEvidencePackage(evidence) {
+    if (!evidence) return;
+    currentEvidencePackage = evidence;
+
+    // Sockets
+    const sockets = evidence.network_connections || [];
+    const tbody = document.getElementById("evNetTableBody");
+    if (tbody) {
+        tbody.innerHTML = sockets.map(s => `
+            <tr>
+                <td><code>${s.pid}</code></td>
+                <td><strong>${s.process_name}</strong></td>
+                <td>${s.local_addr}</td>
+                <td><span style="color: var(--color-red); font-weight: 600;">${s.remote_addr}</span></td>
+                <td><span class="badge-blue">${s.state}</span></td>
+            </tr>
+        `).join("");
+    }
+
+    // DLLs
+    const dlls = evidence.loaded_dlls || [];
+    const dllEl = document.getElementById("evDllList");
+    if (dllEl) {
+        dllEl.innerHTML = dlls.map(d => `<span class="dll-pill">${d}</span>`).join("");
+    }
+
+    // Prefetch
+    const prefetch = evidence.prefetch_entries || [];
+    const prefEl = document.getElementById("evPrefetchList");
+    if (prefEl) {
+        prefEl.innerHTML = prefetch.map(p => `
+            <span class="dll-pill"><i class="fa-solid fa-file-waveform"></i> ${p.executable_name} (Runs: ${p.run_count})</span>
+        `).join("");
+    }
+
+    // Autoruns
+    const autoruns = evidence.autoruns_persistence || [];
+    const autoEl = document.getElementById("evAutorunList");
+    if (autoEl) {
+        autoEl.innerHTML = autoruns.map(a => `
+            <div style="background: var(--bg-secondary); padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-bottom: 6px;">
+                <strong>${a.entry_name || a.location}:</strong> <code>${a.image_path || a.command || ''}</code>
+            </div>
+        `).join("");
+    }
+
+    // Memory Strings
+    const memStrings = evidence.memory_strings || [];
+    const memEl = document.getElementById("evMemoryList");
+    if (memEl) {
+        memEl.innerHTML = memStrings.map(m => `
+            <div style="background: var(--bg-secondary); padding: 8px 12px; border-radius: 6px; font-size: 11px; font-family: monospace; color: #fca5a5; margin-bottom: 6px;">
+                ${m}
+            </div>
+        `).join("");
+    }
+}
+
+function switchEvidenceTab(paneId) {
+    document.querySelectorAll(".evidence-pane").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".ev-tab-btn").forEach(b => b.classList.remove("active"));
+    
+    const target = document.getElementById(paneId);
+    if (target) target.classList.add("active");
+    
+    const btn = Array.from(document.querySelectorAll(".ev-tab-btn")).find(b => b.getAttribute("onclick")?.includes(paneId));
+    if (btn) btn.classList.add("active");
+}
+
+function downloadEvidencePackage() {
+    if (!currentEvidencePackage) {
+        alert("No evidence package loaded for current incident.");
+        return;
+    }
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentEvidencePackage, null, 2));
+    const dlAnchor = document.createElement("a");
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `cyberpulse_dfir_evidence_${activeIncidentId || "package"}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+}
+
+// 4. Active Directory Identity Blast Radius Renderer
+function renderIdentityAnalysis(idData) {
+    if (!idData) return;
+
+    if (document.getElementById("idBlastScore")) {
+        const score = idData.blast_radius_score || 0;
+        document.getElementById("idBlastScore").innerText = `${score}/100`;
+    }
+    if (document.getElementById("idAffectedAssets")) {
+        document.getElementById("idAffectedAssets").innerText = idData.affected_assets_count || 0;
+    }
+    if (document.getElementById("idDirectGroups")) {
+        document.getElementById("idDirectGroups").innerText = (idData.direct_groups || []).length;
+    }
+    if (document.getElementById("idDelegationRisk")) {
+        document.getElementById("idDelegationRisk").innerText = idData.delegation_risks || "None";
+    }
+
+    const pathBreadcrumb = document.getElementById("idPathBreadcrumb");
+    if (pathBreadcrumb) {
+        const path = idData.shortest_path_to_domain_admin || [];
+        if (path.length > 0) {
+            pathBreadcrumb.innerHTML = path.map((step, idx) => {
+                const isDA = idx === path.length - 1;
+                return `
+                    <span class="path-step ${isDA ? 'da-target' : ''}">${step}</span>
+                    ${idx < path.length - 1 ? '<i class="fa-solid fa-arrow-right" style="color: var(--text-muted); font-size: 11px;"></i>' : ''}
+                `;
+            }).join("");
+        } else {
+            pathBreadcrumb.innerHTML = `<span style="color: var(--text-muted);">No direct attack path to Domain Admin detected.</span>`;
+        }
+    }
+
+    const recList = document.getElementById("idIamRecommendations");
+    if (recList) {
+        const recs = idData.recommended_containment || [];
+        recList.innerHTML = recs.map(r => `
+            <li><i class="fa-solid fa-user-lock" style="color: var(--color-green);"></i> ${r}</li>
+        `).join("");
+    }
+}
+
+// 5. Live Ingestion & Syslog Controller
+async function loadSyslogStats() {
+    try {
+        const res = await fetch("/api/syslog/stats");
+        const stats = await res.json();
+        
+        if (document.getElementById("syslogTotalRecv")) document.getElementById("syslogTotalRecv").innerText = stats.total_received || 0;
+        if (document.getElementById("syslogTotalParsed")) document.getElementById("syslogTotalParsed").innerText = stats.total_parsed || 0;
+        if (document.getElementById("syslogTotalErrors")) document.getElementById("syslogTotalErrors").innerText = stats.total_errors || 0;
+        if (document.getElementById("syslogUptime")) document.getElementById("syslogUptime").innerText = `${stats.uptime_seconds || 0}s`;
+    } catch (err) {
+        // Syslog endpoint poll quiet error
+    }
+}
+
+async function sendCustomIngest() {
+    const payloadText = document.getElementById("customIngestPayload")?.value;
+    const badge = document.getElementById("ingestResultBadge");
+    
+    try {
+        const payload = JSON.parse(payloadText);
+        badge.innerHTML = `<span style="color: var(--color-blue);"><i class="fa-solid fa-spinner fa-spin"></i> Ingesting event...</span>`;
+
+        const res = await fetch("/api/ingest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (res.ok && data.status === "INGESTED_AND_PROCESSED") {
+            badge.innerHTML = `<span style="color: var(--color-green); font-weight: bold;"><i class="fa-solid fa-check"></i> Event successfully ingested & processed! Incident ID: ${data.incident?.incident_id}</span>`;
+            loadIncidents();
+            loadMetrics();
+        } else {
+            badge.innerHTML = `<span style="color: var(--color-red); font-weight: bold;"><i class="fa-solid fa-triangle-exclamation"></i> Ingest failed: ${data.error || 'Check event structure'}</span>`;
+        }
+    } catch (err) {
+        badge.innerHTML = `<span style="color: var(--color-red); font-weight: bold;"><i class="fa-solid fa-triangle-exclamation"></i> JSON parse error: ${err.message}</span>`;
+    }
+}
+

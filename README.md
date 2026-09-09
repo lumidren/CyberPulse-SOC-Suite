@@ -156,6 +156,54 @@ Instrumented across **60+ adversary emulation executions**:
 
 ---
 
+## ⚡ 5 Advanced Enterprise Intelligence & DFIR Modules
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             5 ADVANCED ENTERPRISE SOC PILLARS                               │
+├──────────────────────┬──────────────────────┬──────────────────────┬────────────────────────┤
+│ 1. Attack Graph      │ 2. DFIR Packager     │ 3. AI SOC Copilot    │ 4. Identity & Ingest   │
+├──────────────────────┼──────────────────────┼──────────────────────┼────────────────────────┤
+│ • Process Lineage    │ • Pre-Isolation Net  │ • Offline Rule-Based │ • BloodHound AD Path   │
+│ • Cytoscape/Vis JSON │ • Loaded DLL Hooks   │ • Root Cause (RCA)   │ • Kerberos Delegation  │
+│ • Interactive Canvas │ • Prefetch Artifacts │ • Actionable Triage  │ • RFC 5424 Syslog 5514 │
+│ • Blast Radius Score │ • TheHive Attachment │ • Verdict Confidence │ • REST POST /api/ingest│
+└──────────────────────┴──────────────────────┴──────────────────────┴────────────────────────┘
+```
+
+1. **🕸️ Interactive Attack Graph & Process Lineage (`soar/attack_graph.py`)**:
+   Constructs directed dependency graphs mapping:
+   $$\text{Attacker IP} \longrightarrow \text{Target Host} \longrightarrow \text{User Account} \longrightarrow \text{Parent Process} \longrightarrow \text{Child Process} \longrightarrow \text{Containment Action}$$
+   Exposes node metadata, SHA256 hashes, and lateral risk scores.
+
+2. **🧬 Pre-Containment DFIR Volatile Evidence Packager (`soar/evidence_collector.py`)**:
+   Automatically captures volatile endpoint state *prior* to network isolation, preventing forensic evidence loss:
+   * Active TCP/UDP socket connections (PID, foreign IP, port state)
+   * Loaded DLLs of offending processes
+   * Windows Prefetch execution counters and timestamps
+   * Autorun registry keys and scheduled persistence hooks
+   * Suspicious memory strings and C2 patterns formatted as **TheHive 5** case attachments.
+
+3. **🤖 AI SOC Analyst Copilot (`soar/ai_copilot.py`)**:
+   Operates **100% offline with zero external API dependencies**, synthesizing raw telemetry and threat intelligence into:
+   * Executive Incident Summary (Plain-English briefing for leadership)
+   * Root Cause Analysis (Initial vector, privilege escalation path, persistence, data at risk)
+   * Tailored Remediation Guidance (4-6 prioritized engineering actions)
+   * Risk Verdict (`TRUE_POSITIVE` confidence percentage and reasoning).
+
+4. **🩸 Active Directory Identity Blast Radius & Attack Path Engine (`soar/identity_graph.py`)**:
+   BloodHound-inspired identity analyzer evaluating:
+   * Shortest attack path from compromised identity to **Domain Admin** (`Administrator`)
+   * Nested group escalation vectors (e.g. *Helpdesk Admins* ➔ *Server Operators*)
+   * Kerberos unconstrained/constrained delegation risks
+   * Recommended IAM containment (e.g. targeted group revocations and Kerberos TGT invalidation).
+
+5. **🛰️ Live RFC 5424 Syslog Receiver & Ingestion Gateway (`soar/syslog_receiver.py`)**:
+   * Daemon listener accepting RFC 5424 syslog packets over **UDP port 5514**
+   * REST ingestion API (`POST /api/ingest`) allowing external virtual machines (Wazuh agents, Sysmon forwarders) to stream live events directly into CyberPulse's detection and SOAR pipeline.
+
+---
+
 ## 🚀 Quickstart & Verification Commands
 
 ### 1. Interactive Enterprise CLI Operations Suite:
@@ -163,7 +211,7 @@ Instrumented across **60+ adversary emulation executions**:
 python start_lab.py
 ```
 
-### 2. Run the Automated Detection & SOAR Test Suite (13 Test Scenarios):
+### 2. Run the Automated Detection & SOAR Test Suite (18 Test Scenarios):
 ```bash
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
@@ -172,7 +220,14 @@ python -m unittest discover -s tests -p "test_*.py" -v
 ```bash
 python server.py
 ```
-Open **`http://localhost:5000`** in your browser.
+Open **`http://localhost:5000`** in your browser to access:
+* **SOC Overview**: Real-time Leaflet GeoIP Threat Map, KPI summary, and live adversary launcher.
+* **Incident DFIR**: Microsecond chronological timeline, **Interactive Attack Graph**, **AI Copilot briefing**, **DFIR Volatile Evidence Box**, **AD Identity Blast Radius**, and **1-click containment rollback**.
+* **Detection Catalogue**: Searchable rulebase with MITRE tags and DELC lifecycle links.
+* **SOAR Policies**: Risk tier matrix and dry-run simulation mode toggles.
+* **Purple Team Replay**: Interactive APT29 and LockBit campaign runners.
+* **System Health**: Active socket diagnostics for Wazuh, OpenSearch, WinRM, and APIs.
+* **Live Ingestion & Syslog**: Live UDP 5514 daemon statistics and interactive Webhook tester.
 
 ---
 
@@ -186,5 +241,7 @@ GitHub: https://github.com/lumidren/CyberPulse-SOC-Suite
 • Authored 7+ vendor-agnostic Sigma YAML and Wazuh XML detection rules following the formal Detection Engineering Lifecycle (DELC), covering Kerberoasting (T1558.001), DCSync (T1003.006), LSASS dumping (T1003.001), and Defender tampering (T1562.001).
 • Built a fault-tolerant SOAR containment engine with circuit breakers, idempotent actions, and one-click rollback capabilities for WinRM host isolation and pfSense firewall drops.
 • Implemented an automated Purple Team Replay Engine validating multi-stage APT29 and LockBit campaigns with a 100% stage verification rate and < 3.2s MTTC.
-• Built an automated GitHub Actions CI/CD pipeline running 13 unit and integration test scenarios on every commit.
+• Built an Interactive Attack Graph Visualizer, Pre-Containment DFIR Volatile Evidence Packager, 100% Offline AI SOC Analyst Copilot, AD Identity Blast Radius Analyzer, and RFC 5424 Syslog UDP Ingestion Gateway.
+• Built an automated GitHub Actions CI/CD pipeline running 18 unit and integration test scenarios on every commit.
 ```
+

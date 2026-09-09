@@ -591,3 +591,345 @@ body {
 .health-card-top strong { font-size: 14px; }
 .health-msg { font-size: 12px; color: var(--text-secondary); }
 .health-lat { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+
+/* ==============================================================================
+   5 NEW ENTERPRISE MODULE STYLES
+   ============================================================================== */
+
+/* 1. Attack Graph Visualizer */
+.attack-graph-card {
+    margin-top: 16px;
+}
+
+.attack-graph-canvas {
+    background: #0d131f;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: auto;
+}
+
+.graph-flow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+
+.graph-node-box {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-width: 140px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.graph-node-box:hover {
+    transform: translateY(-2px);
+}
+
+.graph-node-box.attacker { border-color: var(--color-red); box-shadow: 0 0 12px rgba(239,68,68,0.3); }
+.graph-node-box.host { border-color: var(--color-blue); box-shadow: 0 0 12px rgba(56,189,248,0.3); }
+.graph-node-box.user { border-color: var(--color-yellow); box-shadow: 0 0 12px rgba(234,179,8,0.3); }
+.graph-node-box.process { border-color: var(--color-purple); box-shadow: 0 0 12px rgba(168,85,247,0.3); }
+.graph-node-box.containment { border-color: var(--color-green); box-shadow: 0 0 12px rgba(34,197,94,0.3); }
+.graph-node-box.observable { border-color: var(--color-orange); }
+
+.graph-node-type {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+.graph-node-label {
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 4px;
+    word-break: break-all;
+}
+
+.graph-arrow {
+    color: var(--color-blue);
+    font-size: 18px;
+    animation: pulseArrow 1.5s infinite;
+}
+
+@keyframes pulseArrow {
+    0%, 100% { opacity: 0.6; transform: translateX(0); }
+    50% { opacity: 1; transform: translateX(4px); }
+}
+
+/* 2. AI SOC Analyst Copilot */
+.copilot-card {
+    margin-top: 16px;
+    border-left: 4px solid var(--color-purple);
+}
+
+.copilot-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.copilot-verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.copilot-verdict.true-positive {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid var(--color-red);
+}
+
+.copilot-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.copilot-exec-summary {
+    background: rgba(168, 85, 247, 0.08);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #e9d5ff;
+}
+
+.copilot-rca-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.rca-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 12px;
+}
+
+.rca-item strong {
+    color: var(--color-blue);
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.remediation-checklist {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.remediation-checklist li {
+    background: var(--bg-secondary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-left: 3px solid var(--color-green);
+}
+
+/* 3. DFIR Volatile Evidence Box */
+.evidence-card {
+    margin-top: 16px;
+}
+
+.evidence-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+.ev-tab-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ev-tab-btn.active, .ev-tab-btn:hover {
+    background: var(--bg-accent);
+    color: var(--color-blue);
+    border-color: var(--color-blue);
+}
+
+.evidence-pane {
+    display: none;
+}
+
+.evidence-pane.active {
+    display: block;
+}
+
+.socket-table {
+    width: 100%;
+    font-size: 11px;
+    border-collapse: collapse;
+}
+
+.socket-table th, .socket-table td {
+    padding: 6px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.socket-table th {
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+}
+
+.dll-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.dll-pill {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: monospace;
+    color: var(--text-secondary);
+}
+
+/* 4. Active Directory Identity Blast Radius */
+.identity-card {
+    margin-top: 16px;
+    border-left: 4px solid var(--color-yellow);
+}
+
+.identity-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.id-stat-box {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+}
+
+.id-stat-box .stat-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--color-yellow);
+}
+
+.id-stat-box .stat-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.path-breadcrumb {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 12px;
+}
+
+.path-step {
+    background: var(--bg-card);
+    border: 1px solid var(--color-blue);
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.path-step.da-target {
+    border-color: var(--color-red);
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+}
+
+/* 5. Live Ingestion & Syslog Tab */
+.ingest-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .ingest-grid { grid-template-columns: 1fr; }
+}
+
+.syslog-stats-card {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.syslog-stat {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 14px;
+    text-align: center;
+}
+
+.syslog-stat h3 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--color-blue);
+}
+
+.syslog-stat span {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.payload-textarea {
+    width: 100%;
+    min-height: 180px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: #38bdf8;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    resize: vertical;
+}
+
