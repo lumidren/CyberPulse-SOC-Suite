@@ -31,6 +31,7 @@
                 <button class="nav-btn" onclick="switchTab('tab-soar')"><i class="fa-solid fa-robot"></i> SOAR Policies</button>
                 <button class="nav-btn" onclick="switchTab('tab-purple')"><i class="fa-solid fa-flag"></i> Purple Team Replay</button>
                 <button class="nav-btn" onclick="switchTab('tab-health')"><i class="fa-solid fa-heart-pulse"></i> System Health</button>
+                <button class="nav-btn" onclick="switchTab('tab-ingest')"><i class="fa-solid fa-satellite-dish"></i> Live Ingestion & Syslog</button>
             </nav>
         </div>
 
@@ -263,6 +264,96 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 1. Interactive Attack Graph & Process Lineage Card -->
+            <div class="card attack-graph-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-diagram-project"></i> Interactive Attack Graph & Process Lineage</h3>
+                    <span class="badge-purple">Attacker ➔ Host ➔ Process Tree ➔ Containment</span>
+                </div>
+                <p class="section-desc">Directed graph mapping adversary network entry, targeted process handles, user tokens, and automated SOAR action:</p>
+                <div class="attack-graph-canvas" id="attackGraphCanvas">
+                    <div class="graph-flow" id="attackGraphFlow"></div>
+                </div>
+            </div>
+
+            <!-- 2. AI SOC Analyst Copilot Card -->
+            <div class="card copilot-card">
+                <div class="card-header copilot-header">
+                    <h3><i class="fa-solid fa-brain"></i> AI SOC Analyst Copilot | Incident Triage Briefing</h3>
+                    <span id="copilotVerdictBadge" class="copilot-verdict true-positive"><i class="fa-solid fa-triangle-exclamation"></i> TRUE POSITIVE (98%)</span>
+                </div>
+                <div class="copilot-body">
+                    <div class="copilot-exec-summary" id="copilotExecSummary">
+                        Loading executive summary...
+                    </div>
+                    <div class="copilot-rca-grid">
+                        <div class="rca-item"><strong>Initial Attack Vector</strong><span id="rcaVector">-</span></div>
+                        <div class="rca-item"><strong>Privilege Escalation</strong><span id="rcaPrivEsc">-</span></div>
+                        <div class="rca-item"><strong>Persistence Mechanism</strong><span id="rcaPersistence">-</span></div>
+                        <div class="rca-item"><strong>Data at Risk</strong><span id="rcaDataRisk">-</span></div>
+                    </div>
+                    <div class="copilot-remediation">
+                        <h4 style="margin-bottom: 8px; font-size: 13px; color: var(--color-green);"><i class="fa-solid fa-list-check"></i> Actionable Incident Remediation Steps:</h4>
+                        <ul class="remediation-checklist" id="copilotRemediationList"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. DFIR Volatile Evidence Box -->
+            <div class="card evidence-card">
+                <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3><i class="fa-solid fa-box-archive"></i> Pre-Containment DFIR Volatile Evidence Package</h3>
+                    <button class="btn-primary" onclick="downloadEvidencePackage()"><i class="fa-solid fa-download"></i> Export TheHive 5 Package (JSON)</button>
+                </div>
+                <p class="section-desc">Volatile state captured immediately before network isolation was enforced:</p>
+                <div class="evidence-nav">
+                    <button class="ev-tab-btn active" onclick="switchEvidenceTab('ev-net')"><i class="fa-solid fa-network-wired"></i> Active Connections</button>
+                    <button class="ev-tab-btn" onclick="switchEvidenceTab('ev-dll')"><i class="fa-solid fa-file-code"></i> Loaded DLLs</button>
+                    <button class="ev-tab-btn" onclick="switchEvidenceTab('ev-prefetch')"><i class="fa-solid fa-clock-rotate-left"></i> Prefetch Records</button>
+                    <button class="ev-tab-btn" onclick="switchEvidenceTab('ev-autorun')"><i class="fa-solid fa-wrench"></i> Autorun Persistence</button>
+                    <button class="ev-tab-btn" onclick="switchEvidenceTab('ev-memory')"><i class="fa-solid fa-memory"></i> Memory Strings</button>
+                </div>
+                <div id="ev-net" class="evidence-pane active">
+                    <table class="socket-table">
+                        <thead><tr><th>PID</th><th>Process</th><th>Local Address</th><th>Remote Address</th><th>State</th></tr></thead>
+                        <tbody id="evNetTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="ev-dll" class="evidence-pane">
+                    <div class="dll-pills" id="evDllList"></div>
+                </div>
+                <div id="ev-prefetch" class="evidence-pane">
+                    <div class="dll-pills" id="evPrefetchList"></div>
+                </div>
+                <div id="ev-autorun" class="evidence-pane">
+                    <div id="evAutorunList"></div>
+                </div>
+                <div id="ev-memory" class="evidence-pane">
+                    <div id="evMemoryList"></div>
+                </div>
+            </div>
+
+            <!-- 4. Active Directory Identity Blast Radius -->
+            <div class="card identity-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-sitemap"></i> Active Directory Identity Blast Radius & Attack Path</h3>
+                    <span class="badge-yellow">Zero Trust IAM Analysis</span>
+                </div>
+                <p class="section-desc">Shortest path from compromised identity to Domain Admin and blast radius containment:</p>
+                <div class="identity-summary-grid">
+                    <div class="id-stat-box"><div class="stat-val" id="idBlastScore">0/100</div><div class="stat-lbl">Blast Radius Score</div></div>
+                    <div class="id-stat-box"><div class="stat-val" id="idAffectedAssets">0</div><div class="stat-lbl">Affected Assets</div></div>
+                    <div class="id-stat-box"><div class="stat-val" id="idDirectGroups">0</div><div class="stat-lbl">Direct AD Groups</div></div>
+                    <div class="id-stat-box"><div class="stat-val" id="idDelegationRisk">None</div><div class="stat-lbl">Delegation Risk</div></div>
+                </div>
+                <h4 style="margin-bottom: 6px; font-size: 12px; color: var(--color-blue);"><i class="fa-solid fa-route"></i> Shortest Path to Domain Admin:</h4>
+                <div class="path-breadcrumb" id="idPathBreadcrumb">No path calculated</div>
+                <div style="margin-top: 12px;">
+                    <h4 style="margin-bottom: 6px; font-size: 12px; color: var(--color-green);"><i class="fa-solid fa-shield-halved"></i> Recommended IAM Containment:</h4>
+                    <ul class="remediation-checklist" id="idIamRecommendations"></ul>
+                </div>
+            </div>
         </div>
 
         <!-- ========================================================================= -->
@@ -400,6 +491,9 @@
         <!-- ========================================================================= -->
         <!-- TAB 6: SYSTEM HEALTH & INTEGRATION DIAGNOSTICS -->
         <!-- ========================================================================= -->
+        <!-- ========================================================================= -->
+        <!-- TAB 6: SYSTEM HEALTH & INTEGRATION DIAGNOSTICS -->
+        <!-- ========================================================================= -->
         <div id="tab-health" class="tab-content">
             <div class="card">
                 <div class="card-header">
@@ -408,6 +502,59 @@
                 </div>
                 <p class="section-desc">Active socket probes, latency meters, and connection status for the entire cybersecurity toolchain:</p>
                 <div class="health-grid" id="healthGrid"></div>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 7: LIVE INGESTION & SYSLOG MONITOR -->
+        <!-- ========================================================================= -->
+        <div id="tab-ingest" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-satellite-dish"></i> Live Syslog Receiver & External Ingestion Gateway</h3>
+                    <span class="badge-blue">RFC 5424 UDP 5514 / REST API POST</span>
+                </div>
+                <p class="section-desc">Real-time listeners accepting live telemetry from Wazuh agents, Sysmon forwarders, and external enterprise VMs:</p>
+                <div class="ingest-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="fa-solid fa-tower-broadcast"></i> RFC 5424 Syslog UDP Daemon</h4>
+                            <span id="syslogActiveBadge" class="badge-green">LISTENING: PORT 5514</span>
+                        </div>
+                        <div class="syslog-stats-card">
+                            <div class="syslog-stat"><h3 id="syslogTotalRecv">0</h3><span>Packets Received</span></div>
+                            <div class="syslog-stat"><h3 id="syslogTotalParsed">0</h3><span>Events Normalized</span></div>
+                            <div class="syslog-stat"><h3 id="syslogTotalErrors">0</h3><span>Parse Errors</span></div>
+                            <div class="syslog-stat"><h3 id="syslogUptime">0s</h3><span>Daemon Uptime</span></div>
+                        </div>
+                        <div style="margin-top: 14px; font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                            <strong>External VM Syslog Forwarding Command:</strong><br>
+                            <code>echo '&lt;165&gt;1 2026-09-09T12:00:00Z WIN-DC01 Security - - {"event_id": 10, "source_ip": "194.26.29.112", "computer_name": "WIN-DC01.corp.local", "user": "CORP\\Administrator", "details": {"TargetImage": "C:\\Windows\\System32\\lsass.exe"}}' | ncat -u localhost 5514</code>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="fa-solid fa-paper-plane"></i> Webhook Ingestion API (POST /api/ingest)</h4>
+                            <button class="btn-primary" onclick="sendCustomIngest()"><i class="fa-solid fa-bolt"></i> Ingest & Process Event</button>
+                        </div>
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Simulate or test external webhook ingestion payload:</p>
+                        <textarea class="payload-textarea" id="customIngestPayload">{
+  "event_id": 10,
+  "computer_name": "WIN-DC01.corp.local",
+  "source_ip": "185.220.101.33",
+  "user": "CORP\\Administrator",
+  "details": {
+    "SourceProcessId": 4812,
+    "SourceImage": "C:\\Windows\\Temp\\mimikatz.exe",
+    "TargetProcessId": 672,
+    "TargetImage": "C:\\Windows\\System32\\lsass.exe",
+    "GrantedAccess": "0x1010"
+  }
+}</textarea>
+                        <div id="ingestResultBadge" style="margin-top: 8px; font-size: 12px;"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
