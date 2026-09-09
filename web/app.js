@@ -3,6 +3,24 @@
 // Author: lumidren (https://github.com/lumidren/CyberPulse-SOC-Suite)
 // ==============================================================================
 
+// Global API Key configuration (can be overridden via localStorage)
+const SOC_API_KEY = window.localStorage?.getItem("CYBERPULSE_API_KEY") || "cyberpulse-dev-secret-key-2026";
+
+// Transparent authenticated fetch interceptor for all /api/* requests
+const _nativeFetch = window.fetch;
+window.fetch = async function(url, options = {}) {
+    if (typeof url === "string" && url.startsWith("/api/")) {
+        options = options || {};
+        options.headers = options.headers || {};
+        if (options.headers instanceof Headers) {
+            if (!options.headers.has("X-API-Key")) options.headers.set("X-API-Key", SOC_API_KEY);
+        } else {
+            if (!options.headers["X-API-Key"]) options.headers["X-API-Key"] = SOC_API_KEY;
+        }
+    }
+    return _nativeFetch(url, options);
+};
+
 let map;
 let datacenterMarker;
 let activeAttackLayers = [];

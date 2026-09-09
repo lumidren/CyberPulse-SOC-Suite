@@ -154,25 +154,60 @@ DETECTION_CATALOGUE = [
     }
 ]
 
+API_KEY = os.environ.get("CYBERPULSE_API_KEY", "cyberpulse-dev-secret-key-2026")
+ALLOWED_ORIGIN = os.environ.get("CORS_ALLOWED_ORIGIN", "http://localhost:5000")
+
 class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=WEB_DIR, **kwargs)
 
+    def _is_authenticated(self):
+        """Validates API Key or Bearer token for API endpoints."""
+        auth_header = self.headers.get("Authorization", "")
+        api_key_header = self.headers.get("X-API-Key", "")
+
+        token = None
+        if auth_header.startswith("Bearer "):
+            token = auth_header.split(" ", 1)[1].strip()
+        elif api_key_header:
+            token = api_key_header.strip()
+
+        return token == API_KEY
+
+    def _send_cors_headers(self):
+        """Applies origin-restricted CORS headers."""
+        origin = self.headers.get("Origin")
+        if origin and (origin.startswith("http://localhost:") or origin.startswith("http://127.0.0.1:")):
+            self.send_header("Access-Control-Allow-Origin", origin)
+        else:
+            self.send_header("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key")
+
     def _send_json(self, status_code, payload):
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self._send_cors_headers()
         self.end_headers()
         self.wfile.write(json.dumps(payload).encode('utf-8'))
 
     def do_OPTIONS(self):
-        self._send_json(200, {"status": "OK"})
+        self.send_response(200)
+        self._send_cors_headers()
+        self.end_headers()
 
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
+
+        # Enforce API Key authentication on all /api/* endpoints
+        if path.startswith("/api/"):
+            if not self._is_authenticated():
+                self._send_json(401, {
+                    "error": "Unauthorized: Invalid or missing API key.",
+                    "hint": "Provide 'X-API-Key: <token>' or 'Authorization: Bearer <token>' header."
+                })
+                return
 
         if path == "/api/incidents" or path == "/api/alerts":
             self._send_json(200, {
@@ -276,6 +311,15 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         parsed = urlparse(self.path)
         path = parsed.path
+
+        # Enforce API Key authentication on all /api/* endpoints
+        if path.startswith("/api/"):
+            if not self._is_authenticated():
+                self._send_json(401, {
+                    "error": "Unauthorized: Missing or invalid API key.",
+                    "hint": "Provide 'X-API-Key: <token>' or 'Authorization: Bearer <token>' header."
+                })
+                return
 
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length).decode('utf-8') if content_length > 0 else "{}"

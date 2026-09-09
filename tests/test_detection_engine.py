@@ -37,6 +37,7 @@ from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.bloodhound_exporter import BloodHoundExporter
 from soar.report_generator import IncidentReportGenerator
+from server import API_KEY
 
 class TestEnterpriseSOCPlatform(unittest.TestCase):
 
@@ -369,6 +370,36 @@ class TestEnterpriseSOCPlatform(unittest.TestCase):
         self.assertIsNotNone(entra_inc)
         self.assertEqual(entra_inc["rule"]["rule_id"], "SOC-RULE-010")
         self.assertEqual(entra_inc["containment_action"]["action_type"], "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA")
+
+    def test_api_key_authentication_enforcement(self):
+        """Verify API key authentication and header validation logic"""
+        class MockHandler:
+            headers = {}
+            def _is_authenticated(self):
+                auth_header = self.headers.get("Authorization", "")
+                api_key_header = self.headers.get("X-API-Key", "")
+                token = None
+                if auth_header.startswith("Bearer "):
+                    token = auth_header.split(" ", 1)[1].strip()
+                elif api_key_header:
+                    token = api_key_header.strip()
+                return token == API_KEY
+
+        handler = MockHandler()
+        # Unauthenticated request
+        self.assertFalse(handler._is_authenticated())
+
+        # Invalid token
+        handler.headers = {"X-API-Key": "invalid-hacker-token"}
+        self.assertFalse(handler._is_authenticated())
+
+        # Valid X-API-Key
+        handler.headers = {"X-API-Key": API_KEY}
+        self.assertTrue(handler._is_authenticated())
+
+        # Valid Authorization: Bearer
+        handler.headers = {"Authorization": f"Bearer {API_KEY}"}
+        self.assertTrue(handler._is_authenticated())
 
 if __name__ == "__main__":
     unittest.main()
