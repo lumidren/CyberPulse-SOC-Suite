@@ -122,6 +122,9 @@ $$\text{Risk Score} = (S_{\text{rule}} \times 0.35) + (W_{\text{tactic}} \times 
 | **`T1059.001`** | Obfuscated PowerShell | Execution | Sysmon Event 1 | **76.0 (HIGH)** | Process Kill + AD Account Lockout |
 | **`T1562.001`** | Defender Impairment | Defense Evasion | Sysmon Event 1 | **92.0 (CRITICAL)** | Revert Policy + Host Isolation |
 | **`T1486`** | Ransomware Canary Encryption | Impact | Sysmon Event 11 | **95.0 (CRITICAL)** | PID Kill + VSS Snapshot Recovery |
+| **`T1548`** | Cross-Account STS AssumeRole | Privilege Escalation | AWS CloudTrail | **84.0 (HIGH)** | Attach Deny Policy & Invalidate STS |
+| **`T1078`** | Entra ID Impossible Travel | Initial Access | Azure SignInLogs | **82.5 (HIGH)** | Revoke Refresh Tokens & Enforce MFA |
+| **`T1068`** | Vulnerable Driver Load (BYOVD) | Defense Evasion | Sysmon Event 6 | **96.0 (CRITICAL)** | Unload Driver & Enforce WDAC Block |
 
 ---
 
@@ -211,7 +214,7 @@ Instrumented across **60+ adversary emulation executions**:
 python start_lab.py
 ```
 
-### 2. Run the Automated Detection & SOAR Test Suite (18 Test Scenarios):
+### 2. Run the Automated Detection & SOAR Test Suite (22 Test Scenarios):
 ```bash
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
@@ -221,8 +224,8 @@ python -m unittest discover -s tests -p "test_*.py" -v
 python server.py
 ```
 Open **`http://localhost:5000`** in your browser to access:
-* **SOC Overview**: Real-time Leaflet GeoIP Threat Map, KPI summary, and live adversary launcher.
-* **Incident DFIR**: Microsecond chronological timeline, **Interactive Attack Graph**, **AI Copilot briefing**, **DFIR Volatile Evidence Box**, **AD Identity Blast Radius**, and **1-click containment rollback**.
+* **SOC Overview**: Real-time Leaflet GeoIP Threat Map, KPI summary, and live adversary launcher (LSASS, DCSync, Kerberoasting, AWS STS, Entra ID).
+* **Incident DFIR**: Microsecond chronological timeline, **Interactive Attack Graph**, **AI Copilot briefing**, **DFIR Volatile Evidence Box**, **AD Identity Blast Radius**, **NIST SP 800-61 HTML report export**, and **1-click containment rollback**.
 * **Detection Catalogue**: Searchable rulebase with MITRE tags and DELC lifecycle links.
 * **SOAR Policies**: Risk tier matrix and dry-run simulation mode toggles.
 * **Purple Team Replay**: Interactive APT29 and LockBit campaign runners.
@@ -238,10 +241,10 @@ CyberPulse SOC Suite – Enterprise Detection Engineering, DFIR & Resilient SOAR
 GitHub: https://github.com/lumidren/CyberPulse-SOC-Suite
 • Architected a closed-loop Detection Engineering & SOAR platform integrating Windows Server 2022 AD DS, Sysmon v14, Wazuh v4.7 SIEM, Splunk SPL searches, and TheHive 5 case management.
 • Engineered a multi-factor Risk & Policy Engine incorporating Asset Criticality, Account Privilege, ATT&CK Tactic Weights, and Threat Intelligence reputation into configurable containment policies.
-• Authored 7+ vendor-agnostic Sigma YAML and Wazuh XML detection rules following the formal Detection Engineering Lifecycle (DELC), covering Kerberoasting (T1558.001), DCSync (T1003.006), LSASS dumping (T1003.001), and Defender tampering (T1562.001).
-• Built a fault-tolerant SOAR containment engine with circuit breakers, idempotent actions, and one-click rollback capabilities for WinRM host isolation and pfSense firewall drops.
+• Authored 10+ vendor-agnostic Sigma YAML and Wazuh XML detection rules following the formal Detection Engineering Lifecycle (DELC), covering Kerberoasting (T1558.001), DCSync (T1003.006), BYOVD (T1068), AWS AssumeRole (T1548), and Defender tampering (T1562.001).
+• Built a fault-tolerant SOAR containment engine with circuit breakers, idempotent actions, and one-click rollback capabilities for WinRM host isolation, pfSense firewall drops, and AWS/Entra session revocation.
 • Implemented an automated Purple Team Replay Engine validating multi-stage APT29 and LockBit campaigns with a 100% stage verification rate and < 3.2s MTTC.
-• Built an Interactive Attack Graph Visualizer, Pre-Containment DFIR Volatile Evidence Packager, 100% Offline AI SOC Analyst Copilot, AD Identity Blast Radius Analyzer, and RFC 5424 Syslog UDP Ingestion Gateway.
-• Built an automated GitHub Actions CI/CD pipeline running 18 unit and integration test scenarios on every commit.
+• Built an Interactive Attack Graph Visualizer, Pre-Containment DFIR Volatile Evidence Packager, 100% Offline AI SOC Analyst Copilot, BloodHound CE Schema Exporter, NIST SP 800-61 Report Generator, and RFC 5424 Syslog UDP Ingestion Gateway.
+• Built an automated GitHub Actions CI/CD pipeline running 22 unit and integration test scenarios on every commit.
 ```
 
