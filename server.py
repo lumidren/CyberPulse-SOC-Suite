@@ -27,9 +27,11 @@ from simulator.attack_simulator import (
 )
 from simulator.purple_team_runner import PurpleTeamRunner, SCENARIOS
 from soar.soar_engine import SOAROrchestrator
+from soar.bloodhound_exporter import BloodHoundExporter
 
 orchestrator = SOAROrchestrator()
 purple_runner = PurpleTeamRunner(orchestrator)
+bloodhound_exporter = BloodHoundExporter()
 PORT = 5000
 WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
 
@@ -246,6 +248,10 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/identity/delegation-risks":
             risks = orchestrator.identity_engine.get_kerberos_delegation_risks()
             self._send_json(200, {"delegation_risks": risks})
+
+        elif path == "/api/identity/bloodhound-export":
+            export_bundle = bloodhound_exporter.export_all()
+            self._send_json(200, export_bundle)
 
         else:
             super().do_GET()
