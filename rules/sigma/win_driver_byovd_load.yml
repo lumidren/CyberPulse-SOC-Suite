@@ -1,0 +1,33 @@
+title: Vulnerable Signed Driver Load (BYOVD Evasion)
+id: f1a2b3c4-d5e6-4789-a012-3456789abcde
+status: production
+description: Detects loading of known vulnerable signed drivers (e.g., gdrv.sys, mhyprot2.sys) commonly leveraged in Bring Your Own Vulnerable Driver (BYOVD) attacks to disable endpoint security agents from kernel-mode.
+references:
+    - https://attack.mitre.org/techniques/T1068/
+    - https://www.loldrivers.io/
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-09-09
+tags:
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.t1068
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 6 # DriverLoaded
+        ImageLoaded|endswith:
+            - '\gdrv.sys'
+            - '\mhyprot2.sys'
+            - '\procexp.sys'
+            - '\RTCore64.sys'
+            - '\DBUtil_2_3.sys'
+    filter:
+        Signed: 'true'
+        SignatureStatus: 'Valid'
+        ImageLoaded|startswith: 'C:\Windows\System32\drivers\'
+    condition: selection and not filter
+falsepositives:
+    - Legitimate legacy hardware utility drivers installed prior to WDAC enforcement
+level: critical
