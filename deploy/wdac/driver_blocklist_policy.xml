@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SiPolicy xmlns="urn:schemas-microsoft-com:sipolicy" PolicyType="Base Policy">
+  <VersionEx>10.0.22621.1</VersionEx>
+  <PlatformID>{2E07F7E4-194C-4D20-B7C9-6F44A6C5A234}</PlatformID>
+  <PolicyID>{A1B2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}</PolicyID>
+  <BasePolicyID>{A1B2C3D4-E5F6-4A5B-8C9D-0E1F2A3B4C5D}</BasePolicyID>
+  <PolicyTypeID>{A24437BC-9459-4AE8-A013-C14D3C5C7A2E}</PolicyTypeID>
+  
+  <!-- CyberPulse Enterprise SOC: Kernel Driver Blocklist Policy -->
+  <!-- Mitigates T1068 / Bring Your Own Vulnerable Driver (BYOVD) Attacks -->
+  
+  <Rules>
+    <Rule>
+      <Option>Enabled:Audit Mode</Option>
+    </Rule>
+    <Rule>
+      <Option>Enabled:Advanced Boot Options Menu</Option>
+    </Rule>
+    <Rule>
+      <Option>Required:Enforce Store Applications</Option>
+    </Rule>
+    <Rule>
+      <Option>Enabled:UMCI</Option>
+    </Rule>
+  </Rules>
+  
+  <EKUs />
+  
+  <FileRules>
+    <!-- GigaByte gdrv.sys vulnerable driver hash rule -->
+    <Deny ID="ID_DENY_GDRV" FriendlyName="Block vulnerable GigaByte gdrv.sys (CVE-2018-19320)" Hash="2C6E80EE7732E904B469D5F09B0E44E6A7A382D420A1017EE9758EF4FF55716D" />
+    
+    <!-- Genshin Impact mhyprot2.sys vulnerable driver hash rule -->
+    <Deny ID="ID_DENY_MHYPROT" FriendlyName="Block vulnerable mhyprot2.sys (Ransomware Evasion Driver)" Hash="046E80EE7732E904B469D5F09B0E44E6A7A382D420A1017EE9758EF4FF55716E" />
+    
+    <!-- Process Explorer vulnerable signed variant -->
+    <Deny ID="ID_DENY_PROCEXP" FriendlyName="Block vulnerable Process Explorer driver (CVE-2023-1177)" Hash="5F6E80EE7732E904B469D5F09B0E44E6A7A382D420A1017EE9758EF4FF55716F" />
+    
+    <!-- Default allow rule for legitimate system drivers -->
+    <Allow ID="ID_ALLOW_WINDOWS_DRIVERS" FriendlyName="Allow legitimate Microsoft-signed Windows drivers" FileName="*" />
+  </FileRules>
+
+  <SigningScenarios>
+    <SigningScenario Value="131" ID="ID_SIGNING_SCENARIO_KMCI" FriendlyName="Kernel-Mode Code Integrity Driver Rules">
+      <ProductSigners>
+        <FileRulesRef>
+          <FileRuleRef RuleID="ID_DENY_GDRV" />
+          <FileRuleRef RuleID="ID_DENY_MHYPROT" />
+          <FileRuleRef RuleID="ID_DENY_PROCEXP" />
+          <FileRuleRef RuleID="ID_ALLOW_WINDOWS_DRIVERS" />
+        </FileRulesRef>
+      </ProductSigners>
+    </SigningScenario>
+  </SigningScenarios>
+</SiPolicy>
