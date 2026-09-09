@@ -21,7 +21,9 @@ from simulator.attack_simulator import (
     simulate_t1562_defender_tamper,
     simulate_t1486_ransomware_canary,
     simulate_t1558_kerberoasting,
-    simulate_t1003_dcsync
+    simulate_t1003_dcsync,
+    simulate_cloud_aws_assumerole,
+    simulate_cloud_entra_impossible_travel
 )
 from soar.soar_engine import SOAROrchestrator
 from soar.risk_engine import RiskAndPolicyEngine
@@ -33,6 +35,8 @@ from soar.evidence_collector import VolatileEvidenceCollector
 from soar.ai_copilot import SOCCopilot
 from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
+from soar.bloodhound_exporter import BloodHoundExporter
+from soar.report_generator import IncidentReportGenerator
 
 class TestEnterpriseSOCPlatform(unittest.TestCase):
 
@@ -40,7 +44,7 @@ class TestEnterpriseSOCPlatform(unittest.TestCase):
         self.orchestrator = SOAROrchestrator(policy_mode="AUTOMATIC")
 
     def test_sigma_rules_exist_and_valid(self):
-        """Verify all 7 core Sigma YAML rules exist with required schema tags"""
+        """Verify all core Sigma YAML rules exist with required schema tags"""
         sigma_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "rules", "sigma")
         expected_rules = [
             "win_lsass_dumping.yml",
@@ -49,7 +53,10 @@ class TestEnterpriseSOCPlatform(unittest.TestCase):
             "win_defender_tamper.yml",
             "win_ransomware_canary.yml",
             "win_kerberoasting.yml",
-            "win_dcsync.yml"
+            "win_dcsync.yml",
+            "win_driver_byovd_load.yml",
+            "cloud_aws_assumerole_abuse.yml",
+            "cloud_entra_impossible_travel.yml"
         ]
         for rule_file in expected_rules:
             rule_path = os.path.join(sigma_dir, rule_file)
@@ -287,6 +294,81 @@ class TestEnterpriseSOCPlatform(unittest.TestCase):
 
         delegation_risks = engine.get_kerberos_delegation_risks()
         self.assertIsInstance(delegation_risks, list)
+
+    def test_wdac_driver_blocklist_and_byovd_detection(self):
+        """Verify WDAC policy exists and Sysmon Event 6 driver load triggers SOC-RULE-011"""
+        wdac_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "deploy", "wdac", "driver_blocklist_policy.xml")
+        self.assertTrue(os.path.exists(wdac_path), "WDAC driver blocklist policy XML missing")
+        with open(wdac_path, "r", encoding="utf-8") as f:
+            content = f.read()
+            self.assertIn("ID_DENY_GDRV", content)
+            self.assertIn("ID_DENY_MHYPROT", content)
+
+        # Simulate BYOVD vulnerable driver load
+        event = {
+            "event_id": 6,
+            "event_source": "sysmon",
+            "technique_id": "T1068",
+            "technique_name": "Exploitation for Privilege Escalation: BYOVD",
+            "timestamp": "2026-09-09T12:00:00Z",
+            "computer_name": "WIN-DC01.corp.local",
+            "user": "CORP\\Administrator",
+            "source_ip": "185.220.101.5",
+            "details": {
+                "ImageLoaded": "C:\\Windows\\Temp\\gdrv.sys",
+                "Hashes": "SHA256=2C6E80EE7732E904B469D5F09B0E44E6A7A382D420A1017EE9758EF4FF55716D"
+            }
+        }
+        incident = self.orchestrator.process_event(event)
+        self.assertIsNotNone(incident)
+        self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-011")
+        self.assertEqual(incident["rule"]["severity"], "CRITICAL")
+        self.assertEqual(incident["containment_action"]["action_type"], "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK")
+
+    def test_bloodhound_ce_export_schema(self):
+        """Verify BloodHound CE exporter generates valid SharpHound/BloodHound v5 schema bundle"""
+        exporter = BloodHoundExporter()
+        bundle = exporter.export_all()
+
+        self.assertIn("users", bundle)
+        self.assertIn("groups", bundle)
+        self.assertIn("computers", bundle)
+        self.assertIn("export_metadata", bundle)
+        self.assertGreaterEqual(len(bundle["users"]["data"]), 5)
+        self.assertGreaterEqual(len(bundle["groups"]["data"]), 3)
+        self.assertEqual(bundle["users"]["meta"]["version"], 5)
+
+    def test_nist_sp_800_61_report_generation(self):
+        """Verify NIST SP 800-61 incident report generator produces valid HTML & JSON dossiers"""
+        event = simulate_t1003_lsass_dump()
+        incident = self.orchestrator.process_event(event)
+
+        generator = IncidentReportGenerator()
+        html_report = generator.generate_html_report(incident)
+        json_report = generator.generate_json_report(incident)
+
+        self.assertIn("<!DOCTYPE html>", html_report)
+        self.assertIn("NIST SP 800-61", html_report)
+        self.assertIn("Executive Incident Briefing", html_report)
+        self.assertIn("Root Cause Analysis", html_report)
+        self.assertIn("Microsecond Chronological Audit Timeline", html_report)
+        self.assertEqual(json_report["report_standard"], "NIST SP 800-61 Rev. 2")
+
+    def test_cloud_detection_aws_and_entra(self):
+        """Verify AWS STS AssumeRole and Entra ID Impossible Travel detections and containments"""
+        # AWS STS AssumeRole Abuse
+        aws_evt = simulate_cloud_aws_assumerole()
+        aws_inc = self.orchestrator.process_event(aws_evt)
+        self.assertIsNotNone(aws_inc)
+        self.assertEqual(aws_inc["rule"]["rule_id"], "SOC-RULE-009")
+        self.assertEqual(aws_inc["containment_action"]["action_type"], "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY")
+
+        # Entra ID Impossible Travel
+        entra_evt = simulate_cloud_entra_impossible_travel()
+        entra_inc = self.orchestrator.process_event(entra_evt)
+        self.assertIsNotNone(entra_inc)
+        self.assertEqual(entra_inc["rule"]["rule_id"], "SOC-RULE-010")
+        self.assertEqual(entra_inc["containment_action"]["action_type"], "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA")
 
 if __name__ == "__main__":
     unittest.main()
