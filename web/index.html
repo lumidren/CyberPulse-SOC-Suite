@@ -197,7 +197,8 @@
                         <option value="">No incidents available</option>
                     </select>
                 </div>
-                <div id="incidentActionsBar" class="incident-actions">
+                <div id="incidentActionsBar" class="incident-actions" style="display:flex; gap:8px;">
+                    <button class="btn-primary" id="exportReportBtn" onclick="exportNistReport()"><i class="fa-solid fa-file-invoice"></i> Export NIST Report (HTML)</button>
                     <button class="btn-danger" id="rollbackBtn" onclick="rollbackActiveIncident()"><i class="fa-solid fa-rotate-left"></i> Rollback Containment</button>
                 </div>
             </div>

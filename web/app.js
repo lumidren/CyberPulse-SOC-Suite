@@ -284,6 +284,16 @@ async function loadIncidentDetails() {
     }
 }
 
+// Export NIST SP 800-61 HTML Report
+function exportNistReport() {
+    const incId = document.getElementById("incidentSelect")?.value || activeIncidentId;
+    if (!incId) {
+        alert("Please select an incident first.");
+        return;
+    }
+    window.open(`/api/incidents/${incId}/report`, "_blank");
+}
+
 // Rollback Active Incident Containment
 async function rollbackActiveIncident() {
     if (!activeIncidentId) return;

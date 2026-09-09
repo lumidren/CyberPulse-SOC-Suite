@@ -28,10 +28,12 @@ from simulator.attack_simulator import (
 from simulator.purple_team_runner import PurpleTeamRunner, SCENARIOS
 from soar.soar_engine import SOAROrchestrator
 from soar.bloodhound_exporter import BloodHoundExporter
+from soar.report_generator import IncidentReportGenerator
 
 orchestrator = SOAROrchestrator()
 purple_runner = PurpleTeamRunner(orchestrator)
 bloodhound_exporter = BloodHoundExporter()
+report_generator = IncidentReportGenerator()
 PORT = 5000
 WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
 
@@ -234,6 +236,19 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 inc = orchestrator.dfir_engine.incidents[inc_id]
                 identity = inc.get("identity_blast_radius", {})
                 self._send_json(200, {"identity_blast_radius": identity})
+            else:
+                self._send_json(404, {"error": "Incident not found"})
+
+        elif path.startswith("/api/incidents/") and path.endswith("/report"):
+            inc_id = path.split("/")[3]
+            if inc_id in orchestrator.dfir_engine.incidents:
+                inc = orchestrator.dfir_engine.incidents[inc_id]
+                html = report_generator.generate_html_report(inc)
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(html.encode("utf-8"))
             else:
                 self._send_json(404, {"error": "Incident not found"})
 
