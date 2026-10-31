@@ -122,5 +122,31 @@ class TestEnrichmentCanBeDisabled(unittest.TestCase):
         self.assertEqual(len(probed), 2)
 
 
+class TestIocCache(unittest.TestCase):
+
+    def test_repeat_lookup_served_from_cache(self):
+        transport = RecordingTransport()
+        c = client(transport)
+        first = c.lookup("8.8.8.8")
+        second = c.lookup("8.8.8.8")
+        self.assertFalse(first["cached"])
+        self.assertTrue(second["cached"])
+        self.assertEqual(len(transport.calls), 2)  # two providers, queried once
+
+    def test_ttl_and_lru_eviction_and_clear(self):
+        from soar.enrichment import IocCache
+        now = [0.0]
+        cache = IocCache(maxsize=2, ttl_sec=10, clock=lambda: now[0])
+        cache.put("a", {"v": 1})
+        cache.put("b", {"v": 2})
+        cache.put("c", {"v": 3})            # evicts least-recently-used "a"
+        self.assertIsNone(cache.get("a"))
+        now[0] += 11                         # TTL elapsed
+        self.assertIsNone(cache.get("b"))
+        cache.put("d", {"v": 4})
+        self.assertEqual(cache.clear(), 2)
+        self.assertEqual(len(cache), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

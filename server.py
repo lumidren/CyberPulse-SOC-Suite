@@ -594,7 +594,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/enrichment":
             client = orchestrator.intel_client
             self._send_json(200, {"enabled": client.enabled,
-                                  "providers": {"virustotal": bool(client.vt_key), "abuseipdb": bool(client.abuse_key)}})
+                                  "providers": {"virustotal": bool(client.vt_key), "abuseipdb": bool(client.abuse_key)},
+                                  "cache": {"entries": len(client.cache), "max_entries": client.cache.maxsize,
+                                            "ttl_sec": client.cache.ttl_sec}})
 
         elif path == "/api/version":
             self._send_json(200, {
@@ -806,6 +808,11 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             )
             self._send_json(200, {"status": "SUCCESS", "decision": decision, "incident_id": inc["incident_id"] if inc else None,
                                   "action": result["action"]})
+
+        elif path == "/api/enrichment/cache/clear":
+            removed = orchestrator.intel_client.cache.clear()
+            audit_logger.info("ENRICHMENT_CACHE_CLEAR client=%s removed=%s", self._client_ip(), removed)
+            self._send_json(200, {"status": "SUCCESS", "entries_removed": removed})
 
         elif path == "/api/enrichment/config":
             enabled = data.get("enabled")
