@@ -1,0 +1,52 @@
+# Positive/negative samples for rules/sigma/win_pass_the_hash.yml (synthetic lab events)
+rule: win_pass_the_hash.yml
+positive:
+- name: NewCredentials logon via seclogo
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 9
+      LogonProcessName: seclogo
+      AuthenticationPackageName: Negotiate
+      TargetUserName: j.doe
+- name: NTLM network logon with zero key length
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 3
+      AuthenticationPackageName: NTLM
+      KeyLength: 0
+      LogonProcessName: NtLmSsp
+      TargetUserName: svc_sql
+negative:
+- name: Interactive Kerberos logon
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 2
+      LogonProcessName: User32
+      AuthenticationPackageName: Negotiate
+      TargetUserName: j.doe
+- name: NTLM logon with a 128-bit session key
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 3
+      AuthenticationPackageName: NTLM
+      KeyLength: 128
+      LogonProcessName: NtLmSsp
+      TargetUserName: j.doe
+- name: Anonymous NTLM null session (excluded)
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 3
+      AuthenticationPackageName: NTLM
+      KeyLength: 0
+      LogonProcessName: NtLmSsp
+      TargetUserName: ANONYMOUS LOGON

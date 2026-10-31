@@ -60,3 +60,7 @@ bump here and in `rules/soar_mapping.yml`.
 
 * **1.0.1** (2026-11-01): Metadata only: date normalised to ISO format; added `modified`.
 * **1.0.0** (2026-09-09): Initial rule.
+
+## SOC-RULE-012: Pass-the-Hash Logon Patterns (NTLM and seclogo) (`win_pass_the_hash.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
