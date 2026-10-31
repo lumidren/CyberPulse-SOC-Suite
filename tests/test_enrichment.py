@@ -318,5 +318,34 @@ class TestFailSafeWhenEnrichmentDown(unittest.TestCase):
         self.assertIn("reputation alone", decision["approval_reason"])
 
 
+class TestCorroboration(unittest.TestCase):
+
+    def test_single_source_counts_half_and_is_flagged(self):
+        from soar.reputation import consensus
+        lone = consensus({"external": {"ip": {"verdicts": [{"source": "AbuseIPDB", "abuse_confidence": 90}]}}})
+        self.assertFalse(lone["corroborated"])
+        self.assertEqual(lone["score"], 45.0)
+        both = consensus({"external": {"ip": {"verdicts": [
+            {"source": "AbuseIPDB", "abuse_confidence": 90}, {"source": "VirusTotal", "malicious": 30}]}}})
+        self.assertTrue(both["corroborated"])
+        self.assertGreater(both["score"], lone["score"])
+
+    def test_failed_verdicts_are_not_signals(self):
+        from soar.reputation import consensus
+        result = consensus({"external": {"ip": {"verdicts": [{"source": "VirusTotal", "status": "RATE_LIMITED"}]}}})
+        self.assertEqual(result["sources"], [])
+
+    def test_single_source_cannot_tip_containment(self):
+        from soar.risk_engine import RiskAndPolicyEngine
+        engine = RiskAndPolicyEngine(policy_mode="AUTOMATIC")
+        engine.confidence_threshold = 0.0
+        event = {"computer_name": "KIOSK-01", "user": "guest", "tactic": "Discovery", "source_ip": "8.8.8.8"}
+        rule = {"rule_id": "X", "severity": "HIGH", "action_recommended": "BLOCK_SOURCE_IP_FIREWALL"}
+        lone = {"external": {"ip": {"status": "OK", "verdicts": [{"source": "AbuseIPDB", "abuse_confidence": 100}]}}}
+        risk = engine.calculate_risk_score(event, rule, lone)
+        self.assertFalse(risk["reputation"]["corroborated"])
+        self.assertNotEqual(engine.evaluate_policy(risk, rule)["execution_intent"], "EXECUTE_IMMEDIATE")
+
+
 if __name__ == "__main__":
     unittest.main()
