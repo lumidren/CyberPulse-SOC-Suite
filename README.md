@@ -76,6 +76,9 @@ and others; none of their binaries are redistributed here. See
 * **Authorisation required:** only deploy on networks, hosts or cloud accounts you own or are
   explicitly authorised in writing to monitor and test.
 
+* **No real client data:** everything in the repo is synthetic; no client, employer or
+  internship data was used.
+
 Full notices: [`docs/LEGAL.md`](docs/LEGAL.md).
 
 ---
