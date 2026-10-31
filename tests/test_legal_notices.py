@@ -21,5 +21,12 @@ class TestLegalNotices(unittest.TestCase):
         self.assertIn("MITRE ATT&CK", read("README.md"))
 
 
+    def test_trademark_disclaimer(self):
+        legal = read("docs/LEGAL.md")
+        for owner in ["Microsoft", "Fortinet", "pfSense", "VirusTotal"]:
+            self.assertIn(owner, legal)
+        self.assertIn("No endorsement is implied", legal)
+
+
 if __name__ == "__main__":
     unittest.main()
