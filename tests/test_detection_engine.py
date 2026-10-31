@@ -1,5 +1,5 @@
 """
-Unit & Integration Test Suite for CyberPulse Enterprise SOC Platform
+Unit & Integration Test Suite for the CyberPulse SOC Lab
 Tests Detection Engine, Multi-Factor Risk Scoring, Policy Evaluation,
 Resilient Containment, Circuit Breakers, Rollback, DFIR, and Purple Team Replay.
 """
@@ -39,7 +39,7 @@ from soar.bloodhound_exporter import BloodHoundExporter
 from soar.report_generator import IncidentReportGenerator
 from server import API_KEY
 
-class TestEnterpriseSOCPlatform(unittest.TestCase):
+class TestSOCLabPlatform(unittest.TestCase):
 
     def setUp(self):
         self.orchestrator = SOAROrchestrator(policy_mode="AUTOMATIC")

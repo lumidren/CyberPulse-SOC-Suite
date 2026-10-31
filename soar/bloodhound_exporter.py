@@ -6,14 +6,14 @@ compatible JSON graph export files (users.json, groups.json, computers.json).
 
 import json
 from datetime import datetime, timezone
-from soar.identity_graph import ENTERPRISE_AD_TOPOLOGY
+from soar.identity_graph import LAB_AD_TOPOLOGY
 
 class BloodHoundExporter:
     """
     Exports Active Directory objects in standard SharpHound/BloodHound CE JSON schemas.
     """
     def __init__(self, topology=None):
-        self.topology = topology or ENTERPRISE_AD_TOPOLOGY
+        self.topology = topology or LAB_AD_TOPOLOGY
 
     def export_users(self) -> dict:
         """Generates BloodHound-compatible users.json structure."""

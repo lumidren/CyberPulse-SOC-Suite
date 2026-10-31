@@ -1,7 +1,7 @@
 # CyberPulse SOC Suite: Deep Technical Architecture & Specifications
 
 ## 1. Executive System Overview
-CyberPulse is a modular Detection Engineering and Security Orchestration, Automation, and Response (SOAR) ecosystem designed for hybrid enterprise environments. It ingests low-level kernel telemetry from Windows endpoints via **Sysmon v14**, aggregates events inside a **Wazuh v4.7 SIEM / Elastic** cluster, evaluates vendor-agnostic **Sigma rules**, enriches indicators of compromise (IoCs) via external threat feeds (**VirusTotal v3**, **AbuseIPDB v2**, and local **CIPHER Threat Intel Platform**), and dispatches automated containment commands via **WinRM** and **Firewall REST APIs**.
+CyberPulse is a modular Detection Engineering and Security Orchestration, Automation, and Response (SOAR) lab designed to model hybrid corporate environments. It ingests low-level kernel telemetry from Windows endpoints via **Sysmon v14**, aggregates events inside a **Wazuh v4.7 SIEM / Elastic** cluster, evaluates vendor-agnostic **Sigma rules**, enriches indicators of compromise (IoCs) via external threat feeds (**VirusTotal v3**, **AbuseIPDB v2**, and local **CIPHER Threat Intel Platform**), and dispatches automated containment commands via **WinRM** and **Firewall REST APIs**.
 
 ```mermaid
 flowchart TD
@@ -44,7 +44,7 @@ flowchart TD
 └──────────────────────────────────────────────────────────┘
         │
         ├──────────────────────────────────────────────────┐
-        │ [VLAN 10: Enterprise Subnet 10.0.0.0/24]         │ [VLAN 20: SOC Management Subnet 10.0.1.0/24]
+        │ [VLAN 10: Lab Corporate Subnet 10.0.0.0/24]   │ [VLAN 20: SOC Management Subnet 10.0.1.0/24]
         │                                                  │
         ├─▶ Windows Server 2022 DC (10.0.0.10)             ├─▶ Wazuh Manager / OpenSearch (10.0.1.5)
         │   Role: AD DS, DNS, Kerberos                     │   Ports: 1514 (Agent), 55000 (API)

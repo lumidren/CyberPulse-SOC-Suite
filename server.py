@@ -1,5 +1,5 @@
 """
-Enterprise Backend & REST API Server for CyberPulse SOC Operations Platform
+Lab Backend & REST API Server for the CyberPulse SOC Lab
 Provides endpoints for Incident Triage, DFIR Timelines, SOAR Rollbacks, 
 Performance Metrics, Integration Health, Detection Catalogue, and Purple Team Scenarios.
 """
@@ -627,7 +627,7 @@ def run_server(port=None, host=None):
         except (ValueError, OSError, AttributeError):
             pass  # Not on main thread, or signal unsupported on this platform
 
-    logger.info("CyberPulse SOC Enterprise Operations Platform v%s running at http://%s:%s", __version__, display_host, bound_port)
+    logger.info("CyberPulse SOC Lab v%s running at http://%s:%s", __version__, display_host, bound_port)
     logger.info("Environment: %s | Serving web console from %s", ENV, WEB_DIR)
     logger.info("Press Ctrl+C to stop.")
     try:

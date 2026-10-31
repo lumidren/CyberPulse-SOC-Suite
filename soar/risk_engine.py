@@ -131,7 +131,7 @@ class RiskAndPolicyEngine:
         action_recommended = matched_rule.get("action_recommended", "LOG_AND_MONITOR")
 
         decision = {
-            "policy_id": "POL-ENTERPRISE-DEFAULT-v2.4",
+            "policy_id": "POL-LAB-DEFAULT-v2.5",
             "risk_level": risk_level,
             "risk_score": score,
             "mode": self.policy_mode,

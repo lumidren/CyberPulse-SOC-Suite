@@ -1,5 +1,5 @@
 """
-Enterprise SOAR Engine & Detection Orchestrator for CyberPulse SOC Suite
+SOAR Engine & Detection Orchestrator for the CyberPulse SOC Lab
 Integrates Detection Matching, Non-Blocking Threat Intel, Multi-Factor Risk Scoring, 
 Configurable Policy Evaluation, Resilient Containment, DFIR Case Generation,
 Attack Graph Visualization, DFIR Evidence Collection, AI Analyst Copilot,

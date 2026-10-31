@@ -50,4 +50,4 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 Historical baseline: closed-loop detection engineering, SOAR containment and
 rollback, purple team replay, DFIR dossiers, identity blast radius, BloodHound
-export, WDAC/BYOVD coverage, cloud detections, and the enterprise web console.
+export, WDAC/BYOVD coverage, cloud detections, and the web console.

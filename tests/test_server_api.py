@@ -1,5 +1,5 @@
 """
-REST API Integration & Hardening Test Suite for CyberPulse Enterprise SOC Platform
+REST API Integration & Hardening Test Suite for the CyberPulse SOC Lab
 Boots the real threaded HTTP server on an ephemeral port and verifies
 authentication, rate limiting, routing (including incident subresources),
 pagination, payload limits, and the SSRF webhook guard.

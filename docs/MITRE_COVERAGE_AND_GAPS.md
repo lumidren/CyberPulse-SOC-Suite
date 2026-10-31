@@ -32,5 +32,5 @@ This document details the exact detection posture of **CyberPulse SOC Suite**, e
 ---
 
 ## 4. Scope and Lab Realism Statement
-* **Deployment Scope**: CyberPulse is a specialized Detection Engineering laboratory engineered on virtualized enterprise components (Windows Server 2022 AD DS, Sysmon v14, pfSense 2.7, Wazuh 4.7) and a CI/CD test harness. 
+* **Deployment Scope**: CyberPulse is a specialized Detection Engineering laboratory engineered on virtualized components (Windows Server 2022 AD DS, Sysmon v14, pfSense 2.7, Wazuh 4.7) and a CI/CD test harness. 
 * **Operational Goal**: Demonstrates rigorous Detection-as-Code development lifecycles, structured false-positive tuning, and automated closed-loop mitigation rather than speculative 100% matrix coverage claims.
