@@ -557,5 +557,20 @@ class TestBruteForceLabAccounts(unittest.TestCase):
                                         "details": {"TargetUserName": "lab.user1", "CredentialMaterial": "Winter2026!"}})
 
 
+class TestSimulationThrottle(unittest.TestCase):
+
+    def test_brute_force_has_tighter_cap(self):
+        from simulator.lab_guard import SimulationThrottle
+        now = [0.0]
+        throttle = SimulationThrottle(clock=lambda: now[0])
+        throttle.limits = {"brute_force": 2, "any": 10}
+        self.assertTrue(throttle.allow(["T1110.001"])[0])
+        self.assertTrue(throttle.allow(["T1110.001"])[0])
+        self.assertEqual(throttle.allow(["T1110.001"]), (False, "brute_force"))
+        self.assertTrue(throttle.allow(["T1003.001"])[0])   # other techniques still allowed
+        now[0] += 61
+        self.assertTrue(throttle.allow(["T1110.001"])[0])
+
+
 if __name__ == "__main__":
     unittest.main()

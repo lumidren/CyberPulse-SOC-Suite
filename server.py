@@ -38,7 +38,7 @@ from soar.soar_engine import SOAROrchestrator
 from soar.bloodhound_exporter import BloodHoundExporter
 from soar.report_generator import IncidentReportGenerator
 from scripts.validate_detections import run_scripted, scripted_status
-from simulator.lab_guard import lab_mode_enabled
+from simulator.lab_guard import SimulationThrottle, lab_mode_enabled
 
 __version__ = "2.5.0"
 
@@ -264,6 +264,7 @@ class SlidingWindowRateLimiter:
             return len(window) >= self.max_events
 
 api_rate_limiter = SlidingWindowRateLimiter(RATE_LIMIT_PER_MINUTE)
+simulation_throttle = SimulationThrottle()
 auth_failure_limiter = SlidingWindowRateLimiter(AUTH_FAILURE_LIMIT_PER_MINUTE)
 
 class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -580,6 +581,12 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             else:
                 evt = generate_random_attack()
 
+            allowed, cap = simulation_throttle.allow([evt.get("technique_id", "")])
+            if not allowed:
+                self._send_json(429, {"error": f"Simulation rate limit reached ({cap}); try again in a minute.",
+                                      "limits_per_minute": simulation_throttle.limits})
+                return
+
             incident = orchestrator.process_event(evt, custom_webhook_url=webhook_url, execution_intent=intent)
             audit_logger.info(
                 "SIMULATE client=%s type=%s incident=%s",
@@ -590,6 +597,11 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/purple-team/run":
             scenario_key = data.get("scenario", "APT29_COZY_BEAR")
             webhook_url = data.get("webhook_url", None)
+            stages = SCENARIOS.get(scenario_key, {}).get("stages", [])
+            allowed, cap = simulation_throttle.allow([s["technique_id"] for s in stages])
+            if not allowed:
+                self._send_json(429, {"error": f"Simulation rate limit reached ({cap}); try again in a minute."})
+                return
             res = purple_runner.run_scenario(scenario_key, custom_webhook_url=webhook_url)
             self._send_json(200, res)
 

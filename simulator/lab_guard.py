@@ -15,6 +15,9 @@ import fnmatch
 import functools
 import ipaddress
 import os
+import threading
+import time
+from collections import deque
 
 
 class LabModeRequired(RuntimeError):
@@ -64,6 +67,42 @@ def validate_credential_attack(event):
     if details.get("CredentialMaterial", "none") != "none":
         raise TargetNotAllowed("Simulated credential attacks must not carry password material.")
     return event
+
+
+class SimulationThrottle:
+    """Per-minute caps on simulations triggered through the API / UI.
+
+    Brute-force emulation has its own, tighter cap so a lab cannot be flooded
+    with authentication-failure telemetry. In-process replay scripts
+    (scripts/validate_detections.py, scripts/benchmark_pipeline.py) generate no
+    traffic and are not throttled.
+    """
+
+    def __init__(self, clock=time.monotonic):
+        self.clock = clock
+        self.limits = {
+            "brute_force": int(os.environ.get("SIM_BRUTE_FORCE_PER_MIN", "6")),
+            "any": int(os.environ.get("SIM_PER_MIN", "60")),
+        }
+        self._windows = {k: deque() for k in self.limits}
+        self._lock = threading.Lock()
+
+    def allow(self, techniques):
+        """Record one simulation covering `techniques`; False if any cap is reached."""
+        kinds = ["any"]
+        if any(str(t).startswith(CREDENTIAL_ATTACK_TECHNIQUES) for t in techniques):
+            kinds.append("brute_force")
+        now = self.clock()
+        with self._lock:
+            for kind in kinds:
+                window = self._windows[kind]
+                while window and now - window[0] > 60:
+                    window.popleft()
+                if len(window) >= self.limits[kind]:
+                    return False, kind
+            for kind in kinds:
+                self._windows[kind].append(now)
+        return True, None
 
 
 def resolve_target_ip(event):
