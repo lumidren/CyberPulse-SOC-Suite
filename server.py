@@ -293,6 +293,9 @@ SESSION_COOKIE = "cp_session"
 SESSION_TTL_MIN = int(os.environ.get("SESSION_TTL_MIN", "480"))
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true" if ENV == "production" else "false").lower() == "true"
 session_store = SessionStore(ttl_sec=SESSION_TTL_MIN * 60)
+SYNTHETIC_DIRECTORY_NOTE = ("SYNTHETIC lab directory (soar/identity_graph.py): invented accounts and hosts, "
+                            "no real employee data")
+
 # Endpoints whose responses contain telemetry; every read is audit-logged (E55)
 TELEMETRY_VIEW_PREFIXES = ("/api/incidents", "/api/alerts", "/api/approvals", "/api/syslog")
 # Static files reachable without a session (everything else in web/ needs login)
@@ -476,6 +479,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                        "/api/purple-team/run", "/api/ingest")
 
     def _send_json(self, status_code, payload):
+        if isinstance(payload, dict) and urlparse(self.path).path.startswith("/api/identity"):
+            # Identity views run on the invented lab directory, never a real one (E56)
+            payload = dict(payload, data_source=SYNTHETIC_DIRECTORY_NOTE)
         if masking_enabled() and urlparse(self.path).path.startswith(self.MASKED_PREFIXES):
             payload = mask_identities(payload)
         self.send_response(status_code)

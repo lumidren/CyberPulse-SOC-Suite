@@ -103,7 +103,7 @@ internal identifiers never go to external APIs.
 - [x] **E53** Document the local LRU IoC cache and how to clear it. — **Done**: `IocCache` in `soar/enrichment.py`; `/api/enrichment/cache/clear`; PRIVACY.md row; tests.
 - [x] **E54** Use synthetic data in the public demo. — **Done**: RFC 5737 IPs + 'Fictional ... (lab data)' providers everywhere; `tests/test_synthetic_demo_data.py`.
 - [x] **E55** Audit-log note on who can view the Sysmon streams. — **Done**: `DATA_ACCESS` audit lines in `server.py`; PRIVACY.md 'Who can view telemetry'; test.
-- [ ] **E56** Dashboard doesn't expose real employee data.
+- [x] **E56** Dashboard doesn't expose real employee data. — **Done**: `data_source` on identity responses, console badge, PRIVACY.md note; tests.
 
 ## Phase 4b — Third-party API compliance (E57–E64)
 
