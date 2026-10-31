@@ -11,7 +11,7 @@ let csrfToken = null;  // per-session token, held in memory only
 async function ensureCsrfToken() {
     if (csrfToken) return csrfToken;
     const res = await _nativeFetch("/api/session", { credentials: "same-origin" });
-    const data = await res.json();
+    const data = await safeJson(res);
     if (!data.authenticated) window.location.replace("/login.html");
     csrfToken = data.csrf_token;
     return csrfToken;
@@ -36,6 +36,27 @@ window.fetch = async function(url, options = {}) {
 async function logout() {
     await fetch("/api/session/logout", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
     window.location.replace("/login.html");
+}
+
+// ------------------------------------------------------------------------------
+// Output encoding: API data can contain ingested, attacker-controlled strings and
+// is rendered through innerHTML templates, so every string is HTML-escaped once
+// at the JSON boundary (safeJson) before any rendering code sees it.
+// ------------------------------------------------------------------------------
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function escapeDeep(value) {
+    if (Array.isArray(value)) return value.map(escapeDeep);
+    if (value && typeof value === "object") {
+        return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, escapeDeep(v)]));
+    }
+    return typeof value === "string" ? escapeHtml(value) : value;
+}
+async function safeJson(res) {
+    return escapeDeep(await safeJson(res));
 }
 
 let map;
@@ -158,7 +179,7 @@ async function triggerSimulation(attackType) {
                 webhook_url: customWebhookUrl
             })
         });
-        const data = await response.json();
+        const data = await safeJson(response);
         if (data.status === "SUCCESS" && data.incident) {
             const inc = data.incident;
             const intel = inc.threat_intel?.ip_reputation || {};
@@ -184,7 +205,7 @@ function simulatedBadge(inc) {
 async function loadIncidents() {
     try {
         const response = await fetch("/api/incidents");
-        const data = await response.json();
+        const data = await safeJson(response);
         incidentsData = data.incidents || [];
         
         document.getElementById("kpiIncidents").innerText = incidentsData.length;
@@ -247,7 +268,7 @@ async function loadIncidentDetails() {
 
     try {
         const response = await fetch(`/api/incidents/${incId}`);
-        const data = await response.json();
+        const data = await safeJson(response);
         const inc = data.incident;
         if (!inc) return;
 
@@ -359,7 +380,7 @@ async function rollbackActiveIncident() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ actor: "analyst_lumidren" })
         });
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.status === "SUCCESS") {
             const rb = data.rollback;
             alert(`[✓] Rollback (${rb.reversibility}): ${rb.log}` + (rb.not_restored ? `\nNot restored: ${rb.not_restored}` : ""));
@@ -385,7 +406,7 @@ async function decideActiveIncident(decision) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ approver: approver, comment: comment })
         });
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.status !== "SUCCESS") alert(`[!] ${data.message || data.error}`);
         loadIncidents();
         loadIncidentDetails();
@@ -406,7 +427,7 @@ async function addAnalystNote() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ note: note, author: "analyst_lumidren" })
         });
-        const data = await res.json();
+        const data = await safeJson(res);
         if (data.status === "SUCCESS") {
             input.value = "";
             loadIncidentDetails();
@@ -420,7 +441,7 @@ async function addAnalystNote() {
 async function loadDetections() {
     try {
         const res = await fetch("/api/detections");
-        const data = await res.json();
+        const data = await safeJson(res);
         const rules = data.rules || [];
 
         document.getElementById("detectionCatalogueBody").innerHTML = rules.map(r => `
@@ -458,7 +479,7 @@ async function runPurpleScenario(scenarioKey) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ scenario: scenarioKey, webhook_url: customWebhookUrl })
         });
-        const data = await res.json();
+        const data = await safeJson(res);
 
         summaryBox.innerHTML = `
             <div style="background:#1e1b4b;border:1px solid #6366f1;padding:14px;border-radius:8px;margin-bottom:14px;">
@@ -494,7 +515,7 @@ async function runPurpleScenario(scenarioKey) {
 async function loadHealthStatus() {
     try {
         const res = await fetch("/api/health");
-        const data = await res.json();
+        const data = await safeJson(res);
         const services = data.services || {};
 
         document.getElementById("healthGrid").innerHTML = Object.entries(services).map(([key, s]) => {
@@ -521,7 +542,7 @@ async function loadHealthStatus() {
 async function loadMetrics() {
     try {
         const res = await fetch("/api/metrics");
-        const data = await res.json();
+        const data = await safeJson(res);
         const kpis = data.operational_kpis || {};
         const p = data.latency_percentiles_sec || {};
 
@@ -539,7 +560,7 @@ async function loadMetrics() {
 async function loadPolicyMode() {
     try {
         const res = await fetch("/api/policy/config");
-        const data = await res.json();
+        const data = await safeJson(res);
         const select = document.getElementById("policyModeSelect");
         if (select && data.active_policy_mode) select.value = data.active_policy_mode;
     } catch (err) {
@@ -551,7 +572,7 @@ async function loadPolicyMode() {
 async function loadLabModeBanner() {
     try {
         const res = await fetch("/api/version");
-        const data = await res.json();
+        const data = await safeJson(res);
         const text = document.getElementById("labModeBannerText");
         if (!text) return;
         text.innerText = data.lab_mode
@@ -572,7 +593,7 @@ function renderKillSwitch(state) {
 async function loadSafetyStatus() {
     try {
         const res = await fetch("/api/safety");
-        const data = await res.json();
+        const data = await safeJson(res);
         renderKillSwitch(data.kill_switch);
     } catch (err) {
         console.error("Load safety status error:", err);
@@ -589,7 +610,7 @@ async function toggleKillSwitch() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ engaged: engage, actor: actor, reason: reason })
         });
-        const data = await res.json();
+        const data = await safeJson(res);
         renderKillSwitch(data.kill_switch);
     } catch (err) {
         console.error("Kill switch error:", err);
@@ -606,7 +627,7 @@ async function updatePolicyMode() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ mode: mode })
         });
-        const data = await res.json();
+        const data = await safeJson(res);
         if (!res.ok) {
             alert(`[!] ${data.error}`);
         }
@@ -841,7 +862,7 @@ function renderIdentityAnalysis(idData) {
 async function loadSyslogStats() {
     try {
         const res = await fetch("/api/syslog/stats");
-        const stats = await res.json();
+        const stats = await safeJson(res);
         
         if (document.getElementById("syslogTotalRecv")) document.getElementById("syslogTotalRecv").innerText = stats.total_received || 0;
         if (document.getElementById("syslogTotalParsed")) document.getElementById("syslogTotalParsed").innerText = stats.total_parsed || 0;
@@ -865,7 +886,7 @@ async function sendCustomIngest() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
-        const data = await res.json();
+        const data = await safeJson(res);
 
         if (res.ok && data.status === "INGESTED_AND_PROCESSED") {
             badge.innerHTML = `<span style="color: var(--color-green); font-weight: bold;"><i class="fa-solid fa-check"></i> Event successfully ingested & processed! Incident ID: ${data.incident?.incident_id}</span>`;
