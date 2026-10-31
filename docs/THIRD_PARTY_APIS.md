@@ -59,3 +59,15 @@ synthetic lab fixture only.
   data (RFC 5737 IPs, fictional providers), not derived from either provider.
 * `tests/test_enrichment.py` fails if provider response data is committed
   anywhere outside the enrichment client and its tests.
+
+## When enrichment fails
+
+* A provider outage, timeout or HTTP error becomes an `UNAVAILABLE` verdict;
+  it never crashes the pipeline, and it triggers the provider's backoff.
+* If enrichment is degraded (any provider unavailable, rate-limited or refused
+  by terms), **no containment runs automatically**: AUTOMATIC mode stages it
+  for an analyst instead.
+* Containment never runs automatically on reputation alone: if the risk score
+  would stay below the containment threshold without the threat-intel factor
+  (`score_without_intel`), an analyst must approve.
+

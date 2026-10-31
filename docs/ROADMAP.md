@@ -112,7 +112,7 @@ internal identifiers never go to external APIs.
 - [x] **E59** Respect AbuseIPDB limits and terms. — **Done**: AbuseIPDB limiter in `soar/enrichment.py`; THIRD_PARTY_APIS.md section; tests. Quota default should be set to your actual plan.
 - [x] **E60** Attribute VirusTotal and AbuseIPDB where required. — **Done**: `attributed()` on every provider verdict; console + report attribution; docs; tests.
 - [x] **E61** Don't redistribute their data in the repo. — **Done**: `strip_provider_data` used by dossier export; THIRD_PARTY_APIS.md 'No redistribution'; repo-scan test.
-- [ ] **E62** Enrichment down means no auto-containment on enrichment alone.
+- [x] **E62** Enrichment down means no auto-containment on enrichment alone. — **Done**: `_call` + `enrichment_degraded` in `soar/enrichment.py`; `score_without_intel` gating in `soar/risk_engine.py`; docs; tests.
 - [ ] **E63** A single reputation score never triggers a block; require corroboration.
 - [ ] **E64** Show source and timestamp for every enrichment verdict.
 

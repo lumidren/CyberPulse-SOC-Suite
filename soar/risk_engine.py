@@ -9,6 +9,7 @@ import os
 import time
 
 from soar.action_tiers import requires_approval, tier_for
+from soar.enrichment import enrichment_degraded
 
 # Asset Criticality Dictionary (0.0 to 1.0)
 ASSET_CRITICALITY = {
@@ -122,6 +123,8 @@ class RiskAndPolicyEngine:
         )
 
         final_score = round(min(100.0, max(0.0, composite_score)), 1)
+        # Same score with the threat-intel factor removed: shows whether intel alone tips the decision
+        score_without_intel = round(min(100.0, max(0.0, composite_score - intel_score * 0.15)), 1)
 
         # Risk Classification
         if final_score >= 80.0:
@@ -135,6 +138,8 @@ class RiskAndPolicyEngine:
 
         breakdown = {
             "final_score": final_score,
+            "score_without_intel": score_without_intel,
+            "enrichment_degraded": enrichment_degraded(intel.get("external")),
             "risk_level": risk_level,
             "factors": {
                 "rule_base_score": round(rule_base_score, 1),
@@ -162,11 +167,18 @@ class RiskAndPolicyEngine:
         """
         if self.policy_mode == "DRY_RUN":
             return "DRY_RUN_SIMULATION"
-        if self.policy_mode == "AUTOMATIC" and not requires_approval(action):
+        intel_only = decision.get("score_without_intel", 100.0) < 65.0 <= decision.get("risk_score", 0.0)
+        degraded = decision.get("enrichment_degraded", False)
+        if self.policy_mode == "AUTOMATIC" and not requires_approval(action) and not intel_only and not degraded:
             return "EXECUTE_IMMEDIATE"
         decision["approval_token"] = f"APPR-{int(time.time())}"
         if self.policy_mode == "AUTOMATIC":
-            decision["approval_reason"] = f"{tier_for(action)} actions always require analyst approval."
+            if intel_only:
+                decision["approval_reason"] = "Containment would rest on threat-intel reputation alone; analyst approval required."
+            elif degraded:
+                decision["approval_reason"] = "Threat-intel enrichment is unavailable or rate-limited; no automatic containment."
+            else:
+                decision["approval_reason"] = f"{tier_for(action)} actions always require analyst approval."
         return "PENDING_APPROVAL"
 
     def evaluate_policy(self, risk_assessment, matched_rule):
@@ -186,6 +198,8 @@ class RiskAndPolicyEngine:
             "execution_intent": "EXECUTE",
             "approval_token": None,
             "blast_radius_tier": tier_for(action_recommended),
+            "score_without_intel": risk_assessment.get("score_without_intel", score),
+            "enrichment_degraded": risk_assessment.get("enrichment_degraded", False),
             "rule_confidence": self.rule_confidence(matched_rule),
             "confidence_threshold": self.confidence_threshold,
             "rationale": ""

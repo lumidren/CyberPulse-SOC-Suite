@@ -97,6 +97,20 @@ def classify_indicator(value):
     return None
 
 
+DEGRADED_STATUSES = {"UNAVAILABLE", "RATE_LIMITED", "REFUSED_BY_TERMS"}
+
+
+def enrichment_degraded(external):
+    """True if enrichment was attempted but any provider answer is missing or failed."""
+    for part in (external or {}).values():
+        if not isinstance(part, dict):
+            continue
+        for verdict in part.get("verdicts", []):
+            if verdict.get("status") in DEGRADED_STATUSES or (verdict.get("http_status") or 200) >= 400:
+                return True
+    return False
+
+
 def _default_transport(url, headers, timeout=8):
     req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310 - fixed https provider URLs
@@ -209,6 +223,14 @@ class ThreatIntelClient:
         self.abuse_limiter = ProviderLimiter(int(os.environ.get("ABUSEIPDB_RATE_LIMIT_PER_MIN", "60")),
                                              int(os.environ.get("ABUSEIPDB_DAILY_QUOTA", "1000")), clock=clock)
 
+    def _call(self, url, headers):
+        """Transport call that never raises: outages become (None, {})."""
+        try:
+            return self.transport(url, headers)
+        except Exception as exc:  # network errors, timeouts, bad JSON, HTTP errors
+            self.last_error = str(exc)
+            return None, {}
+
     def _cached(self, key, fetch):
         hit = self.cache.get(key)
         if hit is not None:
@@ -245,9 +267,13 @@ class ThreatIntelClient:
         blocked = self._vt_terms_block(digest) or self._vt_rate_block(digest)
         if blocked:
             return {"status": blocked["status"], "verdicts": [blocked]}
-        status, body = self.transport(VT_FILE_URL.format(digest), {"x-apikey": self.vt_key})
-        self.vt_limiter.record(status)
+        status, body = self._call(VT_FILE_URL.format(digest), {"x-apikey": self.vt_key})
+        self.vt_limiter.record(status if status is not None else 503)
         stats = body.get("data", {}).get("attributes", {}).get("last_analysis_stats", {}) if status == 200 else {}
+        if status is None:
+            return {"status": "UNAVAILABLE", "verdicts": [attributed({
+                "source": "VirusTotal", "indicator": digest, "http_status": None, "status": "UNAVAILABLE",
+                "fetched_at": datetime.now(timezone.utc).isoformat()})]}
         return {"status": "OK", "verdicts": [attributed({"source": "VirusTotal", "indicator": digest, "http_status": status,
                                                          "malicious": stats.get("malicious"),
                                                          "fetched_at": datetime.now(timezone.utc).isoformat()})]}
@@ -288,11 +314,14 @@ class ThreatIntelClient:
         blocked = self._vt_terms_block(ip) or self._vt_rate_block(ip)
         if blocked:
             return blocked
-        status, body = self.transport(VT_IP_URL.format(urllib.parse.quote(ip)), {"x-apikey": self.vt_key})
-        self.vt_limiter.record(status)
+        status, body = self._call(VT_IP_URL.format(urllib.parse.quote(ip)), {"x-apikey": self.vt_key})
+        self.vt_limiter.record(status if status is not None else 503)
         stats = body.get("data", {}).get("attributes", {}).get("last_analysis_stats", {}) if status == 200 else {}
-        return attributed({"source": "VirusTotal", "indicator": ip, "http_status": status,
-                "malicious": stats.get("malicious"), "fetched_at": datetime.now(timezone.utc).isoformat()})
+        verdict = attributed({"source": "VirusTotal", "indicator": ip, "http_status": status,
+                              "malicious": stats.get("malicious"), "fetched_at": datetime.now(timezone.utc).isoformat()})
+        if status is None:
+            verdict["status"] = "UNAVAILABLE"
+        return verdict
 
     def _abuseipdb_ip(self, ip):
         allowed, retry_after = self.abuse_limiter.try_acquire()
@@ -300,9 +329,12 @@ class ThreatIntelClient:
             return attributed({"source": "AbuseIPDB", "indicator": ip, "http_status": None, "status": "RATE_LIMITED",
                     "retry_after_sec": retry_after, "fetched_at": datetime.now(timezone.utc).isoformat()})
         query = urllib.parse.urlencode({"ipAddress": ip, "maxAgeInDays": 90})
-        status, body = self.transport(ABUSEIPDB_CHECK_URL.format(query),
-                                      {"Key": self.abuse_key, "Accept": "application/json"})
-        self.abuse_limiter.record(status)
+        status, body = self._call(ABUSEIPDB_CHECK_URL.format(query),
+                                  {"Key": self.abuse_key, "Accept": "application/json"})
+        self.abuse_limiter.record(status if status is not None else 503)
         score = body.get("data", {}).get("abuseConfidenceScore") if status == 200 else None
-        return attributed({"source": "AbuseIPDB", "indicator": ip, "http_status": status,
-                "abuse_confidence": score, "fetched_at": datetime.now(timezone.utc).isoformat()})
+        verdict = attributed({"source": "AbuseIPDB", "indicator": ip, "http_status": status,
+                              "abuse_confidence": score, "fetched_at": datetime.now(timezone.utc).isoformat()})
+        if status is None:
+            verdict["status"] = "UNAVAILABLE"
+        return verdict
