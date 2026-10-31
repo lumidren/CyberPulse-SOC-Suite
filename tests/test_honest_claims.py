@@ -39,6 +39,8 @@ BANNED_CLAIMS = [
      "Rules are only tested on synthetic events; don't call them production-ready."),
     ("E11", re.compile(r"\bformal (incident|detection engineering|report)|FORENSIC DOSSIER|Compliance Standard:", re.I),
      "Reports are lab exercises; don't present them as formal or compliance artefacts."),
+    ("E12", re.compile(r"100% Offline AI|Technical Resume Summary|executing \d+ unit and integration test", re.I),
+     "Resume lines must be verifiable: no '100% AI' copilot claim, no hardcoded test counts."),
 ]
 
 
