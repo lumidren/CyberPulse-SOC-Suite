@@ -10,19 +10,19 @@
 
 **CyberPulse SOC Suite** is a modular **Detection Engineering, Incident Response (DFIR), and Resilient SOAR Architecture Lab** built in Python. It models how modern Security Operations Centers (SOCs) bridge the gap between adversary emulation, detection rule authoring, multi-factor risk scoring, automated containment, and forensic case management.
 
-The project provides both **production-ready configuration artifacts** (vendor-agnostic Sigma rules, Wazuh XML, Sysmon configurations, WDAC policies) and a **self-contained adversary emulation harness** for rapid testing without requiring a multi-server Active Directory cluster.
+The project provides both **deployable configuration artifacts** (vendor-agnostic Sigma rules, Wazuh XML, Sysmon configurations, WDAC policies) and a **self-contained adversary emulation harness** for rapid testing without requiring a multi-server Active Directory cluster.
 
 ---
 
-## 📐 Architectural Scope: Simulation Testbed vs. Production Artifacts
+## 📐 Architectural Scope: Simulation Testbed vs. Deployable Artifacts
 
-To maintain engineering transparency, the repository separates **production configuration artifacts** from the **Python simulation testbed**:
+To maintain engineering transparency, the repository separates **deployable configuration artifacts** from the **Python simulation testbed**:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
 │                             CYBERPULSE ARCHITECTURAL SCOPE                                  │
 ├──────────────────────────────────────────┬──────────────────────────────────────────────────┤
-│ 1. Production-Ready Artifacts            │ 2. Python Simulation & Validation Harness        │
+│ 1. Deployable Artifacts (untested)       │ 2. Python Simulation & Validation Harness        │
 ├──────────────────────────────────────────┼──────────────────────────────────────────────────┤
 │ • 10+ Sigma YAML rules (Sysmon & Cloud)  │ • Adversary Emulation Generator (Sysmon/EVTX)    │
 │ • Wazuh Manager XML detection rules      │ • Multi-Factor Risk & Policy Decision Engine     │
@@ -34,7 +34,7 @@ To maintain engineering transparency, the repository separates **production conf
 └──────────────────────────────────────────┴──────────────────────────────────────────────────┘
 ```
 
-* **Production Configuration Artifacts (`rules/`, `deploy/`, `integrations/`)**: Industry-standard, vendor-agnostic rules and configurations ready for deployment into Wazuh, Splunk, Windows endpoints, and TheHive.
+* **Deployable Configuration Artifacts (`rules/`, `deploy/`, `integrations/`)**: Vendor-agnostic rules and configurations in the formats Wazuh, Splunk, Windows endpoints and TheHive consume. They have only been exercised against this lab's synthetic events and are **untested against real-world noise**; tune them on your own baseline before relying on them.
 * **Simulation Testbed (`simulator/`, `soar/`)**: Generates deterministic telemetry mimicking Windows Event Logs (Sysmon 1, 6, 10, 11; Security 4625, 4662, 4698, 4769; AWS CloudTrail; Azure SignInLogs). This enables rapid local testing, automated CI/CD verification, and interactive triage demonstrations without heavyweight infrastructure.
 * **External Ingestion (`soar/syslog_receiver.py`)**: Accepts live RFC 5424 syslog packets over UDP 5514 or raw JSON via `POST /api/ingest`, enabling external agents or VMs to feed real telemetry into the pipeline.
 
@@ -54,6 +54,10 @@ Read this before drawing conclusions from anything else in the README.
   traffic from `simulator/benign_baseline.py`. Both were written by the same
   author as the rules, so detection counts are regression checks, not efficacy
   measurements (see [`docs/VALIDATION_RESULTS.md`](docs/VALIDATION_RESULTS.md)).
+* **The rules are untested against real-world noise.** Every rule has only
+  been run against synthetic events from this repository. Sigma rules are
+  marked `status: experimental` for that reason; expect false positives on a
+  real network until you tune them on your own baseline.
 * **The Python detection engine is simpler than the Sigma rules.** The
   in-process matcher in `soar/soar_engine.py` does not yet apply the
   exclusions documented in `rules/sigma/`, which is why the benign baseline
@@ -111,7 +115,7 @@ flowchart TD
 | **🛡️ Sysmon v14** | [`deploy/sysmon/sysmonconfig.xml`](deploy/sysmon/sysmonconfig.xml) | Kernel-level process handle, network socket, and driver load auditing. |
 | **🛡️ WDAC Policies** | [`deploy/wdac/driver_blocklist_policy.xml`](deploy/wdac/driver_blocklist_policy.xml) | Windows Defender Application Control policy blocking vulnerable signed drivers (`T1068`). |
 | **📜 Sigma Rules** | [`rules/sigma/`](rules/sigma/) | 10 vendor-agnostic detection rules covering Kerberoasting, DCSync, LSASS dumping, and cloud identity. |
-| **📊 Splunk** | [`integrations/splunk/savedsearches.conf`](integrations/splunk/savedsearches.conf) | Production SPL correlation searches and `inputs.conf` Windows stream definitions. |
+| **📊 Splunk** | [`integrations/splunk/savedsearches.conf`](integrations/splunk/savedsearches.conf) | SPL correlation searches and `inputs.conf` Windows stream definitions. |
 | **📑 TheHive 5** | [`integrations/thehive/thehive_case_template.json`](integrations/thehive/thehive_case_template.json) | Standardized NIST SP 800-61 6-stage incident triage case template. |
 | **🌐 MISP** | [`integrations/misp/misp_event_cyberpulse.json`](integrations/misp/misp_event_cyberpulse.json) | Threat intelligence feed schema containing hashes, IPs, and MITRE galaxy tags. |
 | **🔍 YARA** | [`rules/yara/soc_threat_signatures.yar`](rules/yara/soc_threat_signatures.yar) | Binary threat signatures for credential dumping and obfuscated cradles. |

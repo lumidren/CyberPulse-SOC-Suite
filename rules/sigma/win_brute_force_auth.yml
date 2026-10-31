@@ -1,6 +1,6 @@
 title: Password Brute Force Authentication Failure Spike
 id: 9a8d420f-21b4-4e12-b91c-223405fae38e
-status: production
+status: experimental
 description: Detects a high volume of failed logon attempts (EventID 4625) originating from a single source workstation or external IP within a short threshold.
 references:
     - https://attack.mitre.org/techniques/T1110/001/

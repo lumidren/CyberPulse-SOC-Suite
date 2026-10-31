@@ -2,7 +2,7 @@
 
 | Lifecycle Stage | Status | Author | Target Technique | Threat Actor Alignment |
 | :--- | :--- | :--- | :--- | :--- |
-| **Production (v2.1)** | **Active & Tuned** | lumidren | **MITRE ATT&CK T1003.001** | APT29, FIN7, Wizard Spider, LockBit |
+| **Lab (v2.1)** | **Lab-validated on synthetic data; untested against real-world noise** | lumidren | **MITRE ATT&CK T1003.001** | APT29, FIN7, Wizard Spider, LockBit |
 
 ---
 
@@ -54,11 +54,11 @@ detection:
 2. **Client Server Runtime Subsystem (`csrss.exe`) & Service Host (`svchost.exe`)**: Legitimate OS sub-systems query LSASS status.
 3. **IT Diagnostic Tools (`procdump.exe -ma`)**: Legitimate sysadmins dumping crash dumps during application failure diagnostics.
 
-### Tuning Iteration (Production v2.1):
+### Tuning Iteration (Lab v2.1):
 We implemented explicit parent/source binary exclusions for signed native system services while requiring specific granted access masks.
 
 ```yaml
-# Final Production Rule (rules/sigma/win_lsass_dumping.yml)
+# Current Lab Rule (rules/sigma/win_lsass_dumping.yml)
 detection:
     selection:
         TargetImage|endswith: '\lsass.exe'

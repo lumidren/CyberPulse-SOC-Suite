@@ -1,6 +1,6 @@
 title: Obfuscated PowerShell Execution Cradle
 id: 7d4b9e21-63fa-4c8e-9b1d-5a2e0f8c3d47
-status: production
+status: experimental
 description: Detects obfuscated or policy-bypassing PowerShell invocations commonly used by download cradles and in-memory stagers, including encoded commands, profile bypass, and hidden windows.
 references:
     - https://attack.mitre.org/techniques/T1059/001/

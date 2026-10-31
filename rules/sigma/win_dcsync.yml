@@ -1,6 +1,6 @@
 title: Active Directory Replication Abuse (DCSync) via Non-DC Account
 id: b41289cf-1123-4482-9912-781290341829
-status: production
+status: experimental
 description: Detects directory replication service requests (DS-Replication-Get-Changes) originating from non-domain controller accounts, indicative of Mimikatz lsadump::dcsync credential harvesting.
 references:
     - https://attack.mitre.org/techniques/T1003/006/

@@ -1,6 +1,6 @@
 title: Microsoft Entra ID Impossible Travel Anomaly
 id: e8f9a0b1-c2d3-4456-b789-0abcdef12345
-status: production
+status: experimental
 description: Detects impossible travel login anomalies in Microsoft Entra ID (Azure AD) where user authentications originate from geographically disparate IP addresses within an unrealistic physical travel window.
 references:
     - https://attack.mitre.org/techniques/T1078/

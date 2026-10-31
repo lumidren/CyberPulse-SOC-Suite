@@ -1,6 +1,6 @@
 title: Suspicious AWS STS AssumeRole Abuse Across External Account
 id: d7e8f9a0-b1c2-4345-a678-9abcdef01234
-status: production
+status: experimental
 description: Detects suspicious AWS STS AssumeRole calls originating from unapproved foreign IPs or anomalous role ARNs, characteristic of cloud privilege escalation and cross-account lateral movement.
 references:
     - https://attack.mitre.org/techniques/T1548/

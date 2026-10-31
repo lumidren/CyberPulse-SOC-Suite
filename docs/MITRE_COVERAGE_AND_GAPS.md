@@ -7,9 +7,9 @@ This document details the exact detection posture of **CyberPulse SOC Suite**, e
 
 ---
 
-## 2. Active High-Fidelity Detections (Production Rulebase)
+## 2. Active Detections (Lab Rulebase — untested against real-world noise)
 
-| Technique ID | Technique Name | Tactic | Primary Telemetry | Rule ID & Format | Fidelity / Noise | Automated Containment Action |
+| Technique ID | Technique Name | Tactic | Primary Telemetry | Rule ID & Format | Expected Fidelity (design intent, untested vs real noise) | Automated Containment Action |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`T1003.001`** | OS Credential Dumping: LSASS | Credential Access | Sysmon Event ID 10 | `SOC-RULE-001` (Sigma/Wazuh) | **High** (Tuned vs Defender/CSRSS) | WinRM Host Isolation + Process Termination |
 | **`T1110.001`** | Password Guessing: RDP | Credential Access | Security Event ID 4625 | `SOC-RULE-002` (Sigma/Wazuh) | **High** (>10 fails/300s window) | Dynamic pfSense Perimeter Firewall Drop |

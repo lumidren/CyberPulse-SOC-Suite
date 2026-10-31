@@ -1,6 +1,6 @@
 title: Vulnerable Signed Driver Load (BYOVD Evasion)
 id: f1a2b3c4-d5e6-4789-a012-3456789abcde
-status: production
+status: experimental
 description: Detects loading of known vulnerable signed drivers (e.g., gdrv.sys, mhyprot2.sys) commonly leveraged in Bring Your Own Vulnerable Driver (BYOVD) attacks to disable endpoint security agents from kernel-mode.
 references:
     - https://attack.mitre.org/techniques/T1068/
