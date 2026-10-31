@@ -22,6 +22,7 @@ from soar.ai_copilot import SOCCopilot
 from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
+from soar.plugins import run_enrichers
 
 # SYNTHETIC lab threat-intel fixture. IPs are RFC 5737 documentation addresses
 # (198.51.100.0/24, 203.0.113.0/24) and providers are fictional, so no real
@@ -308,6 +309,7 @@ class SOAROrchestrator:
                 "ip": self.intel_client.lookup(source_ip) if source_ip else {"status": "NO_INDICATOR", "verdicts": []},
                 "hash": self.intel_client.lookup(hash_val) if hash_val else {"status": "NO_INDICATOR", "verdicts": []},
             },
+            "plugins": run_enrichers(event),
             "ip_reputation": ip_intel,
             "hash_reputation": THREAT_INTEL_CACHE.get(hash_val, {
                 "reputation": "UNKNOWN",

@@ -11,6 +11,7 @@ import time
 from datetime import datetime, timezone
 
 from soar import command_builder as cmd
+from soar.plugins import RESPONDERS
 from soar.evidence_collector import VolatileEvidenceCollector
 from soar.process_termination import RANSOMWARE_GRACE_SECONDS, termination_plan
 from soar.protected_assets import protected_account_match, protected_match
@@ -338,6 +339,10 @@ class ResilientContainmentEngine:
                 "method": "WINRM_POWERSHELL",
                 "argv": cmd.citool_refresh()
             }
+
+        elif action_type in RESPONDERS:
+            # Plugin responder: runs only here, after every safety gate in execute/approve
+            RESPONDERS[action_type](action_record)
 
         elif action_type == "ESCALATE_TO_ANALYST":
             action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
