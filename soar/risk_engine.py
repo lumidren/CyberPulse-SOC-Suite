@@ -43,11 +43,11 @@ TACTIC_WEIGHTS = {
 }
 
 class RiskAndPolicyEngine:
-    def __init__(self, policy_mode="AUTOMATIC"):
+    def __init__(self, policy_mode="APPROVAL_REQUIRED"):
         """
         Policy Modes:
-        - 'AUTOMATIC': Automatically execute containment if risk threshold is met.
-        - 'APPROVAL_REQUIRED': Flag containment as PENDING_APPROVAL for analyst sign-off.
+        - 'APPROVAL_REQUIRED' (default): Stage containment as PENDING_APPROVAL for analyst sign-off.
+        - 'AUTOMATIC': Execute containment when the risk threshold is met (explicit opt-in only).
         - 'DRY_RUN': Simulate and log containment with zero network/host disruption.
         """
         self.policy_mode = policy_mode

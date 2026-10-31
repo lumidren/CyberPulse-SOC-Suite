@@ -39,9 +39,9 @@
             <div class="policy-mode-selector">
                 <label><i class="fa-solid fa-sliders"></i> Mode:</label>
                 <select id="policyModeSelect" onchange="updatePolicyMode()">
-                    <option value="AUTOMATIC" selected>🟢 AUTOMATIC (Active SOAR)</option>
-                    <option value="APPROVAL_REQUIRED">🟡 APPROVAL REQUIRED</option>
-                    <option value="DRY_RUN">🔵 DRY-RUN (Simulation)</option>
+                    <option value="APPROVAL_REQUIRED" selected>🟡 APPROVAL REQUIRED (default)</option>
+                    <option value="DRY_RUN">🔵 DRY-RUN (log only)</option>
+                    <option value="AUTOMATIC">🔴 AUTOMATIC (opt-in)</option>
                 </select>
             </div>
             <div class="soc-live-status">

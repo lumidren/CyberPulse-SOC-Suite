@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadDetections();
     loadHealthStatus();
     loadSyslogStats();
+    loadPolicyMode();
     
     // Poll metrics & health periodically
     setInterval(loadMetrics, 15000);
@@ -503,16 +504,33 @@ async function loadMetrics() {
     }
 }
 
+// Reflect the server's active policy mode (approval is the default)
+async function loadPolicyMode() {
+    try {
+        const res = await fetch("/api/policy/config");
+        const data = await res.json();
+        const select = document.getElementById("policyModeSelect");
+        if (select && data.active_policy_mode) select.value = data.active_policy_mode;
+    } catch (err) {
+        console.error("Load policy mode error:", err);
+    }
+}
+
 // Policy Mode Update
 async function updatePolicyMode() {
     const select = document.getElementById("policyModeSelect");
-    const mode = select?.value || "AUTOMATIC";
+    const mode = select?.value || "APPROVAL_REQUIRED";
     try {
-        await fetch("/api/policy/config", {
+        const res = await fetch("/api/policy/config", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ mode: mode })
         });
+        const data = await res.json();
+        if (!res.ok) {
+            alert(`[!] ${data.error}`);
+        }
+        if (data.active_policy_mode) select.value = data.active_policy_mode;
     } catch (err) {
         console.error("Policy mode error:", err);
     }
