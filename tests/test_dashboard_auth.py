@@ -102,6 +102,29 @@ class TestDashboardAuth(unittest.TestCase):
         self.assertEqual(client.request("GET", "/")[0], 302)
 
 
+class TestTelemetryAccessAudit(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.httpd = create_server(host="127.0.0.1", port=0)
+        cls.port = cls.httpd.server_address[1]
+        threading.Thread(target=cls.httpd.serve_forever, daemon=True).start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.httpd.shutdown()
+        cls.httpd.server_close()
+
+    def test_telemetry_reads_are_audit_logged(self):
+        client = DashboardClient(self.port)
+        client.login()
+        with self.assertLogs("cyberpulse.audit", level="INFO") as logs:
+            client.request("GET", "/api/incidents")
+        line = next(l for l in logs.output if "DATA_ACCESS" in l)
+        self.assertIn("principal=session:", line)
+        self.assertIn("path=/api/incidents", line)
+
+
 class TestCsrfProtection(unittest.TestCase):
 
     @classmethod
