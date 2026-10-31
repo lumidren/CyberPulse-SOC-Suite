@@ -64,6 +64,7 @@ ENV = os.environ.get("CYBERPULSE_ENV", "development").strip().lower()
 PORT = int(os.environ.get("PORT", "5000"))
 HOST = os.environ.get("HOST", "0.0.0.0")
 MAX_BODY_BYTES = int(os.environ.get("MAX_BODY_BYTES", str(1024 * 1024)))  # 1 MiB
+MAX_DRAIN_BYTES = 8 * 1024 * 1024  # upper bound read-and-discarded for oversized bodies
 RATE_LIMIT_PER_MINUTE = int(os.environ.get("RATE_LIMIT_PER_MINUTE", "240"))
 AUTH_FAILURE_LIMIT_PER_MINUTE = int(os.environ.get("AUTH_FAILURE_LIMIT_PER_MINUTE", "10"))
 WEB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
@@ -476,6 +477,15 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             content_length = 0
 
         if content_length > MAX_BODY_BYTES:
+            # Drain (and discard) a bounded amount of the body so the client
+            # reliably receives the 413 instead of a connection reset.
+            remaining = min(content_length, MAX_DRAIN_BYTES)
+            while remaining > 0:
+                chunk = self.rfile.read(min(65536, remaining))
+                if not chunk:
+                    break
+                remaining -= len(chunk)
+            self.close_connection = True
             self._send_json(413, {
                 "error": f"Payload Too Large: request body exceeds {MAX_BODY_BYTES} bytes."
             })
