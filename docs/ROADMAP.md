@@ -97,7 +97,7 @@ internal identifiers never go to external APIs.
 - [x] **E47** Set and enforce a log retention period. — **Done**: `apply_retention` (sweeper), bounded syslog deque, rotating `LOG_FILE`; PRIVACY.md updated; tests.
 - [x] **E48** Data minimization: ingest only the fields detections need. — **Done**: `DETAIL_FIELD_ALLOWLIST` in `soar/input_validation.py`; dropped field names reported; PRIVACY.md section; tests.
 - [ ] **E49** Document that IPs sent to VirusTotal/AbuseIPDB leave your environment.
-- [ ] **E50** Never send internal/RFC1918 IPs to external APIs.
+- [x] **E50** Never send internal/RFC1918 IPs to external APIs. — **Done**: `soar/enrichment.py` (`is_shareable_ip`, opt-in client) wired into `enrich_threat_intel`; `tests/test_enrichment.py`. Not run against live APIs (needs your keys).
 - [ ] **E51** Never send hostnames, usernames or file contents to enrichment APIs.
 - [ ] **E52** Option to disable external enrichment.
 - [ ] **E53** Document the local LRU IoC cache and how to clear it.

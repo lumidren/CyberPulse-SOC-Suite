@@ -21,6 +21,7 @@ from soar.evidence_collector import VolatileEvidenceCollector
 from soar.ai_copilot import SOCCopilot
 from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
+from soar.enrichment import ThreatIntelClient
 
 # Curated Threat Intelligence & GeoIP Database
 THREAT_INTEL_CACHE = {
@@ -131,6 +132,8 @@ class SOAROrchestrator:
         self.syslog_receiver = SyslogReceiver(port=5514)
         self.webhook_ingest = WebhookIngestionHandler()
         self.identity_engine = IdentityBlastRadiusEngine()
+        # Optional external enrichment (off unless EXTERNAL_ENRICHMENT_ENABLED=true + API keys)
+        self.intel_client = ThreatIntelClient()
         # Circuit-breaker trips page a human through the configured notification channel
         self.containment_engine.safety.pager = lambda message: self.dispatcher.dispatch_text(
             f"🚨 [CyberPulse PAGE] {message}")
@@ -297,6 +300,8 @@ class SOAROrchestrator:
         ip_intel = THREAT_INTEL_CACHE.get(source_ip, default_geo)
 
         intel = {
+            # Live lookups only for public IPs, only when enabled (see soar/enrichment.py)
+            "external": self.intel_client.lookup_ip(source_ip) if source_ip else {"status": "NO_INDICATOR", "verdicts": []},
             "ip_reputation": ip_intel,
             "hash_reputation": THREAT_INTEL_CACHE.get(hash_val, {
                 "reputation": "UNKNOWN",
