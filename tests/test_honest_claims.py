@@ -41,6 +41,8 @@ BANNED_CLAIMS = [
      "Reports are lab exercises; don't present them as formal or compliance artefacts."),
     ("E12", re.compile(r"100% Offline AI|Technical Resume Summary|executing \d+ unit and integration test", re.I),
      "Resume lines must be verifiable: no '100% AI' copilot claim, no hardcoded test counts."),
+    ("E13", re.compile(r"no human[- ]in[- ]the[- ]loop|without (any )?human|zero[- ]touch|100% Automated", re.I),
+     "Removing analysts from the loop is not a selling point."),
 ]
 
 

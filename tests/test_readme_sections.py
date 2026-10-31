@@ -19,6 +19,11 @@ class TestReadmeSections(unittest.TestCase):
         self.assertIn("Responders are simulated", text)
         self.assertIn("Telemetry is synthetic", text)
 
+    def test_human_oversight_section_present(self):
+        text = readme()
+        self.assertIn("## 🧑‍⚖️ Human Oversight", text)
+        self.assertIn("not to replace them", text)
+
 
 class TestSimulatedIncidentLabels(unittest.TestCase):
 

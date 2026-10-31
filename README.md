@@ -40,6 +40,16 @@ To maintain engineering transparency, the repository separates **deployable conf
 
 ---
 
+## 🧑‍⚖️ Human Oversight
+
+CyberPulse is built to **assist** analysts, not to replace them. Removing people
+from the loop is not a goal of this project: automation proposes and records
+actions, disruptive actions are meant to be approved by an analyst, and every
+action is logged and reversible. See the safe-automation controls documented
+under *SOAR Policies* below.
+
+---
+
 ## ⚠️ Limitations
 
 Read this before drawing conclusions from anything else in the README.
