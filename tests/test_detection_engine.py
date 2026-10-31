@@ -8,7 +8,6 @@ import unittest
 import os
 os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")  # tests run in a declared lab
 import sys
-import json
 import time
 
 # Ensure project root in python path
@@ -17,8 +16,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from simulator.attack_simulator import (
     simulate_t1003_lsass_dump,
     simulate_t1110_brute_force,
-    simulate_t1053_scheduled_task,
-    simulate_t1059_powershell_execution,
     simulate_t1562_defender_tamper,
     simulate_t1486_ransomware_canary,
     simulate_t1558_kerberoasting,
@@ -31,10 +28,7 @@ from soar.risk_engine import RiskAndPolicyEngine
 from soar.resilient_containment import ResilientContainmentEngine, CircuitBreaker
 from soar.metrics_engine import SOCMetricsEngine
 from simulator.purple_team_runner import PurpleTeamRunner
-from soar.attack_graph import AttackGraphEngine
-from soar.evidence_collector import VolatileEvidenceCollector
-from soar.ai_copilot import SOCCopilot
-from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
+from soar.syslog_receiver import WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.bloodhound_exporter import BloodHoundExporter
 from soar.report_generator import IncidentReportGenerator
@@ -73,7 +67,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         """Verify T1003.001 LSASS Memory Dump executes closed loop with Host Isolation"""
         event = simulate_t1003_lsass_dump()
         incident = self.orchestrator.process_event(event)
-        
+
         self.assertIsNotNone(incident)
         self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-001")
         self.assertEqual(incident["risk_assessment"]["risk_level"], "CRITICAL")
@@ -91,7 +85,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         """Verify T1110.001 RDP Brute Force triggers pfSense firewall drop"""
         event = simulate_t1110_brute_force()
         incident = self.orchestrator.process_event(event)
-        
+
         self.assertIsNotNone(incident)
         self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-002")
         self.assertEqual(incident["containment_action"]["action_type"], "BLOCK_SOURCE_IP_FIREWALL")
@@ -101,7 +95,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         """Verify T1562.001 Defender tampering triggers policy reversion and isolation"""
         event = simulate_t1562_defender_tamper()
         incident = self.orchestrator.process_event(event)
-        
+
         self.assertIsNotNone(incident)
         self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-005")
         self.assertEqual(incident["containment_action"]["action_type"], "REVERT_DEFENDER_POLICY_AND_ISOLATE")
@@ -110,7 +104,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         """Verify T1486 Ransomware canary encryption triggers VSS recovery"""
         event = simulate_t1486_ransomware_canary()
         incident = self.orchestrator.process_event(event)
-        
+
         self.assertIsNotNone(incident)
         self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-006")
         self.assertEqual(incident["containment_action"]["action_type"], "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS")
@@ -119,7 +113,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         """Verify T1558.001 Kerberoasting TGS request triggers SOC-RULE-007 and account reset"""
         event = simulate_t1558_kerberoasting()
         incident = self.orchestrator.process_event(event)
-        
+
         self.assertIsNotNone(incident)
         self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-007")
         self.assertEqual(incident["containment_action"]["action_type"], "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET")
@@ -128,7 +122,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         """Verify T1003.006 DCSync replication abuse triggers SOC-RULE-008 and privilege revocation"""
         event = simulate_t1003_dcsync()
         incident = self.orchestrator.process_event(event)
-        
+
         self.assertIsNotNone(incident)
         self.assertEqual(incident["rule"]["rule_id"], "SOC-RULE-008")
         self.assertEqual(incident["containment_action"]["action_type"], "ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES")
@@ -136,13 +130,13 @@ class TestSOCLabPlatform(unittest.TestCase):
     def test_multi_factor_risk_scoring_accuracy(self):
         """Verify risk engine properly factors asset criticality and user privilege"""
         risk_engine = RiskAndPolicyEngine()
-        
+
         # High-value Domain Controller
         dc_event = {"computer_name": "WIN-DC01.corp.local", "user": "CORP\\Administrator", "tactic": "Credential Access"}
         rule = {"severity": "CRITICAL", "action_recommended": "ISOLATE_HOST_AND_KILL_PROCESS"}
         intel = {"ip_reputation": {"virustotal_positives": 42, "abuse_score": 95}}
         dc_risk = risk_engine.calculate_risk_score(dc_event, rule, intel)
-        
+
         # Standard Low-Value Workstation
         ws_event = {"computer_name": "WIN-WORKSTATION09", "user": "CORP\\j.doe", "tactic": "Execution"}
         rule_low = {"severity": "HIGH", "action_recommended": "TERMINATE_PROCESS_TREE"}
@@ -188,7 +182,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         orch_dry = SOAROrchestrator(policy_mode="DRY_RUN")
         event = simulate_t1003_lsass_dump()
         incident = orch_dry.process_event(event)
-        
+
         self.assertEqual(incident["policy_decision"]["execution_intent"], "DRY_RUN_SIMULATION")
         self.assertEqual(incident["containment_action"]["status"], "SIMULATED_NO_DISRUPTION")
 
@@ -208,7 +202,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         """Verify Purple Team Runner detects every scripted stage of the APT29-style scenario"""
         runner = PurpleTeamRunner(self.orchestrator)
         summary = runner.run_scenario("APT29_COZY_BEAR")
-        
+
         self.assertEqual(summary["overall_status"], "ALL_SCRIPTED_STAGES_DETECTED")
         self.assertEqual(summary["total_stages"], 3)
         self.assertEqual(summary["passed_stages"], 3)

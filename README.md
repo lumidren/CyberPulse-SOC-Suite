@@ -291,6 +291,13 @@ source venv/bin/activate
 # Install dependencies (hash-pinned; dev tools are only needed for tests/lint)
 pip install --require-hashes -r requirements.txt
 pip install --require-hashes -r requirements-dev.txt
+pip install --require-hashes -r requirements-typecheck.txt   # mypy (Linux/64-bit wheels)
+```
+
+Lint and type-check (both run in CI):
+```bash
+ruff check .
+mypy
 ```
 
 ### 2. Run the Automated Test Suite:

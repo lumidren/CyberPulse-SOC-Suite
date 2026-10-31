@@ -21,7 +21,7 @@ class SyslogReceiver:
         self.sock = None
         self.running = False
         self.thread = None
-        
+
         # Bounded buffer: the oldest events drop off once SYSLOG_MAX_EVENTS is reached
         import collections
         import os
@@ -41,11 +41,10 @@ class SyslogReceiver:
             # or older format <PRI> TIMESTAMP HOSTNAME MSG
             match = re.match(r'<(\d+)>(?:1 )?(\S+) (\S+) (.*)', message)
             if match:
-                pri = match.group(1)
                 timestamp = match.group(2)
                 hostname = match.group(3)
                 rest = match.group(4)
-                
+
                 # Check if JSON payload is embedded in the message
                 details = {}
                 try:
@@ -56,13 +55,13 @@ class SyslogReceiver:
                         details = {"raw": rest}
                 except json.JSONDecodeError:
                     details = {"raw": rest}
-                    
+
                 event_id = details.get("event_id", "syslog_generic")
                 event_source = details.get("event_source", "syslog")
                 technique_id = details.get("technique_id", "Unknown")
                 user = details.get("user", "Unknown")
                 source_ip = details.get("source_ip", "")
-                
+
                 return {
                     "event_id": event_id,
                     "event_source": event_source,
@@ -86,7 +85,7 @@ class SyslogReceiver:
                     "details": {"raw": message}
                 }
         except Exception as e:
-            raise ValueError(f"Failed to parse syslog message: {e}")
+            raise ValueError(f"Failed to parse syslog message: {e}") from e
 
     def _listen(self):
         """Background thread worker to listen for UDP packets."""
@@ -98,13 +97,13 @@ class SyslogReceiver:
             print(f"Error binding to {self.host}:{self.port} - {e}")
             self.running = False
             return
-            
+
         while self.running:
             try:
                 data, addr = self.sock.recvfrom(65535)
                 self.total_received += 1
                 message = data.decode('utf-8', errors='replace').strip()
-                
+
                 try:
                     event = self._parse_syslog(message)
                     # Automatically use sender's IP if it's missing in the message
@@ -119,10 +118,10 @@ class SyslogReceiver:
                     self.total_errors += 1
             except socket.timeout:
                 continue
-            except Exception as e:
+            except Exception:
                 if self.running:
                     self.total_errors += 1
-        
+
         self.sock.close()
 
     def start(self):
@@ -189,7 +188,7 @@ if __name__ == '__main__':
     receiver = SyslogReceiver(port=5514)
     print(f"Starting SyslogReceiver on port {receiver.port}...")
     receiver.start()
-    
+
     # Send a dummy syslog message for testing
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     test_msg = '<165>1 2026-09-09T12:00:00Z web-server my-app - - {"event_id": "4624", "user": "admin_user", "technique_id": "T1078"}'
@@ -197,16 +196,16 @@ if __name__ == '__main__':
         sock.sendto(test_msg.encode('utf-8'), ('127.0.0.1', 5514))
     except Exception as e:
         print("Failed to send test message:", e)
-    
+
     print("Listening for 5 seconds...")
     time.sleep(5)
-    
+
     print("--- Stats ---")
     print(json.dumps(receiver.get_stats(), indent=2))
-    
+
     print("--- Received Events ---")
     print(json.dumps(receiver.get_received_events(), indent=2))
-    
+
     print("Stopping SyslogReceiver...")
     receiver.stop()
     print("Stopped.")

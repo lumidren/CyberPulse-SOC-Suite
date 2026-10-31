@@ -16,13 +16,14 @@ import hashlib
 import hmac
 import threading
 import time
+from typing import Any, Callable, Dict, Optional, Tuple
 
 SIGNATURE_HEADER = "X-CyberPulse-Signature"
 TIMESTAMP_HEADER = "X-CyberPulse-Timestamp"
 MAX_SKEW_SEC = 300
 
 
-def sign_payload(secret, body, timestamp=None):
+def sign_payload(secret: str, body: Any, timestamp: Optional[float] = None) -> Tuple[str, str]:
     """Return (timestamp, signature header value) for `body` (bytes or str)."""
     ts = str(int(timestamp if timestamp is not None else time.time()))
     raw = body.encode("utf-8") if isinstance(body, str) else body
@@ -31,18 +32,18 @@ def sign_payload(secret, body, timestamp=None):
 
 
 class IngestVerifier:
-    def __init__(self, secret, clock=time.time, max_skew_sec=MAX_SKEW_SEC):
+    def __init__(self, secret: str, clock: Callable[[], float] = time.time, max_skew_sec: int = MAX_SKEW_SEC) -> None:
         self.secret = secret
         self.clock = clock
         self.max_skew_sec = max_skew_sec
-        self._seen = {}  # signature -> first-seen time (replay cache)
+        self._seen: Dict[str, float] = {}  # signature -> first-seen time (replay cache)
         self._lock = threading.Lock()
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return bool(self.secret)
 
-    def verify(self, timestamp, signature, raw_body):
+    def verify(self, timestamp: Optional[str], signature: Optional[str], raw_body: bytes) -> Tuple[bool, str]:
         """Return (ok, reason)."""
         if not self.enabled:
             return False, "Webhook receiver disabled: set INGEST_HMAC_SECRET."

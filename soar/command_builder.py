@@ -11,6 +11,7 @@ extra arguments or a second command.
 import ipaddress
 import re
 from urllib.parse import quote
+from typing import Any, Dict, List
 
 
 class CommandValidationError(ValueError):
@@ -23,43 +24,43 @@ _TASK_NAME_RE = re.compile(r"^\\[A-Za-z0-9 _.\\-]{1,200}$")
 _UPN_RE = re.compile(r"^[A-Za-z0-9._-]{1,64}(@[A-Za-z0-9.-]{1,190})?$")
 
 
-def valid_ip(value):
+def valid_ip(value: Any) -> str:
     try:
         return str(ipaddress.ip_address(str(value)))
     except ValueError:
-        raise CommandValidationError(f"not an IP address: {str(value)[:60]!r}")
+        raise CommandValidationError(f"not an IP address: {str(value)[:60]!r}") from None
 
 
-def valid_hostname(value):
+def valid_hostname(value: Any) -> str:
     if not isinstance(value, str) or not _HOSTNAME_RE.match(value):
         raise CommandValidationError(f"not a valid hostname: {str(value)[:60]!r}")
     return value
 
 
-def valid_account(value):
+def valid_account(value: Any) -> str:
     """sAMAccountName with optional NetBIOS domain, e.g. CORP\\j.doe. No quotes, spaces or shell metacharacters."""
     if not isinstance(value, str) or not _ACCOUNT_RE.match(value):
         raise CommandValidationError(f"not a valid account name: {str(value)[:60]!r}")
     return value
 
 
-def valid_task_name(value):
+def valid_task_name(value: Any) -> str:
     if not isinstance(value, str) or not _TASK_NAME_RE.match(value) or ".." in value:
         raise CommandValidationError(f"not a valid scheduled task path: {str(value)[:60]!r}")
     return value
 
 
-def valid_pid(value):
+def valid_pid(value: Any) -> int:
     try:
         pid = int(value)
     except (TypeError, ValueError):
-        raise CommandValidationError(f"not a PID: {value!r}")
+        raise CommandValidationError(f"not a PID: {value!r}") from None
     if not 4 < pid < 4_194_304:
         raise CommandValidationError(f"PID out of range: {pid}")
     return pid
 
 
-def valid_upn(value):
+def valid_upn(value: Any) -> str:
     if not isinstance(value, str) or not _UPN_RE.match(value):
         raise CommandValidationError(f"not a valid user principal name: {str(value)[:60]!r}")
     return value
@@ -70,7 +71,7 @@ def valid_upn(value):
 # The responder must pass `parameters` as a splatted hashtable to a fixed wrapper
 # (param($Cmdlet, $Params) & $Cmdlet @Params) - never interpolate into script text.
 ISOLATION_RULE = "SOC-Emergency-Isolation"
-PS_CMDLETS = {
+PS_CMDLETS: Dict[str, Dict[str, Any]] = {
     "Set-ADUser": {"Identity": valid_account, "Enabled": bool, "ChangePasswordAtLogon": bool},
     "Disable-ADAccount": {"Identity": valid_account},
     "Enable-ADAccount": {"Identity": valid_account},
@@ -81,7 +82,7 @@ PS_CMDLETS = {
 }
 
 
-def ps_invocation(cmdlet, **params):
+def ps_invocation(cmdlet: str, **params: Any) -> Dict[str, Any]:
     """Structured, validated PowerShell invocation for WinRM-over-HTTPS transport."""
     schema = PS_CMDLETS.get(cmdlet)
     if schema is None:
@@ -104,37 +105,37 @@ def ps_invocation(cmdlet, **params):
     return {"transport": "winrm-https", "cmdlet": cmdlet, "parameters": clean}
 
 
-def graph_revoke_sessions(upn):
+def graph_revoke_sessions(upn: str) -> Dict[str, str]:
     """Microsoft Graph request with the UPN validated and URL-encoded."""
     return {"method": "POST",
             "url": f"https://graph.microsoft.com/v1.0/users/{quote(valid_upn(upn), safe='@.')}/revokeSignInSessions"}
 
 
-def citool_refresh():
+def citool_refresh() -> List[str]:
     return ["CiTool.exe", "--refresh"]
 
 
 # --------------------------------------------------------------------- argv builders
-def iptables_drop(ip):
+def iptables_drop(ip: Any) -> List[str]:
     return ["iptables", "-I", "INPUT", "1", "-s", f"{valid_ip(ip)}/32", "-j", "DROP",
             "-m", "comment", "--comment", "CyberPulse-Auto-Block"]
 
 
-def iptables_undrop(ip):
+def iptables_undrop(ip: Any) -> List[str]:
     return ["iptables", "-D", "INPUT", "-s", f"{valid_ip(ip)}/32", "-j", "DROP",
             "-m", "comment", "--comment", "CyberPulse-Auto-Block"]
 
 
-def pfsense_rule_path(ip):
+def pfsense_rule_path(ip: Any) -> str:
     return f"/api/v1/firewall/rule/{valid_ip(ip)}"
 
 
-def aws_delete_deny_policy(user):
+def aws_delete_deny_policy(user: Any) -> List[str]:
     return ["aws", "iam", "delete-user-policy", "--user-name", valid_account(user).split("\\")[-1],
             "--policy-name", "AWSRevokeOlderSessions"]
 
 
-def schtasks(action, task_name):
+def schtasks(action: str, task_name: Any) -> List[str]:
     flags = {"export": ["/Query", "/TN", None, "/XML"], "disable": ["/Change", "/TN", None, "/DISABLE"],
              "enable": ["/Change", "/TN", None, "/ENABLE"]}[action]
     name = valid_task_name(task_name)

@@ -1,12 +1,11 @@
 """
 Resilient Containment, Circuit Breaker & Rollback Engine for CyberPulse SOC Suite
-Provides fault-tolerant execution, non-blocking enrichment fallback, 
+Provides fault-tolerant execution, non-blocking enrichment fallback,
 idempotent operations, and automated containment rollback capabilities.
 """
 
 import hashlib
 import itertools
-import json
 import time
 from datetime import datetime, timezone
 

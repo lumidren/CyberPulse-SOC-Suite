@@ -14,7 +14,7 @@ class VolatileEvidenceCollector:
         Simulates gathering pre-containment volatile state from a Windows host.
         """
         now = datetime.datetime.now(datetime.timezone.utc).isoformat()
-        
+
         evidence_package = {
             "network_connections": [
                 {"pid": 1024, "local_addr": "192.168.1.10:4444", "remote_addr": "10.0.0.5:8080", "state": "ESTABLISHED", "process_name": "malware.exe"},
@@ -41,7 +41,8 @@ class VolatileEvidenceCollector:
             ],
             "memory_strings": [
                 "http://malicious-c2.com/payload.bin",
-                "powershell.exe -nop -w hidden -enc JABzAD0ATgBlAHcALQBPAGIAagBlAGMAdAAgAEkATwAuAE0AZQBtAG8AcgB5AFMAdAByAGUAYQBtACgAWwBDAG8AbgB2AGUAcgB0AF0AOgA6AEYAcgBvAG0AQgBhAHMAZQA2ADQAUwB0AHIAaQBuAGcAKAAiAEgA...",
+                ("powershell.exe -nop -w hidden -enc JABzAD0ATgBlAHcALQBPAGIAagBlAGMAdAAgAEkATwAuAE0AZQBtAG8AcgB5AFMAdAByAGUAYQBtACgA"
+                 "WwBDAG8AbgB2AGUAcgB0AF0AOgA6AEYAcgBvAG0AQgBhAHMAZQA2ADQAUwB0AHIAaQBuAGcAKAAiAEgA..."),
                 "Administrator:Password123!"
             ],
             "collection_metadata": {
@@ -51,7 +52,7 @@ class VolatileEvidenceCollector:
                 "total_artifacts_count": 18
             }
         }
-        
+
         # Memory strings and command lines routinely contain credentials: redact before storing
         return redact_deep(evidence_package)
 

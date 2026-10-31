@@ -11,6 +11,7 @@ full names (e.g. working a real incident).
 """
 
 import os
+from typing import Any
 
 # Keys whose values are account names wherever they appear in a payload
 USER_KEYS = {
@@ -20,11 +21,11 @@ USER_KEYS = {
 UNMASKED = {"Unknown", "NT AUTHORITY\\SYSTEM", "SYSTEM", "", None}
 
 
-def masking_enabled():
+def masking_enabled() -> bool:
     return os.environ.get("PRIVACY_MASK_USERNAMES", "true").strip().lower() != "false"
 
 
-def mask_username(value):
+def mask_username(value: Any) -> Any:
     """Keep domain prefix and first/last character of the account; mask the rest."""
     if not isinstance(value, str) or value in UNMASKED:
         return value
@@ -36,7 +37,7 @@ def mask_username(value):
     return f"{domain}{sep}{masked}"
 
 
-def mask_identities(obj):
+def mask_identities(obj: Any) -> Any:
     """Return a copy of `obj` with every account name masked."""
     if isinstance(obj, dict):
         out = {}

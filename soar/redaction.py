@@ -8,7 +8,9 @@ strings, user:password@host URLs. Those values are replaced with
 the command line (which detections and analysts need) is kept.
 """
 
+import logging
 import re
+from typing import Any
 
 REDACTED = "[REDACTED]"
 
@@ -35,7 +37,7 @@ _RULES = [
 ]
 
 
-def redact(text):
+def redact(text: Any) -> Any:
     """Return `text` with credential values replaced by [REDACTED]."""
     if not isinstance(text, str) or not text:
         return text
@@ -47,7 +49,7 @@ def redact(text):
 class RedactingFilter:
     """logging.Filter that redacts credentials from every formatted log message."""
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
         try:
             message = record.getMessage()
         except Exception:
@@ -56,7 +58,7 @@ class RedactingFilter:
         return True
 
 
-def redact_deep(value):
+def redact_deep(value: Any) -> Any:
     """Apply `redact` to every string in a nested structure."""
     if isinstance(value, dict):
         return {k: redact_deep(v) for k, v in value.items()}

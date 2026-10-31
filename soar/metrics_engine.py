@@ -6,7 +6,6 @@ from pipeline runs on emulated telemetry recorded in this process.
 
 import json
 import math
-import time
 from datetime import datetime, timezone
 
 def calculate_percentile(values, percentile):

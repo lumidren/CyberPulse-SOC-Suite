@@ -42,11 +42,11 @@ TIER_DESCRIPTIONS = {
 }
 
 
-def tier_for(action_type):
+def tier_for(action_type: str) -> str:
     """Blast-radius tier for an action; unknown actions get the strictest tier."""
     return ACTION_TIERS.get(action_type, TIER_3_IDENTITY)
 
 
-def requires_approval(action_type):
+def requires_approval(action_type: str) -> bool:
     """True if the action may never run without an analyst approving it."""
     return tier_for(action_type) != TIER_1_AUTO_ELIGIBLE

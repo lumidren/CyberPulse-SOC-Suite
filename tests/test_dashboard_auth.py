@@ -120,7 +120,7 @@ class TestTelemetryAccessAudit(unittest.TestCase):
         client.login()
         with self.assertLogs("cyberpulse.audit", level="INFO") as logs:
             client.request("GET", "/api/incidents")
-        line = next(l for l in logs.output if "DATA_ACCESS" in l)
+        line = next(entry for entry in logs.output if "DATA_ACCESS" in entry)
         self.assertIn("principal=session:", line)
         self.assertIn("path=/api/incidents", line)
 

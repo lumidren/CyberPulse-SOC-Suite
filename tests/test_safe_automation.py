@@ -480,7 +480,7 @@ class TestScheduledTaskExport(unittest.TestCase):
         orch = SOAROrchestrator(policy_mode="APPROVAL_REQUIRED")
         inc = orch.process_event(simulate_t1053_scheduled_task())
         context = inc["containment_action"]["context"]
-        self.assertEqual(context["task_name"], "\Microsoft\Windows\SystemHealthUpdate")
+        self.assertEqual(context["task_name"], r"\Microsoft\Windows\SystemHealthUpdate")
         self.assertIn("<Exec>", context["task_xml"])
 
 

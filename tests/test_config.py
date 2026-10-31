@@ -9,7 +9,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from soar.config import SCHEMA, ConfigError, load_and_apply, validate  # noqa: E402
+from soar.config import SCHEMA, load_and_apply, validate  # noqa: E402
 
 
 class TestConfigSchema(unittest.TestCase):

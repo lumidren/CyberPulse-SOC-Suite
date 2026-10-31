@@ -1,6 +1,6 @@
 """
 Integration Diagnostics & Health Monitor for CyberPulse SOC Suite
-Provides real-time health checks, latency probes, and connection status 
+Provides real-time health checks, latency probes, and connection status
 across all SIEM, SOAR, Threat Intel, and Endpoint infrastructure.
 """
 
@@ -38,10 +38,10 @@ def check_http_endpoint(url, timeout=0.8):
     t_start = time.perf_counter()
     try:
         req = urllib.request.Request(url, headers={'User-Agent': 'CyberPulse-HealthCheck/2.4'})
-        with urllib.request.urlopen(req, timeout=timeout) as response:  # nosec B310 - fixed https probe URLs
+        with urllib.request.urlopen(req, timeout=timeout):  # nosec B310 - fixed https probe URLs
             latency_ms = round((time.perf_counter() - t_start) * 1000, 2)
             return True, latency_ms
-    except urllib.error.HTTPError as e:
+    except urllib.error.HTTPError:
         # HTTP errors like 401/403 still mean service is online and healthy
         latency_ms = round((time.perf_counter() - t_start) * 1000, 2)
         return True, latency_ms

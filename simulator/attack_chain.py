@@ -8,9 +8,7 @@ explicitly authorised to test. It only emits synthetic telemetry (no exploitatio
 no credential access, no network traffic).
 """
 
-import json
 import time
-from datetime import datetime, timezone
 
 # Add project root to sys.path
 import os
@@ -71,18 +69,17 @@ def run_adversary_kill_chain(delay_between_phases=1.5, webhook_url=None):
     for stage in KILL_CHAIN_STAGES:
         print(f"\n[*] [STAGE: {stage['phase']}] - {stage['tactic']} ({stage['technique']})")
         event = stage["generator"]()
-        
-        t_start = time.perf_counter()
+
         alert = orchestrator.process_event(event, custom_webhook_url=webhook_url)
-        elapsed = time.perf_counter() - t_start
 
         if alert:
             timing = alert["pipeline_timing"]
             soar = alert["soar_response"]
             print(f"    \033[92m[✓] Detection Fired:\033[0m {alert['rule']['rule_name']}")
-            print(f"    \033[96m[⚡] Total Latency:\033[0m {timing['total_pipeline_sec']}s (Detection: {timing['stage1_detection_ms']}ms | Containment: {timing['stage3_containment_ms']}ms)")
+            print(f"    \033[96m[⚡] Total Latency:\033[0m {timing['total_pipeline_sec']}s "
+                  f"(Detection: {timing['stage1_detection_ms']}ms | Containment: {timing['stage3_containment_ms']}ms)")
             print(f"    \033[93m[🛡️] Containment:\033[0m {soar['action_type']} -> {soar['execution_log']}")
-            
+
             results.append({
                 "stage": stage["phase"],
                 "technique_id": stage["technique"],

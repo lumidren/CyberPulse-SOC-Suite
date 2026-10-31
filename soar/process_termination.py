@@ -35,7 +35,7 @@ def termination_plan(pid, process_name=None, grace_seconds=DEFAULT_GRACE_SECONDS
     try:
         pid = valid_pid(pid)
     except CommandValidationError as exc:
-        raise ValueError(f"Refusing to plan termination: {exc}")
+        raise ValueError(f"Refusing to plan termination: {exc}") from exc
     steps = [
         {"step": 1, "action": "snapshot_process", "detail": "Collect process, handle, network and memory metadata first."},
     ]

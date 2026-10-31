@@ -5,7 +5,6 @@ Inspired by BloodHound, designed for CyberPulse.
 
 import json
 from collections import deque
-from datetime import datetime, timezone
 
 # 1. Simulated lab AD topology (synthetic accounts, no real directory data)
 LAB_AD_TOPOLOGY = {
@@ -132,9 +131,9 @@ class IdentityBlastRadiusEngine:
         """Find the shortest path from a user to Domain Admins using BFS."""
         if username not in self.topology:
             return None
-        
+
         user_groups = self.topology[username].get("groups", [])
-        
+
         if "Domain Admins" in user_groups:
             return ["Domain Admins"]
 
@@ -145,7 +144,7 @@ class IdentityBlastRadiusEngine:
         for group in user_groups:
             queue.append((group, [username, group]))
             visited.add(group)
-            
+
         # We also check if user can reset password of someone who is domain admin or can lead to it
         for target_group in self.topology[username].get("can_reset_password_of", []):
             queue.append((target_group, [username, f"ResetPassword({target_group})", target_group]))
@@ -160,7 +159,7 @@ class IdentityBlastRadiusEngine:
                 if neighbor not in visited:
                     visited.add(neighbor)
                     queue.append((neighbor, path + [neighbor]))
-                    
+
         return None
 
     def analyze_compromised_identity(self, username: str) -> dict:
@@ -187,26 +186,26 @@ class IdentityBlastRadiusEngine:
         user_data = self.topology[username]
         direct_groups = user_data.get("groups", [])
         all_groups = self.get_all_nested_groups(direct_groups)
-        
+
         admin_of_hosts = user_data.get("admin_of", [])
         rdp_targets = user_data.get("can_rdp_to", [])
         delegation_risks = user_data.get("delegation_type")
-        
+
         shortest_path = self.get_shortest_path_to_domain_admin(username)
-        
+
         # Calculate Blast Radius Score (0-100)
         score = 0
         score += len(admin_of_hosts) * 5
         score += len(rdp_targets) * 2
-        
+
         if user_data.get("spn"):
             score += 20  # Kerberoastable
-            
+
         if delegation_risks == "constrained":
             score += 30
         elif delegation_risks == "unconstrained":
             score += 50
-            
+
         if shortest_path:
             # The shorter the path, the higher the risk
             path_len = len(shortest_path)
@@ -218,11 +217,11 @@ class IdentityBlastRadiusEngine:
                 score += 40
             else:
                 score += 20
-                
+
         score = min(100, score) # Cap at 100
-        
+
         affected_assets_count = len(admin_of_hosts) + len(rdp_targets)
-        
+
         recommended_containment = [
             f"Disable account {username} immediately.",
             f"Rotate credentials for {username}.",
@@ -266,22 +265,22 @@ class IdentityBlastRadiusEngine:
             return {"error": "Source or destination user not found."}
 
         target_groups = self.topology[to_user].get("groups", [])
-        
+
         # We will do a basic BFS from from_user to see if they can reach any of to_user's groups
         queue = deque()
         visited = set()
-        
+
         for group in self.topology[from_user].get("groups", []):
             queue.append((group, [from_user, group]))
             visited.add(group)
-            
+
         for reset_tgt in self.topology[from_user].get("can_reset_password_of", []):
             queue.append((reset_tgt, [from_user, f"ResetPassword({reset_tgt})", reset_tgt]))
             visited.add(reset_tgt)
 
         while queue:
             current, path = queue.popleft()
-            
+
             if current in target_groups:
                 # Path found to target user's group, meaning they can reach the user's privilege level
                 path.append(to_user)
@@ -291,14 +290,14 @@ class IdentityBlastRadiusEngine:
                 if neighbor not in visited:
                     visited.add(neighbor)
                     queue.append((neighbor, path + [neighbor]))
-                    
+
         return {"path": None, "message": "No path found."}
 
     def generate_identity_graph_data(self) -> dict:
         """Generate Cytoscape.js/Vis.js compatible node and edge data."""
         nodes = []
         edges = []
-        
+
         for username, data in self.topology.items():
             nodes.append({
                 "data": {
@@ -324,7 +323,7 @@ class IdentityBlastRadiusEngine:
                         "label": "AdminTo"
                     }
                 })
-                
+
         for group, parents in self.group_nesting.items():
             nodes.append({"data": {"id": group, "label": group, "type": "Group"}})
             for parent in parents:
@@ -335,10 +334,10 @@ class IdentityBlastRadiusEngine:
                         "label": "MemberOf"
                     }
                 })
-                
+
         # Remove duplicates from nodes
         unique_nodes = {node["data"]["id"]: node for node in nodes}.values()
-                
+
         return {
             "nodes": list(unique_nodes),
             "edges": edges
@@ -347,19 +346,19 @@ class IdentityBlastRadiusEngine:
 
 if __name__ == '__main__':
     engine = IdentityBlastRadiusEngine()
-    
+
     print("=== Compromised Admin Analysis ===")
     analysis = engine.analyze_compromised_identity("compromised_admin")
     print(json.dumps(analysis, indent=2))
-    
+
     print("\n=== Kerberos Delegation Risks ===")
     risks = engine.get_kerberos_delegation_risks()
     print(json.dumps(risks, indent=2))
-    
+
     print("\n=== Shortest Path: m.worker -> Administrator ===")
     path = engine.get_shortest_path("m.worker", "Administrator")
     print(json.dumps(path, indent=2))
-    
+
     print("\n=== Identity Graph Data ===")
     graph_data = engine.generate_identity_graph_data()
     print(f"Generated {len(graph_data['nodes'])} nodes and {len(graph_data['edges'])} edges.")

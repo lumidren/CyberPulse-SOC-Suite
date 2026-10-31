@@ -4,11 +4,9 @@ Provides end-to-end incident lifecycle tracking, observable extraction,
 structured TheHive 5 case generation, and microsecond chronological timelines.
 """
 
-import json
 import time
 
 from soar.redaction import redact_deep
-import random
 from datetime import datetime, timezone
 
 # Containment action status -> incident status
@@ -106,7 +104,7 @@ class DFIREngine:
             {
                 "timestamp": datetime.fromtimestamp(t_base + ((timing_breakdown.get("stage1_detection_ms", 0.0) + timing_breakdown.get("stage2_threat_intel_ms", 0.0))/1000.0), timezone.utc).isoformat(),
                 "stage": "3. THREAT_INTELLIGENCE",
-                "title": f"IoC Enrichment completed via VirusTotal v3 & AbuseIPDB v2",
+                "title": "IoC Enrichment completed via VirusTotal v3 & AbuseIPDB v2",
                 "detail": f"VT Detections: {intel.get('ip_reputation', {}).get('virustotal_positives', 0)}/72 | Abuse Score: {intel.get('ip_reputation', {}).get('abuse_score', 0)}% | Origin: {intel.get('ip_reputation', {}).get('country', 'Unknown')}",
                 "status": "ENRICHED"
             },
@@ -193,7 +191,7 @@ class DFIREngine:
         """Adds a verified analyst triage note to an active incident record"""
         if incident_id not in self.incidents:
             return {"status": "ERROR", "message": f"Incident {incident_id} not found."}
-        
+
         note_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "author": author,

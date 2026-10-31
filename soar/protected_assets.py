@@ -15,6 +15,7 @@ IP addresses or CIDR ranges. Extend the list with PROTECTED_ASSETS
 import fnmatch
 import ipaddress
 import os
+from typing import List, Optional
 
 # Lab inventory: hostname -> management IP (synthetic lab addressing)
 ASSET_INVENTORY = {
@@ -52,13 +53,13 @@ DEFAULT_PROTECTED_ACCOUNTS = [
 ]
 
 
-def _normalise_account(user):
+def _normalise_account(user: Optional[str]) -> str:
     """'CORP\\j.doe' or 'j.doe@corp.local' -> 'j.doe' (lower-case)."""
     name = (user or "").split("\\")[-1].split("@")[0]
     return name.strip().lower()
 
 
-def protected_account_match(user, entries=None):
+def protected_account_match(user: Optional[str], entries: Optional[List[str]] = None) -> Optional[str]:
     """Return the protecting entry for an account, or None."""
     if not user:
         return None
@@ -72,12 +73,12 @@ def protected_account_match(user, entries=None):
     return None
 
 
-def _load_entries():
+def _load_entries() -> List[str]:
     extra = [e.strip() for e in os.environ.get("PROTECTED_ASSETS", "").split(",") if e.strip()]
     return DEFAULT_PROTECTED_ASSETS + extra
 
 
-def _ip_matches(ip, entry):
+def _ip_matches(ip: str, entry: str) -> bool:
     try:
         addr = ipaddress.ip_address(ip)
     except ValueError:
@@ -88,7 +89,7 @@ def _ip_matches(ip, entry):
         return False
 
 
-def protected_match(host=None, ip=None, entries=None):
+def protected_match(host: Optional[str] = None, ip: Optional[str] = None, entries: Optional[List[str]] = None) -> Optional[str]:
     """Return the protecting entry for a host/IP, or None if it is not protected.
 
     The host's inventory IP is checked too, so protecting 10.0.0.10 also

@@ -1,0 +1,55 @@
+[project]
+name = "cyberpulse-soc-lab"
+version = "2.5.0"
+description = "Detection engineering and safe-SOAR lab (synthetic telemetry, simulated responders)"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+[tool.ruff]
+line-length = 160
+target-version = "py310"
+extend-exclude = [".venv", "venv"]
+
+[tool.ruff.lint]
+# pycodestyle errors/warnings, pyflakes, bugbear
+select = ["E", "W", "F", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# Modules dominated by long human-readable log/report/template strings
+"soar/resilient_containment.py" = ["E501"]
+"soar/report_generator.py" = ["E501"]
+"soar/notifications.py" = ["E501"]
+"soar/dfir_engine.py" = ["E501"]
+"soar/ai_copilot.py" = ["E501"]
+# Scripts and tests adjust sys.path before importing project modules
+"scripts/*.py" = ["E402"]
+"tests/*.py" = ["E402"]
+"server.py" = ["E402"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+explicit_package_bases = true
+mypy_path = "."
+warn_unused_ignores = true
+warn_redundant_casts = true
+# Typed safety-critical modules are checked strictly; the rest is checked leniently
+files = [
+    "soar/action_tiers.py",
+    "soar/safety.py",
+    "soar/protected_assets.py",
+    "soar/privacy.py",
+    "soar/command_builder.py",
+    "soar/reputation.py",
+    "soar/redaction.py",
+    "soar/ingest_auth.py",
+    "soar/auth.py",
+    "simulator/lab_guard.py",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "soar.action_tiers", "soar.safety", "soar.protected_assets", "soar.privacy", "soar.command_builder",
+    "soar.reputation", "soar.redaction", "soar.ingest_auth", "soar.auth", "simulator.lab_guard",
+]
+disallow_untyped_defs = true

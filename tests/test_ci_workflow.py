@@ -19,7 +19,7 @@ class TestCiWorkflow(unittest.TestCase):
 
     def test_lint_test_and_security_jobs(self):
         steps = " ".join(str(step) for job in self.wf["jobs"].values() for step in job["steps"])
-        for needle in ["flake8", "unittest", "pip-audit", "bandit", "gitleaks"]:
+        for needle in ["ruff check", "mypy", "unittest", "pip-audit", "bandit", "gitleaks"]:
             self.assertIn(needle, steps)
 
     def test_jobs_time_out(self):

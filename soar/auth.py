@@ -10,16 +10,17 @@ expire after a fixed TTL.
 import secrets
 import threading
 import time
+from typing import Any, Callable, Dict, Optional, Tuple
 
 
 class SessionStore:
-    def __init__(self, ttl_sec=8 * 3600, clock=time.time):
+    def __init__(self, ttl_sec: int = 8 * 3600, clock: Callable[[], float] = time.time) -> None:
         self.ttl_sec = ttl_sec
         self.clock = clock
-        self._sessions = {}
+        self._sessions: Dict[str, Dict[str, Any]] = {}
         self._lock = threading.Lock()
 
-    def create(self, principal):
+    def create(self, principal: str) -> Tuple[str, str]:
         """Start a session; returns (token, csrf_token)."""
         token = secrets.token_urlsafe(32)
         csrf = secrets.token_urlsafe(32)
@@ -32,7 +33,7 @@ class SessionStore:
             }
         return token, csrf
 
-    def get(self, token):
+    def get(self, token: Optional[str]) -> Optional[Dict[str, Any]]:
         """Return the live session for `token`, or None (expired sessions are dropped)."""
         if not token:
             return None
@@ -43,6 +44,8 @@ class SessionStore:
                 return None
             return session
 
-    def destroy(self, token):
+    def destroy(self, token: Optional[str]) -> None:
+        if not token:
+            return
         with self._lock:
             self._sessions.pop(token, None)
