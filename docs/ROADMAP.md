@@ -114,7 +114,7 @@ internal identifiers never go to external APIs.
 - [x] **E61** Don't redistribute their data in the repo. — **Done**: `strip_provider_data` used by dossier export; THIRD_PARTY_APIS.md 'No redistribution'; repo-scan test.
 - [x] **E62** Enrichment down means no auto-containment on enrichment alone. — **Done**: `_call` + `enrichment_degraded` in `soar/enrichment.py`; `score_without_intel` gating in `soar/risk_engine.py`; docs; tests.
 - [x] **E63** A single reputation score never triggers a block; require corroboration. — **Done**: `soar/reputation.py` consensus used by `RiskAndPolicyEngine`; docs 'Corroboration'; tests.
-- [ ] **E64** Show source and timestamp for every enrichment verdict.
+- [x] **E64** Show source and timestamp for every enrichment verdict. — **Done**: provenance on every signal in `soar/reputation.py`; dossier verdict table (`#intelVerdicts`) and report table; tests.
 
 ## Phase 4c — Legal, licensing & attribution (E79–E88)
 

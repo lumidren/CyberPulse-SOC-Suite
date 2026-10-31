@@ -66,6 +66,11 @@ class IncidentReportGenerator:
         external = (incident.get("threat_intel", {}) or {}).get("external", {}) or {}
         attributions = sorted({v.get("attribution") for part in external.values() if isinstance(part, dict)
                                for v in part.get("verdicts", []) if v.get("attribution")})
+        verdict_rows = "".join(
+            f"<tr><td>{s.get('source')}</td><td>{s.get('score')}</td><td>{'yes' if s.get('flags') else 'no'}</td>"
+            f"<td>{s.get('observed_at')}</td></tr>"
+            for s in (risk.get("reputation", {}) or {}).get("sources", [])
+        ) or "<tr><td colspan='4'>No reputation signals.</td></tr>"
         attribution_html = "".join(f"<div>{a}</div>" for a in attributions) or \
             "<div>No third-party reputation data used (lab fixture only).</div>"
 
@@ -161,6 +166,8 @@ class IncidentReportGenerator:
 
     <div class="section-card" style="font-size:11px;color:#94a3b8;">
         <strong>Threat-intel sources:</strong> {attribution_html}
+        <table><thead><tr><th>Source</th><th>Score</th><th>Flags</th><th>Observed at</th></tr></thead>
+        <tbody>{verdict_rows}</tbody></table>
     </div>
 
     <div class="signoff">

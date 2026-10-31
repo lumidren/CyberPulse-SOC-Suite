@@ -13,6 +13,7 @@ Signals:
 * live VirusTotal / AbuseIPDB verdicts, when external enrichment is enabled.
 """
 
+FIXTURE_TIMESTAMP = "static lab fixture (synthetic, no lookup time)"
 MIN_CORROBORATING_SOURCES = 2
 UNCORROBORATED_WEIGHT = 0.5
 
@@ -28,9 +29,9 @@ def _signals(intel):
     abuse = fixture.get("abuse_score") or 0
     if vt or abuse:
         signals.append({"source": "lab-fixture:vt-style (synthetic)", "score": min(100.0, vt / 72.0 * 100.0),
-                        "flags": vt >= VT_FLAG_ENGINES})
+                        "flags": vt >= VT_FLAG_ENGINES, "observed_at": FIXTURE_TIMESTAMP})
         signals.append({"source": "lab-fixture:abuse-style (synthetic)", "score": float(abuse),
-                        "flags": abuse >= ABUSE_FLAG_CONFIDENCE})
+                        "flags": abuse >= ABUSE_FLAG_CONFIDENCE, "observed_at": FIXTURE_TIMESTAMP})
     for part in (intel.get("external") or {}).values():
         if not isinstance(part, dict):
             continue
@@ -40,10 +41,12 @@ def _signals(intel):
             if v.get("source") == "VirusTotal" and v.get("malicious") is not None:
                 engines = v["malicious"]
                 signals.append({"source": "VirusTotal", "score": min(100.0, engines / 72.0 * 100.0 * 2),
-                                "flags": engines >= VT_FLAG_ENGINES})
+                                "flags": engines >= VT_FLAG_ENGINES, "observed_at": v.get("fetched_at"),
+                                "cached": part.get("cached", False), "attribution": v.get("attribution")})
             elif v.get("source") == "AbuseIPDB" and v.get("abuse_confidence") is not None:
                 signals.append({"source": "AbuseIPDB", "score": float(v["abuse_confidence"]),
-                                "flags": v["abuse_confidence"] >= ABUSE_FLAG_CONFIDENCE})
+                                "flags": v["abuse_confidence"] >= ABUSE_FLAG_CONFIDENCE, "observed_at": v.get("fetched_at"),
+                                "cached": part.get("cached", False), "attribution": v.get("attribution")})
     return signals
 
 
