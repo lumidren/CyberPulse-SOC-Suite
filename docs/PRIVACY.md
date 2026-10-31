@@ -59,3 +59,25 @@ you need full names for a real investigation. Take screenshots with masking on.
   with `POST /api/enrichment/config`). While off, nothing is sent to
   VirusTotal or AbuseIPDB, not even a reachability probe.
 * No incident data is sent to any third party.
+
+## External threat-intel enrichment: what leaves your environment
+
+When you turn enrichment on (`EXTERNAL_ENRICHMENT_ENABLED=true` plus an API
+key), the following **leaves your environment** and is processed by a third
+party under *their* terms and retention policies, not yours:
+
+| Provider | Sent | Never sent |
+| :--- | :--- | :--- |
+| VirusTotal (`www.virustotal.com`, API v3) | Public source IP addresses; MD5/SHA-1/SHA-256 file hashes; your API key | Internal/RFC 1918 IPs, hostnames, usernames, command lines, file names, file contents (no file is uploaded) |
+| AbuseIPDB (`api.abuseipdb.com`, API v2) | Public source IP addresses; your API key | Everything else listed above |
+
+Things to weigh before enabling it:
+
+* A lookup tells the provider that *your* API key is interested in that IP or
+  hash. Querying an attacker's own infrastructure can, in principle, be seen
+  by them if they monitor such services.
+* Providers may log queries; you cannot delete them from this lab.
+* The guards are enforced in code (`soar/enrichment.py`): non-routable IPs and
+  any non-hash value are refused before a request is built, and tests replay
+  every scenario to check that no hostname or username reaches a URL.
+
