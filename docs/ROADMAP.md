@@ -155,7 +155,7 @@ internal identifiers never go to external APIs.
 - [x] **F92** Plugin architecture for new enrichers and responders. — **Done**: `soar/plugins.py` registry + allowlisted loader; `plugins/` examples; engine/pipeline wiring; `tests/test_plugins.py`.
 - [x] **F93** Config file with schema validation. — **Done**: `soar/config.py` schema + `python -m soar.config --check`; `config/cyberpulse.example.yml`; startup validation in `server.py`; `tests/test_config.py`.
 - [x] **F94** Type hints and static analysis (mypy, ruff). — **Done**: `pyproject.toml` ruff + mypy config; codebase ruff-clean; 10 modules strictly typed; CI lint/type steps; `requirements-typecheck.txt` (hash-pinned).
-- [ ] **F95** Release process with tags and semantic versioning.
+- [x] **F95** Release process with tags and semantic versioning. — **Done**: `docs/RELEASING.md`, `.github/workflows/release.yml`, `scripts/release_notes.py`, `tests/test_release.py`. No tag created (maintainer's decision).
 
 ## Phase 6 — Detection engineering (F1–F20)
 
