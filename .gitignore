@@ -22,6 +22,19 @@ htmlcov/
 docs/dossier_*.json
 *.log
 
+# Real telemetry, captures and dumps must never be committed (roadmap E46).
+# Use the synthetic generators in simulator/ for anything that goes in the repo.
+*.evtx
+*.etl
+*.pcap
+*.pcapng
+*.dmp
+*.mdmp
+logs/
+telemetry/
+captures/
+exports/
+
 # OS / editor noise
 .DS_Store
 Thumbs.db
