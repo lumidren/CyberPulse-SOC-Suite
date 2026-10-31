@@ -302,6 +302,17 @@ async function loadIncidentDetails() {
         const attributions = [...new Set(Object.values(ext).flatMap(p => (p?.verdicts || []).map(v => v.attribution)).filter(Boolean))];
         const attrEl = document.getElementById("intelAttribution");
         if (attrEl) attrEl.innerHTML = attributions.length ? attributions.join("<br>") : "Lab fixture only (synthetic); no third-party data.";
+        // Every reputation verdict with its source and timestamp (roadmap E64)
+        const rep = inc.risk_assessment?.reputation || {};
+        const verdictEl = document.getElementById("intelVerdicts");
+        if (verdictEl) {
+            const rows = (rep.sources || []).map(s => `<tr><td>${s.source}</td><td>${s.score}</td>
+                <td>${s.flags ? "flags" : "clean"}</td><td>${s.observed_at || "n/a"}${s.cached ? " (cached)" : ""}</td></tr>`).join("");
+            verdictEl.innerHTML = rows
+                ? `<table class="data-table"><thead><tr><th>Source</th><th>Score</th><th>Verdict</th><th>Observed at</th></tr></thead><tbody>${rows}</tbody></table>
+                   <small>${rep.corroborated ? "Corroborated by 2+ sources" : "Not corroborated: counted at half weight"}</small>`
+                : "<small>No reputation signals for this incident.</small>";
+        }
 
         // Observables
         const observables = inc.observables || [];

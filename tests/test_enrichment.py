@@ -347,5 +347,28 @@ class TestCorroboration(unittest.TestCase):
         self.assertNotEqual(engine.evaluate_policy(risk, rule)["execution_intent"], "EXECUTE_IMMEDIATE")
 
 
+class TestVerdictProvenance(unittest.TestCase):
+
+    def test_every_signal_has_source_and_timestamp(self):
+        from soar.reputation import consensus
+        live = client(RecordingTransport()).lookup("8.8.8.8")
+        result = consensus({"ip_reputation": {"virustotal_positives": 40, "abuse_score": 90}, "external": {"ip": live}})
+        self.assertEqual(len(result["sources"]), 4)
+        for signal in result["sources"]:
+            self.assertTrue(signal["source"])
+            self.assertTrue(signal["observed_at"])
+
+    def test_report_shows_source_and_time_per_verdict(self):
+        os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")
+        from simulator.attack_simulator import simulate_t1110_brute_force
+        from soar.report_generator import IncidentReportGenerator
+        from soar.soar_engine import SOAROrchestrator
+        incident = SOAROrchestrator().process_event(simulate_t1110_brute_force())
+        html = IncidentReportGenerator().generate_html_report(incident)
+        self.assertIn("Observed at", html)
+        self.assertIn("lab-fixture:abuse-style (synthetic)", html)
+        self.assertIn("static lab fixture", html)
+
+
 if __name__ == "__main__":
     unittest.main()
