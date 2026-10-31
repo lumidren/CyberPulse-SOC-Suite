@@ -142,7 +142,7 @@ class RiskAndPolicyEngine:
         }
 
         if score >= 80.0 or matched_rule.get("severity") == "CRITICAL":
-            decision["rationale"] = f"Critical risk score ({score}/100) or Critical rule trigger. Initiating closed-loop containment."
+            decision["rationale"] = f"Critical risk score ({score}/100) or Critical rule trigger. Proposing containment for analyst review."
             if self.policy_mode == "DRY_RUN":
                 decision["execution_intent"] = "DRY_RUN_SIMULATION"
             elif self.policy_mode == "APPROVAL_REQUIRED":

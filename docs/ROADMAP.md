@@ -37,7 +37,7 @@ internal identifiers never go to external APIs.
 
 ## Phase 2 — Human oversight & safe automation (E13–E30)
 
-- [ ] **E13** Remove "no human-in-the-loop" as a selling point.
+- [x] **E13** Remove "no human-in-the-loop" as a selling point. — **Done**: SOAR tab/header wording, README 'Human Oversight' section, policy rationale text; guard pattern.
 - [ ] **E14** Add an approval mode: an analyst confirms before containment runs.
 - [ ] **E15** Make approval the default; full-auto is opt-in.
 - [ ] **E16** Tier actions by blast radius (auto IP block; approval for host isolation and account lockdown).

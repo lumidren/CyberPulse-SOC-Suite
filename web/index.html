@@ -46,7 +46,7 @@
             </div>
             <div class="soc-live-status">
                 <span class="live-dot"></span>
-                <span>PIPELINE ARMED</span>
+                <span>PIPELINE ONLINE</span>
             </div>
         </div>
     </header>
@@ -99,7 +99,7 @@
                     <div class="kpi-info">
                         <span class="kpi-title">Total Incidents</span>
                         <h2 id="kpiIncidents">0</h2>
-                        <span class="kpi-sub">Closed-Loop Contained</span>
+                        <span class="kpi-sub">Recorded in this session</span>
                     </div>
                 </div>
             </div>
@@ -404,7 +404,7 @@
                     <h3><i class="fa-solid fa-robot"></i> SOAR Policy Execution Matrix</h3>
                     <span class="badge-green">Policy-Driven Automation</span>
                 </div>
-                <p class="section-desc">CyberPulse evaluates multi-factor risk scores against configurable lab containment policies:</p>
+                <p class="section-desc">CyberPulse evaluates multi-factor risk scores against configurable lab containment policies. <strong>Automation proposes; an analyst decides.</strong> Disruptive actions are designed to be reviewed by a person, and every action is recorded and reversible.</p>
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead>
@@ -421,10 +421,10 @@
                             <tr>
                                 <td><span class="badge-red">CRITICAL</span></td>
                                 <td><strong>80.0 – 100.0</strong></td>
-                                <td>Immediate Emergency Host Isolation & PID Kill</td>
+                                <td>Proposed Host Isolation & Process Termination</td>
                                 <td>High (Network Disruption)</td>
                                 <td>WinRM over TLS (Port 5986) WFP Rule</td>
-                                <td><span class="badge-green">100% Automated</span></td>
+                                <td><span class="badge-green">Yes (one-click)</span></td>
                             </tr>
                             <tr>
                                 <td><span class="badge-orange">HIGH</span></td>
@@ -432,7 +432,7 @@
                                 <td>Perimeter IP Drop / Scheduled Task De-register</td>
                                 <td>Medium (External Gateway)</td>
                                 <td>pfSense REST API / iptables</td>
-                                <td><span class="badge-green">100% Automated</span></td>
+                                <td><span class="badge-green">Yes (one-click)</span></td>
                             </tr>
                             <tr>
                                 <td><span class="badge-yellow">MEDIUM</span></td>
