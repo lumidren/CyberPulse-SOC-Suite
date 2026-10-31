@@ -48,3 +48,14 @@ source and linking to it. The console shows these under the incident's
 observables, and the NIST-style report lists them under *Threat-intel
 sources*. When no external lookup was made, both say the result came from the
 synthetic lab fixture only.
+
+## No redistribution
+
+* Provider responses live only in the in-memory cache (`IocCache`); nothing is
+  written to disk, and the cache empties on restart.
+* Dossier exports (`start_lab.py` option 7) strip `threat_intel.external`
+  before writing (`soar.enrichment.strip_provider_data`).
+* The threat-intel fixture committed in `soar/soar_engine.py` is synthetic lab
+  data (RFC 5737 IPs, fictional providers), not derived from either provider.
+* `tests/test_enrichment.py` fails if provider response data is committed
+  anywhere outside the enrichment client and its tests.

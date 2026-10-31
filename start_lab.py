@@ -119,6 +119,9 @@ def export_dossier():
     event = generate_random_attack()
     incident = orchestrator.process_event(event)
     
+    # Exports never contain third-party (VirusTotal/AbuseIPDB) data, only our own findings
+    from soar.enrichment import strip_provider_data
+    incident = strip_provider_data(incident)
     filename = f"dossier_{incident['incident_id']}.json"
     filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs", filename)
     with open(filepath, "w", encoding="utf-8") as f:

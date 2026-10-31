@@ -111,7 +111,7 @@ internal identifiers never go to external APIs.
 - [x] **E58** Respect the VirusTotal rate limit (4 req/min free) with backoff. — **Done**: `ProviderLimiter` in `soar/enrichment.py` for VirusTotal; docs; tests with an injected clock.
 - [x] **E59** Respect AbuseIPDB limits and terms. — **Done**: AbuseIPDB limiter in `soar/enrichment.py`; THIRD_PARTY_APIS.md section; tests. Quota default should be set to your actual plan.
 - [x] **E60** Attribute VirusTotal and AbuseIPDB where required. — **Done**: `attributed()` on every provider verdict; console + report attribution; docs; tests.
-- [ ] **E61** Don't redistribute their data in the repo.
+- [x] **E61** Don't redistribute their data in the repo. — **Done**: `strip_provider_data` used by dossier export; THIRD_PARTY_APIS.md 'No redistribution'; repo-scan test.
 - [ ] **E62** Enrichment down means no auto-containment on enrichment alone.
 - [ ] **E63** A single reputation score never triggers a block; require corroboration.
 - [ ] **E64** Show source and timestamp for every enrichment verdict.
