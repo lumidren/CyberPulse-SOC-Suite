@@ -26,3 +26,17 @@ bound by each provider's terms, and you supply your own API keys.
   exceeded by CyberPulse. Over-limit lookups return `RATE_LIMITED` with a
   `retry_after_sec` instead of a request. After an HTTP 429 or 5xx the client
   backs off exponentially (60 s, 120 s, ... capped at 15 min).
+
+## AbuseIPDB (API v2)
+
+* **Daily quotas per plan.** The free plan allows a limited number of `check`
+  requests per day (1,000 at the time of writing). Set
+  `ABUSEIPDB_DAILY_QUOTA` to your plan's limit; the client stops sending once
+  it is reached and returns `RATE_LIMITED`. HTTP 429/5xx responses trigger the
+  same exponential backoff as for VirusTotal.
+* Only the `check` endpoint is used, with `maxAgeInDays=90`. CyberPulse never
+  *reports* IPs to AbuseIPDB (no `report` calls), so it cannot submit false
+  abuse reports about anyone.
+* Check AbuseIPDB's terms for attribution and redistribution rules.
+  CyberPulse attributes every AbuseIPDB verdict it displays and does not
+  redistribute their data (see the sections below).

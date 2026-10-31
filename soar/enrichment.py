@@ -184,6 +184,9 @@ class ThreatIntelClient:
         # VirusTotal Public API: 4 requests/minute and a daily quota (docs/THIRD_PARTY_APIS.md)
         self.vt_limiter = ProviderLimiter(int(os.environ.get("VT_RATE_LIMIT_PER_MIN", "4")),
                                           int(os.environ.get("VT_DAILY_QUOTA", "500")), clock=clock)
+        # AbuseIPDB free plan: daily quota on the check endpoint (docs/THIRD_PARTY_APIS.md)
+        self.abuse_limiter = ProviderLimiter(int(os.environ.get("ABUSEIPDB_RATE_LIMIT_PER_MIN", "60")),
+                                             int(os.environ.get("ABUSEIPDB_DAILY_QUOTA", "1000")), clock=clock)
 
     def _cached(self, key, fetch):
         hit = self.cache.get(key)
@@ -271,9 +274,14 @@ class ThreatIntelClient:
                 "malicious": stats.get("malicious"), "fetched_at": datetime.now(timezone.utc).isoformat()}
 
     def _abuseipdb_ip(self, ip):
+        allowed, retry_after = self.abuse_limiter.try_acquire()
+        if not allowed:
+            return {"source": "AbuseIPDB", "indicator": ip, "http_status": None, "status": "RATE_LIMITED",
+                    "retry_after_sec": retry_after, "fetched_at": datetime.now(timezone.utc).isoformat()}
         query = urllib.parse.urlencode({"ipAddress": ip, "maxAgeInDays": 90})
         status, body = self.transport(ABUSEIPDB_CHECK_URL.format(query),
                                       {"Key": self.abuse_key, "Accept": "application/json"})
+        self.abuse_limiter.record(status)
         score = body.get("data", {}).get("abuseConfidenceScore") if status == 200 else None
         return {"source": "AbuseIPDB", "indicator": ip, "http_status": status,
                 "abuse_confidence": score, "fetched_at": datetime.now(timezone.utc).isoformat()}
