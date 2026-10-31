@@ -1,0 +1,31 @@
+# CyberPulse lab configuration (optional). Point CYBERPULSE_CONFIG at a copy.
+# Environment variables override values here. Secrets (API keys, passwords,
+# HMAC secrets) are refused in this file: keep them in .env or a secrets manager.
+# Validate with:  python -m soar.config --check config/cyberpulse.yml
+
+CYBERPULSE_ENV: development
+HOST: 127.0.0.1
+PORT: 5000
+
+# Human oversight
+POLICY_MODE: APPROVAL_REQUIRED
+CYBERPULSE_ALLOW_FULL_AUTO: false
+CONFIDENCE_THRESHOLD: 0.8
+CONTAINMENT_MAX_ACTIONS_PER_HOUR: 20
+ISOLATION_BREAKER_MAX_HOSTS: 3
+ISOLATION_BREAKER_WINDOW_MIN: 10
+ISOLATION_TTL_MIN: 240
+IP_BLOCK_TTL_MIN: 1440
+
+# Lab guardrails
+CYBERPULSE_LAB_MODE: false
+CYBERPULSE_LAB_CIDRS: 10.0.0.0/16
+
+# Privacy
+RETENTION_DAYS: 30
+PRIVACY_MASK_USERNAMES: true
+EXTERNAL_ENRICHMENT_ENABLED: false
+
+# Logging
+LOG_FORMAT: text
+CYBERPULSE_LOG_LEVEL: INFO

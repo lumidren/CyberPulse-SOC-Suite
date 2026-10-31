@@ -12,6 +12,7 @@ COPY simulator/ ./simulator/
 COPY scripts/ ./scripts/
 COPY soar/ ./soar/
 COPY plugins/ ./plugins/
+COPY config/ ./config/
 COPY rules/ ./rules/
 COPY web/ ./web/
 COPY server.py ./
