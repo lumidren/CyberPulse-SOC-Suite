@@ -275,3 +275,21 @@ rules:
     action_recommended: KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS
     version: 1.0.0
     detection_sha256: 3eba70f214c7816fcd1b88637aa4400a84c34c6cd8d44aaaba9175844a522a6f
+  496d73f0-48ae-44d5-9901-e7b8b876da90:
+    soc_rule_id: SOC-RULE-046
+    name: Authentication Attempt Against a Honey Account
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 5e4c536cce401bbe05a775effca608ec81c2807baf3768de0d9f3de383f915bc
+  9ca3f8a2-d64e-4b9a-a384-cbd394d06768:
+    soc_rule_id: SOC-RULE-047
+    name: Access to a Canary File
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 84e1e8de9582f23a7f657c983eea5a77dd856ad34e30e34160d4c120d6ebd77c
+  6da749e3-8201-4892-8faa-212df737dc73:
+    soc_rule_id: SOC-RULE-048
+    name: AWS Canary Credential Used
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: d6523668e5058d4f86e1715fc7eac78c0e92d64f14de5c18e666c36de08299e5

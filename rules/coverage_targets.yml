@@ -50,3 +50,4 @@ targets:
   T1190: {name: "Exploit Public-Facing Application", tactic: initial-access, why: "Edge-device exploitation",
           blocker: "Needs web/WAF logs; the lab has no public-facing application"}
   T1068: {name: "Exploitation for Privilege Escalation", tactic: privilege-escalation, why: "Vulnerable-driver (BYOVD) attacks"}
+  T1552.001: {name: "Unsecured Credentials: Credentials In Files", tactic: credential-access, why: "Looted config files and scripts; covered by canary credentials (F16)"}

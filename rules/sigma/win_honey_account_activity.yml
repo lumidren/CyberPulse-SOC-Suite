@@ -1,0 +1,39 @@
+title: Authentication Attempt Against a Honey Account
+id: 496d73f0-48ae-44d5-9901-e7b8b876da90
+status: experimental
+description: Any logon, Kerberos ticket request or failed logon for a decoy account. Honey accounts are never used
+    legitimately, so any activity means someone enumerated and tried them. Replace the lab names with the decoy
+    accounts you create (see docs/CANARIES.md).
+references:
+- https://attack.mitre.org/techniques/T1078/002/
+- https://attack.mitre.org/mitigations/M1056/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.initial_access
+- attack.credential_access
+- attack.t1078.002
+- attack.t1110
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_events:
+        EventID:
+        - 4624
+        - 4625
+        - 4648
+        - 4768
+        - 4769
+        - 4771
+        - 4776
+    selection_users:
+        TargetUserName:
+        - svc_sql_legacy
+        - adm_backup_old
+    condition: selection_events and selection_users
+falsepositives:
+- An administrator testing the decoy (announce tests in advance)
+- Audit or IAM tooling that enumerates every account and attempts a bind
+level: critical

@@ -1,0 +1,3 @@
+// SOC-RULE-047: Access to a Canary File (generated from rules/sigma/win_honey_file_access.yml; review before use)
+SecurityEvent
+| where ((EventID =~ "4663" and (ObjectName endswith "\\Passwords_2019.xlsx" or ObjectName endswith "\\vpn_credentials.txt" or ObjectName endswith "\\Payroll_Q4_FINAL.xlsx")) and not ((ProcessName endswith "\\MsMpEng.exe" or ProcessName endswith "\\wbengine.exe")))

@@ -1,0 +1,2 @@
+``` SOC-RULE-046: Authentication Attempt Against a Honey Account (generated from rules/sigma/win_honey_account_activity.yml; review before use) ```
+index=* (source="*Security*") | where (((match('EventCode', "(?i)^4624$") OR match('EventCode', "(?i)^4625$") OR match('EventCode', "(?i)^4648$") OR match('EventCode', "(?i)^4768$") OR match('EventCode', "(?i)^4769$") OR match('EventCode', "(?i)^4771$") OR match('EventCode', "(?i)^4776$"))) AND ((match('TargetUserName', "(?i)^svc_sql_legacy$") OR match('TargetUserName', "(?i)^adm_backup_old$"))))

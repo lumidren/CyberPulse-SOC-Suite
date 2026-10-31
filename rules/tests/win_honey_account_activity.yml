@@ -1,0 +1,31 @@
+# Positive/negative samples for rules/sigma/win_honey_account_activity.yml (synthetic lab events)
+rule: win_honey_account_activity.yml
+positive:
+- name: Failed RDP logon to decoy
+  event:
+    event_id: 4625
+    event_source: Security
+    details:
+      TargetUserName: svc_sql_legacy
+      LogonType: 10
+- name: Kerberoast request for decoy SPN
+  event:
+    event_id: 4769
+    event_source: Security
+    details:
+      TargetUserName: adm_backup_old
+      ServiceName: MSSQLSvc/sql-legacy
+negative:
+- name: Real account logon
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      TargetUserName: j.doe
+      LogonType: 2
+- name: Decoy name in an unrelated event
+  event:
+    event_id: 4720
+    event_source: Security
+    details:
+      TargetUserName: svc_sql_legacy
