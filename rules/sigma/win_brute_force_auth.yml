@@ -1,7 +1,11 @@
 title: Password Brute Force Authentication Failure Spike
 id: 9a8d420f-21b4-4e12-b91c-223405fae38e
 status: experimental
-description: Detects a high volume of failed logon attempts (EventID 4625) originating from a single source workstation or external IP within a short threshold.
+description: >-
+    Detects a burst of failed network/RDP logons (EventID 4625) from one source. Expects
+    FailedAttemptsCount, a per-source failure count added by the upstream collector
+    (e.g. a Wazuh frequency rule over 5 minutes). For raw, unaggregated 4625 events
+    use the correlation rule in rules/sigma/correlations/.
 references:
     - https://attack.mitre.org/techniques/T1110/001/
 author: lumidren (CyberPulse SOC Suite)
@@ -18,8 +22,8 @@ detection:
         LogonType:
             - 3 # Network
             - 10 # RDP
-    timeframe: 5m
-    condition: selection | count() by IpAddress > 10
+        FailedAttemptsCount|gte: 10
+    condition: selection
 falsepositives:
     - Misconfigured service accounts or password typos by legitimate users.
 level: high

@@ -39,7 +39,8 @@ DETAIL_FIELD_ALLOWLIST = {
     "TicketEncryptionType", "AccessMask", "Properties", "SubjectUserName",
     # cloud
     "eventName", "eventSource", "roleArn", "durationSeconds", "Category", "OperationName",
-    "RiskLevelDuringSignIn", "RiskEventTypes", "Location", "PreviousLocation",
+    "RiskLevelDuringSignIn", "RiskEventTypes", "Location", "PreviousLocation", "ResultType",
+    "SignatureStatus",
     # provenance
     "simulation", "CredentialMaterial", "raw",
 }

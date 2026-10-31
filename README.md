@@ -114,10 +114,10 @@ Read this before drawing conclusions from anything else in the README.
   been run against synthetic events from this repository. Sigma rules are
   marked `status: experimental` for that reason; expect false positives on a
   real network until you tune them on your own baseline.
-* **The Python detection engine is simpler than the Sigma rules.** The
-  in-process matcher in `soar/soar_engine.py` does not yet apply the
-  exclusions documented in `rules/sigma/`, which is why the benign baseline
-  currently produces false positives.
+* **Detection runs the Sigma rules in this repo** (`soar/sigma_engine.py`, a documented
+  subset of Sigma 2.0). The rules still produce false positives on the synthetic benign
+  baseline (see [`docs/VALIDATION_RESULTS.md`](docs/VALIDATION_RESULTS.md)); those are
+  real rule weaknesses, published rather than hidden.
 * **Threat intelligence is a local, synthetic cache.** No live VirusTotal or
   AbuseIPDB lookups are made by the pipeline; reputation values are invented
   lab data.

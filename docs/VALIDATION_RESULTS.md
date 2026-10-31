@@ -27,18 +27,14 @@ were written together, this is a regression check, not an efficacy measurement.
 
 ## False positives on the benign baseline
 
-**319 false positives in 600 baseline events** (seed 1337; see [BASELINE_TRAFFIC.md](BASELINE_TRAFFIC.md)).
+**119 false positives in 600 baseline events** (seed 1337; see [BASELINE_TRAFFIC.md](BASELINE_TRAFFIC.md)).
 
 | Rule | False positives |
 | :--- | ---: |
-| `SOC-RULE-001` | 100 |
 | `SOC-RULE-003` | 19 |
 | `SOC-RULE-004` | 100 |
-| `SOC-RULE-009` | 100 |
 
 | Baseline category | False positives |
 | :--- | ---: |
 | `admin_scripts` | 100 |
-| `av_scanning` | 100 |
-| `cloud_ops` | 100 |
 | `patching` | 19 |
