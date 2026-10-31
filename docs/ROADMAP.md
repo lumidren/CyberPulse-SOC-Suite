@@ -69,7 +69,7 @@ internal identifiers never go to external APIs.
 - [x] **E39** Rate-limit the brute-force simulation. — **Done**: `SimulationThrottle` in `simulator/lab_guard.py`, enforced on the simulate and purple-team endpoints; tests.
 - [x] **E40** Tag all simulated events with `simulation=true`. — **Done**: `tag_simulated` in `simulator/lab_guard.py`; baseline + ingest + incident `simulated` flag; tests.
 - [x] **E41** Dashboard visibly shows when data is simulated. — **Done**: `simulatedBadge()` in `web/app.js` on the incident table and dossier; test.
-- [ ] **E42** Test-mode banner in the UI.
+- [x] **E42** Test-mode banner in the UI. — **Done**: sticky `#labModeBanner` in `web/index.html`/`styles.css`, text from `/api/version` `lab_mode`; test.
 
 ## Phase 3 — Securing the tool itself (E65–E78)
 
