@@ -26,7 +26,7 @@ internal identifiers never go to external APIs.
 - [x] **E2** Label every metric as lab-measured on emulated traffic. — **Done**: real timings in `soar/soar_engine.py`; `scripts/benchmark_pipeline.py`; README/UI labels.
 - [ ] **E3** Replace "0% false positives" with "0 false positives in N baseline runs", stating N.
 - [ ] **E4** Replace "100% true-positive" with an "X/Y scripted runs detected" count.
-- [ ] **E5** Document how the baseline traffic for the FP test is generated.
+- [x] **E5** Document how the baseline traffic for the FP test is generated. — **Done**: `simulator/benign_baseline.py`, `docs/BASELINE_TRAFFIC.md`, `tests/test_benign_baseline.py`.
 - [ ] **E6** Remove the "15–25 min manual analyst benchmark" or cite a source.
 - [ ] **E7** Stop comparing a 20 min manual MTTR to automated pipeline seconds.
 - [ ] **E8** Add a Limitations section to the README.
@@ -187,7 +187,7 @@ internal identifiers never go to external APIs.
 - [ ] **F23** ⭐ Automated purple-team report: what ran, what fired, what missed.
 - [ ] **F24** Detection-latency histogram per technique.
 - [ ] **F25** True/false-positive confusion matrix with real counts.
-- [ ] **F26** Benign-activity generators (admin scripts, backups, patching).
+- [x] **F26** Benign-activity generators (admin scripts, backups, patching). — 🔀 **Merged into E5**: `simulator/benign_baseline.py` already covers admin scripts, backups, patching, AV scanning, auth and cloud ops.
 - [ ] **F27** Regression testing: a rule change must not break old detections.
 - [ ] **F28** Multi-stage attack chain emulation (initial access to exfil).
 - [ ] **F29** Evasion tests (obfuscation, renamed binaries); document bypasses.
