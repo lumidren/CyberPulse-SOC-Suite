@@ -40,3 +40,4 @@ exports/
 Thumbs.db
 .idea/
 .vscode/
+deploy/vagrant/certs/

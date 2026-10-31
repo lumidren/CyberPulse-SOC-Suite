@@ -1,54 +1,99 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Vagrantfile for CyberPulse Multi-VLAN Enterprise Lab Environment
-# Provisions: Windows Server 2022 AD DC (10.0.0.10), Windows 11 Workstation (10.0.0.45), Wazuh Server (10.0.1.5)
+# CyberPulse lab provisioning (VirtualBox, isolated internal networks only).
+#
+#   vagrant up                 # DC, workstation and Wazuh VMs
+#   vagrant up ad-dc01         # one VM
+#
+# LAB USE ONLY: these VMs are for a network you own. They use internal-only
+# VirtualBox networks (10.0.0.0/24 lab, 10.0.1.0/24 SOC) and are not bridged
+# to your LAN.
+#
+# Provisions: Windows Server 2022 DC (10.0.0.10), Windows 11 workstation
+# (10.0.0.45) and an Ubuntu 22.04 Wazuh host (10.0.1.5) running the repo's
+# deploy/docker-compose.yml.
+#
+# Sysmon config: by default the repo's own deploy/sysmon/sysmonconfig.xml.
+# Set SYSMON_CONFIG=modular to use Olaf Hartong's sysmon-modular instead
+# (credit: https://github.com/olafhartong/sysmon-modular; downloaded at
+# provision time, not redistributed). Sysmon: Microsoft Sysinternals terms.
+
+SYSMON_CONFIG = ENV.fetch("SYSMON_CONFIG", "repo")
+
+# Installs Sysmon, then a WinRM HTTPS (5986) listener with a lab self-signed
+# certificate. The certificate is exported to the synced folder so the SOAR
+# host can trust it via WINRM_CA_BUNDLE (WinRM over plain HTTP is not used).
+WINDOWS_BASELINE = <<-'POWERSHELL'
+  param([string]$SysmonConfig = "repo")
+  $ErrorActionPreference = "Stop"
+  $tmp = "C:\Windows\Temp"
+
+  Invoke-WebRequest -Uri "https://live.sysinternals.com/Sysmon64.exe" -OutFile "$tmp\Sysmon64.exe"
+  if ($SysmonConfig -eq "modular") {
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/olafhartong/sysmon-modular/master/sysmonconfig.xml" -OutFile "$tmp\sysmonconfig.xml"
+  } else {
+    Copy-Item "C:\cyberpulse\deploy\sysmon\sysmonconfig.xml" "$tmp\sysmonconfig.xml"
+  }
+  & "$tmp\Sysmon64.exe" -accepteula -i "$tmp\sysmonconfig.xml"
+
+  # WinRM over HTTPS only (lab self-signed cert); allow 5986 from the SOC subnet only
+  $cert = New-SelfSignedCertificate -DnsName $env:COMPUTERNAME -CertStoreLocation Cert:\LocalMachine\My
+  Get-ChildItem WSMan:\localhost\Listener | Where-Object { $_.Keys -contains "Transport=HTTPS" } | Remove-Item -Recurse -Force
+  New-Item -Path WSMan:\localhost\Listener -Transport HTTPS -Address * -CertificateThumbPrint $cert.Thumbprint -Force | Out-Null
+  New-NetFirewallRule -DisplayName "WinRM HTTPS (CyberPulse lab)" -Direction Inbound -Protocol TCP -LocalPort 5986 `
+    -RemoteAddress 10.0.1.0/24 -Action Allow | Out-Null
+  New-Item -ItemType Directory -Force "C:\cyberpulse\deploy\vagrant\certs" | Out-Null
+  Export-Certificate -Cert $cert -FilePath "C:\cyberpulse\deploy\vagrant\certs\$env:COMPUTERNAME-winrm.cer" | Out-Null
+POWERSHELL
 
 Vagrant.configure("2") do |config|
-  
+
   # 1. Windows Server 2022 Active Directory Domain Controller
   config.vm.define "ad-dc01" do |dc|
     dc.vm.box = "gusztavvargadr/windows-server-2022-standard"
     dc.vm.hostname = "WIN-DC01"
-    dc.vm.network "private_network", ip: "10.0.0.10", virtualbox__intnet: "vlan10-enterprise"
+    dc.vm.network "private_network", ip: "10.0.0.10", virtualbox__intnet: "vlan10-lab"
+    dc.vm.synced_folder "../..", "C:/cyberpulse"
     dc.vm.provider "virtualbox" do |vb|
       vb.memory = "4096"
       vb.cpus = 2
     end
-    dc.vm.provision "shell", inline: <<-SHELL
-      # Install Sysmon v14 with Olaf Hartong's sysmon-modular config.
-      # Credit: Olaf Hartong, https://github.com/olafhartong/sysmon-modular (downloaded at
-      # provision time, not redistributed; see that repository's LICENSE before reuse).
-      # Sysmon: Microsoft Sysinternals licence terms apply.
-      Invoke-WebRequest -Uri "https://live.sysinternals.com/Sysmon64.exe" -OutFile "C:\\Windows\\Temp\\Sysmon64.exe"
-      Invoke-WebRequest -Uri "https://raw.githubusercontent.com/olafhartong/sysmon-modular/master/sysmonconfig.xml" -OutFile "C:\\Windows\\Temp\\sysmonconfig.xml"
-      C:\\Windows\\Temp\\Sysmon64.exe -accepteula -i C:\\Windows\\Temp\\sysmonconfig.xml
-      
-      # Configure WinRM over TLS for automated SOAR containment
-      Enable-PSRemoting -Force -SkipNetworkProfileCheck
-    SHELL
+    dc.vm.provision "shell", inline: WINDOWS_BASELINE, args: [SYSMON_CONFIG]
   end
 
-  # 2. Windows 11 Enterprise Workstation
+  # 2. Windows 11 Workstation
   config.vm.define "win11-client" do |ws|
     ws.vm.box = "gusztavvargadr/windows-11-enterprise"
     ws.vm.hostname = "WIN-WORKSTATION09"
-    ws.vm.network "private_network", ip: "10.0.0.45", virtualbox__intnet: "vlan10-enterprise"
+    ws.vm.network "private_network", ip: "10.0.0.45", virtualbox__intnet: "vlan10-lab"
+    ws.vm.synced_folder "../..", "C:/cyberpulse"
     ws.vm.provider "virtualbox" do |vb|
       vb.memory = "4096"
       vb.cpus = 2
     end
+    ws.vm.provision "shell", inline: WINDOWS_BASELINE, args: [SYSMON_CONFIG]
   end
 
-  # 3. Wazuh SIEM & SOAR Manager Cluster
+  # 3. Wazuh / SOC host: runs deploy/docker-compose.yml (needs deploy/.env, see README)
   config.vm.define "wazuh-manager" do |wz|
     wz.vm.box = "generic/ubuntu2204"
     wz.vm.hostname = "wazuh-core"
     wz.vm.network "private_network", ip: "10.0.1.5", virtualbox__intnet: "vlan20-soc"
+    wz.vm.synced_folder "../..", "/opt/cyberpulse"
     wz.vm.provider "virtualbox" do |vb|
-      vb.memory = "4096"
+      vb.memory = "6144"
       vb.cpus = 2
     end
+    wz.vm.provision "shell", inline: <<-SHELL
+      set -euo pipefail
+      apt-get update -y
+      apt-get install -y docker.io docker-compose-v2
+      sysctl -w vm.max_map_count=262144   # required by OpenSearch
+      cd /opt/cyberpulse/deploy
+      if [ -f .env ]; then docker compose --env-file .env up -d; else
+        echo "deploy/.env missing: copy .env.example, set OPENSEARCH_ADMIN_PASSWORD and CYBERPULSE_API_KEY, then 'docker compose up -d'"; fi
+    SHELL
   end
 
 end
