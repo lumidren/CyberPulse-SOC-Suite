@@ -40,6 +40,7 @@ from soar.soar_engine import SOAROrchestrator
 from soar.bloodhound_exporter import BloodHoundExporter
 from soar.report_generator import IncidentReportGenerator
 from soar.auth import SessionStore
+from soar.privacy import mask_identities, masking_enabled
 from soar.ingest_auth import SIGNATURE_HEADER, TIMESTAMP_HEADER, IngestVerifier
 from scripts.validate_detections import run_scripted, scripted_status
 from simulator.lab_guard import SimulationThrottle, lab_mode_enabled
@@ -453,7 +454,13 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key, X-CSRF-Token")
 
+    # Responses that carry incident/telemetry data get account names masked (E45)
+    MASKED_PREFIXES = ("/api/incidents", "/api/alerts", "/api/approvals", "/api/simulate",
+                       "/api/purple-team/run", "/api/ingest")
+
     def _send_json(self, status_code, payload):
+        if masking_enabled() and urlparse(self.path).path.startswith(self.MASKED_PREFIXES):
+            payload = mask_identities(payload)
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json")
         self._send_cors_headers()
@@ -499,7 +506,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif subresource == "identity":
             self._send_json(200, {"identity_blast_radius": inc.get("identity_blast_radius", {})})
         elif subresource == "report":
-            html = report_generator.generate_html_report(inc)
+            html = report_generator.generate_html_report(mask_identities(inc) if masking_enabled() else inc)
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self._send_cors_headers()

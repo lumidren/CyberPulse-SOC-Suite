@@ -1,0 +1,55 @@
+"""Identity masking in displayed data (roadmap E45)."""
+
+import os
+import sys
+import unittest
+
+os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")  # tests run in a declared lab
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from soar.privacy import mask_identities, mask_username  # noqa: E402
+
+
+class TestMasking(unittest.TestCase):
+
+    def test_mask_username(self):
+        self.assertEqual(mask_username(r"CORP\j.doe"), r"CORP\j***e")
+        self.assertEqual(mask_username("finance_admin"), "f******n")
+        self.assertEqual(mask_username("ab"), "a*")
+        self.assertEqual(mask_username("Unknown"), "Unknown")
+
+    def test_nested_payload_masked(self):
+        payload = {"incident": {"telemetry": {"user": r"CORP\j.doe", "details": {"TargetUserName": "lab.admin"}},
+                                "observables": [{"type": "user-account", "value": r"CORP\j.doe"},
+                                                {"type": "ip-src", "value": "10.0.0.5"}]}}
+        masked = mask_identities(payload)
+        self.assertEqual(masked["incident"]["telemetry"]["user"], r"CORP\j***e")
+        self.assertEqual(masked["incident"]["telemetry"]["details"]["TargetUserName"], "l******n")  # at most six asterisks
+        self.assertEqual(masked["incident"]["observables"][0]["value"], r"CORP\j***e")
+        self.assertEqual(masked["incident"]["observables"][1]["value"], "10.0.0.5")
+        self.assertEqual(payload["incident"]["telemetry"]["user"], r"CORP\j.doe")  # original untouched
+
+    def test_api_masks_by_default(self):
+        import threading
+        import urllib.request
+        import json
+        import server
+        httpd = server.create_server(host="127.0.0.1", port=0)
+        threading.Thread(target=httpd.serve_forever, daemon=True).start()
+        try:
+            url = f"http://127.0.0.1:{httpd.server_address[1]}/api/simulate"
+            req = urllib.request.Request(url, data=b'{"type": "t1003"}', method="POST",
+                                         headers={"Content-Type": "application/json", "X-API-Key": server.API_KEY})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                body = json.loads(resp.read())
+            self.assertEqual(body["incident"]["telemetry"]["user"], r"CORP\A******r")
+            # server-side record keeps the real value for detection and containment
+            stored = server.orchestrator.dfir_engine.incidents[body["incident"]["incident_id"]]
+            self.assertEqual(stored["telemetry"]["user"], r"CORP\Administrator")
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+
+
+if __name__ == "__main__":
+    unittest.main()
