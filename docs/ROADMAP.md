@@ -123,8 +123,8 @@ internal identifiers never go to external APIs.
 - [x] **E81** Check the license of any reused Sysmon config and credit the author. — **Done**: provenance header in `sysmonconfig.xml`, credit in `Vagrantfile`, notices section. sysmon-modular's licence is referenced, not restated.
 - [x] **E82** Credit sources of any adapted Sigma rules. — **Done**: `rules/sigma/README.md` provenance + DRL 1.1 adaptation rules; normalised authors; `tests/test_sigma_metadata.py`.
 - [x] **E83** MITRE ATT&CK attribution and terms notice. — **Done**: `docs/LEGAL.md` ATT&CK section; README '⚖️ Legal'; `tests/test_legal_notices.py`.
-- [ ] **E84** Trademark disclaimer (Microsoft, Fortinet, pfSense, VirusTotal).
-- [ ] **E85** "Not affiliated with" statement.
+- [x] **E84** Trademark disclaimer (Microsoft, Fortinet, pfSense, VirusTotal). — **Done**: 'Trademarks' section in `docs/LEGAL.md`; test.
+- [x] **E85** "Not affiliated with" statement. — **Done**: 'Not affiliated' in `docs/LEGAL.md` + README; test.
 - [ ] **E86** Disclaimer of warranty and liability for the automation.
 - [ ] **E87** Notice that users need authorization before deploying on any network.
 - [ ] **E88** Clarify no real client data was used.
