@@ -29,6 +29,8 @@ BANNED_CLAIMS = [
      "Latency figures must come from scripts/benchmark_pipeline.py, not hardcoded values."),
     ("E3", re.compile(r"0\s?% false[- ]positive|zero false[- ]positive", re.I),
      "State FP results as 'N false positives in M baseline events' (docs/VALIDATION_RESULTS.md)."),
+    ("E4", re.compile(r"100% True-Positive|VALIDATED_100%", re.I),
+     "Self-authored attack runs are a regression check; report 'X/Y scripted runs detected'."),
 ]
 
 

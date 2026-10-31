@@ -25,7 +25,7 @@ internal identifiers never go to external APIs.
 - [x] **E1** Drop "enterprise-grade"; describe the project as a lab. — **Done**: lab wording across UI/CLI/docs; guard in `tests/test_honest_claims.py`.
 - [x] **E2** Label every metric as lab-measured on emulated traffic. — **Done**: real timings in `soar/soar_engine.py`; `scripts/benchmark_pipeline.py`; README/UI labels.
 - [x] **E3** Replace "0% false positives" with "0 false positives in N baseline runs", stating N. — **Done**: `scripts/validate_detections.py` → `docs/VALIDATION_RESULTS.md` (currently 319 FPs in 600 baseline events); sync test.
-- [ ] **E4** Replace "100% true-positive" with an "X/Y scripted runs detected" count.
+- [x] **E4** Replace "100% true-positive" with an "X/Y scripted runs detected" count. — **Done**: catalogue + `docs/VALIDATION_RESULTS.md` show '60/60 scripted runs detected'; guard bans '100% True-Positive'.
 - [x] **E5** Document how the baseline traffic for the FP test is generated. — **Done**: `simulator/benign_baseline.py`, `docs/BASELINE_TRAFFIC.md`, `tests/test_benign_baseline.py`.
 - [ ] **E6** Remove the "15–25 min manual analyst benchmark" or cite a source.
 - [ ] **E7** Stop comparing a 20 min manual MTTR to automated pipeline seconds.

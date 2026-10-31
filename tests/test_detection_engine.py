@@ -188,11 +188,11 @@ class TestSOCLabPlatform(unittest.TestCase):
         self.assertTrue(cb.is_available()) # Half-open recovery
 
     def test_purple_team_runner_apt29(self):
-        """Verify Purple Team Runner executes multi-stage APT29 scenario with 100% pass"""
+        """Verify Purple Team Runner detects every scripted stage of the APT29-style scenario"""
         runner = PurpleTeamRunner(self.orchestrator)
         summary = runner.run_scenario("APT29_COZY_BEAR")
         
-        self.assertEqual(summary["overall_status"], "VALIDATED_100%")
+        self.assertEqual(summary["overall_status"], "ALL_SCRIPTED_STAGES_DETECTED")
         self.assertEqual(summary["total_stages"], 3)
         self.assertEqual(summary["passed_stages"], 3)
 

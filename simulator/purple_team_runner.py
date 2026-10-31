@@ -144,7 +144,7 @@ class PurpleTeamRunner:
             "threat_actor": scenario["threat_actor"],
             "started_at": start_time,
             "completed_at": datetime.now(timezone.utc).isoformat(),
-            "overall_status": "VALIDATED_100%" if all_passed else "GAPS_DETECTED",
+            "overall_status": "ALL_SCRIPTED_STAGES_DETECTED" if all_passed else "GAPS_DETECTED",
             "total_stages": len(scenario["stages"]),
             "passed_stages": sum(1 for s in stage_results if s["status"] == "PASS"),
             "stage_results": stage_results

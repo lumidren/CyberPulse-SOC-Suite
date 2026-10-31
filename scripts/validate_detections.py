@@ -6,6 +6,8 @@ Replays synthetic traffic through the detection engine and reports counts.
 These are counts on traffic the project itself generated, so they measure
 "does the rule match the events we scripted", not real-world efficacy.
 
+  * Scripted detections: every attack generator is run RUNS times and we count
+    how often the *expected* rule fired ("X/Y scripted runs detected").
   * False positives: the deterministic benign baseline
     (simulator/benign_baseline.py) is replayed and every rule match is an FP.
 
@@ -22,12 +24,51 @@ from collections import Counter
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
+from simulator.attack_simulator import SCRIPTED_GENERATORS  # noqa: E402
 from simulator.benign_baseline import generate_baseline  # noqa: E402
 from soar.soar_engine import SOAROrchestrator  # noqa: E402
 
+SCRIPTED_RUNS = 6
 BASELINE_COUNT = 600
 BASELINE_SEED = 1337
 RESULTS_PATH = os.path.join(ROOT, "docs", "VALIDATION_RESULTS.md")
+
+# Rule each scripted generator is written to trigger.
+EXPECTED_RULE = {
+    "t1003": "SOC-RULE-001",
+    "t1110": "SOC-RULE-002",
+    "t1053": "SOC-RULE-003",
+    "t1059": "SOC-RULE-004",
+    "t1562": "SOC-RULE-005",
+    "t1486": "SOC-RULE-006",
+    "t1558": "SOC-RULE-007",
+    "t1003_dcsync": "SOC-RULE-008",
+    "cloud_aws": "SOC-RULE-009",
+    "cloud_entra": "SOC-RULE-010",
+}
+
+
+def run_scripted(runs=SCRIPTED_RUNS):
+    """Run each attack generator `runs` times; count matches of the expected rule."""
+    orchestrator = SOAROrchestrator(policy_mode="DRY_RUN")
+    results = {}
+    for name, generator in SCRIPTED_GENERATORS:
+        expected = EXPECTED_RULE[name]
+        detected = 0
+        for _ in range(runs):
+            match = orchestrator.evaluate_detection(generator())
+            if match and match["rule_id"] == expected:
+                detected += 1
+        results[expected] = {"generator": name, "detected": detected, "runs": runs}
+    return results
+
+
+def scripted_status(rule_id, scripted):
+    """Human-readable validation status for a catalogue rule."""
+    r = scripted.get(rule_id)
+    if not r:
+        return "No scripted test yet"
+    return f"{r['detected']}/{r['runs']} scripted runs detected (self-authored events)"
 
 
 def run_baseline(count=BASELINE_COUNT, seed=BASELINE_SEED):
@@ -50,7 +91,7 @@ def run_baseline(count=BASELINE_COUNT, seed=BASELINE_SEED):
     }
 
 
-def render_markdown(baseline):
+def render_markdown(scripted, baseline):
     lines = [
         "# Detection Validation Results",
         "",
@@ -60,6 +101,18 @@ def render_markdown(baseline):
         "> All traffic is synthetic and was written by the same author as the rules.",
         "> These counts show the rules match the scripted events; they are **not**",
         "> evidence of real-world detection efficacy or real-world false-positive rates.",
+        "",
+        "## Scripted attack runs",
+        "",
+        f"**{sum(r['detected'] for r in scripted.values())}/{sum(r['runs'] for r in scripted.values())} "
+        "scripted runs detected by the expected rule.** Because the attack events and the rules",
+        "were written together, this is a regression check, not an efficacy measurement.",
+        "",
+        "| Rule | Generator | Detected |",
+        "| :--- | :--- | ---: |",
+    ]
+    lines += [f"| `{rule}` | `{r['generator']}` | {r['detected']}/{r['runs']} |" for rule, r in sorted(scripted.items())]
+    lines += [
         "",
         "## False positives on the benign baseline",
         "",
@@ -79,7 +132,7 @@ def render_markdown(baseline):
 
 
 def build_report():
-    return render_markdown(run_baseline())
+    return render_markdown(run_scripted(), run_baseline())
 
 
 def main():
