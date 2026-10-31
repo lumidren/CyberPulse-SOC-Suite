@@ -1,0 +1,18 @@
+# Positive/negative samples for rules/sigma/win_service_install_suspicious_path.yml (synthetic lab events)
+rule: win_service_install_suspicious_path.yml
+positive:
+- name: Service running from Temp
+  event:
+    event_id: 7045
+    event_source: System
+    details:
+      ServiceName: WinUpdateHelper
+      ImagePath: 'C:\Windows\Temp\svc.exe'
+negative:
+- name: Vendor service in Program Files
+  event:
+    event_id: 7045
+    event_source: System
+    details:
+      ServiceName: VendorAgent
+      ImagePath: '"C:\Program Files\Vendor\agent.exe"'

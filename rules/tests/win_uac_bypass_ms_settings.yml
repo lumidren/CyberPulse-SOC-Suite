@@ -1,0 +1,18 @@
+# Positive/negative samples for rules/sigma/win_uac_bypass_ms_settings.yml (synthetic lab events)
+rule: win_uac_bypass_ms_settings.yml
+positive:
+- name: ms-settings hijack
+  event:
+    event_id: 13
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      TargetObject: 'HKU\S-1-5-21-1\Software\Classes\ms-settings\shell\open\command\(Default)'
+      Details: 'C:\Users\Public\payload.exe'
+negative:
+- name: Unrelated shell open command
+  event:
+    event_id: 13
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      TargetObject: 'HKCR\txtfile\shell\open\command\(Default)'
+      Details: notepad.exe %1

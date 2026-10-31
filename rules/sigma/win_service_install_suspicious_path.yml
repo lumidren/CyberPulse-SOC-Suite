@@ -1,0 +1,32 @@
+title: Service Installed from a Suspicious Path or Command
+id: 0fde580d-5410-4c4a-837c-56af44b17c96
+status: experimental
+description: Detects new services (System 7045) whose image path is in a user-writable location or launches a script
+    interpreter, used for persistence and privilege escalation.
+references:
+- https://attack.mitre.org/techniques/T1543/003/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.persistence
+- attack.privilege_escalation
+- attack.t1543.003
+logsource:
+    product: windows
+    service: system
+detection:
+    selection:
+        EventID: 7045
+    suspicious:
+        ImagePath|contains:
+        - '\Temp\'
+        - '\Users\Public\'
+        - '\AppData\'
+        - powershell
+        - cmd.exe /c
+        - mshta
+    condition: selection and suspicious
+falsepositives:
+- Installers that briefly register a helper service from a Temp folder
+level: high

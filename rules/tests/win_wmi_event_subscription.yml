@@ -1,0 +1,19 @@
+# Positive/negative samples for rules/sigma/win_wmi_event_subscription.yml (synthetic lab events)
+rule: win_wmi_event_subscription.yml
+positive:
+- name: CommandLineEventConsumer created
+  event:
+    event_id: 20
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Type: Command Line
+      Name: Updater
+      Destination: powershell.exe -enc AAA
+negative:
+- name: Event filter only (no consumer)
+  event:
+    event_id: 19
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Name: BVTFilter
+      Query: SELECT * FROM __InstanceModificationEvent

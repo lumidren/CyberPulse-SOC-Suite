@@ -143,3 +143,33 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: 19a38a95d2c3687db127b959ed59144b4dcac1422c82e91214f6de8292759755
+  d2d58f6a-752c-4ce1-971a-141b72508e04:
+    soc_rule_id: SOC-RULE-024
+    name: Run Key Persistence Added via reg.exe
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 1d196ae739f59a40ca3333be03fab680a6fc26b560a7782f7649d4a40ae76ac1
+  0fde580d-5410-4c4a-837c-56af44b17c96:
+    soc_rule_id: SOC-RULE-025
+    name: Service Installed from a Suspicious Path or Command
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 133f5eef312fee9f868b2075fb927489ec6b0893106371b6469a93280929d206
+  1dd893a5-c677-4ded-bc1a-265fb472f93c:
+    soc_rule_id: SOC-RULE-026
+    name: Account Added to the Local Administrators Group
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 67cb360b814033c8281c27bdc452fcd5949e4f859d0606ca5c071eb3adf724d9
+  a0292324-c8d5-43e7-8812-5548d1eb5e16:
+    soc_rule_id: SOC-RULE-027
+    name: WMI Event Subscription Persistence
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: d081688a959c110d81c5605aa3122e30ca71b9fdbe40219604191acd2969d337
+  fce2b55f-8af4-4213-89fa-3ed000336a1d:
+    soc_rule_id: SOC-RULE-028
+    name: UAC Bypass via ms-settings Shell Open Command
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 5cf62e62e0c1ade264e5b6b067205e21681224154f2b67b1d946689dd048eea4

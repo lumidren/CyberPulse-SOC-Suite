@@ -1,0 +1,26 @@
+title: Run Key Persistence Added via reg.exe
+id: d2d58f6a-752c-4ce1-971a-141b72508e04
+status: experimental
+description: 'Detects reg.exe adding a value under a CurrentVersion\Run or RunOnce key, a common way to make malware
+    start at every logon.'
+references:
+- https://attack.mitre.org/techniques/T1547/001/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.persistence
+- attack.t1547.001
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\reg.exe'
+        CommandLine|contains|all:
+        - ' add '
+        - '\CurrentVersion\Run'
+    condition: selection
+falsepositives:
+- Software installers registering autostart entries via scripts
+level: medium

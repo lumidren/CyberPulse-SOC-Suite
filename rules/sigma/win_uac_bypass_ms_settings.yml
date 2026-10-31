@@ -1,0 +1,24 @@
+title: UAC Bypass via ms-settings Shell Open Command
+id: fce2b55f-8af4-4213-89fa-3ed000336a1d
+status: experimental
+description: 'Detects a write to HKCU ...\ms-settings\shell\open\command (Sysmon 13), used with fodhelper.exe or
+    computerdefaults.exe to run a program elevated without a UAC prompt.'
+references:
+- https://attack.mitre.org/techniques/T1548/002/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.privilege_escalation
+- attack.defense_evasion
+- attack.t1548.002
+logsource:
+    product: windows
+    category: registry_set
+detection:
+    selection:
+        TargetObject|contains: '\ms-settings\shell\open\command'
+    condition: selection
+falsepositives:
+- None expected in normal use; Windows does not write this key itself
+level: high

@@ -47,6 +47,7 @@ LOGSOURCE_EVENT_IDS = {
     ("windows", "registry_event"): {12, 13, 14},
     ("windows", "dns_query"): {22},
     ("windows", "ps_script"): {4104},
+    ("windows", "wmi_event"): {19, 20, 21},
 }
 LOGSOURCE_SOURCES = {
     ("windows", "security"): {"Security"},

@@ -1,0 +1,30 @@
+title: Account Added to the Local Administrators Group
+id: 1dd893a5-c677-4ded-bc1a-265fb472f93c
+status: experimental
+description: Detects a member being added to the built-in local Administrators group (Security 4732), often done
+    after creating a backdoor account.
+references:
+- https://attack.mitre.org/techniques/T1136/001/
+- https://attack.mitre.org/techniques/T1098/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.persistence
+- attack.privilege_escalation
+- attack.t1136.001
+- attack.t1098
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4732
+        TargetUserName:
+        - Administrators
+        - Administratoren
+        - Administrateurs
+    condition: selection
+falsepositives:
+- Helpdesk granting temporary local admin through an approved change
+level: medium
