@@ -73,6 +73,9 @@ and others; none of their binaries are redistributed here. See
 * **No warranty, no liability:** automated or approved containment can disrupt operations,
   lock people out or destroy evidence. Provided AS IS (MIT); use at your own risk.
 
+* **Authorisation required:** only deploy on networks, hosts or cloud accounts you own or are
+  explicitly authorised in writing to monitor and test.
+
 Full notices: [`docs/LEGAL.md`](docs/LEGAL.md).
 
 ---
