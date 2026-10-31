@@ -56,12 +56,14 @@ def simulate_t1110_brute_force():
         "tactic": "Credential Access",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "computer_name": "CORP-RDP-GW01",
-        "user": "admin",
+        "user": "lab.admin",
         "source_ip": "185.220.101.5",
         "details": {
             "LogonType": 10,
             "FailedAttemptsCount": 18,
-            "TargetUserName": "admin",
+            "TargetUserName": "lab.admin",
+            # Synthetic record: no password was generated, guessed or transmitted
+            "CredentialMaterial": "none",
             "TargetDomainName": "CORP",
             "Status": "0xc000006d",
             "SubStatus": "0xc000006a",

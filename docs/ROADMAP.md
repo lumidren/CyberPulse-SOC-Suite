@@ -65,7 +65,7 @@ internal identifiers never go to external APIs.
 - [x] **E35** Confirm the LSASS "dump" is simulated, not a real credential dump. — **Done**: `tests/test_simulator_is_telemetry_only.py` (AST + runtime); generator docstring and README statement.
 - [x] **E36** If it touches real credentials, document that and use dummy accounts only. — 🔀 **Merged into E35**: not applicable. The simulator never touches real or dummy credentials (verified by `tests/test_simulator_is_telemetry_only.py`), so there is nothing to restrict to dummy accounts.
 - [x] **E37** Don't ship working credential-theft tooling; emulate the telemetry instead. — **Done**: `simulator/atomic_tests/*.yaml` now reference-only (`execution: none`); test `TestNoShippedAttackTooling`.
-- [ ] **E38** Brute-force simulation targets only lab accounts with fake passwords.
+- [x] **E38** Brute-force simulation targets only lab accounts with fake passwords. — **Done**: `validate_credential_attack` in `simulator/lab_guard.py`; scenario uses `lab.admin` with `CredentialMaterial: none`; tests.
 - [ ] **E39** Rate-limit the brute-force simulation.
 - [ ] **E40** Tag all simulated events with `simulation=true`.
 - [ ] **E41** Dashboard visibly shows when data is simulated.
