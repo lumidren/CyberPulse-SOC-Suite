@@ -8,6 +8,12 @@
 ![Purple Team](https://img.shields.io/badge/Purple%20Team-APT29%20%7C%20LockBit%203.0-purple)
 ![License](https://img.shields.io/badge/License-MIT-purple)
 
+> **⚠️ LAB USE ONLY.** CyberPulse is a training and portfolio lab. **Never run the
+> simulator, the SOAR engine or any deployment artefact against production
+> systems or any network you do not own or are not explicitly authorised in
+> writing to test.** The simulator only emits synthetic telemetry, but the
+> configurations and playbooks describe real defensive actions.
+
 **CyberPulse SOC Suite** is a modular **Detection Engineering, Incident Response (DFIR), and Resilient SOAR Architecture Lab** built in Python. It models how modern Security Operations Centers (SOCs) bridge the gap between adversary emulation, detection rule authoring, multi-factor risk scoring, automated containment, and forensic case management.
 
 The project provides both **deployable configuration artifacts** (vendor-agnostic Sigma rules, Wazuh XML, Sysmon configurations, WDAC policies) and a **self-contained adversary emulation harness** for rapid testing without requiring a multi-server Active Directory cluster.

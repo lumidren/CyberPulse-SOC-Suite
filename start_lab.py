@@ -33,6 +33,8 @@ BANNER = r"""
 
 def print_banner():
     print("\033[96m" + BANNER + "\033[0m")
+    print("\033[91m\033[1m  *** LAB USE ONLY: never run against production or networks you do not own"
+          " or are not authorised to test. ***\033[0m")
     print("=" * 80)
     print("  [✓] Closed-Loop Detection Engineering     | [✓] Multi-Factor Risk & Policy Engine")
     print("  [✓] Resilient SOAR Containment & Rollback | [✓] Purple Team Attack Replay Engine")

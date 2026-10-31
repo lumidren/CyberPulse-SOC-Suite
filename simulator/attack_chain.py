@@ -1,6 +1,11 @@
 """
 End-to-End Multi-Stage Adversary Attack Chain Simulator for CyberPulse SOC Suite
 Executes a chronological 5-stage kill chain to validate end-to-end detection coverage and SOAR containment.
+
+*** LAB USE ONLY ***
+Never run this against production systems or networks you do not own or are not
+explicitly authorised to test. It only emits synthetic telemetry (no exploitation,
+no credential access, no network traffic).
 """
 
 import json
