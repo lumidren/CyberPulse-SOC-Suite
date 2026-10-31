@@ -1,0 +1,7 @@
+---
+sysmon_download_url: https://live.sysinternals.com/Sysmon64.exe
+# Required: SHA-256 of the Sysmon64.exe you have reviewed. The role refuses to run without it.
+sysmon_sha256: ""
+sysmon_install_dir: C:\Program Files\Sysmon
+# Lab config from this repository (deploy/sysmon/sysmonconfig.xml)
+sysmon_config_src: "{{ playbook_dir }}/../sysmon/sysmonconfig.xml"
