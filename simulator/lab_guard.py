@@ -31,8 +31,13 @@ CLOUD_SOURCES = {"aws:cloudtrail", "azure:signinlogs"}
 
 
 def lab_cidrs():
+    """Configured lab ranges. Publicly routable ranges are rejected outright."""
     raw = os.environ.get("CYBERPULSE_LAB_CIDRS", DEFAULT_LAB_CIDRS)
-    return [ipaddress.ip_network(c.strip(), strict=False) for c in raw.split(",") if c.strip()]
+    nets = [ipaddress.ip_network(c.strip(), strict=False) for c in raw.split(",") if c.strip()]
+    public = [str(n) for n in nets if n.is_global]
+    if public:
+        raise TargetNotAllowed(f"CYBERPULSE_LAB_CIDRS may not contain public ranges: {', '.join(public)}")
+    return nets
 
 
 def lab_cloud_targets():
@@ -57,8 +62,12 @@ def validate_target(event):
     if not ip:
         raise TargetNotAllowed(f"Target {target!r} has no lab inventory address; refusing to simulate.")
     addr = ipaddress.ip_address(ip)
-    if not any(addr in net for net in lab_cidrs()):
-        raise TargetNotAllowed(f"Target {target} ({ip}) is outside the lab CIDRs {DEFAULT_LAB_CIDRS!r}.")
+    # Never simulate against a publicly routable address, whatever the config says
+    if addr.is_global:
+        raise TargetNotAllowed(f"Target {target} ({ip}) is a public IP; the simulator never targets public addresses.")
+    nets = lab_cidrs()
+    if not any(addr in net for net in nets):
+        raise TargetNotAllowed(f"Target {target} ({ip}) is outside the lab CIDRs {[str(n) for n in nets]}.")
     return event
 
 
