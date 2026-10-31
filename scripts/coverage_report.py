@@ -219,7 +219,7 @@ def render_quality():
         f"| Positive samples | {QUALITY_WEIGHTS['positive_samples']} | `rules/tests/` has at least one event the rule must match |",
         f"| Negative samples | {QUALITY_WEIGHTS['negative_samples']} | `rules/tests/` has at least one near-miss the rule must ignore |",
         f"| Scripted generator | {QUALITY_WEIGHTS['scripted_generator']} | The attack simulator has a generator for the rule |",
-        f"| Baseline FP risk | {QUALITY_WEIGHTS['baseline_fp']} | Full for 0 matches on the 600-event benign baseline, half for 1-5 |",
+        f"| Baseline FP risk | {QUALITY_WEIGHTS['baseline_fp']} | Full for 0 matches on the 600-event benign baseline (before exceptions), half for 1-5 |",
         f"| Metadata | {QUALITY_WEIGHTS['metadata']} | Falsepositives, references, ATT&CK tag, level (a quarter each) |",
         f"| Shared data source | {QUALITY_WEIGHTS['shared_data_source']} | Another rule uses the same telemetry, so collecting it is already justified |",
         "",

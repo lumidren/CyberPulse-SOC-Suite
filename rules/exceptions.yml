@@ -8,4 +8,28 @@
 # Tests reject an exception that would suppress any of the rule's positive
 # samples in rules/tests/, so an allowlist entry cannot hide the attack the
 # rule exists for.
-exceptions: []
+exceptions:
+  - id: EXC-0001
+    rule: SOC-RULE-004
+    reason: >-
+      Signed inventory/maintenance scripts run by the task scheduler (svchost) from
+      C:\Scripts\ with -NoProfile. Assumes C:\Scripts is writable by admins only; if
+      that ACL changes, this entry must go.
+    owner: lumidren
+    created: 2026-11-01
+    expires: 2027-04-30
+    match:
+      ParentImage|endswith: '\svchost.exe'
+      CommandLine|contains: ' -File C:\Scripts\'
+      Signed: true
+  - id: EXC-0002
+    rule: SOC-RULE-003
+    reason: >-
+      IT's weekly maintenance task, created by the patching service account and running
+      a script from the admin-only C:\Scripts\ folder.
+    owner: lumidren
+    created: 2026-11-01
+    expires: 2027-04-30
+    match:
+      TaskName: '\IT\WeeklyMaintenance'
+      TaskContent|contains: 'C:\Scripts\maintenance.ps1'

@@ -20,6 +20,7 @@ import argparse
 import os
 import sys
 from collections import Counter
+from datetime import date
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
@@ -32,6 +33,8 @@ SCRIPTED_RUNS = 6
 BASELINE_COUNT = 600
 BASELINE_SEED = 1337
 RESULTS_PATH = os.path.join(ROOT, "docs", "VALIDATION_RESULTS.md")
+# Exceptions expire; evaluate them as of a fixed date so the committed report is reproducible
+VALIDATION_DATE = date(2026, 11, 1)
 
 # Rule each scripted generator is written to trigger.
 EXPECTED_RULE = {
@@ -74,6 +77,7 @@ def scripted_status(rule_id, scripted):
 def run_baseline(count=BASELINE_COUNT, seed=BASELINE_SEED):
     """Replay benign events; every detection is a false positive."""
     orchestrator = SOAROrchestrator(policy_mode="DRY_RUN")
+    orchestrator.exceptions.clock = lambda: VALIDATION_DATE
     fps_by_rule = Counter()
     fps_by_category = Counter()
     events = generate_baseline(count, seed)
@@ -88,6 +92,7 @@ def run_baseline(count=BASELINE_COUNT, seed=BASELINE_SEED):
         "false_positives": sum(fps_by_rule.values()),
         "by_rule": dict(sorted(fps_by_rule.items())),
         "by_category": dict(sorted(fps_by_category.items())),
+        "suppressed": dict(sorted(orchestrator.exceptions.suppressed.items())),
     }
 
 
@@ -117,7 +122,9 @@ def render_markdown(scripted, baseline):
         "## False positives on the benign baseline",
         "",
         f"**{baseline['false_positives']} false positives in {baseline['events']} baseline events** "
-        f"(seed {baseline['seed']}; see [BASELINE_TRAFFIC.md](BASELINE_TRAFFIC.md)).",
+        f"(seed {baseline['seed']}; see [BASELINE_TRAFFIC.md](BASELINE_TRAFFIC.md))"
+        + (f", **after {sum(baseline['suppressed'].values())} matches were suppressed by "
+           f"{len(baseline['suppressed'])} exception(s)** (below)." if baseline.get("suppressed") else "."),
         "",
     ]
     if baseline["by_rule"]:
@@ -126,7 +133,15 @@ def render_markdown(scripted, baseline):
         lines += ["", "| Baseline category | False positives |", "| :--- | ---: |"]
         lines += [f"| `{cat}` | {n} |" for cat, n in baseline["by_category"].items()]
     else:
-        lines.append("No rule matched any baseline event.")
+        lines.append("No baseline event raised an alert.")
+    if baseline.get("suppressed"):
+        lines += ["", "### Suppressed by exceptions", "",
+                  f"Matches allowlisted in [`rules/exceptions.yml`](../rules/exceptions.yml), evaluated as of "
+                  f"{VALIDATION_DATE.isoformat()}. These are not counted above but are not hidden: the exceptions",
+                  "were written for this synthetic baseline by the rule author, so the drop in false positives is",
+                  "tuning against known data, not an independent measurement.", "",
+                  "| Exception | Suppressed matches |", "| :--- | ---: |"]
+        lines += [f"| `{exc}` | {n} |" for exc, n in baseline["suppressed"].items()]
     lines.append("")
     return "\n".join(lines)
 
