@@ -280,5 +280,43 @@ class TestNoRedistribution(unittest.TestCase):
         self.assertEqual(offenders, [])
 
 
+class TestFailSafeWhenEnrichmentDown(unittest.TestCase):
+
+    def test_provider_outage_becomes_unavailable_verdict(self):
+        def broken_transport(url, headers, timeout=8):
+            raise OSError("connection refused")
+        c = ThreatIntelClient(vt_key="vt", abuse_key="ab", transport=broken_transport, enabled=True)
+        result = c.lookup("8.8.8.8")
+        self.assertEqual({v["status"] for v in result["verdicts"]}, {"UNAVAILABLE"})
+        from soar.enrichment import enrichment_degraded
+        self.assertTrue(enrichment_degraded({"ip": result}))
+
+    def test_degraded_enrichment_blocks_automatic_execution(self):
+        from soar.risk_engine import RiskAndPolicyEngine
+        engine = RiskAndPolicyEngine(policy_mode="AUTOMATIC")
+        event = {"computer_name": "CORP-RDP-GW01", "user": "lab.admin", "tactic": "Credential Access", "source_ip": "8.8.8.8"}
+        rule = {"rule_id": "SOC-RULE-002", "severity": "HIGH", "action_recommended": "BLOCK_SOURCE_IP_FIREWALL"}
+        intel = {"ip_reputation": {"virustotal_positives": 40, "abuse_score": 90},
+                 "external": {"ip": {"status": "OK", "verdicts": [{"source": "VirusTotal", "status": "UNAVAILABLE"}]}}}
+        decision = engine.evaluate_policy(engine.calculate_risk_score(event, rule, intel), rule)
+        self.assertEqual(decision["execution_intent"], "PENDING_APPROVAL")
+        self.assertIn("unavailable", decision["approval_reason"])
+
+    def test_intel_alone_never_triggers_automatic_block(self):
+        from soar.risk_engine import RiskAndPolicyEngine
+        engine = RiskAndPolicyEngine(policy_mode="AUTOMATIC")
+        engine.confidence_threshold = 0.0
+        # Low-value asset, low-privilege user, weak rule: only reputation pushes it over 65
+        event = {"computer_name": "KIOSK-01", "user": "guest", "tactic": "Discovery", "source_ip": "8.8.8.8"}
+        rule = {"rule_id": "X", "severity": "HIGH", "action_recommended": "BLOCK_SOURCE_IP_FIREWALL"}
+        intel = {"ip_reputation": {"virustotal_positives": 72, "abuse_score": 100}}
+        risk = engine.calculate_risk_score(event, rule, intel)
+        self.assertLess(risk["score_without_intel"], 65.0)
+        self.assertGreaterEqual(risk["final_score"], 65.0)
+        decision = engine.evaluate_policy(risk, rule)
+        self.assertEqual(decision["execution_intent"], "PENDING_APPROVAL")
+        self.assertIn("reputation alone", decision["approval_reason"])
+
+
 if __name__ == "__main__":
     unittest.main()
