@@ -55,6 +55,10 @@ logging.basicConfig(
     level=getattr(logging, LOG_LEVEL, logging.INFO),
     format="%(asctime)s %(levelname)s %(name)s %(message)s"
 )
+from soar.redaction import RedactingFilter  # noqa: E402
+
+for _handler in logging.getLogger().handlers:
+    _handler.addFilter(RedactingFilter())  # credentials never reach the logs
 logger = logging.getLogger("cyberpulse.server")
 audit_logger = logging.getLogger("cyberpulse.audit")
 
