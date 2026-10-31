@@ -1,4 +1,4 @@
-# SOC Tier-1 / Tier-2 Triage Case Study 01: LSASS Access False Positive Analysis
+# Lab Triage Exercise 01 (Simulated): LSASS Access False Positive Analysis
 
 > **⚠️ SIMULATED INCIDENT — lab exercise, not a real event.** Every host, user,
 > IP, hash and timestamp below is synthetic telemetry produced by this

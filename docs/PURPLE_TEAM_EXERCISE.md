@@ -1,4 +1,8 @@
-# Collaborative Purple Team Exercise Report: Active Directory Adversary Emulation
+# Purple Team Lab Exercise (Simulated): Active Directory Adversary Emulation
+
+> **Exercise, not an engagement.** The "red team" actions below were emulated as
+> synthetic telemetry by `simulator/`; no offensive tool was executed and no real
+> network was tested. Blindspots and fixes describe the lab's design reasoning.
 
 | Exercise ID | Date | Lead Evaluator | Scope | Objective |
 | :--- | :--- | :--- | :--- | :--- |
@@ -15,11 +19,11 @@ The exercise validated **6 core ATT&CK techniques**, identified **2 critical bli
 
 ## 2. Collaborative Red/Blue Execution Matrix
 
-| # | Kill Chain Phase | Red Team Offensive Tradecraft | Expected Blue Team Sensor | SIEM Detection Status | Detection Latency | Blindspot / Gap Discovered | Remediation & Engineering Fix |
+| # | Kill Chain Phase | Emulated Tradecraft (telemetry only) | Expected Blue Team Sensor | SIEM Detection Status | Detection Latency | Blindspot / Gap Discovered | Remediation & Engineering Fix |
 | :- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **1** | **Execution** (`T1059.001`) | Invoked base64 encoded PowerShell cradle (`-EncodedCommand aW52...`). | Sysmon Event ID 1 (Process Create) | **DETECTED** (`SOC-RULE-004`) | not yet measured | Standard command-line auditing misses script block payloads executed via stdin. | Enabled **PowerShell Script Block Logging (EventID 4104)** via GPO. |
 | **2** | **Defense Evasion** (`T1562.001`) | Executed `Set-MpPreference -DisableRealtimeMonitoring $true` via batch script. | Sysmon Event ID 1 | **DETECTED** (`SOC-RULE-005`) | not yet measured | Attempting to terminate `WinDefend` service directly via taskkill was not captured. | Configured SACL auditing on Windows Defender service registry keys. |
-| **3** | **Credential Access** (`T1003.001`) | Executed Mimikatz `sekurlsa::logonpasswords` reading `lsass.exe`. | Sysmon Event ID 10 (ProcessAccess `0x1010`) | **DETECTED** (`SOC-RULE-001`) | not yet measured | Initial draft rule triggered on legitimate Windows Defender and Sysinternals crash dumps. | Added signed binary filters for `MsMpEng.exe` and `csrss.exe` in Sigma v2.1. |
+| **3** | **Credential Access** (`T1003.001`) | Emulated a credential-dumping tool's Sysmon 10 handle request on `lsass.exe` (no tool run). | Sysmon Event ID 10 (ProcessAccess `0x1010`) | **DETECTED** (`SOC-RULE-001`) | not yet measured | Initial draft rule triggered on legitimate Windows Defender and Sysinternals crash dumps. | Added signed binary filters for `MsMpEng.exe` and `csrss.exe` in Sigma v2.1. |
 | **4** | **Persistence** (`T1053.005`) | Created scheduled task `\SystemHealthUpdate` running remote PowerShell beacon. | Security Event ID 4698 | **DETECTED** (`SOC-RULE-003`) | not yet measured | Tasks created with benign names like `GoogleUpdate` blend into baseline without script keyword filters. | Added keyword regex inspection for `http:`, `powershell`, and `cmd.exe`. |
 | **5** | **Impact** (`T1486`) | Rapidly created 15 decoy encrypted files (`.docx.locked`) in canary finance folder. | Sysmon Event ID 11 (FileCreate) | **DETECTED** (`SOC-RULE-006`) | not yet measured | Ransomware encrypting in-memory without changing file extension bypassed extension matching. | Added I/O entropy monitoring threshold to file activity engine. |
 

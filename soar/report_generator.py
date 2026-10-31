@@ -78,8 +78,8 @@ class IncidentReportGenerator:
 <body>
     <div class="report-header">
         <div class="header-title">
-            <span>CyberPulse SOC Suite | NIST SP 800-61 Rev. 2 Incident Record</span>
-            <h1>INCIDENT REMEDIATION & FORENSIC DOSSIER</h1>
+            <span>CyberPulse SOC Lab | Exercise report structured after NIST SP 800-61 Rev. 2</span>
+            <h1>LAB EXERCISE INCIDENT REPORT (SIMULATED)</h1>
         </div>
         <div>
             <span class="badge-crit">{risk.get('risk_level', 'CRITICAL')} RISK ({risk.get('final_score', 0)}/100)</span>
@@ -141,7 +141,7 @@ class IncidentReportGenerator:
     <div class="signoff">
         <div><strong>Lead Detection Engineer:</strong> analyst_lumidren (CyberPulse SOC Suite)</div>
         <div><strong>Report Timestamp:</strong> {created_at}</div>
-        <div><strong>Compliance Standard:</strong> NIST SP 800-61 Rev. 2 / ISO 27035</div>
+        <div><strong>Structure:</strong> follows NIST SP 800-61 Rev. 2 phases (lab exercise, not a compliance attestation)</div>
     </div>
 </body>
 </html>"""
@@ -150,6 +150,7 @@ class IncidentReportGenerator:
     def generate_json_report(self, incident: dict) -> dict:
         return {
             "report_standard": "NIST SP 800-61 Rev. 2",
+            "report_type": "LAB_EXERCISE_SIMULATED",
             "generator": "CyberPulse SOC Suite Automated Reporting Engine",
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "incident": incident

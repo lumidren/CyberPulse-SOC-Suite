@@ -1,4 +1,4 @@
-# SOC Incident Response Report: RDP Password Brute Force Attack (T1110.001)
+# Lab Exercise Incident Report (Simulated): RDP Password Brute Force Attack (T1110.001)
 
 > **⚠️ SIMULATED INCIDENT — lab exercise, not a real event.** Every host, user,
 > IP, hash and timestamp below is synthetic telemetry produced by this

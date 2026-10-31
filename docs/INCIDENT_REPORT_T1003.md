@@ -1,4 +1,4 @@
-# SOC Incident Response Report: LSASS Memory Dumping Attempt (T1003.001)
+# Lab Exercise Incident Report (Simulated): LSASS Memory Dumping Attempt (T1003.001)
 
 > **⚠️ SIMULATED INCIDENT — lab exercise, not a real event.** Every host, user,
 > IP, hash and timestamp below is synthetic telemetry produced by this
