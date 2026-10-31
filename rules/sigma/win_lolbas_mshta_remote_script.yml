@@ -1,0 +1,30 @@
+title: Mshta Executing Remote or Inline Script
+id: e743c085-e481-43cc-a605-aedb5a704060
+status: experimental
+description: Detects mshta.exe executing a remote HTA or inline javascript/vbscript, used to proxy execution of
+    malicious code through a signed binary.
+references:
+- https://attack.mitre.org/techniques/T1218/005/
+- https://lolbas-project.github.io/lolbas/Binaries/Mshta/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.defense_evasion
+- attack.t1218.005
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '\mshta.exe'
+    selection_cli:
+        CommandLine|contains:
+        - http://
+        - https://
+        - 'javascript:'
+        - 'vbscript:'
+    condition: selection_img and selection_cli
+falsepositives:
+- Legacy intranet HTA applications served over HTTP (allowlist them by URL)
+level: high

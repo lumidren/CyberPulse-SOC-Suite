@@ -1,0 +1,32 @@
+title: Certutil Used to Download or Decode a Payload
+id: 01e4d913-f0fc-47d7-b34d-31ddd9acb04f
+status: experimental
+description: Detects certutil.exe used as a downloader (-urlcache -split -f) or to decode base64 payloads (-decode),
+    a common living-off-the-land technique.
+references:
+- https://attack.mitre.org/techniques/T1105/
+- https://lolbas-project.github.io/lolbas/Binaries/Certutil/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.command_and_control
+- attack.defense_evasion
+- attack.t1105
+- attack.t1140
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '\certutil.exe'
+    selection_cli:
+        CommandLine|contains:
+        - urlcache
+        - -decode
+        - /decode
+        - -decodehex
+    condition: selection_img and selection_cli
+falsepositives:
+- PKI administrators decoding certificate files during troubleshooting
+level: high

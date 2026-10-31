@@ -83,3 +83,33 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: 454951d613e03a250e465e60a4edc95e72c9720cee76f108b4a313bf14750e71
+  01e4d913-f0fc-47d7-b34d-31ddd9acb04f:
+    soc_rule_id: SOC-RULE-014
+    name: Certutil Used to Download or Decode a Payload
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 328754d04133b5175c54d3f4ec64f4333413005bafd84d607de3035b0d6278fa
+  e743c085-e481-43cc-a605-aedb5a704060:
+    soc_rule_id: SOC-RULE-015
+    name: Mshta Executing Remote or Inline Script
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 3bdb8be51acb2cc2bdf89664de12f565241bf52c22619852e4f415f163b0de69
+  cf9fd8ee-251d-4573-8803-f972ceb4b848:
+    soc_rule_id: SOC-RULE-016
+    name: Regsvr32 Loading a Remote Scriptlet (Squiblydoo)
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 7f208957e19509ea6a1caefd16284c6ae2b02dc867857c67982b97243066ac81
+  3a196b0d-e252-4742-9cb5-2445803f2369:
+    soc_rule_id: SOC-RULE-017
+    name: Rundll32 Executing Script or Remote Content
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: ea9a2092f2d6481886fadab20df29253669c750c1da6d724bd2b852b3a1d8bf5
+  8e4fee5a-cc32-4c24-9a8f-d9ce617ddea6:
+    soc_rule_id: SOC-RULE-018
+    name: BITSAdmin Download or Job Creation
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: a3f37f4a4a40685f8325150f2607833b5a5c3600212dbd7ddaf45f810b571217
