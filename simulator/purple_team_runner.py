@@ -2,6 +2,11 @@
 Attack Replay & Purple Team Validation Engine for CyberPulse SOC Suite
 Executes reproducible adversary campaigns (APT29 Cozy Bear, LockBit Ransomware, Insider Threat)
 and produces stage-by-stage verification metrics comparing Red Tradecraft to Blue Defenses.
+
+*** LAB USE ONLY ***
+Never run this against production systems or networks you do not own or are not
+explicitly authorised to test. It only emits synthetic telemetry (no exploitation,
+no credential access, no network traffic).
 """
 
 import time

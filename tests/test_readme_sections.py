@@ -19,6 +19,12 @@ class TestReadmeSections(unittest.TestCase):
         self.assertIn("Responders are simulated", text)
         self.assertIn("Telemetry is synthetic", text)
 
+    def test_lab_only_warning_present(self):
+        self.assertIn("**⚠️ LAB USE ONLY.**", readme())
+        for rel in ["simulator/attack_simulator.py", "simulator/attack_chain.py", "simulator/purple_team_runner.py"]:
+            with open(os.path.join(ROOT, rel), encoding="utf-8") as fh:
+                self.assertIn("*** LAB USE ONLY ***", fh.read(), rel)
+
     def test_human_oversight_section_present(self):
         text = readme()
         self.assertIn("## 🧑‍⚖️ Human Oversight", text)

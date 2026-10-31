@@ -58,7 +58,7 @@ internal identifiers never go to external APIs.
 
 ## Phase 2b — Simulator safety (E31–E42)
 
-- [ ] **E31** Bold warning: lab use only, never on production or networks you don't own.
+- [x] **E31** Bold warning: lab use only, never on production or networks you don't own. — **Done**: warning in README, simulator docstrings and `start_lab.py` banner; test.
 - [ ] **E32** Simulator refuses to run unless a lab flag is set.
 - [ ] **E33** Target allowlist limited to the lab CIDR.
 - [ ] **E34** Block the simulator from running against public IPs.

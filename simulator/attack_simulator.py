@@ -2,6 +2,11 @@
 Adversary Telemetry & Attack Simulator for CyberPulse SOC Suite
 Generates deterministic, schema-compliant Windows Event Logs and Sysmon records
 covering MITRE ATT&CK enterprise tactics and adversary tradecraft.
+
+*** LAB USE ONLY ***
+Never run this against production systems or networks you do not own or are not
+explicitly authorised to test. It only emits synthetic telemetry (no exploitation,
+no credential access, no network traffic).
 """
 
 import json
