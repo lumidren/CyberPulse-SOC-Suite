@@ -108,7 +108,7 @@ internal identifiers never go to external APIs.
 ## Phase 4b — Third-party API compliance (E57–E64)
 
 - [x] **E57** Follow the VirusTotal API terms (free tier is non-commercial). — **Done**: `virustotal_allowed()` enforcement in `soar/enrichment.py`; `docs/THIRD_PARTY_APIS.md`; tests. Terms summary should be re-verified against VirusTotal's current ToS.
-- [ ] **E58** Respect the VirusTotal rate limit (4 req/min free) with backoff.
+- [x] **E58** Respect the VirusTotal rate limit (4 req/min free) with backoff. — **Done**: `ProviderLimiter` in `soar/enrichment.py` for VirusTotal; docs; tests with an injected clock.
 - [ ] **E59** Respect AbuseIPDB limits and terms.
 - [ ] **E60** Attribute VirusTotal and AbuseIPDB where required.
 - [ ] **E61** Don't redistribute their data in the repo.
