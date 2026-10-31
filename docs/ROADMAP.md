@@ -40,7 +40,7 @@ internal identifiers never go to external APIs.
 - [x] **E13** Remove "no human-in-the-loop" as a selling point. — **Done**: SOAR tab/header wording, README 'Human Oversight' section, policy rationale text; guard pattern.
 - [x] **E14** Add an approval mode: an analyst confirms before containment runs. — **Done**: `approve_action`/`reject_action` in `soar/resilient_containment.py`, `/api/approvals` endpoints, UI buttons; `tests/test_safe_automation.py`.
 - [x] **E15** Make approval the default; full-auto is opt-in. — **Done**: default `APPROVAL_REQUIRED`; AUTOMATIC needs `CYBERPULSE_ALLOW_FULL_AUTO=true` (403 otherwise); tests in both suites.
-- [ ] **E16** Tier actions by blast radius (auto IP block; approval for host isolation and account lockdown).
+- [x] **E16** Tier actions by blast radius (auto IP block; approval for host isolation and account lockdown). — **Done**: `soar/action_tiers.py`; enforced in `RiskAndPolicyEngine._containment_intent`; SOAR tab tier table; tests.
 - [ ] **E17** Add a global kill switch that halts all automation.
 - [x] **E18** Add a dry-run mode that logs what it would do. — **Done earlier**: DRY_RUN policy mode records `SIMULATED_NO_DISRUPTION` actions (`soar/resilient_containment.py`, test `test_dry_run_policy_mode`).
 - [ ] **E19** Add a confidence threshold; below it, escalate instead of acting.

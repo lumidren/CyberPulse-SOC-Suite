@@ -77,5 +77,30 @@ class TestApprovalIsDefault(unittest.TestCase):
         self.assertEqual(orch.containment_engine.host_isolation_registry, set())
 
 
+class TestBlastRadiusTiers(unittest.TestCase):
+
+    def test_tier_assignments(self):
+        from soar.action_tiers import TIER_1_AUTO_ELIGIBLE, TIER_2_HOST, TIER_3_IDENTITY, tier_for
+        self.assertEqual(tier_for("BLOCK_SOURCE_IP_FIREWALL"), TIER_1_AUTO_ELIGIBLE)
+        self.assertEqual(tier_for("ISOLATE_HOST_AND_KILL_PROCESS"), TIER_2_HOST)
+        self.assertEqual(tier_for("ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES"), TIER_3_IDENTITY)
+        self.assertEqual(tier_for("SOMETHING_NEW"), TIER_3_IDENTITY)  # unknown -> strictest
+
+    def test_automatic_mode_only_auto_runs_tier_1(self):
+        from simulator.attack_simulator import simulate_t1110_brute_force, simulate_t1003_dcsync
+        orch = SOAROrchestrator(policy_mode="AUTOMATIC")
+        ip_block = orch.process_event(simulate_t1110_brute_force())
+        self.assertEqual(ip_block["containment_action"]["status"], "SUCCESS")
+        self.assertEqual(ip_block["policy_decision"]["blast_radius_tier"], "TIER_1_AUTO_ELIGIBLE")
+
+        isolation = orch.process_event(simulate_t1003_lsass_dump())
+        self.assertEqual(isolation["containment_action"]["status"], "PENDING_ANALYST_APPROVAL")
+        self.assertIn("approval_reason", isolation["policy_decision"])
+
+        lockdown = orch.process_event(simulate_t1003_dcsync())
+        self.assertEqual(lockdown["containment_action"]["status"], "PENDING_ANALYST_APPROVAL")
+        self.assertEqual(lockdown["policy_decision"]["blast_radius_tier"], "TIER_3_IDENTITY")
+
+
 if __name__ == "__main__":
     unittest.main()
