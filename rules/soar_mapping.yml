@@ -245,3 +245,15 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: f05e4ba433f85014014a8ddf80b0463199ab2b2d55560a604db78a802072da48
+  1489068e-d952-4bfb-bdde-7889dcfe0b05:
+    soc_rule_id: SOC-RULE-041
+    name: AWS CloudTrail Logging Stopped or Deleted
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 99e5ffd22a65e87c83fa205e65f15b23ff09b5aa64891f41fd8d4d030cf70314
+  75ddfba7-8c30-4c7a-b1ba-60e3da3d9b72:
+    soc_rule_id: SOC-RULE-042
+    name: Entra ID Admin Consent Granted to an Application
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: e4b15c11d7bf7d666db7abe01598ec7cc5d759194c77db6e63d10ab5065b6417

@@ -39,7 +39,11 @@ DETAIL_FIELD_ALLOWLIST = {
     "TicketEncryptionType", "AccessMask", "Properties", "SubjectUserName",
     # cloud
     "eventName", "eventSource", "roleArn", "durationSeconds", "Category", "OperationName",
-    "RiskLevelDuringSignIn", "RiskEventTypes", "Location", "PreviousLocation", "ResultType",
+    "RiskLevelDuringSignIn", "RiskEventTypes", "Location", "PreviousLocation", "ResultType", "ConsentType",
+    "requestParameters.roleArn",
+    # additional rule fields (rules/sigma/)
+    "LogonProcessName", "AuthenticationPackageName", "KeyLength", "MemberName", "PreAuthType", "ImagePath",
+    "TargetObject", "Details", "Type", "Destination", "Name", "Query", "SubjectDomainName",
     "SignatureStatus",
     # provenance
     "simulation", "CredentialMaterial", "raw",

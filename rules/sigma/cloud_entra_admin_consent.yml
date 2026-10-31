@@ -1,0 +1,25 @@
+title: Entra ID Admin Consent Granted to an Application
+id: 75ddfba7-8c30-4c7a-b1ba-60e3da3d9b72
+status: experimental
+description: Detects tenant-wide admin consent being granted to an application in Entra ID audit logs, a path to
+    persistent OAuth access (illicit consent grant).
+references:
+- https://attack.mitre.org/techniques/T1528/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.credential_access
+- attack.persistence
+- attack.t1528
+logsource:
+    product: azure
+    service: auditlogs
+detection:
+    selection:
+        OperationName: Consent to application
+        ConsentType|contains: AllPrincipals
+    condition: selection
+falsepositives:
+- Approved onboarding of a new SaaS application by a cloud administrator
+level: medium
