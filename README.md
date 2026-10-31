@@ -66,6 +66,10 @@ Read this before drawing conclusions from anything else in the README.
   drops, account lockouts, token revocation) produce realistic action records
   but make **no** WinRM, pfSense, Active Directory, AWS or Microsoft Graph
   calls.
+* **The simulator never performs attacks.** The LSASS "dump", brute force,
+  DCSync and other scenarios return synthetic log records only; no process is
+  opened, no memory is read and no credential is touched. A static-analysis
+  test (`tests/test_simulator_is_telemetry_only.py`) enforces this.
 * **Telemetry is synthetic.** Attack events come from `simulator/`, benign
   traffic from `simulator/benign_baseline.py`. Both were written by the same
   author as the rules, so detection counts are regression checks, not efficacy

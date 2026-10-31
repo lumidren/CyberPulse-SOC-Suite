@@ -62,8 +62,8 @@ internal identifiers never go to external APIs.
 - [x] **E32** Simulator refuses to run unless a lab flag is set. — **Done**: `simulator/lab_guard.py` decorator on every generator; API 403; scripts/CLI/CI/.env updated; tests.
 - [x] **E33** Target allowlist limited to the lab CIDR. — **Done**: `validate_target` in `simulator/lab_guard.py` (lab CIDRs + lab cloud targets) applied to every generator; tests.
 - [x] **E34** Block the simulator from running against public IPs. — **Done**: `is_global` checks on targets and on `CYBERPULSE_LAB_CIDRS` in `simulator/lab_guard.py`; tests.
-- [ ] **E35** Confirm the LSASS "dump" is simulated, not a real credential dump.
-- [ ] **E36** If it touches real credentials, document that and use dummy accounts only.
+- [x] **E35** Confirm the LSASS "dump" is simulated, not a real credential dump. — **Done**: `tests/test_simulator_is_telemetry_only.py` (AST + runtime); generator docstring and README statement.
+- [x] **E36** If it touches real credentials, document that and use dummy accounts only. — 🔀 **Merged into E35**: not applicable. The simulator never touches real or dummy credentials (verified by `tests/test_simulator_is_telemetry_only.py`), so there is nothing to restrict to dummy accounts.
 - [ ] **E37** Don't ship working credential-theft tooling; emulate the telemetry instead.
 - [ ] **E38** Brute-force simulation targets only lab accounts with fake passwords.
 - [ ] **E39** Rate-limit the brute-force simulation.
