@@ -1,4 +1,4 @@
-# SOC Tier-1 / Tier-2 Triage Case Study 02: True-Positive Defense Evasion Triage
+# Lab Triage Exercise 02 (Simulated): True-Positive Defense Evasion Triage
 
 > **⚠️ SIMULATED INCIDENT — lab exercise, not a real event.** Every host, user,
 > IP, hash and timestamp below is synthetic telemetry produced by this

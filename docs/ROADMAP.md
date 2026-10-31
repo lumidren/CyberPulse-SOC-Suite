@@ -32,7 +32,7 @@ internal identifiers never go to external APIs.
 - [x] **E8** Add a Limitations section to the README. — **Done**: README '⚠️ Limitations' section; `tests/test_readme_sections.py`.
 - [x] **E9** State that the rules are untested against real-world noise. — **Done**: Sigma `status: experimental`; README/DELC/coverage caveats; API flag `real_world_noise_tested=false`.
 - [x] **E10** Mark INC-2026-0815-01 and -02 as simulated incidents. — **Done**: simulated banner + '(SIMULATED)' IDs on both incident reports and both triage case studies; test in `tests/test_readme_sections.py`.
-- [ ] **E11** Remove "Formal" from incident report headings, or label them exercises.
+- [x] **E11** Remove "Formal" from incident report headings, or label them exercises. — **Done**: report/triage/purple-team headings, HTML generator header + signoff, JSON `report_type`; guard pattern.
 - [ ] **E12** Make the README resume block accurate, or move it out of the repo.
 
 ## Phase 2 — Human oversight & safe automation (E13–E30)

@@ -238,7 +238,7 @@ python server.py
 Open **`http://localhost:5000`** in your browser to access:
 * **SOC Overview**: GeoIP threat map, operational KPI meters, and attack simulation launcher.
 * **Incident DFIR**: Interactive attack graph, AI Copilot incident briefing, pre-containment volatile evidence box, Active Directory identity blast radius, and 1-click rollback.
-* **Detection Catalogue**: Searchable rulebase linked to formal Detection Engineering Lifecycle (DELC) documents.
+* **Detection Catalogue**: Searchable rulebase linked to Detection Engineering Lifecycle (DELC) write-ups.
 * **SOAR Policies**: Risk tier configuration and Dry-Run mode toggles.
 * **Purple Team Replay**: Interactive APT29 and LockBit kill chain execution.
 * **System Health**: Connection probes for Wazuh, OpenSearch, WinRM, and external APIs.
@@ -252,7 +252,7 @@ Open **`http://localhost:5000`** in your browser to access:
 CyberPulse SOC Suite – Detection Engineering & Resilient SOAR Architecture Lab
 GitHub: https://github.com/lumidren/CyberPulse-SOC-Suite
 • Designed an extensible SecOps architecture prototype in Python modeling closed-loop Detection Engineering, Multi-Factor Risk Scoring, and Automated Containment.
-• Authored 10+ vendor-agnostic Sigma YAML and Wazuh XML detection rules following the formal Detection Engineering Lifecycle (DELC), covering Kerberoasting (T1558.001), DCSync (T1003.006), BYOVD driver load (T1068), and AWS AssumeRole abuse (T1548).
+• Authored 10+ vendor-agnostic Sigma YAML and Wazuh XML detection rules following a Detection Engineering Lifecycle (DELC), covering Kerberoasting (T1558.001), DCSync (T1003.006), BYOVD driver load (T1068), and AWS AssumeRole abuse (T1548).
 • Engineered a multi-factor Risk & Policy Engine incorporating Asset Criticality, Account Privilege, ATT&CK Tactic Weights, and Threat Intelligence reputation into configurable containment policies.
 • Built a fault-tolerant SOAR containment engine with circuit breakers, idempotent actions, and one-click rollback capabilities for WinRM host isolation, pfSense firewall drops, and cloud token revocation.
 • Built an Interactive Attack Graph Visualizer, Pre-Containment DFIR Volatile Evidence Packager, 100% Offline AI SOC Analyst Copilot, BloodHound CE Schema Exporter, and RFC 5424 Syslog UDP Ingestion Gateway.

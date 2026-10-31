@@ -37,6 +37,8 @@ BANNED_CLAIMS = [
      "Automated in-process seconds are not comparable to a human triage cycle."),
     ("E9", re.compile(r"production[- ]ready|^status:\s*production\b|Final Production Rule", re.I),
      "Rules are only tested on synthetic events; don't call them production-ready."),
+    ("E11", re.compile(r"\bformal (incident|detection engineering|report)|FORENSIC DOSSIER|Compliance Standard:", re.I),
+     "Reports are lab exercises; don't present them as formal or compliance artefacts."),
 ]
 
 
