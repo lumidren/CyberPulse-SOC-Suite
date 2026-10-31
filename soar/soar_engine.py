@@ -118,7 +118,7 @@ DATACENTER_GEO = {
 }
 
 class SOAROrchestrator:
-    def __init__(self, webhook_url=None, policy_mode="AUTOMATIC"):
+    def __init__(self, webhook_url=None, policy_mode="APPROVAL_REQUIRED"):
         self.risk_engine = RiskAndPolicyEngine(policy_mode=policy_mode)
         self.containment_engine = ResilientContainmentEngine()
         self.dfir_engine = DFIREngine()

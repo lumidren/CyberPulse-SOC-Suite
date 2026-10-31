@@ -53,7 +53,18 @@ logging.basicConfig(
 logger = logging.getLogger("cyberpulse.server")
 audit_logger = logging.getLogger("cyberpulse.audit")
 
-orchestrator = SOAROrchestrator()
+VALID_POLICY_MODES = ("APPROVAL_REQUIRED", "DRY_RUN", "AUTOMATIC")
+# Approval is the default. Full-auto must be explicitly opted into by the operator.
+ALLOW_FULL_AUTO = os.environ.get("CYBERPULSE_ALLOW_FULL_AUTO", "false").strip().lower() == "true"
+POLICY_MODE = os.environ.get("POLICY_MODE", "APPROVAL_REQUIRED").split("#")[0].strip().upper() or "APPROVAL_REQUIRED"
+if POLICY_MODE not in VALID_POLICY_MODES:
+    logger.warning("Unknown POLICY_MODE=%r; falling back to APPROVAL_REQUIRED.", POLICY_MODE)
+    POLICY_MODE = "APPROVAL_REQUIRED"
+if POLICY_MODE == "AUTOMATIC" and not ALLOW_FULL_AUTO:
+    logger.warning("POLICY_MODE=AUTOMATIC ignored: set CYBERPULSE_ALLOW_FULL_AUTO=true to opt in. Using APPROVAL_REQUIRED.")
+    POLICY_MODE = "APPROVAL_REQUIRED"
+
+orchestrator = SOAROrchestrator(policy_mode=POLICY_MODE)
 purple_runner = PurpleTeamRunner(orchestrator)
 bloodhound_exporter = BloodHoundExporter()
 report_generator = IncidentReportGenerator()
@@ -432,6 +443,13 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 items.append({"incident_id": inc["incident_id"] if inc else None, "action": action})
             self._send_json(200, {"total": len(items), "pending": items})
 
+        elif path == "/api/policy/config":
+            self._send_json(200, {
+                "active_policy_mode": orchestrator.risk_engine.policy_mode,
+                "default_policy_mode": "APPROVAL_REQUIRED",
+                "full_auto_allowed": ALLOW_FULL_AUTO
+            })
+
         elif path == "/api/version":
             self._send_json(200, {
                 "service": "cyberpulse-soc",
@@ -618,13 +636,19 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json(200, res)
 
         elif path == "/api/policy/config":
-            new_mode = data.get("mode", "AUTOMATIC")
-            if new_mode in ["AUTOMATIC", "APPROVAL_REQUIRED", "DRY_RUN"]:
+            new_mode = str(data.get("mode", "")).upper()
+            if new_mode == "AUTOMATIC" and not ALLOW_FULL_AUTO:
+                self._send_json(403, {
+                    "error": "Full-auto containment is opt-in. Start the server with CYBERPULSE_ALLOW_FULL_AUTO=true to enable AUTOMATIC mode.",
+                    "active_policy_mode": orchestrator.risk_engine.policy_mode
+                })
+                return
+            if new_mode in VALID_POLICY_MODES:
                 orchestrator.risk_engine.policy_mode = new_mode
                 audit_logger.info("POLICY_CHANGE client=%s mode=%s", self._client_ip(), new_mode)
                 self._send_json(200, {"status": "SUCCESS", "active_policy_mode": new_mode})
             else:
-                self._send_json(400, {"error": "Invalid mode. Choose AUTOMATIC, APPROVAL_REQUIRED, or DRY_RUN."})
+                self._send_json(400, {"error": "Invalid mode. Choose APPROVAL_REQUIRED, DRY_RUN, or AUTOMATIC."})
 
         elif path == "/api/ingest":
             result = orchestrator.webhook_ingest.handle_ingest(data)

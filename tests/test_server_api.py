@@ -152,6 +152,20 @@ class TestRestApiIntegration(unittest.TestCase):
         finally:
             server.orchestrator.risk_engine.policy_mode = original_mode
 
+    def test_full_auto_is_opt_in(self):
+        """AUTOMATIC mode is refused unless the operator opted in via env"""
+        status, cfg = _request(self.base_url, "/api/policy/config")
+        self.assertEqual(status, 200)
+        self.assertEqual(cfg["default_policy_mode"], "APPROVAL_REQUIRED")
+        original = server.ALLOW_FULL_AUTO
+        server.ALLOW_FULL_AUTO = False
+        try:
+            status, body = _request(self.base_url, "/api/policy/config", method="POST", body={"mode": "AUTOMATIC"})
+            self.assertEqual(status, 403)
+            self.assertNotEqual(server.orchestrator.risk_engine.policy_mode, "AUTOMATIC")
+        finally:
+            server.ALLOW_FULL_AUTO = original
+
     def test_incident_list_pagination(self):
         """Incident list honors limit/offset and reports totals"""
         for _ in range(3):

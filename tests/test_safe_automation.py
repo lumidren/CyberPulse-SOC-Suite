@@ -67,5 +67,15 @@ class TestApprovalWorkflow(unittest.TestCase):
         self.assertEqual(incident["status"], "CONTAINED")
 
 
+class TestApprovalIsDefault(unittest.TestCase):
+
+    def test_orchestrator_defaults_to_approval(self):
+        orch = SOAROrchestrator()
+        self.assertEqual(orch.risk_engine.policy_mode, "APPROVAL_REQUIRED")
+        incident = orch.process_event(simulate_t1003_lsass_dump())
+        self.assertEqual(incident["containment_action"]["status"], "PENDING_ANALYST_APPROVAL")
+        self.assertEqual(orch.containment_engine.host_isolation_registry, set())
+
+
 if __name__ == "__main__":
     unittest.main()
