@@ -237,6 +237,11 @@ def _resolve_api_key():
 API_KEY = _resolve_api_key()
 ALLOWED_ORIGIN = os.environ.get("CORS_ALLOWED_ORIGIN", "http://localhost:5000")
 
+def allowed_origins():
+    """Origins whose browser requests may change state with a session cookie."""
+    port = PORT
+    return {ALLOWED_ORIGIN, f"http://localhost:{port}", f"http://127.0.0.1:{port}"}
+
 class SlidingWindowRateLimiter:
     """Thread-safe per-client sliding-window rate limiter."""
 
@@ -313,6 +318,32 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def _key_matches(self, token):
         return hmac.compare_digest((token or "").encode("utf-8"), API_KEY.encode("utf-8"))
+
+    def _has_valid_api_key(self):
+        auth_header = self.headers.get("Authorization", "")
+        api_key_header = self.headers.get("X-API-Key", "")
+        if auth_header.startswith("Bearer "):
+            return self._key_matches(auth_header.split(" ", 1)[1].strip())
+        if api_key_header:
+            return self._key_matches(api_key_header.strip())
+        return False
+
+    def _csrf_ok(self):
+        """Cookie-authenticated state changes need the session's CSRF token and a same-origin request.
+
+        API-key clients are exempt: a browser never attaches that header on its own,
+        so a forged cross-site request cannot carry it.
+        """
+        if self._has_valid_api_key():
+            return True
+        session = self._session()
+        if not session:
+            return True  # unauthenticated requests are rejected by the auth gate instead
+        origin = self.headers.get("Origin")
+        if origin and origin not in allowed_origins():
+            return False
+        supplied = self.headers.get("X-CSRF-Token", "")
+        return hmac.compare_digest(supplied.encode("utf-8"), session["csrf_token"].encode("utf-8"))
 
     def _is_authenticated(self):
         """Valid dashboard session cookie, or API key / Bearer token (timing-safe)."""
@@ -410,7 +441,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         else:
             self.send_header("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key, X-CSRF-Token")
 
     def _send_json(self, status_code, payload):
         self.send_response(status_code)
@@ -596,12 +627,19 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Login is the one API call that does not need prior authentication
         login_request = path == "/api/session"
         if path == "/api/session/logout":
+            if not self._csrf_ok():
+                self._send_json(403, {"error": "CSRF check failed."})
+                return
             self._handle_logout()
             return
 
         # Enforce rate limiting + API key authentication on all /api/* endpoints
         if path.startswith("/api/") and not login_request:
             if not self._check_api_access():
+                return
+            if not self._csrf_ok():
+                audit_logger.warning("CSRF_REJECTED client=%s path=%s", self._client_ip(), path)
+                self._send_json(403, {"error": "CSRF check failed: missing/invalid X-CSRF-Token or cross-origin request."})
                 return
 
         try:
