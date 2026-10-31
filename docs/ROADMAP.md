@@ -77,7 +77,7 @@ internal identifiers never go to external APIs.
 - [x] **E66** Bind to 127.0.0.1 by default; document the 0.0.0.0 risk. — **Done**: `HOST`/`SYSLOG_HOST` default 127.0.0.1, startup warning, compose publishes on loopback; risk documented; tests.
 - [x] **E67** CSRF protection on the simulation trigger endpoints. — **Done**: `_csrf_ok` in `server.py` (token + Origin check) on every cookie-auth POST; console sends `X-CSRF-Token`; tests.
 - [x] **E68** HMAC-signature authentication on the SOAR webhook receiver. — **Done**: `soar/ingest_auth.py` verifier, enforced on `/api/ingest`; `/api/ingest/manual`; `scripts/send_signed_event.py`; `tests/test_ingest_hmac.py`.
-- [ ] **E69** Validate and sanitize all webhook inputs.
+- [x] **E69** Validate and sanitize all webhook inputs. — **Done** (2 commits): `soar/input_validation.py` on webhook + syslog input; output escaping in the report and console; tests.
 - [ ] **E70** Prevent command injection in taskkill/netsh/iptables calls; never concatenate strings.
 - [ ] **E71** Parameterized, validated arguments for WinRM and PowerShell.
 - [ ] **E72** Never hardcode API keys; use environment variables or a secrets manager.

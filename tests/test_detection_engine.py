@@ -317,6 +317,26 @@ class TestSOCLabPlatform(unittest.TestCase):
         result_bad = handler.handle_ingest(invalid_event)
         self.assertNotEqual(result_bad.get("status"), "SUCCESS")
 
+    def test_ingest_rejects_malformed_and_hostile_fields(self):
+        """Webhook input is type/format checked and sanitised (roadmap E69)"""
+        handler = WebhookIngestionHandler()
+        base = {"event_id": 10, "computer_name": "WIN-WORKSTATION09", "source_ip": "203.0.113.9"}
+        for bad in [
+            dict(base, computer_name="<img src=x onerror=alert(1)>"),
+            dict(base, source_ip="not-an-ip"),
+            dict(base, event_id={"$gt": 1}),
+            dict(base, technique_id="T1003; DROP"),
+            dict(base, details={"a": {"b": {"c": {"d": 1}}}}),
+            dict(base, details={"bad key!": 1}),
+        ]:
+            result = handler.handle_ingest(bad)
+            self.assertEqual(result["status"], "ERROR", bad)
+            self.assertTrue(result["problems"])
+
+        ok = handler.handle_ingest(dict(base, details={"CommandLine": "cmd.exe\x00 /c whoami\x07"}))
+        self.assertEqual(ok["status"], "SUCCESS")
+        self.assertEqual(ok["normalized_event"]["details"]["CommandLine"], "cmd.exe /c whoami")
+
     def test_identity_blast_radius_analysis(self):
         """Verify identity blast radius engine calculates compromise impact for AD users"""
         engine = IdentityBlastRadiusEngine()

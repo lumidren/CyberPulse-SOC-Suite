@@ -5,6 +5,8 @@ import re
 import time
 from datetime import datetime, timezone
 
+from soar.input_validation import ValidationError, validate_event
+
 class SyslogReceiver:
     """
     Live Syslog Listener for CyberPulse.
@@ -105,6 +107,7 @@ class SyslogReceiver:
                     # Automatically use sender's IP if it's missing in the message
                     if not event.get("source_ip"):
                         event["source_ip"] = addr[0]
+                    event = validate_event(event)  # same validation as the webhook receiver
                     self.events.append(event)
                     self.total_parsed += 1
                 except Exception:
@@ -154,27 +157,13 @@ class WebhookIngestionHandler:
     Handles POST payloads, validates, and normalizes them into the common schema.
     """
     def handle_ingest(self, json_body: dict) -> dict:
-        required_fields = ["event_id", "computer_name", "source_ip"]
-        for field in required_fields:
-            if field not in json_body:
-                return {
-                    "status": "ERROR",
-                    "error": f"Missing required field: {field}"
-                }
-                
-        event = {
-            "event_id": json_body.get("event_id"),
-            "event_source": json_body.get("event_source", "webhook"),
-            "technique_id": json_body.get("technique_id", "Unknown"),
-            "timestamp": json_body.get("timestamp", datetime.now(timezone.utc).isoformat()),
-            "computer_name": json_body.get("computer_name"),
-            "user": json_body.get("user", "Unknown"),
-            "source_ip": json_body.get("source_ip"),
-            "details": json_body.get("details", {}),
-            # Externally ingested events are real unless the sender says otherwise
-            "simulation": bool(json_body.get("simulation", False))
-        }
-        
+        # Untrusted input: strict type/format/size validation and sanitisation.
+        # Externally ingested events are real unless the sender says otherwise.
+        try:
+            event = validate_event(json_body)
+        except ValidationError as exc:
+            return {"status": "ERROR", "error": str(exc), "problems": exc.problems}
+
         return {
             "status": "SUCCESS",
             "event_id": event["event_id"],
