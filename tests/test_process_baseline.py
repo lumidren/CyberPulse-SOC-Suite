@@ -34,7 +34,8 @@ class TestProcessBaseline(unittest.TestCase):
         self.assertEqual(baseline.score({"event_id": 11})["verdict"], "NOT_APPLICABLE")
 
     def test_refuses_to_judge_without_enough_training(self):
-        baseline = ProcessPairBaseline(min_training_events=50).learn(proc("a.exe", "b.exe")) and ProcessPairBaseline()
+        baseline = ProcessPairBaseline(min_training_events=50)
+        baseline.learn(proc("a.exe", "b.exe"))
         self.assertEqual(baseline.score(proc("x.exe", "y.exe"))["verdict"], "INSUFFICIENT_BASELINE")
 
     def test_round_trip_holds_no_hosts_or_users(self):
