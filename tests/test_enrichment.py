@@ -148,5 +148,40 @@ class TestIocCache(unittest.TestCase):
         self.assertEqual(len(cache), 0)
 
 
+class TestVirusTotalTerms(unittest.TestCase):
+
+    def _with_env(self, **env):
+        previous = {k: os.environ.get(k) for k in env}
+        os.environ.update(env)
+        return previous
+
+    def _restore(self, previous):
+        for k, v in previous.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+    def test_public_tier_refused_for_commercial_use(self):
+        previous = self._with_env(VIRUSTOTAL_API_TIER="public", CYBERPULSE_COMMERCIAL_USE="true")
+        try:
+            transport = RecordingTransport()
+            c = ThreatIntelClient(vt_key="vt", abuse_key="", transport=transport, enabled=True)
+            result = c.lookup("8.8.8.8")
+            self.assertEqual(result["verdicts"][0]["status"], "REFUSED_BY_TERMS")
+            self.assertEqual(transport.calls, [])
+        finally:
+            self._restore(previous)
+
+    def test_premium_tier_allowed_for_commercial_use(self):
+        previous = self._with_env(VIRUSTOTAL_API_TIER="premium", CYBERPULSE_COMMERCIAL_USE="true")
+        try:
+            transport = RecordingTransport()
+            ThreatIntelClient(vt_key="vt", abuse_key="", transport=transport, enabled=True).lookup("8.8.8.8")
+            self.assertEqual(len(transport.calls), 1)
+        finally:
+            self._restore(previous)
+
+
 if __name__ == "__main__":
     unittest.main()
