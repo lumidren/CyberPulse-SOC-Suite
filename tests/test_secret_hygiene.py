@@ -7,7 +7,9 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules"}
 SKIP_FILES = {os.path.join("tests", "test_secret_hygiene.py"), os.path.join("tests", "test_dashboard_auth.py"),
-              "CHANGELOG.md", os.path.join("docs", "ROADMAP.md")}
+              "CHANGELOG.md", os.path.join("docs", "ROADMAP.md"),
+              # These name the historical placeholders on purpose (allowlist / scan record / scanner)
+              ".gitleaks.toml", os.path.join("docs", "SECRET_SCAN.md"), os.path.join("scripts", "scan_history_secrets.py")}
 
 SECRET_PATTERNS = [
     ("old dev default key", re.compile(r"cyberpulse-dev-secret-key")),

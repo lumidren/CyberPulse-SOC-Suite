@@ -67,3 +67,21 @@ jobs:
         assert not missing, f'Catalogue references missing rule files: {missing}'
         print(f'[OK] All {len(DETECTION_CATALOGUE)} catalogue sigma_rule paths resolve.')
         "
+
+  secret-scan:
+    name: Secret Scan (gitleaks + history scan)
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout full history
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_CONFIG: .gitleaks.toml
+
+    - name: History pattern scan
+      run: python scripts/scan_history_secrets.py --allow-known

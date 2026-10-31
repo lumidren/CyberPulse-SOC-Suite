@@ -1,0 +1,12 @@
+# gitleaks configuration: default rules plus an allowlist for documented,
+# non-secret placeholders that remain in early history (removed in roadmap E72).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Documented placeholders, never real credentials (see docs/SECRET_SCAN.md)"
+regexes = [
+  '''cyberpulse-dev-secret-key-2026''',
+  '''SecretPassword123!''',
+  '''SecretWinRMPassword!''',
+]
