@@ -135,6 +135,23 @@ class SOAROrchestrator:
         self.containment_engine.safety.pager = lambda message: self.dispatcher.dispatch_text(
             f"🚨 [CyberPulse PAGE] {message}")
 
+    def apply_retention(self, days=None, now=None):
+        """Delete incidents, their action records and buffered events older than the retention period."""
+        import os
+        from datetime import timedelta
+        days = int(days if days is not None else os.environ.get("RETENTION_DAYS", "30"))
+        now = now or datetime.now(timezone.utc)
+        cutoff = now - timedelta(days=days)
+        removed = self.dfir_engine.purge_older_than(cutoff)
+        actions = 0
+        for inc in removed:
+            action_id = inc.get("containment_action", {}).get("action_id")
+            if action_id and self.containment_engine.action_registry.pop(action_id, None) is not None:
+                actions += 1
+        syslog = self.syslog_receiver.purge_older_than(cutoff.timestamp())
+        return {"retention_days": days, "incidents_purged": len(removed),
+                "actions_purged": actions, "syslog_events_purged": syslog}
+
     def expire_containment(self):
         """Roll back expired actions and record it on their incidents."""
         expired = self.containment_engine.expire_actions()

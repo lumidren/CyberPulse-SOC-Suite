@@ -52,9 +52,17 @@ __version__ = "2.5.0"
 # SOC actions (simulations, rollbacks, policy changes, ingestion).
 # ------------------------------------------------------------------------------
 LOG_LEVEL = os.environ.get("CYBERPULSE_LOG_LEVEL", "INFO").upper()
+RETENTION_DAYS = int(os.environ.get("RETENTION_DAYS", "30"))
+_log_handlers = [logging.StreamHandler()]
+if os.environ.get("LOG_FILE"):
+    import logging.handlers
+    # Daily rotation; keep RETENTION_DAYS files, older ones are deleted (roadmap E47)
+    _log_handlers.append(logging.handlers.TimedRotatingFileHandler(
+        os.environ["LOG_FILE"], when="midnight", backupCount=RETENTION_DAYS, encoding="utf-8"))
 logging.basicConfig(
     level=getattr(logging, LOG_LEVEL, logging.INFO),
-    format="%(asctime)s %(levelname)s %(name)s %(message)s"
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    handlers=_log_handlers,
 )
 from soar.redaction import RedactingFilter  # noqa: E402
 
@@ -922,6 +930,9 @@ def _start_ttl_sweeper(interval_sec=60):
             try:
                 for entry in orchestrator.expire_containment():
                     audit_logger.info("TTL_EXPIRY action=%s rollback=%s", entry["original_action_id"], entry["rollback_id"])
+                purged = orchestrator.apply_retention(RETENTION_DAYS)
+                if purged["incidents_purged"] or purged["syslog_events_purged"]:
+                    audit_logger.info("RETENTION_PURGE %s", purged)
             except Exception:
                 logger.exception("TTL sweeper failed")
     threading.Thread(target=sweep, name="ttl-sweeper", daemon=True).start()
