@@ -70,6 +70,9 @@ and others; none of their binaries are redistributed here. See
 * MITRE ATT&CK® is a registered trademark of The MITRE Corporation; ATT&CK content is used
   under the ATT&CK Terms of Use. © The MITRE Corporation, reproduced with permission.
 
+* **No warranty, no liability:** automated or approved containment can disrupt operations,
+  lock people out or destroy evidence. Provided AS IS (MIT); use at your own risk.
+
 Full notices: [`docs/LEGAL.md`](docs/LEGAL.md).
 
 ---

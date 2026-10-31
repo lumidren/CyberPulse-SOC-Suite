@@ -28,5 +28,12 @@ class TestLegalNotices(unittest.TestCase):
         self.assertIn("No endorsement is implied", legal)
 
 
+    def test_warranty_and_liability_disclaimer(self):
+        legal = read("docs/LEGAL.md")
+        self.assertIn("without warranty of any kind", legal)
+        self.assertIn("no liability", legal)
+        self.assertIn("No warranty, no liability", read("README.md"))
+
+
 if __name__ == "__main__":
     unittest.main()

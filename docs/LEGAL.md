@@ -28,3 +28,21 @@ registered trademark of The MITRE Corporation.
 These names are used only to identify the products this lab is configured to
 work with (nominative use). No endorsement is implied.
 
+## No warranty; no liability for automated actions
+
+This software is provided "AS IS", without warranty of any kind, as stated in
+the MIT [LICENSE](../LICENSE). In particular, and in plain words:
+
+* The detection rules, risk scores and containment playbooks are lab material.
+  They may miss real attacks and may flag legitimate activity.
+* Automated or approved containment (host isolation, firewall blocks, account
+  lockout, token revocation, process termination) **can disrupt business
+  operations, lock people out and destroy data or evidence** if misconfigured
+  or wrong. The safety controls (approval by default, kill switch, rate
+  limits, protected assets, TTLs, rollback) reduce that risk; they do not
+  remove it.
+* The author and contributors accept **no liability** for any outage, data
+  loss, wrongful lockout, missed detection, or other damage arising from use
+  of this software. If you wire the responders to real systems, you do so at
+  your own risk and are responsible for testing, change control and approval.
+
