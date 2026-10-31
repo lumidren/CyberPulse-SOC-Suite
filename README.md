@@ -261,6 +261,9 @@ correlation rules); expect different numbers on other machines:
 | **Containment (simulated)** | 52 µs | 287 µs | Building the simulated action record; no network I/O. |
 | **Total In-Process Pipeline** | 321 µs | 1,554 µs | The three stages above plus pipeline bookkeeping. |
 
+Per-technique detection latency (histogram buckets, p50/p95) is in
+[`docs/LATENCY_HISTOGRAM.md`](docs/LATENCY_HISTOGRAM.md) (`--histogram`).
+
 Real-world latency would be dominated by log shipping, SIEM indexing, API
 round-trips and responder execution, none of which this lab measures yet
 (**not yet measured**).
