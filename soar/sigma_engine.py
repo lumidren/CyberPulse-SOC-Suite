@@ -339,9 +339,11 @@ class SigmaEngine:
     def match_all(self, event):
         return [r for r in self.rules if r.matches(event)]
 
-    def evaluate(self, event):
-        """Best match (highest severity, then rule id) as the pipeline's matched_rule, or None."""
-        hits = self.match_all(event)
+    def evaluate(self, event, suppress=None):
+        """Best match (highest severity, then rule id) as the pipeline's matched_rule, or None.
+
+        `suppress(rule, event)` returning True drops that rule's match (per-rule exceptions)."""
+        hits = [h for h in self.match_all(event) if not (suppress and suppress(h, event))]
         if not hits:
             return None
         hits.sort(key=lambda r: (-SEVERITY_ORDER.get(r.as_matched_rule()["severity"], 0), str(r.as_matched_rule()["rule_id"])))
