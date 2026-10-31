@@ -31,9 +31,11 @@ DATA_LOSS_NOTE = (
 
 def termination_plan(pid, process_name=None, grace_seconds=DEFAULT_GRACE_SECONDS, reason="malicious process"):
     """Ordered, argv-based steps for stopping one process gracefully first."""
-    pid = int(pid)
-    if pid <= 4:
-        raise ValueError(f"Refusing to plan termination of system PID {pid}.")
+    from soar.command_builder import CommandValidationError, valid_pid
+    try:
+        pid = valid_pid(pid)
+    except CommandValidationError as exc:
+        raise ValueError(f"Refusing to plan termination: {exc}")
     steps = [
         {"step": 1, "action": "snapshot_process", "detail": "Collect process, handle, network and memory metadata first."},
     ]
