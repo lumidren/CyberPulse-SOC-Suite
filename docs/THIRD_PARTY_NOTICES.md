@@ -31,8 +31,10 @@ this lab in the formats those tools consume.
 
 ## Sysmon configurations
 
-* `deploy/sysmon/sysmonconfig.xml` is a **minimal, original** configuration
-  written for this lab; it is not derived from a community configuration.
+* `deploy/sysmon/sysmonconfig.xml` is a **minimal** configuration written for
+  this lab (added in commit 92325c0); no upstream source is recorded for it. If
+  you recognise it as derived from a community config, please open an issue so
+  the author can be credited.
 * `deploy/vagrant/Vagrantfile` downloads **sysmon-modular by Olaf Hartong**
   (<https://github.com/olafhartong/sysmon-modular>) at provision time. It is
   not redistributed in this repository; credit belongs to its author, and its

@@ -1,8 +1,8 @@
 <!--
   CyberPulse lab Sysmon configuration (minimal, original).
   Written for this lab to emit the events its detections use (process creation,
-  LSASS access, driver loads, file creation). It is not derived from a community
-  configuration. For broad production coverage, consider well-maintained community
+  LSASS access, driver loads, file creation). It was added in commit 92325c0 as
+  lab-specific content; no upstream source is recorded for it. For broad production coverage, consider well-maintained community
   configurations such as Olaf Hartong's sysmon-modular
   (https://github.com/olafhartong/sysmon-modular), crediting the author and
   following the licence in that repository.
