@@ -1,0 +1,16 @@
+# Positive/negative samples for rules/sigma/win_driver_byovd_load.yml (synthetic lab events)
+rule: win_driver_byovd_load.yml
+positive:
+- name: Known vulnerable driver from Temp
+  event:
+    event_id: 6
+    event_source: sysmon
+    details:
+      ImageLoaded: C:\Windows\Temp\gdrv.sys
+negative:
+- name: Ordinary signed driver
+  event:
+    event_id: 6
+    event_source: sysmon
+    details:
+      ImageLoaded: C:\Windows\System32\drivers\e1d68x64.sys

@@ -1,0 +1,16 @@
+# Positive/negative samples for rules/sigma/win_scheduled_task_persistence.yml (synthetic lab events)
+rule: win_scheduled_task_persistence.yml
+positive:
+- name: Task launches hidden encoded PowerShell
+  event:
+    event_id: 4698
+    event_source: Security
+    details:
+      TaskContent: <Exec><Command>powershell.exe</Command><Arguments>-WindowStyle Hidden -Enc AAA</Arguments></Exec>
+negative:
+- name: Vendor updater task
+  event:
+    event_id: 4698
+    event_source: Security
+    details:
+      TaskContent: <Exec><Command>C:\Program Files\Vendor\updater.exe</Command><Arguments>/silent</Arguments></Exec>

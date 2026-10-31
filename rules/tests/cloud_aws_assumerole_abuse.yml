@@ -1,0 +1,31 @@
+# Positive/negative samples for rules/sigma/cloud_aws_assumerole_abuse.yml (synthetic lab events)
+rule: cloud_aws_assumerole_abuse.yml
+positive:
+- name: External source assumes admin role
+  event:
+    event_id: 9901
+    event_source: aws:cloudtrail
+    source_ip: 198.51.100.33
+    details:
+      eventName: AssumeRole
+      eventSource: sts.amazonaws.com
+      roleArn: arn:aws:iam::000000000000:role/AdministratorAccess
+negative:
+- name: CI pipeline inside the VPC (excluded)
+  event:
+    event_id: 9901
+    event_source: aws:cloudtrail
+    source_ip: 10.0.1.15
+    details:
+      eventName: AssumeRole
+      eventSource: sts.amazonaws.com
+      roleArn: arn:aws:iam::000000000000:role/AdministratorAccess
+- name: Low-privilege role
+  event:
+    event_id: 9901
+    event_source: aws:cloudtrail
+    source_ip: 198.51.100.33
+    details:
+      eventName: AssumeRole
+      eventSource: sts.amazonaws.com
+      roleArn: arn:aws:iam::000000000000:role/ReadOnlyReports

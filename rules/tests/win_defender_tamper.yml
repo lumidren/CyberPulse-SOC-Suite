@@ -1,0 +1,18 @@
+# Positive/negative samples for rules/sigma/win_defender_tamper.yml (synthetic lab events)
+rule: win_defender_tamper.yml
+positive:
+- name: Disable real-time monitoring
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      CommandLine: powershell.exe -Command Set-MpPreference -DisableRealtimeMonitoring $true
+negative:
+- name: Read Defender status
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      CommandLine: powershell.exe Get-MpComputerStatus

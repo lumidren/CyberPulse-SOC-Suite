@@ -1,0 +1,44 @@
+# Positive/negative samples for rules/sigma/win_lsass_dumping.yml (synthetic lab events)
+rule: win_lsass_dumping.yml
+positive:
+- name: Unknown tool opens LSASS with PROCESS_VM_READ
+  event:
+    event_id: 10
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      SourceImage: C:\Windows\Temp\tool.exe
+      TargetImage: C:\Windows\System32\lsass.exe
+      GrantedAccess: '0x1010'
+- name: Full access handle from user temp folder
+  event:
+    event_id: 10
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      SourceImage: C:\Users\x\AppData\Local\Temp\a.exe
+      TargetImage: C:\Windows\System32\lsass.exe
+      GrantedAccess: '0x1F0FFF'
+negative:
+- name: Defender inspects LSASS (excluded source)
+  event:
+    event_id: 10
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      SourceImage: C:\ProgramData\Microsoft\Windows Defender\Platform\MsMpEng.exe
+      TargetImage: C:\Windows\System32\lsass.exe
+      GrantedAccess: '0x1010'
+- name: Query-only access mask
+  event:
+    event_id: 10
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      SourceImage: C:\Tools\monitor.exe
+      TargetImage: C:\Windows\System32\lsass.exe
+      GrantedAccess: '0x1000'
+- name: Handle to a different process
+  event:
+    event_id: 10
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      SourceImage: C:\Windows\Temp\tool.exe
+      TargetImage: C:\Windows\explorer.exe
+      GrantedAccess: '0x1010'

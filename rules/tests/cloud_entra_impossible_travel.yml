@@ -1,0 +1,34 @@
+# Positive/negative samples for rules/sigma/cloud_entra_impossible_travel.yml (synthetic lab events)
+rule: cloud_entra_impossible_travel.yml
+positive:
+- name: High-risk impossible travel sign-in
+  event:
+    event_id: 9902
+    event_source: azure:signinlogs
+    details:
+      Category: SignInLogs
+      OperationName: Sign-in activity
+      ResultType: '0'
+      RiskLevelDuringSignIn: high
+      RiskEventTypes: impossibleTravel
+negative:
+- name: Failed sign-in (not a successful session)
+  event:
+    event_id: 9902
+    event_source: azure:signinlogs
+    details:
+      Category: SignInLogs
+      OperationName: Sign-in activity
+      ResultType: '50126'
+      RiskLevelDuringSignIn: high
+      RiskEventTypes: impossibleTravel
+- name: Low-risk sign-in
+  event:
+    event_id: 9902
+    event_source: azure:signinlogs
+    details:
+      Category: SignInLogs
+      OperationName: Sign-in activity
+      ResultType: '0'
+      RiskLevelDuringSignIn: low
+      RiskEventTypes: none

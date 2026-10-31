@@ -1,0 +1,28 @@
+# Positive/negative samples for rules/sigma/win_kerberoasting.yml (synthetic lab events)
+rule: win_kerberoasting.yml
+positive:
+- name: RC4 service ticket for a user SPN
+  event:
+    event_id: 4769
+    event_source: Security
+    details:
+      ServiceName: MSSQLSvc/sql01.corp.local:1433
+      TicketOptions: '0x40810000'
+      TicketEncryptionType: '0x17'
+negative:
+- name: AES service ticket
+  event:
+    event_id: 4769
+    event_source: Security
+    details:
+      ServiceName: MSSQLSvc/sql01.corp.local:1433
+      TicketOptions: '0x40810000'
+      TicketEncryptionType: '0x12'
+- name: RC4 ticket for a computer account (excluded)
+  event:
+    event_id: 4769
+    event_source: Security
+    details:
+      ServiceName: WKS01$
+      TicketOptions: '0x40810000'
+      TicketEncryptionType: '0x17'
