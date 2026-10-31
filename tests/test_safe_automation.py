@@ -217,5 +217,41 @@ class TestIsolationCircuitBreaker(unittest.TestCase):
         self.assertIsNotNone(orch.containment_engine.safety.pager)
 
 
+class TestProtectedAssets(unittest.TestCase):
+
+    def test_protected_match_rules(self):
+        from soar.protected_assets import protected_match
+        self.assertEqual(protected_match(ip="10.0.0.10"), "10.0.0.10")
+        self.assertIsNotNone(protected_match(host="WIN-DC01.corp.local"))
+        self.assertIsNotNone(protected_match(host="jump-07"))           # pattern, case-insensitive
+        self.assertIsNotNone(protected_match(ip="10.0.1.15"))           # SOC subnet CIDR
+        self.assertIsNone(protected_match(host="WIN-WORKSTATION09"))
+        self.assertIsNone(protected_match(ip="203.0.113.9"))
+
+    def test_dc_is_never_isolated_even_with_approval(self):
+        engine = ResilientContainmentEngine()
+        act = stage(engine, host="WIN-DC01.corp.local")
+        self.assertEqual(act["status"], "BLOCKED_PROTECTED_ASSET")
+        self.assertEqual(engine.pending_approvals(), [])
+        self.assertEqual(engine.approve_action(act["action_id"], approver="analyst_a")["status"], "ERROR")
+        self.assertNotIn("WIN-DC01.corp.local", engine.host_isolation_registry)
+
+    def test_dc_ip_is_never_blocked_at_perimeter(self):
+        engine = ResilientContainmentEngine()
+        act = engine.execute_containment(
+            action_type="BLOCK_SOURCE_IP_FIREWALL", target_host="CORP-RDP-GW01", target_ip="10.0.0.10",
+            target_user="admin", pid=None, process_name=None)
+        self.assertEqual(act["status"], "BLOCKED_PROTECTED_ASSET")
+        self.assertEqual(engine.blocked_ips, set())
+
+    def test_lsass_on_dc_is_flagged_not_contained(self):
+        orch = SOAROrchestrator(policy_mode="AUTOMATIC")
+        event = simulate_t1003_lsass_dump()
+        event["computer_name"] = "WIN-DC01.corp.local"
+        incident = orch.process_event(event)
+        self.assertEqual(incident["containment_action"]["status"], "BLOCKED_PROTECTED_ASSET")
+        self.assertEqual(incident["status"], "NEEDS_ANALYST_REVIEW")
+
+
 if __name__ == "__main__":
     unittest.main()
