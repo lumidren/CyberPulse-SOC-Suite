@@ -71,3 +71,9 @@ rules:
     action_recommended: UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK
     version: 1.0.1
     detection_sha256: b8692a0413ac118021e8272e5598cf7acf1656fd8cb9427f1cd437d8e7a66a00
+  348c0c82-bd9b-427a-bc05-11d9157700e9:
+    soc_rule_id: SOC-RULE-012
+    name: Pass-the-Hash Logon Detected
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: e0c5bc07c9e8d68081af83cfbcd604fb084a3bc06b71202d1b9c592b11fb94c0

@@ -1,0 +1,38 @@
+title: Pass-the-Hash Logon Patterns (NTLM and seclogo)
+id: 348c0c82-bd9b-427a-bc05-11d9157700e9
+status: experimental
+description: 'Detects logon events typical of pass-the-hash: a LogonType 9 (NewCredentials) logon via the seclogo
+    process with the Negotiate package, as produced by tools that inject an NTLM hash into a new logon session,
+    or a network NTLM logon with a zero session key length.'
+references:
+- https://attack.mitre.org/techniques/T1550/002/
+- https://learn.microsoft.com/windows/security/threat-protection/auditing/event-4624
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.lateral_movement
+- attack.defense_evasion
+- attack.t1550.002
+logsource:
+    product: windows
+    service: security
+detection:
+    selection_seclogo:
+        EventID: 4624
+        LogonType: 9
+        LogonProcessName: seclogo
+        AuthenticationPackageName: Negotiate
+    selection_ntlm:
+        EventID: 4624
+        LogonType: 3
+        AuthenticationPackageName: NTLM
+        KeyLength: 0
+        LogonProcessName: NtLmSsp
+    filter_anonymous:
+        TargetUserName: ANONYMOUS LOGON
+    condition: 1 of selection_* and not filter_anonymous
+falsepositives:
+- runas /netonly by administrators (LogonType 9 via seclogo)
+- Legacy NTLM-only applications and network scanners
+level: high
