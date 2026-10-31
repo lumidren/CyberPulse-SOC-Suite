@@ -1,13 +1,18 @@
 # SOC Incident Response Report: LSASS Memory Dumping Attempt (T1003.001)
 
+> **⚠️ SIMULATED INCIDENT — lab exercise, not a real event.** Every host, user,
+> IP, hash and timestamp below is synthetic telemetry produced by this
+> repository's simulator. No real organization, system or person was affected,
+> and no real responder (EDR, firewall, directory) was invoked.
+
 | Incident ID | Severity | Status | Assigned Analyst | Timestamp |
 | :--- | :--- | :--- | :--- | :--- |
-| **INC-2026-0815-01** | **CRITICAL** | **CLOSED (Auto-Contained)** | Tier-1 / SOAR Automated Playbook | 2026-08-15T14:32:00Z |
+| **INC-2026-0815-01 (SIMULATED)** | **CRITICAL** | **CLOSED (Auto-Contained)** | Tier-1 / SOAR Automated Playbook | 2026-08-15T14:32:00Z |
 
 ---
 
 ## 1. Executive Summary
-At 14:32:00 UTC, AegisSOC SIEM triggered a **CRITICAL** alert (`SOC-RULE-001`) on domain controller `WIN-DC01.corp.local`. Telemetry indicated an unauthorized process (`C:\Windows\Temp\mimikatz.exe`) attempted to open a process memory handle targeting `lsass.exe` with access mask `0x1010` (PROCESS_VM_READ). The automated SOAR playbook immediately isolated the endpoint from the network via EDR API and terminated the malicious process tree.
+At 14:32:00 UTC, The lab's simulated SIEM pipeline triggered a **CRITICAL** alert (`SOC-RULE-001`) on domain controller `WIN-DC01.corp.local`. Telemetry indicated an unauthorized process (`C:\Windows\Temp\mimikatz.exe`) attempted to open a process memory handle targeting `lsass.exe` with access mask `0x1010` (PROCESS_VM_READ). The automated SOAR playbook immediately isolated the endpoint from the network via EDR API and terminated the malicious process tree.
 
 ---
 

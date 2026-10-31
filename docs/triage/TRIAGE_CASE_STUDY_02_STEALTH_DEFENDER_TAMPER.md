@@ -1,8 +1,13 @@
 # SOC Tier-1 / Tier-2 Triage Case Study 02: True-Positive Defense Evasion Triage
 
+> **⚠️ SIMULATED INCIDENT — lab exercise, not a real event.** Every host, user,
+> IP, hash and timestamp below is synthetic telemetry produced by this
+> repository's simulator. No real organization, system or person was affected,
+> and no real responder (EDR, firewall, directory) was invoked.
+
 | Incident ID | Fired Rule | Initial Severity | Final Triage Verdict | Assigned Analyst |
 | :--- | :--- | :--- | :--- | :--- |
-| **TRIAGE-2026-0821-02** | `SOC-RULE-005` (Defender Tamper) | **CRITICAL** | **TRUE POSITIVE (Malicious Intrusion)** | Tier-2 Analyst (lumidren) |
+| **TRIAGE-2026-0821-02 (SIMULATED)** | `SOC-RULE-005` (Defender Tamper) | **CRITICAL** | **TRUE POSITIVE (Malicious Intrusion)** | Tier-2 Analyst (lumidren) |
 
 ---
 

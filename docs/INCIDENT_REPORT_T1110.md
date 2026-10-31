@@ -1,13 +1,18 @@
 # SOC Incident Response Report: RDP Password Brute Force Attack (T1110.001)
 
+> **⚠️ SIMULATED INCIDENT — lab exercise, not a real event.** Every host, user,
+> IP, hash and timestamp below is synthetic telemetry produced by this
+> repository's simulator. No real organization, system or person was affected,
+> and no real responder (EDR, firewall, directory) was invoked.
+
 | Incident ID | Severity | Status | Assigned Analyst | Timestamp |
 | :--- | :--- | :--- | :--- | :--- |
-| **INC-2026-0815-02** | **HIGH** | **CLOSED (Auto-Contained)** | Tier-1 / SOAR Automated Playbook | 2026-08-15T15:10:00Z |
+| **INC-2026-0815-02 (SIMULATED)** | **HIGH** | **CLOSED (Auto-Contained)** | Tier-1 / SOAR Automated Playbook | 2026-08-15T15:10:00Z |
 
 ---
 
 ## 1. Executive Summary
-AegisSOC detected a brute-force password guessing campaign targeting the external RDP gateway server (`CORP-RDP-GW01`). Over 65 failed authentication attempts were recorded within 180 seconds originating from external IP `185.220.101.5`. The SOAR playbook automatically triggered a dynamic firewall rule on the perimeter gateway, blocking all traffic from the threat source.
+The lab's simulated SIEM pipeline detected a brute-force password guessing campaign targeting the external RDP gateway server (`CORP-RDP-GW01`). Over 65 failed authentication attempts were recorded within 180 seconds originating from external IP `185.220.101.5`. The SOAR playbook automatically triggered a dynamic firewall rule on the perimeter gateway, blocking all traffic from the threat source.
 
 ---
 
