@@ -135,7 +135,8 @@ class WebhookDispatcher:
                 data=json.dumps(payload).encode("utf-8"),
                 headers={"Content-Type": "application/json", "User-Agent": "CyberPulse-SOC/2.0"}
             )
-            with urllib.request.urlopen(req, timeout=5) as response:
+            # nosec B310: scheme restricted to http/https by validate_webhook_url() above
+            with urllib.request.urlopen(req, timeout=5) as response:  # nosec B310
                 return {"status": "SUCCESS", "code": response.status}
         except Exception as e:
             logger.critical("PAGE (delivery failed: %s): %s", e, text)
@@ -166,7 +167,8 @@ class WebhookDispatcher:
                 data=json.dumps(payload).encode('utf-8'),
                 headers={'Content-Type': 'application/json', 'User-Agent': 'CyberPulse-SOC/2.0'}
             )
-            with urllib.request.urlopen(req, timeout=5) as response:
+            # nosec B310: scheme restricted to http/https by validate_webhook_url() above
+            with urllib.request.urlopen(req, timeout=5) as response:  # nosec B310
                 return {"status": "SUCCESS", "code": response.status}
         except Exception as e:
             return {"status": "ERROR", "error": str(e)}
