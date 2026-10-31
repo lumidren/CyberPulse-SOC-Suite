@@ -90,7 +90,7 @@ internal identifiers never go to external APIs.
 
 ## Phase 4 — Privacy & data handling (E43–E56)
 
-- [ ] **E43** Privacy section explaining what data is stored.
+- [x] **E43** Privacy section explaining what data is stored. — **Done**: `docs/PRIVACY.md` + README '🔏 Privacy' section; test.
 - [ ] **E44** Redact secrets in logged command lines.
 - [ ] **E45** Mask usernames in demo data and screenshots.
 - [ ] **E46** Don't commit real telemetry or logs.
