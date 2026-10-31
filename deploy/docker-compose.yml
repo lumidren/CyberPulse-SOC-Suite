@@ -57,7 +57,7 @@ services:
     container_name: cyberpulse-soar
     restart: always
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"   # publish on loopback only; front with a TLS proxy to expose
     environment:
       - CYBERPULSE_ENV=production
       - CYBERPULSE_LAB_MODE=${CYBERPULSE_LAB_MODE:-false}
