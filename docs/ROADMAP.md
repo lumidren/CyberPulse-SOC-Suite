@@ -83,7 +83,7 @@ internal identifiers never go to external APIs.
 - [x] **E72** Never hardcode API keys; use environment variables or a secrets manager. — **Done**: random dev key in `server.py`, compose/.env placeholders, `tests/test_secret_hygiene.py`.
 - [x] **E73** Add `.env.example` and a `.gitignore` for secrets. — **Done earlier** (62c8760, 176e547): `.env.example` documents every setting; `.gitignore` excludes `.env*`.
 - [x] **E74** Scan repo history for leaked keys (gitleaks/trufflehog). — **Done**: `scripts/scan_history_secrets.py` run over 81 commits (2 known placeholders, no real secrets) → `docs/SECRET_SCAN.md`; gitleaks CI job (first run not yet observed).
-- [ ] **E75** WinRM over HTTPS with certificate validation, not skip-verify.
+- [x] **E75** WinRM over HTTPS with certificate validation, not skip-verify. — **Done**: `validate_winrm` in `soar/responder_config.py`, surfaced in `/api/health`; tests. Not exercised against a real WinRM host.
 - [ ] **E76** Least privilege: dedicated SOAR service account, not Domain Admin.
 - [ ] **E77** Pin dependencies in a requirements file with hashes.
 - [ ] **E78** Dependabot and a CI security scan.

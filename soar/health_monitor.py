@@ -12,6 +12,8 @@ import urllib.error
 import json
 from datetime import datetime, timezone
 
+from soar.responder_config import validate_winrm
+
 def check_tcp_port(host, port, timeout=0.5):
     """Probes a TCP socket and returns status and latency in ms"""
     t_start = time.perf_counter()
@@ -91,8 +93,13 @@ class IntegrationHealthMonitor:
             "status": "HEALTHY" if winrm_ok else "OFFLINE",
             "latency_ms": winrm_lat if winrm_ok else 0,
             "mode": "WinRM Listener" if winrm_ok else "Emulated AD Mode",
-            "message": "WFP Isolation Filter & PowerShell Remoting Ready"
+            "message": "WFP Isolation Filter & PowerShell Remoting Ready",
+            # Transport policy: HTTPS + certificate validation only (see soar/responder_config.py)
+            "config_check": validate_winrm()
         }
+        if not results["winrm_controller"]["config_check"]["ok"]:
+            results["winrm_controller"]["status"] = "MISCONFIGURED"
+            results["winrm_controller"]["message"] = "; ".join(results["winrm_controller"]["config_check"]["errors"])
 
         # 5. pfSense Perimeter Firewall Gateway
         pf_ok, pf_lat = check_tcp_port("127.0.0.1", 8443)
