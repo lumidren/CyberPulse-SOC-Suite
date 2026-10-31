@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from soar.enrichment import ThreatIntelClient, is_shareable_ip  # noqa: E402
+from soar.enrichment import ThreatIntelClient, classify_indicator, is_shareable_ip  # noqa: E402
 
 
 class RecordingTransport:
@@ -58,6 +58,41 @@ class TestInternalIndicatorsNeverLeave(unittest.TestCase):
                 os.environ["EXTERNAL_ENRICHMENT_ENABLED"] = previous
         self.assertEqual(result["status"], "DISABLED")
         self.assertEqual(transport.calls, [])
+
+
+class TestOnlyTypedIndicatorsAreSent(unittest.TestCase):
+
+    def test_non_indicators_refused_without_request(self):
+        transport = RecordingTransport()
+        c = client(transport)
+        for value in ["WIN-DC01.corp.local", "CORP\\Administrator", "j.doe@corp.local",
+                      "powershell.exe -enc AAAA", "C:\\Users\\j.doe\\secret.docx", "MZ\x90\x00 file bytes"]:
+            self.assertIsNone(classify_indicator(value), value)
+            self.assertEqual(c.lookup(value)["status"], "REFUSED")
+        self.assertEqual(transport.calls, [])
+
+    def test_hash_lookup_sends_only_the_digest(self):
+        transport = RecordingTransport()
+        digest = "F058F9A5D60E36E4E2C79E89DCE9A32158814F23D6980D4181F54B00D499E0C1"
+        self.assertEqual(client(transport).lookup("SHA256=" + digest)["status"], "OK")
+        self.assertEqual(transport.calls, ["https://www.virustotal.com/api/v3/files/" + digest.lower()])
+
+    def test_pipeline_never_sends_hosts_or_users(self):
+        os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")
+        from simulator.attack_simulator import SCRIPTED_GENERATORS
+        from soar.soar_engine import SOAROrchestrator
+        transport = RecordingTransport()
+        orch = SOAROrchestrator()
+        orch.intel_client = client(transport)
+        sent_hosts_users = []
+        for _name, gen in SCRIPTED_GENERATORS:
+            event = gen()
+            orch.process_event(event)
+            for url in transport.calls:
+                for secret in (event["computer_name"], event["user"].split("\\")[-1]):
+                    if secret and secret.lower() in url.lower():
+                        sent_hosts_users.append((secret, url))
+        self.assertEqual(sent_hosts_users, [])
 
 
 if __name__ == "__main__":

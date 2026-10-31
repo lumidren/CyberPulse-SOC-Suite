@@ -301,7 +301,11 @@ class SOAROrchestrator:
 
         intel = {
             # Live lookups only for public IPs, only when enabled (see soar/enrichment.py)
-            "external": self.intel_client.lookup_ip(source_ip) if source_ip else {"status": "NO_INDICATOR", "verdicts": []},
+            # Only typed indicators (public IP, file hash) are ever looked up externally
+            "external": {
+                "ip": self.intel_client.lookup(source_ip) if source_ip else {"status": "NO_INDICATOR", "verdicts": []},
+                "hash": self.intel_client.lookup(hash_val) if hash_val else {"status": "NO_INDICATOR", "verdicts": []},
+            },
             "ip_reputation": ip_intel,
             "hash_reputation": THREAT_INTEL_CACHE.get(hash_val, {
                 "reputation": "UNKNOWN",
