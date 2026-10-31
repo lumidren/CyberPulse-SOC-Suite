@@ -22,6 +22,16 @@ from urllib.parse import urlparse, parse_qs
 # Ensure project root in python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Validate configuration (environment + optional CYBERPULSE_CONFIG file) before
+# anything reads a setting; refuse to start on invalid values (roadmap F93).
+from soar.config import ConfigError, load_and_apply  # noqa: E402
+try:
+    load_and_apply()
+except ConfigError as _exc:
+    for _problem in _exc.problems:
+        print(f"[config] {_problem}", file=sys.stderr)
+    sys.exit(2)
+
 from simulator.attack_simulator import (
     simulate_t1003_lsass_dump,
     simulate_t1110_brute_force,

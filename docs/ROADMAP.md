@@ -153,7 +153,7 @@ internal identifiers never go to external APIs.
 - [x] **F90** Ansible roles to deploy Sysmon and Wazuh agents. — **Done** (not executed: Ansible not installed here): `deploy/ansible/` playbook + `sysmon`/`wazuh_agent` roles; `tests/test_ansible.py` static checks.
 - [x] **F91** Structured logging and metrics (Prometheus, Grafana). — **Done**: `soar/observability.py`, `LOG_FORMAT=json`, `/metrics`; `deploy/monitoring/` Prometheus + Grafana examples (statically tested only); tests.
 - [x] **F92** Plugin architecture for new enrichers and responders. — **Done**: `soar/plugins.py` registry + allowlisted loader; `plugins/` examples; engine/pipeline wiring; `tests/test_plugins.py`.
-- [ ] **F93** Config file with schema validation.
+- [x] **F93** Config file with schema validation. — **Done**: `soar/config.py` schema + `python -m soar.config --check`; `config/cyberpulse.example.yml`; startup validation in `server.py`; `tests/test_config.py`.
 - [ ] **F94** Type hints and static analysis (mypy, ruff).
 - [ ] **F95** Release process with tags and semantic versioning.
 
