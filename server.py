@@ -87,6 +87,9 @@ if POLICY_MODE == "AUTOMATIC" and not ALLOW_FULL_AUTO:
     logger.warning("POLICY_MODE=AUTOMATIC ignored: set CYBERPULSE_ALLOW_FULL_AUTO=true to opt in. Using APPROVAL_REQUIRED.")
     POLICY_MODE = "APPROVAL_REQUIRED"
 
+from soar.plugins import load_plugins  # noqa: E402
+
+LOADED_PLUGINS = load_plugins()  # only modules from plugins/ named in CYBERPULSE_PLUGINS
 orchestrator = SOAROrchestrator(policy_mode=POLICY_MODE)
 purple_runner = PurpleTeamRunner(orchestrator)
 bloodhound_exporter = BloodHoundExporter()
