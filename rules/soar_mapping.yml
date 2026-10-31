@@ -77,3 +77,9 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: e0c5bc07c9e8d68081af83cfbcd604fb084a3bc06b71202d1b9c592b11fb94c0
+  99f1358f-06a1-467b-9f5e-820afec7e049:
+    soc_rule_id: SOC-RULE-013
+    name: Possible Golden Ticket (Kerberos Domain Anomaly)
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 454951d613e03a250e465e60a4edc95e72c9720cee76f108b4a313bf14750e71
