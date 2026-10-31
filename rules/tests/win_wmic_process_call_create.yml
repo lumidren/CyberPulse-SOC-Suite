@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_wmic_process_call_create.yml (synthetic lab events)
+rule: win_wmic_process_call_create.yml
+positive:
+- name: Remote process via WMIC
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\wbem\wmic.exe'
+      CommandLine: wmic /node:10.0.0.45 process call create "cmd.exe /c whoami"
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: WMIC inventory query
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\wbem\wmic.exe'
+      CommandLine: wmic os get caption
+      ParentImage: 'C:\Windows\System32\cmd.exe'

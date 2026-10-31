@@ -96,3 +96,15 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-020: Backup Catalog Deletion or Boot Recovery Disabled (`win_ransomware_recovery_inhibition.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-021: Office Application Spawning a Shell or Script Host (`win_office_spawns_shell.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-022: Process Creation via WMIC process call create (`win_wmic_process_call_create.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-023: Script Host Running a Script from a User-Writable Path (`win_script_host_user_writable.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

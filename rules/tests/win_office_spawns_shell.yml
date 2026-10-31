@@ -1,0 +1,28 @@
+# Positive/negative samples for rules/sigma/win_office_spawns_shell.yml (synthetic lab events)
+rule: win_office_spawns_shell.yml
+positive:
+- name: Word macro launches PowerShell
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+      CommandLine: powershell -nop -w hidden -c IEX(...)
+      ParentImage: 'C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE'
+negative:
+- name: Word opens the print spooler helper
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\splwow64.exe'
+      CommandLine: splwow64.exe 8192
+      ParentImage: 'C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE'
+- name: Explorer launches PowerShell
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+      CommandLine: powershell
+      ParentImage: 'C:\Windows\explorer.exe'

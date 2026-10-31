@@ -1,0 +1,27 @@
+title: Process Creation via WMIC process call create
+id: c0cfa5d9-444a-4964-b475-b6b1e6a8e68e
+status: experimental
+description: Detects wmic.exe used to start a process locally or on a remote host (process call create), a common
+    execution and lateral-movement technique.
+references:
+- https://attack.mitre.org/techniques/T1047/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.execution
+- attack.t1047
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\wmic.exe'
+        CommandLine|contains|all:
+        - process
+        - call
+        - create
+    condition: selection
+falsepositives:
+- Legacy administration scripts that launch processes through WMIC
+level: medium

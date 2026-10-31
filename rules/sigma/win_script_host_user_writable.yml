@@ -1,0 +1,40 @@
+title: Script Host Running a Script from a User-Writable Path
+id: 439a2928-6b66-473e-8bc6-d0fd0ed293d6
+status: experimental
+description: Detects wscript.exe or cscript.exe executing .js, .jse, .vbs, .vbe or .wsf files from Downloads, Temp,
+    AppData or Public folders, typical of malicious attachments and droppers.
+references:
+- https://attack.mitre.org/techniques/T1059/005/
+- https://attack.mitre.org/techniques/T1059/007/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.execution
+- attack.t1059.005
+- attack.t1059.007
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith:
+        - '\wscript.exe'
+        - '\cscript.exe'
+    selection_path:
+        CommandLine|contains:
+        - '\Downloads\'
+        - '\AppData\'
+        - '\Temp\'
+        - '\Users\Public\'
+    selection_ext:
+        CommandLine|contains:
+        - .js
+        - .jse
+        - .vbs
+        - .vbe
+        - .wsf
+    condition: all of selection_*
+falsepositives:
+- Login scripts deployed into user profiles (allowlist their paths)
+level: high
