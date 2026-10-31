@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_firewall_disabled.yml (synthetic lab events)
+rule: win_firewall_disabled.yml
+positive:
+- name: netsh turns the firewall off
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\netsh.exe'
+      CommandLine: netsh advfirewall set allprofiles state off
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: netsh adds an allow rule
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\netsh.exe'
+      CommandLine: netsh advfirewall firewall add rule name=app dir=in action=allow
+      ParentImage: 'C:\Windows\System32\cmd.exe'

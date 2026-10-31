@@ -1,0 +1,25 @@
+title: 'AS-REP Roasting: TGT Without Pre-Authentication over RC4'
+id: 8b4b478d-997e-45c2-9172-8f9b7f9766d3
+status: experimental
+description: Detects Kerberos TGT requests (4768) for accounts without pre-authentication (PreAuthType 0) using
+    RC4, which lets attackers crack the AS-REP offline.
+references:
+- https://attack.mitre.org/techniques/T1558/004/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.credential_access
+- attack.t1558.004
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4768
+        PreAuthType: '0'
+        TicketEncryptionType: '0x17'
+    condition: selection
+falsepositives:
+- Legacy accounts deliberately configured without Kerberos pre-authentication
+level: high

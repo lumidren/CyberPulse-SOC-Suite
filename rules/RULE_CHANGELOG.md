@@ -128,3 +128,23 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-028: UAC Bypass via ms-settings Shell Open Command (`win_uac_bypass_ms_settings.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-029: Security Event Log Cleared (`win_security_log_cleared.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-030: Windows Firewall Disabled via netsh or PowerShell (`win_firewall_disabled.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-031: SAM or SYSTEM Registry Hive Saved to Disk (`win_sam_hive_export.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-032: NTDS.dit Extraction via ntdsutil IFM (`win_ntds_extraction.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-033: AS-REP Roasting: TGT Without Pre-Authentication over RC4 (`win_asrep_roasting.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

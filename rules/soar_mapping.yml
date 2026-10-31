@@ -173,3 +173,33 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: 5cf62e62e0c1ade264e5b6b067205e21681224154f2b67b1d946689dd048eea4
+  5bdcf192-58d3-4ea8-a584-57dc4c96b519:
+    soc_rule_id: SOC-RULE-029
+    name: Security Event Log Cleared
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 3f364c757a12f45751a2766052fb838bc05eb154be689b32181036c2d7523a95
+  4f2db321-d744-4a92-8636-8f6747f670d9:
+    soc_rule_id: SOC-RULE-030
+    name: Windows Firewall Disabled via netsh or PowerShell
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 24ddbf01fa27c15a83f96222b137cd4b40f14fbf37f1c5ff91d5ef43b2ebd602
+  e97f1f74-f1bd-43ae-bac6-e4cf564a5bea:
+    soc_rule_id: SOC-RULE-031
+    name: SAM or SYSTEM Registry Hive Saved to Disk
+    action_recommended: ISOLATE_HOST_AND_KILL_PROCESS
+    version: 1.0.0
+    detection_sha256: e217f608dfa0cadcf261e72cadf14def88042dab538345b3aea2a79803a0cff4
+  3749483f-a3a9-4f3b-8029-345fd2d2a682:
+    soc_rule_id: SOC-RULE-032
+    name: NTDS.dit Extraction via ntdsutil IFM
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: f69a1aa7c62e1a65b155ef56e6dc633203e29ae67edd57adbcf7039629be6cb6
+  8b4b478d-997e-45c2-9172-8f9b7f9766d3:
+    soc_rule_id: SOC-RULE-033
+    name: 'AS-REP Roasting: TGT Without Pre-Authentication over RC4'
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: d89b88590c3ec50a04346abd108e6b3f1fac13016c4e57f282612f7dd7750fa5

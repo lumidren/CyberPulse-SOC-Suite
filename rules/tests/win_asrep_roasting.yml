@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_asrep_roasting.yml (synthetic lab events)
+rule: win_asrep_roasting.yml
+positive:
+- name: No-preauth RC4 TGT
+  event:
+    event_id: 4768
+    event_source: Security
+    details:
+      TargetUserName: svc_legacy
+      PreAuthType: '0'
+      TicketEncryptionType: '0x17'
+negative:
+- name: Normal pre-authenticated AES TGT
+  event:
+    event_id: 4768
+    event_source: Security
+    details:
+      TargetUserName: j.doe
+      PreAuthType: '2'
+      TicketEncryptionType: '0x12'
