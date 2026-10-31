@@ -41,6 +41,7 @@ from soar.bloodhound_exporter import BloodHoundExporter
 from soar.report_generator import IncidentReportGenerator
 from soar.auth import SessionStore
 from soar.privacy import mask_identities, masking_enabled
+from soar.observability import render_prometheus
 from soar.ingest_auth import SIGNATURE_HEADER, TIMESTAMP_HEADER, IngestVerifier
 from scripts.validate_detections import run_scripted, scripted_status
 from simulator.lab_guard import SimulationThrottle, lab_mode_enabled
@@ -64,6 +65,10 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
     handlers=_log_handlers,
 )
+if os.environ.get("LOG_FORMAT", "text").lower() == "json":
+    from soar.observability import JsonLogFormatter  # noqa: E402
+    for _h in _log_handlers:
+        _h.setFormatter(JsonLogFormatter())
 from soar.redaction import RedactingFilter  # noqa: E402
 
 for _handler in logging.getLogger().handlers:
@@ -545,6 +550,17 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Unauthenticated liveness probe for load balancers / container healthchecks
         if path == "/healthz":
             self._send_json(200, {"status": "ok", "service": "cyberpulse-soc", "version": __version__})
+            return
+
+        # Prometheus scrape endpoint (API key / Bearer token, same as the REST API)
+        if path == "/metrics":
+            if not self._check_api_access():
+                return
+            body = render_prometheus(orchestrator).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(body)
             return
 
         # Session status is readable without auth (it says whether you are logged in)

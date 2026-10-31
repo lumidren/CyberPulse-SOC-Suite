@@ -1,0 +1,11 @@
+# Example Prometheus scrape config for the CyberPulse lab (GET /metrics).
+# The endpoint needs the API key as a Bearer token; keep it in a file, not here.
+scrape_configs:
+  - job_name: cyberpulse-lab
+    scrape_interval: 30s
+    metrics_path: /metrics
+    authorization:
+      type: Bearer
+      credentials_file: /etc/prometheus/cyberpulse_api_key
+    static_configs:
+      - targets: ["cyberpulse:5000"]
