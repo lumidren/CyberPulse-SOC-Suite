@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 
 from soar.notifications import WebhookDispatcher
 from soar.risk_engine import RiskAndPolicyEngine
-from soar.resilient_containment import ResilientContainmentEngine
+from soar.resilient_containment import ResilientContainmentEngine, next_id
 from soar.dfir_engine import DFIREngine
 from soar.metrics_engine import SOCMetricsEngine
 from soar.health_monitor import IntegrationHealthMonitor
@@ -307,7 +307,7 @@ class SOAROrchestrator:
         target_user = event.get("user")
         process_name = event.get("details", {}).get("SourceImage") or event.get("details", {}).get("Image", "system")
         pid = event.get("details", {}).get("SourceProcessId") or event.get("details", {}).get("ProcessId", 4012)
-        correlation_id = f"CORR-{int(time.time()*1000)%1000000:06d}"
+        correlation_id = next_id("CORR")
 
         containment_action = self.containment_engine.execute_containment(
             action_type=policy_decision["action"],
