@@ -9,6 +9,8 @@ import json
 import time
 from datetime import datetime, timezone
 
+from soar.safety import AutomationSafety
+
 # Monotonic per-process sequence: IDs must never collide, even within one millisecond.
 _ID_SEQUENCE = itertools.count(1)
 
@@ -45,7 +47,8 @@ class CircuitBreaker:
         return True
 
 class ResilientContainmentEngine:
-    def __init__(self):
+    def __init__(self, safety=None):
+        self.safety = safety or AutomationSafety()
         self.action_registry = {} # action_id -> action record
         self.circuit_breaker = CircuitBreaker()
         self.host_isolation_registry = set()
@@ -93,6 +96,19 @@ class ResilientContainmentEngine:
             action_record["status"] = "PENDING_ANALYST_APPROVAL"
             action_record["execution_protocol"] = "Analyst Approval Gate"
             action_record["execution_log"] = f"Action {action_type} for {target_host} staged; nothing runs until an analyst approves it."
+            action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
+            self.action_registry[action_id] = action_record
+            return action_record
+
+        # Global kill switch: nothing executes while it is engaged
+        if self.safety.is_halted():
+            ks = self.safety.kill_switch
+            action_record["status"] = "HALTED_BY_KILL_SWITCH"
+            action_record["execution_protocol"] = "Automation Kill Switch"
+            action_record["execution_log"] = (
+                f"Kill switch engaged by {ks['actor']} ({ks['reason'] or 'no reason given'}); "
+                f"{action_type} on {target_host} was not executed."
+            )
             action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
             self.action_registry[action_id] = action_record
             return action_record
@@ -224,6 +240,8 @@ class ResilientContainmentEngine:
             return {"status": "ERROR", "message": f"Action {action_id} is {record['status']}, not pending approval."}
         if not approver:
             return {"status": "ERROR", "message": "An approver identity is required."}
+        if self.safety.is_halted():
+            return {"status": "ERROR", "message": "Kill switch engaged: approvals cannot execute until it is released."}
 
         t_start = time.perf_counter()
         record["approval"] = {
