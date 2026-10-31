@@ -394,7 +394,9 @@ class ResilientContainmentEngine:
 
     def rollback_containment(self, action_id, actor="analyst_lumidren"):
         """
-        Rolls back a previously executed containment action and restores network/host baseline.
+        Reverses an executed containment action and records exactly what was and
+        was not restored. Only executed (SUCCESS) actions can be rolled back; staged
+        actions are rejected instead, and terminal states are left alone.
         """
         if action_id not in self.action_registry:
             return {"status": "ERROR", "message": f"Action ID {action_id} not found in registry."}
@@ -402,52 +404,89 @@ class ResilientContainmentEngine:
         record = self.action_registry[action_id]
         if record["status"] == "ROLLED_BACK":
             return {"status": "ALREADY_ROLLED_BACK", "message": f"Action {action_id} was already reversed."}
+        if record["status"] != "SUCCESS":
+            hint = " Reject it instead." if record["status"] == "PENDING_ANALYST_APPROVAL" else ""
+            return {"status": "ERROR", "message": f"Action {action_id} is {record['status']}; nothing was executed to roll back.{hint}"}
 
-        action_type = record["action_type"]
-        target_host = record["target_host"]
-        target_ip = record["target_ip"]
-        target_user = record["target_user"]
-
+        playbook = ROLLBACK_PLAYBOOKS.get(record["action_type"])
         rollback_entry = {
             "rollback_id": next_id("RB"),
             "original_action_id": action_id,
+            "action_type": record["action_type"],
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "actor": actor,
             "status": "SUCCESS",
-            "log": ""
+            "reversibility": "FULL",
+            "not_restored": None,
+            "log": "",
         }
 
-        if action_type in ["ISOLATE_HOST_AND_KILL_PROCESS", "REVERT_DEFENDER_POLICY_AND_ISOLATE"]:
-            rollback_entry["log"] = f"[WinRM TLS 5986 -> {target_host}] Removed WFP emergency isolation rule. Network connectivity restored."
-            if target_host in self.host_isolation_registry:
-                self.host_isolation_registry.remove(target_host)
-
-        elif action_type == "BLOCK_SOURCE_IP_FIREWALL":
-            rollback_entry["log"] = f"[pfSense Gateway 10.0.0.1:8443] Removed packet drop rule for {target_ip}/32. Traffic unblocked."
-            if target_ip in self.blocked_ips:
-                self.blocked_ips.remove(target_ip)
-
-        elif action_type in ["TERMINATE_PROCESS_TREE", "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET", "ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES"]:
-            rollback_entry["log"] = f"[Active Directory LDAP] Re-enabled user account {target_user} and verified permissions."
-            if target_user in self.disabled_users:
-                self.disabled_users.remove(target_user)
-
-        elif action_type == "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY":
-            rollback_entry["log"] = f"[AWS IAM API] Removed AWSRevokeOlderSessions policy from {target_user}. Normal STS session issuance restored."
-            if target_user in self.disabled_users:
-                self.disabled_users.remove(target_user)
-
-        elif action_type == "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA":
-            rollback_entry["log"] = f"[Microsoft Graph API] Cleared forced re-authentication flag on user {target_user}."
-            if target_user in self.disabled_users:
-                self.disabled_users.remove(target_user)
-
-        elif action_type == "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK":
-            rollback_entry["log"] = f"[WinRM TLS 5986 -> {target_host}] Reverted WDAC policy to audit mode. Driver loading restored."
-
+        if playbook is None:
+            rollback_entry["log"] = f"No containment side effects recorded for {record['action_type']}; audit flag reversed."
         else:
-            rollback_entry["log"] = f"Reversed audit flag for action {action_id}."
+            reversibility, describe, not_restored = playbook
+            rollback_entry["reversibility"] = reversibility
+            rollback_entry["log"] = describe(record)
+            rollback_entry["not_restored"] = not_restored
+        self._release_state(record)
 
         record["status"] = "ROLLED_BACK"
         record["rollback_history"] = rollback_entry
         return rollback_entry
+
+    def _release_state(self, record):
+        """Remove the action's effect from the simulated responder state."""
+        self.host_isolation_registry.discard(record.get("target_host"))
+        if record["action_type"] == "BLOCK_SOURCE_IP_FIREWALL":
+            self.blocked_ips.discard(record.get("target_ip"))
+        if record["action_type"] in ACCOUNT_DISRUPTING_ACTIONS:
+            self.disabled_users.discard(record.get("target_user"))
+
+
+# action_type -> (reversibility, log builder, what cannot be restored)
+ROLLBACK_PLAYBOOKS = {
+    "BLOCK_SOURCE_IP_FIREWALL": (
+        "FULL",
+        lambda r: f"[pfSense] Removed drop rule for {r['target_ip']}/32. Traffic unblocked.",
+        None),
+    "ISOLATE_HOST_AND_KILL_PROCESS": (
+        "PARTIAL",
+        lambda r: f"[WinRM -> {r['target_host']}] Removed SOC-Emergency-Isolation firewall rule. Network restored.",
+        "The terminated process is not restarted."),
+    "REVERT_DEFENDER_POLICY_AND_ISOLATE": (
+        "PARTIAL",
+        lambda r: f"[WinRM -> {r['target_host']}] Removed isolation rule. Network restored.",
+        "Defender real-time protection stays re-enabled (intentionally not reverted to the tampered state)."),
+    "REMOVE_SCHEDULED_TASK": (
+        "PARTIAL",
+        lambda r: f"[WinRM -> {r['target_host']}] Re-registration of the removed task is required from its pre-action export.",
+        "The task is only restored if its definition was exported before removal."),
+    "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS": (
+        "PARTIAL",
+        lambda r: f"[WinRM -> {r['target_host']}] Containment record released; restored files are kept.",
+        "The killed process is not restarted and the VSS restore is not undone."),
+    "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK": (
+        "PARTIAL",
+        lambda r: f"[WinRM -> {r['target_host']}] Reverted WDAC policy to audit mode; driver loading allowed again.",
+        "The unloaded driver is not reloaded automatically."),
+    "TERMINATE_PROCESS_TREE": (
+        "PARTIAL",
+        lambda r: f"[AD LDAP] Re-enabled account {r['target_user']}.",
+        "The terminated process tree is not restarted."),
+    "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET": (
+        "PARTIAL",
+        lambda r: f"[AD LDAP] Cleared forced password change on {r['target_user']}.",
+        "The old password and revoked tickets cannot be restored; dependent services need the new password."),
+    "ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES": (
+        "FULL",
+        lambda r: f"[AD LDAP] Re-enabled {r['target_user']} and restored its pre-action replication rights.",
+        None),
+    "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY": (
+        "PARTIAL",
+        lambda r: f"[AWS IAM] Removed AWSRevokeOlderSessions policy from {r['target_user']}.",
+        "Already-revoked STS sessions stay revoked; callers must re-authenticate."),
+    "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA": (
+        "PARTIAL",
+        lambda r: f"[MS Graph] Cleared forced MFA re-challenge on {r['target_user']}.",
+        "Revoked refresh tokens stay revoked; the user signs in again."),
+}
