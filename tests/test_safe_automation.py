@@ -323,5 +323,35 @@ class TestContainmentTTL(unittest.TestCase):
         self.assertEqual(incident["analyst_notes"][-1]["author"], "ttl-expiry")
 
 
+class TestRollbackEveryAction(unittest.TestCase):
+
+    def test_every_tiered_action_has_a_rollback(self):
+        from soar.action_tiers import ACTION_TIERS
+        from soar.resilient_containment import ROLLBACK_PLAYBOOKS
+        self.assertEqual(set(ACTION_TIERS) - set(ROLLBACK_PLAYBOOKS), set())
+
+    def test_rollback_reports_what_was_not_restored(self):
+        engine = ResilientContainmentEngine()
+        for action_type in ["BLOCK_SOURCE_IP_FIREWALL", "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS",
+                            "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET"]:
+            act = engine.execute_containment(
+                action_type=action_type, target_host="WIN-WORKSTATION09", target_ip="203.0.113.4",
+                target_user="CORP\\j.doe", pid=4812, process_name="tool.exe")
+            rb = engine.rollback_containment(act["action_id"], actor="analyst_a")
+            self.assertEqual(rb["status"], "SUCCESS")
+            if rb["reversibility"] == "PARTIAL":
+                self.assertTrue(rb["not_restored"])
+        self.assertEqual(engine.blocked_ips, set())
+        self.assertEqual(engine.disabled_users, set())
+
+    def test_staged_action_cannot_be_rolled_back(self):
+        engine = ResilientContainmentEngine()
+        act = stage(engine)
+        rb = engine.rollback_containment(act["action_id"], actor="analyst_a")
+        self.assertEqual(rb["status"], "ERROR")
+        self.assertIn("Reject it instead", rb["message"])
+        self.assertEqual(act["status"], "PENDING_ANALYST_APPROVAL")
+
+
 if __name__ == "__main__":
     unittest.main()

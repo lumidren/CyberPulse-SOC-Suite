@@ -656,7 +656,14 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                     return
                 actor = data.get("actor", "analyst_lumidren")
                 rb_res = orchestrator.containment_engine.rollback_containment(action_id, actor=actor)
-                inc["status"] = "ROLLED_BACK"
+                if rb_res.get("status") not in ("SUCCESS",):
+                    self._send_json(409, rb_res)
+                    return
+                orchestrator.dfir_engine.refresh_status(inc)
+                note = f"Rolled back {rb_res['action_type']} ({rb_res['reversibility']})."
+                if rb_res.get("not_restored"):
+                    note += f" Not restored: {rb_res['not_restored']}"
+                orchestrator.dfir_engine.add_analyst_note(inc_id, note, author=actor)
                 audit_logger.info(
                     "ROLLBACK client=%s incident=%s action=%s actor=%s",
                     self._client_ip(), inc_id, action_id, actor

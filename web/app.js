@@ -299,6 +299,9 @@ async function loadIncidentDetails() {
         if (inc.status === "ROLLED_BACK") {
             rollbackBtn.disabled = true;
             rollbackBtn.innerHTML = `<i class="fa-solid fa-check"></i> Already Rolled Back`;
+        } else if (inc.containment_action?.status !== "SUCCESS") {
+            rollbackBtn.disabled = true;
+            rollbackBtn.innerHTML = `<i class="fa-solid fa-rotate-left"></i> Nothing Executed`;
         } else {
             rollbackBtn.disabled = false;
             rollbackBtn.innerHTML = `<i class="fa-solid fa-rotate-left"></i> Rollback Containment`;
@@ -332,7 +335,8 @@ async function rollbackActiveIncident() {
         });
         const data = await res.json();
         if (data.status === "SUCCESS") {
-            alert(`[✓] Rollback Succeeded: ${data.rollback.log}`);
+            const rb = data.rollback;
+            alert(`[✓] Rollback (${rb.reversibility}): ${rb.log}` + (rb.not_restored ? `\nNot restored: ${rb.not_restored}` : ""));
             loadIncidentDetails();
             loadIncidents();
         }
