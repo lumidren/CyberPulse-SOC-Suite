@@ -1,0 +1,2 @@
+// SOC-RULE-007: Kerberoasting TGS Ticket Request with RC4 Encryption (generated from rules/sigma/win_kerberoasting.yml; review before use)
+((event.code:4769 AND winlog.event_data.TicketOptions:0x40810000 AND winlog.event_data.TicketEncryptionType:0x17) AND NOT (winlog.event_data.ServiceName:*$))

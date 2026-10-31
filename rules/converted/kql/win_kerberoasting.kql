@@ -1,0 +1,3 @@
+// SOC-RULE-007: Kerberoasting TGS Ticket Request with RC4 Encryption (generated from rules/sigma/win_kerberoasting.yml; review before use)
+SecurityEvent
+| where ((EventID =~ "4769" and TicketOptions =~ "0x40810000" and TicketEncryptionType =~ "0x17") and not (ServiceName endswith "$"))

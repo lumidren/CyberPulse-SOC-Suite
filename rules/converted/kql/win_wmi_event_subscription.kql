@@ -1,0 +1,3 @@
+// SOC-RULE-027: WMI Event Subscription Persistence (generated from rules/sigma/win_wmi_event_subscription.yml; review before use)
+SecurityEvent
+| where ((EventID =~ "20" and (Type =~ "Command Line" or Type =~ "Script"))) or ((EventID =~ "21"))

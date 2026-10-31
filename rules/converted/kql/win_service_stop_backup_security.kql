@@ -1,0 +1,3 @@
+// SOC-RULE-040: Backup or Security Service Stopped via net or sc (generated from rules/sigma/win_service_stop_backup_security.yml; review before use)
+DeviceProcessEvents
+| where (((FolderPath endswith "\\net.exe" or FolderPath endswith "\\net1.exe" or FolderPath endswith "\\sc.exe")) and ((ProcessCommandLine contains "stop" or ProcessCommandLine contains "config")) and ((ProcessCommandLine contains "veeam" or ProcessCommandLine contains "backup" or ProcessCommandLine contains "vss" or ProcessCommandLine contains "sql" or ProcessCommandLine contains "WinDefend" or ProcessCommandLine contains "sophos" or ProcessCommandLine contains "MsMpSvc" or ProcessCommandLine contains "wbengine")))

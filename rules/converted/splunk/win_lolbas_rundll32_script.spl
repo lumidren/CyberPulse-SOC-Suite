@@ -1,0 +1,2 @@
+``` SOC-RULE-017: Rundll32 Executing Script or Remote Content (generated from rules/sigma/win_lolbas_rundll32_script.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\rundll32\\.exe$")) AND ((match('CommandLine', "(?i)javascript:") OR match('CommandLine', "(?i)RunHTMLApplication") OR match('CommandLine', "(?i)http://") OR match('CommandLine', "(?i)https://"))))

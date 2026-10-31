@@ -1,0 +1,2 @@
+``` SOC-RULE-006: Rapid File Encryption and Ransomware Canary Modification (generated from rules/sigma/win_ransomware_canary.yml; review before use) ```
+index=* (EventCode=11) | where (((match('TargetFilename', "(?i)\\.locked$") OR match('TargetFilename', "(?i)\\.encrypted$") OR match('TargetFilename', "(?i)\\.crypted$") OR match('TargetFilename', "(?i)HOW_TO_DECRYPT\\.txt$") OR match('TargetFilename', "(?i)README_RESTORE\\.txt$"))))

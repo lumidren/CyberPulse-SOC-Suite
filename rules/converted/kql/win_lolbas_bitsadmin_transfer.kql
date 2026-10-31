@@ -1,0 +1,3 @@
+// SOC-RULE-018: BITSAdmin Download or Job Creation (generated from rules/sigma/win_lolbas_bitsadmin_transfer.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\bitsadmin.exe") and ((ProcessCommandLine contains "/transfer" or ProcessCommandLine contains "/addfile" or ProcessCommandLine contains "/SetNotifyCmdLine" or ProcessCommandLine contains "/download")))

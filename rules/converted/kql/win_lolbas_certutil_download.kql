@@ -1,0 +1,3 @@
+// SOC-RULE-014: Certutil Used to Download or Decode a Payload (generated from rules/sigma/win_lolbas_certutil_download.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\certutil.exe") and ((ProcessCommandLine contains "urlcache" or ProcessCommandLine contains "-decode" or ProcessCommandLine contains "/decode" or ProcessCommandLine contains "-decodehex")))

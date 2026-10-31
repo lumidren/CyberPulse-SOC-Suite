@@ -1,0 +1,2 @@
+``` SOC-RULE-030: Windows Firewall Disabled via netsh or PowerShell (generated from rules/sigma/win_firewall_disabled.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\netsh\\.exe$") AND (match('CommandLine', "(?i)advfirewall") AND match('CommandLine', "(?i)state\\ off")))) OR (((match('CommandLine', "(?i)Set\\-NetFirewallProfile") AND match('CommandLine', "(?i)\\-Enabled") AND match('CommandLine', "(?i)False"))))

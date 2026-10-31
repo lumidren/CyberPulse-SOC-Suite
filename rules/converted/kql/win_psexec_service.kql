@@ -1,0 +1,3 @@
+// SOC-RULE-035: PsExec-Style Remote Service Execution (generated from rules/sigma/win_psexec_service.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\PSEXESVC.exe")) or ((InitiatingProcessFolderPath endswith "\\PSEXESVC.exe"))

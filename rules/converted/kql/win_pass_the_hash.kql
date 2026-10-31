@@ -1,0 +1,3 @@
+// SOC-RULE-012: Pass-the-Hash Logon Patterns (NTLM and seclogo) (generated from rules/sigma/win_pass_the_hash.yml; review before use)
+SecurityEvent
+| where ((EventID =~ "4624" and LogonType =~ "9" and LogonProcessName =~ "seclogo" and AuthenticationPackageName =~ "Negotiate") and not (TargetUserName =~ "ANONYMOUS LOGON")) or ((EventID =~ "4624" and LogonType =~ "3" and AuthenticationPackageName =~ "NTLM" and KeyLength =~ "0" and LogonProcessName =~ "NtLmSsp") and not (TargetUserName =~ "ANONYMOUS LOGON"))

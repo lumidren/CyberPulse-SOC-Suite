@@ -1,0 +1,2 @@
+// SOC-RULE-035: PsExec-Style Remote Service Execution (generated from rules/sigma/win_psexec_service.yml; review before use)
+(event.code:1 OR event.code:4688) AND ((process.executable:*\\PSEXESVC.exe)) OR ((process.parent.executable:*\\PSEXESVC.exe))

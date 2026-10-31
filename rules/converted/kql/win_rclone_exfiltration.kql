@@ -1,0 +1,3 @@
+// SOC-RULE-039: Rclone Copying Data to Cloud Storage (generated from rules/sigma/win_rclone_exfiltration.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\rclone.exe" and (ProcessCommandLine contains " copy " or ProcessCommandLine contains " sync " or ProcessCommandLine contains " move "))) or (((ProcessCommandLine contains "--config" and ProcessCommandLine contains "--no-check-certificate"))) or (((ProcessCommandLine contains "mega:" or ProcessCommandLine contains "s3:" or ProcessCommandLine contains "drive:" or ProcessCommandLine contains "dropbox:" or ProcessCommandLine contains "ftp:") and ProcessCommandLine contains " copy "))

@@ -1,0 +1,3 @@
+// SOC-RULE-015: Mshta Executing Remote or Inline Script (generated from rules/sigma/win_lolbas_mshta_remote_script.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\mshta.exe") and ((ProcessCommandLine contains "http://" or ProcessCommandLine contains "https://" or ProcessCommandLine contains "javascript:" or ProcessCommandLine contains "vbscript:")))

@@ -1,0 +1,2 @@
+``` SOC-RULE-015: Mshta Executing Remote or Inline Script (generated from rules/sigma/win_lolbas_mshta_remote_script.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\mshta\\.exe$")) AND ((match('CommandLine', "(?i)http://") OR match('CommandLine', "(?i)https://") OR match('CommandLine', "(?i)javascript:") OR match('CommandLine', "(?i)vbscript:"))))

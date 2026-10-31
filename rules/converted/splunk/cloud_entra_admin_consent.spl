@@ -1,0 +1,2 @@
+``` SOC-RULE-042: Entra ID Admin Consent Granted to an Application (generated from rules/sigma/cloud_entra_admin_consent.yml; review before use) ```
+index=* (source="*azure:auditlogs*") | where ((match('OperationName', "(?i)^Consent\\ to\\ application$") AND match('ConsentType', "(?i)AllPrincipals")))

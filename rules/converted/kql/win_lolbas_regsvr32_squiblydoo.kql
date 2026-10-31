@@ -1,0 +1,3 @@
+// SOC-RULE-016: Regsvr32 Loading a Remote Scriptlet (Squiblydoo) (generated from rules/sigma/win_lolbas_regsvr32_squiblydoo.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\regsvr32.exe") and ((ProcessCommandLine contains "/i:http" or ProcessCommandLine contains "-i:http" or ProcessCommandLine contains "/i:ftp")) and (ProcessCommandLine contains "scrobj"))

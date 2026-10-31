@@ -1,0 +1,3 @@
+// SOC-RULE-022: Process Creation via WMIC process call create (generated from rules/sigma/win_wmic_process_call_create.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\wmic.exe" and (ProcessCommandLine contains "process" and ProcessCommandLine contains "call" and ProcessCommandLine contains "create")))

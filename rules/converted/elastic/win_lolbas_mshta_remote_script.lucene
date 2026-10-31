@@ -1,0 +1,2 @@
+// SOC-RULE-015: Mshta Executing Remote or Inline Script (generated from rules/sigma/win_lolbas_mshta_remote_script.yml; review before use)
+(event.code:1 OR event.code:4688) AND ((process.executable:*\\mshta.exe) AND ((process.command_line:*http\:\/\/* OR process.command_line:*https\:\/\/* OR process.command_line:*javascript\:* OR process.command_line:*vbscript\:*)))

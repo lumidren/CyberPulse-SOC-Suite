@@ -1,0 +1,2 @@
+``` SOC-RULE-005: Windows Defender Real-Time Protection Disabled via PowerShell (generated from rules/sigma/win_defender_tamper.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where (((match('Image', "(?i)\\\\powershell\\.exe$") OR match('Image', "(?i)\\\\pwsh\\.exe$")) AND (match('CommandLine', "(?i)Set\\-MpPreference") OR match('CommandLine', "(?i)\\-DisableRealtimeMonitoring") OR match('CommandLine', "(?i)\\-DisableBehaviorMonitoring") OR match('CommandLine', "(?i)\\-DisableIOAVProtection") OR match('CommandLine', "(?i)\\-DisableScriptScanning"))))

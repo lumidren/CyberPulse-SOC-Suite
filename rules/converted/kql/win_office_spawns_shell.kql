@@ -1,0 +1,3 @@
+// SOC-RULE-021: Office Application Spawning a Shell or Script Host (generated from rules/sigma/win_office_spawns_shell.yml; review before use)
+DeviceProcessEvents
+| where (((InitiatingProcessFolderPath endswith "\\WINWORD.EXE" or InitiatingProcessFolderPath endswith "\\EXCEL.EXE" or InitiatingProcessFolderPath endswith "\\POWERPNT.EXE" or InitiatingProcessFolderPath endswith "\\OUTLOOK.EXE")) and ((FolderPath endswith "\\cmd.exe" or FolderPath endswith "\\powershell.exe" or FolderPath endswith "\\pwsh.exe" or FolderPath endswith "\\wscript.exe" or FolderPath endswith "\\cscript.exe" or FolderPath endswith "\\mshta.exe")))

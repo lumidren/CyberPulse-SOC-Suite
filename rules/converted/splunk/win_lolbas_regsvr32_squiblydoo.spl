@@ -1,0 +1,2 @@
+``` SOC-RULE-016: Regsvr32 Loading a Remote Scriptlet (Squiblydoo) (generated from rules/sigma/win_lolbas_regsvr32_squiblydoo.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\regsvr32\\.exe$")) AND ((match('CommandLine', "(?i)/i:http") OR match('CommandLine', "(?i)\\-i:http") OR match('CommandLine', "(?i)/i:ftp"))) AND (match('CommandLine', "(?i)scrobj")))

@@ -1,0 +1,3 @@
+// SOC-RULE-037: Remote Access Tool Started from a User-Writable Path (generated from rules/sigma/win_remote_access_tool.yml; review before use)
+DeviceProcessEvents
+| where (((FolderPath endswith "\\AnyDesk.exe" or FolderPath endswith "\\TeamViewer.exe" or FolderPath endswith "\\ScreenConnect.ClientService.exe" or FolderPath endswith "\\AteraAgent.exe" or FolderPath endswith "\\rustdesk.exe")) and ((FolderPath contains "\\Downloads\\" or FolderPath contains "\\Temp\\" or FolderPath contains "\\AppData\\" or FolderPath contains "\\Users\\Public\\")))

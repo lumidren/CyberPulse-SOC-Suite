@@ -1,0 +1,2 @@
+``` SOC-RULE-018: BITSAdmin Download or Job Creation (generated from rules/sigma/win_lolbas_bitsadmin_transfer.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\bitsadmin\\.exe$")) AND ((match('CommandLine', "(?i)/transfer") OR match('CommandLine', "(?i)/addfile") OR match('CommandLine', "(?i)/SetNotifyCmdLine") OR match('CommandLine', "(?i)/download"))))

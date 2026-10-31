@@ -1,0 +1,2 @@
+// SOC-RULE-013: Possible Golden Ticket Use via Kerberos Logon Domain Anomaly (generated from rules/sigma/win_golden_ticket_domain_anomaly.yml; review before use)
+((event.code:4624 AND winlog.event_data.LogonType:3 AND winlog.event_data.AuthenticationPackageName:Kerberos) AND NOT (winlog.event_data.TargetDomainName:/^(CORP|NT AUTHORITY)$/))

@@ -1,0 +1,3 @@
+// SOC-RULE-036: Shell Spawned by WinRM Remote Session Host (generated from rules/sigma/win_winrm_remote_shell.yml; review before use)
+DeviceProcessEvents
+| where ((InitiatingProcessFolderPath endswith "\\wsmprovhost.exe" and (FolderPath endswith "\\cmd.exe" or FolderPath endswith "\\powershell.exe" or FolderPath endswith "\\whoami.exe" or FolderPath endswith "\\net.exe")))

@@ -1,0 +1,2 @@
+``` SOC-RULE-022: Process Creation via WMIC process call create (generated from rules/sigma/win_wmic_process_call_create.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\wmic\\.exe$") AND (match('CommandLine', "(?i)process") AND match('CommandLine', "(?i)call") AND match('CommandLine', "(?i)create"))))

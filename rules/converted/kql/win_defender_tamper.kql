@@ -1,0 +1,3 @@
+// SOC-RULE-005: Windows Defender Real-Time Protection Disabled via PowerShell (generated from rules/sigma/win_defender_tamper.yml; review before use)
+DeviceProcessEvents
+| where (((FolderPath endswith "\\powershell.exe" or FolderPath endswith "\\pwsh.exe") and (ProcessCommandLine contains "Set-MpPreference" or ProcessCommandLine contains "-DisableRealtimeMonitoring" or ProcessCommandLine contains "-DisableBehaviorMonitoring" or ProcessCommandLine contains "-DisableIOAVProtection" or ProcessCommandLine contains "-DisableScriptScanning")))

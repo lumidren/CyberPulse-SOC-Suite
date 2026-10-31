@@ -1,0 +1,3 @@
+// SOC-RULE-011: Vulnerable Signed Driver Load (BYOVD Evasion) (generated from rules/sigma/win_driver_byovd_load.yml; review before use)
+SecurityEvent
+| where ((EventID =~ "6" and (ImageLoaded endswith "\\gdrv.sys" or ImageLoaded endswith "\\mhyprot2.sys" or ImageLoaded endswith "\\procexp.sys" or ImageLoaded endswith "\\RTCore64.sys" or ImageLoaded endswith "\\DBUtil_2_3.sys")) and not (Signed =~ "true" and SignatureStatus =~ "Valid" and ImageLoaded startswith "C:\\Windows\\System32\\drivers\\"))

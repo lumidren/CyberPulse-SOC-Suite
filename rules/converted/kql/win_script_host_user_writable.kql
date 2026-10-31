@@ -1,0 +1,3 @@
+// SOC-RULE-023: Script Host Running a Script from a User-Writable Path (generated from rules/sigma/win_script_host_user_writable.yml; review before use)
+DeviceProcessEvents
+| where (((FolderPath endswith "\\wscript.exe" or FolderPath endswith "\\cscript.exe")) and ((ProcessCommandLine contains "\\Downloads\\" or ProcessCommandLine contains "\\AppData\\" or ProcessCommandLine contains "\\Temp\\" or ProcessCommandLine contains "\\Users\\Public\\")) and ((ProcessCommandLine contains ".js" or ProcessCommandLine contains ".jse" or ProcessCommandLine contains ".vbs" or ProcessCommandLine contains ".vbe" or ProcessCommandLine contains ".wsf")))

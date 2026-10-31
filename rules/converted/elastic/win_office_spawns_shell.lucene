@@ -1,0 +1,2 @@
+// SOC-RULE-021: Office Application Spawning a Shell or Script Host (generated from rules/sigma/win_office_spawns_shell.yml; review before use)
+(event.code:1 OR event.code:4688) AND (((process.parent.executable:*\\WINWORD.EXE OR process.parent.executable:*\\EXCEL.EXE OR process.parent.executable:*\\POWERPNT.EXE OR process.parent.executable:*\\OUTLOOK.EXE)) AND ((process.executable:*\\cmd.exe OR process.executable:*\\powershell.exe OR process.executable:*\\pwsh.exe OR process.executable:*\\wscript.exe OR process.executable:*\\cscript.exe OR process.executable:*\\mshta.exe)))

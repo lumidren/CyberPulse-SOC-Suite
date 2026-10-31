@@ -1,0 +1,3 @@
+// SOC-RULE-026: Account Added to the Local Administrators Group (generated from rules/sigma/win_local_admin_group_addition.yml; review before use)
+SecurityEvent
+| where ((EventID =~ "4732" and (TargetUserName =~ "Administrators" or TargetUserName =~ "Administratoren" or TargetUserName =~ "Administrateurs")))

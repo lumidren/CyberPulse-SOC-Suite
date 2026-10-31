@@ -1,0 +1,2 @@
+// SOC-RULE-037: Remote Access Tool Started from a User-Writable Path (generated from rules/sigma/win_remote_access_tool.yml; review before use)
+(event.code:1 OR event.code:4688) AND (((process.executable:*\\AnyDesk.exe OR process.executable:*\\TeamViewer.exe OR process.executable:*\\ScreenConnect.ClientService.exe OR process.executable:*\\AteraAgent.exe OR process.executable:*\\rustdesk.exe)) AND ((process.executable:*\\Downloads\\* OR process.executable:*\\Temp\\* OR process.executable:*\\AppData\\* OR process.executable:*\\Users\\Public\\*)))
