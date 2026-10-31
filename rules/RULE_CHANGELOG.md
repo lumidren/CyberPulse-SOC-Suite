@@ -68,3 +68,23 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-013: Possible Golden Ticket Use via Kerberos Logon Domain Anomaly (`win_golden_ticket_domain_anomaly.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-014: Certutil Used to Download or Decode a Payload (`win_lolbas_certutil_download.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-015: Mshta Executing Remote or Inline Script (`win_lolbas_mshta_remote_script.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-016: Regsvr32 Loading a Remote Scriptlet (Squiblydoo) (`win_lolbas_regsvr32_squiblydoo.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-017: Rundll32 Executing Script or Remote Content (`win_lolbas_rundll32_script.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-018: BITSAdmin Download or Job Creation (`win_lolbas_bitsadmin_transfer.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

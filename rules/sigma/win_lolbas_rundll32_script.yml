@@ -1,0 +1,30 @@
+title: Rundll32 Executing Script or Remote Content
+id: 3a196b0d-e252-4742-9cb5-2445803f2369
+status: experimental
+description: Detects rundll32.exe abused to run javascript through mshtml (RunHTMLApplication) or to load content
+    from a URL, proxying execution through a signed binary.
+references:
+- https://attack.mitre.org/techniques/T1218/011/
+- https://lolbas-project.github.io/lolbas/Binaries/Rundll32/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.defense_evasion
+- attack.t1218.011
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '\rundll32.exe'
+    selection_cli:
+        CommandLine|contains:
+        - 'javascript:'
+        - RunHTMLApplication
+        - http://
+        - https://
+    condition: selection_img and selection_cli
+falsepositives:
+- Software that opens a help URL through url.dll,FileProtocolHandler (allowlist by parent)
+level: high

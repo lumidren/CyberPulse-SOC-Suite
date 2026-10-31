@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_lolbas_rundll32_script.yml (synthetic lab events)
+rule: win_lolbas_rundll32_script.yml
+positive:
+- name: mshtml RunHTMLApplication
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\rundll32.exe'
+      CommandLine: 'rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";alert(1)'
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: Control panel applet
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\rundll32.exe'
+      CommandLine: rundll32.exe shell32.dll,Control_RunDLL desk.cpl
+      ParentImage: 'C:\Windows\System32\cmd.exe'

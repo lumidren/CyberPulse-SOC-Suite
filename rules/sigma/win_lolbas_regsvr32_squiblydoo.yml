@@ -1,0 +1,31 @@
+title: Regsvr32 Loading a Remote Scriptlet (Squiblydoo)
+id: cf9fd8ee-251d-4573-8803-f972ceb4b848
+status: experimental
+description: Detects regsvr32.exe loading a remote COM scriptlet through scrobj.dll (/i:http...), which executes
+    code while bypassing application allowlisting.
+references:
+- https://attack.mitre.org/techniques/T1218/010/
+- https://lolbas-project.github.io/lolbas/Binaries/Regsvr32/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.defense_evasion
+- attack.t1218.010
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '\regsvr32.exe'
+    selection_remote:
+        CommandLine|contains:
+        - /i:http
+        - -i:http
+        - /i:ftp
+    selection_scrobj:
+        CommandLine|contains: scrobj
+    condition: selection_img and selection_remote and selection_scrobj
+falsepositives:
+- None known in normal administration; verify any hit
+level: critical

