@@ -919,7 +919,7 @@ def run_server(port=None, host=None):
     httpd = create_server(host=host, port=port)
     _start_ttl_sweeper()
     bound_host, bound_port = httpd.server_address[:2]
-    display_host = "localhost" if bound_host in ("0.0.0.0", "::") else bound_host
+    display_host = "localhost" if bound_host in ("0.0.0.0", "::") else bound_host  # nosec B104 - comparison, not a bind
 
     def _graceful_shutdown(signum, frame):
         logger.info("Received signal %s - shutting down SOC server.", signum)
@@ -933,7 +933,7 @@ def run_server(port=None, host=None):
 
     logger.info("CyberPulse SOC Lab v%s running at http://%s:%s", __version__, display_host, bound_port)
     logger.info("Environment: %s | Serving web console from %s", ENV, WEB_DIR)
-    if bound_host in ("0.0.0.0", "::"):
+    if bound_host in ("0.0.0.0", "::"):  # nosec B104 - warning when bound to all interfaces
         logger.warning("Listening on ALL interfaces (%s). Anyone who can reach this port can try to sign in; "
                        "keep it behind a firewall and a TLS reverse proxy.", bound_host)
     logger.info("Press Ctrl+C to stop.")

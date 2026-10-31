@@ -24,6 +24,8 @@ def main():
     parser.add_argument("--url", default="http://127.0.0.1:5000/api/ingest")
     args = parser.parse_args()
 
+    if not args.url.startswith(("http://", "https://")):
+        sys.exit("--url must be an http(s) URL.")
     secret = os.environ.get("INGEST_HMAC_SECRET")
     if not secret:
         sys.exit("Set INGEST_HMAC_SECRET to the server's shared secret.")
@@ -32,7 +34,7 @@ def main():
     ts, signature = sign_payload(secret, body)
     req = urllib.request.Request(args.url, data=body, method="POST", headers={
         "Content-Type": "application/json", TIMESTAMP_HEADER: ts, SIGNATURE_HEADER: signature})
-    with urllib.request.urlopen(req, timeout=10) as resp:
+    with urllib.request.urlopen(req, timeout=10) as resp:  # nosec B310 - scheme checked above
         print(resp.status, resp.read().decode("utf-8")[:500])
 
 

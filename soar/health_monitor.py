@@ -29,7 +29,7 @@ def check_http_endpoint(url, timeout=0.8):
     t_start = time.perf_counter()
     try:
         req = urllib.request.Request(url, headers={'User-Agent': 'CyberPulse-HealthCheck/2.4'})
-        with urllib.request.urlopen(req, timeout=timeout) as response:
+        with urllib.request.urlopen(req, timeout=timeout) as response:  # nosec B310 - fixed https probe URLs
             latency_ms = round((time.perf_counter() - t_start) * 1000, 2)
             return True, latency_ms
     except urllib.error.HTTPError as e:
