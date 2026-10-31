@@ -150,5 +150,34 @@ class TestConfidenceThreshold(unittest.TestCase):
         self.assertEqual(incident["policy_decision"]["execution_intent"], "PENDING_APPROVAL")
 
 
+class TestContainmentRateLimit(unittest.TestCase):
+
+    def _block(self, engine, ip):
+        return engine.execute_containment(
+            action_type="BLOCK_SOURCE_IP_FIREWALL", target_host="CORP-RDP-GW01", target_ip=ip,
+            target_user="admin", pid=None, process_name=None)
+
+    def test_hourly_budget_stages_excess_actions(self):
+        now = [1_000_000.0]
+        engine = ResilientContainmentEngine()
+        engine.safety.clock = lambda: now[0]
+        engine.safety.max_actions_per_hour = 3
+
+        results = [self._block(engine, f"203.0.113.{i}")["status"] for i in range(5)]
+        self.assertEqual(results, ["SUCCESS"] * 3 + ["PENDING_ANALYST_APPROVAL"] * 2)
+        self.assertEqual(len(engine.blocked_ips), 3)
+
+        now[0] += 3601  # window rolls over
+        self.assertEqual(self._block(engine, "203.0.113.99")["status"], "SUCCESS")
+
+    def test_approvals_count_toward_budget(self):
+        engine = ResilientContainmentEngine()
+        engine.safety.max_actions_per_hour = 1
+        staged = stage(engine)
+        engine.approve_action(staged["action_id"], approver="analyst_a")
+        self.assertTrue(engine.safety.rate_limit_exceeded())
+        self.assertEqual(self._block(engine, "203.0.113.5")["status"], "PENDING_ANALYST_APPROVAL")
+
+
 if __name__ == "__main__":
     unittest.main()
