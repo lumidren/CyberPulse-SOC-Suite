@@ -191,7 +191,8 @@ class ThreatIntelClient:
             hit["cached"] = True
             return hit
         result = fetch()
-        if result.get("status") == "OK":
+        # Cache only genuine provider answers, never rate-limited / refused placeholders
+        if result.get("status") == "OK" and all("status" not in v for v in result.get("verdicts", [])):
             self.cache.put(key, result)
         result["cached"] = False
         return result
