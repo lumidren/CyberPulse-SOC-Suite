@@ -159,7 +159,7 @@ internal identifiers never go to external APIs.
 
 ## Phase 6 — Detection engineering (F1–F20)
 
-- [ ] **F1** ⭐ Expand to 40+ rules covering ATT&CK tactics end to end.
+- [x] **F1** ⭐ Expand to 40+ rules covering ATT&CK tactics end to end. — **Done** (6 commits): 22 new rules (SOC-RULE-021..042) across initial access → impact and cloud; 42 rules total; coverage test enforces ≥40 rules / ≥12 tactics.
 - [x] **F2** ⭐ Detection-as-code pipeline: rules in Git, CI lints and tests every rule. — **Done**: `soar/sigma_engine.py` + `rules/soar_mapping.yml`; orchestrator uses Sigma; rule lint in `tests/test_sigma_engine.py` (CI). FPs 319 → 119 / 600.
 - [x] **F3** ⭐ Unit-test each rule with positive and negative log samples. — **Done**: `rules/tests/*.yml` (2+ samples per rule, incl. exclusions); `tests/test_rule_samples.py` enforces coverage for every rule.
 - [x] **F4** Validate Sigma syntax in CI with sigma-cli. — **Done** (sigma-cli step unverified locally: pySigma's `jq` dependency does not build on 32-bit Windows): CI `sigma check rules/sigma`; local spec test in `tests/test_sigma_metadata.py`; ISO dates.

@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_script_host_user_writable.yml (synthetic lab events)
+rule: win_script_host_user_writable.yml
+positive:
+- name: Invoice.js from Downloads
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\wscript.exe'
+      CommandLine: 'wscript.exe C:\Users\j.doe\Downloads\Invoice_4411.js'
+      ParentImage: 'C:\Windows\explorer.exe'
+negative:
+- name: Admin VBScript from a share
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\cscript.exe'
+      CommandLine: 'cscript //nologo \\fs01\scripts\inventory.vbs'
+      ParentImage: 'C:\Windows\System32\svchost.exe'

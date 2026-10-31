@@ -125,3 +125,21 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: b6f78382f0d58069ca473d6412956d7cb39ccc370788991acaa0e0a0f70e4a1a
+  23817aaf-3f8a-4fe0-9c5b-6c3e95fbe25c:
+    soc_rule_id: SOC-RULE-021
+    name: Office Application Spawning a Shell or Script Host
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 1ed44c93ef3656b3e5974d537a7d24b0c7accf8081e11fe127e82a16be280f06
+  c0cfa5d9-444a-4964-b475-b6b1e6a8e68e:
+    soc_rule_id: SOC-RULE-022
+    name: Process Creation via WMIC process call create
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: e5b43e4a824c12902522f80996283a1ea74e8bf820c3960a5898d1014d630355
+  439a2928-6b66-473e-8bc6-d0fd0ed293d6:
+    soc_rule_id: SOC-RULE-023
+    name: Script Host Running a Script from a User-Writable Path
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 19a38a95d2c3687db127b959ed59144b4dcac1422c82e91214f6de8292759755
