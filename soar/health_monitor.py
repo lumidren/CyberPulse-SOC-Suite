@@ -12,7 +12,16 @@ import urllib.error
 import json
 from datetime import datetime, timezone
 
+from soar.enrichment import external_enrichment_enabled
 from soar.responder_config import validate_winrm
+
+
+def _disabled_intel_entry(name, target, mode):
+    return {
+        "name": name, "category": "Threat Intelligence", "target": target, "status": "DISABLED",
+        "latency_ms": 0, "mode": mode,
+        "message": "External enrichment disabled (EXTERNAL_ENRICHMENT_ENABLED=false); not probed.",
+    }
 
 def check_tcp_port(host, port, timeout=0.5):
     """Probes a TCP socket and returns status and latency in ms"""
@@ -43,7 +52,7 @@ class IntegrationHealthMonitor:
     def __init__(self):
         pass
 
-    def check_all_integrations(self, custom_webhook_url=None):
+    def check_all_integrations(self, custom_webhook_url=None, enrichment_enabled=None):
         """Runs active diagnostics across the entire cybersecurity ecosystem"""
         timestamp = datetime.now(timezone.utc).isoformat()
         results = {}
@@ -113,29 +122,36 @@ class IntegrationHealthMonitor:
             "message": "Dynamic Inbound IP Drop Injection Active"
         }
 
-        # 6. VirusTotal v3 Threat Intel API
-        vt_ok, vt_lat = check_http_endpoint("https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8")
-        results["virustotal"] = {
-            "name": "VirusTotal v3 API",
-            "category": "Threat Intelligence",
-            "target": "api.virustotal.com",
-            "status": "HEALTHY" if vt_ok else "DEGRADED",
-            "latency_ms": vt_lat if vt_ok else 0,
-            "mode": "REST API v3",
-            "message": "Global Malware & Hash Reputation Feed Active"
-        }
+        # 6/7. Threat-intel providers are only contacted when external enrichment is on
+        if enrichment_enabled is None:
+            enrichment_enabled = external_enrichment_enabled()
+        if not enrichment_enabled:
+            results["virustotal"] = _disabled_intel_entry("VirusTotal v3 API", "api.virustotal.com", "REST API v3")
+            results["abuseipdb"] = _disabled_intel_entry("AbuseIPDB v2 API", "api.abuseipdb.com", "REST API v2")
+        else:
+            # 6. VirusTotal v3 Threat Intel API
+            vt_ok, vt_lat = check_http_endpoint("https://www.virustotal.com/api/v3/ip_addresses/8.8.8.8")
+            results["virustotal"] = {
+                "name": "VirusTotal v3 API",
+                "category": "Threat Intelligence",
+                "target": "api.virustotal.com",
+                "status": "HEALTHY" if vt_ok else "DEGRADED",
+                "latency_ms": vt_lat if vt_ok else 0,
+                "mode": "REST API v3",
+                "message": "Global Malware & Hash Reputation Feed Active"
+            }
 
-        # 7. AbuseIPDB v2 Reputation API
-        abuse_ok, abuse_lat = check_http_endpoint("https://api.abuseipdb.com/api/v2/check")
-        results["abuseipdb"] = {
-            "name": "AbuseIPDB v2 API",
-            "category": "Threat Intelligence",
-            "target": "api.abuseipdb.com",
-            "status": "HEALTHY" if abuse_ok else "DEGRADED",
-            "latency_ms": abuse_lat if abuse_ok else 0,
-            "mode": "REST API v2",
-            "message": "IP Confidence Score & Scanner Intelligence Online"
-        }
+            # 7. AbuseIPDB v2 Reputation API
+            abuse_ok, abuse_lat = check_http_endpoint("https://api.abuseipdb.com/api/v2/check")
+            results["abuseipdb"] = {
+                "name": "AbuseIPDB v2 API",
+                "category": "Threat Intelligence",
+                "target": "api.abuseipdb.com",
+                "status": "HEALTHY" if abuse_ok else "DEGRADED",
+                "latency_ms": abuse_lat if abuse_ok else 0,
+                "mode": "REST API v2",
+                "message": "IP Confidence Score & Scanner Intelligence Online"
+            }
 
         # 8. Live Webhook Dispatcher (Discord / Slack)
         webhook_status = "HEALTHY" if (custom_webhook_url or os.environ.get("DISCORD_WEBHOOK_URL")) else "STANDBY"

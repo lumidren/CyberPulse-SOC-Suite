@@ -95,5 +95,32 @@ class TestOnlyTypedIndicatorsAreSent(unittest.TestCase):
         self.assertEqual(sent_hosts_users, [])
 
 
+class TestEnrichmentCanBeDisabled(unittest.TestCase):
+
+    def test_health_check_does_not_probe_providers_when_disabled(self):
+        from soar import health_monitor
+        probed = []
+        original = health_monitor.check_http_endpoint
+        health_monitor.check_http_endpoint = lambda url, timeout=0.8: (probed.append(url), (False, None))[1]
+        try:
+            result = health_monitor.IntegrationHealthMonitor().check_all_integrations(enrichment_enabled=False)
+        finally:
+            health_monitor.check_http_endpoint = original
+        self.assertEqual(probed, [])
+        self.assertEqual(result["services"]["virustotal"]["status"], "DISABLED")
+        self.assertEqual(result["services"]["abuseipdb"]["status"], "DISABLED")
+
+    def test_health_check_probes_when_enabled(self):
+        from soar import health_monitor
+        probed = []
+        original = health_monitor.check_http_endpoint
+        health_monitor.check_http_endpoint = lambda url, timeout=0.8: (probed.append(url), (True, 1.0))[1]
+        try:
+            health_monitor.IntegrationHealthMonitor().check_all_integrations(enrichment_enabled=True)
+        finally:
+            health_monitor.check_http_endpoint = original
+        self.assertEqual(len(probed), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
