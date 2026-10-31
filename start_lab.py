@@ -28,7 +28,7 @@ BANNER = r"""
 | $$__/  /  $$$$\ | $$| $$|  $$$$$$$ $$__| $$ $$     | |_| | $$ _\$$$$$$\ $$$$$$$$
  \$$    $$  \$$\$$\$$$| $$ \$$    $$\$$    $$ $$      \$$$$$| $$|       $$ \$$     \
   \$$$$$$    \$$ \$$   \$$  \$$$$$$$ \$$$$$$$ \$$            \$$ \$$$$$$$   \$$$$$$$
-                    CYBERPULSE ENTERPRISE SOC PLATFORM v2.4
+                    CYBERPULSE ENTERPRISE SOC PLATFORM v2.5
 """
 
 def print_banner():
@@ -43,7 +43,7 @@ def print_banner():
 def menu():
     print("\033[93m[ENTERPRISE SOC OPERATIONS MENU]\033[0m")
     print("  \033[92m[1]\033[0m Launch Enterprise Web Console (http://localhost:5000)")
-    print("  \033[92m[2]\033[0m Run Detection & SOAR Automated Test Suite (11 Test Scenarios)")
+    print("  \033[92m[2]\033[0m Run Detection & SOAR Automated Test Suite (38 Test Scenarios)")
     print("  \033[92m[3]\033[0m Execute APT29 / Cozy Bear Purple Team Validation Campaign")
     print("  \033[92m[4]\033[0m Execute LockBit 3.0 Ransomware Attack & Recovery Lifecycle")
     print("  \033[92m[5]\033[0m Run Active System Diagnostics & Integration Health Probe")
@@ -59,7 +59,7 @@ def run_tests():
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     if result.wasSuccessful():
-        print("\n\033[92m[✓] All 11 Unit & Integration Test Scenarios Passed Successfully!\033[0m\n")
+        print("\n\033[92m[✓] All Unit & Integration Test Scenarios Passed Successfully!\033[0m\n")
     else:
         print("\n\033[91m[✗] Test failures detected.\033[0m\n")
 

@@ -3,10 +3,53 @@ Webhook Notification Dispatcher for CyberPulse SOC Suite
 Dispatches real-time structured incident alerts to Discord, Slack, Telegram, or custom webhooks.
 """
 
+import ipaddress
 import json
+import logging
 import os
 import urllib.request
 import urllib.error
+from urllib.parse import urlparse
+
+logger = logging.getLogger("cyberpulse.notifications")
+
+# Operators may opt in to internal/private webhook targets (e.g. an on-prem
+# Mattermost) by setting ALLOW_INTERNAL_WEBHOOKS=true in the environment.
+ALLOW_INTERNAL_WEBHOOKS = os.environ.get("ALLOW_INTERNAL_WEBHOOKS", "false").strip().lower() == "true"
+
+def validate_webhook_url(url):
+    """SSRF guard for analyst-supplied webhook URLs.
+
+    Rejects non-HTTP(S) schemes and, unless ALLOW_INTERNAL_WEBHOOKS is set,
+    literal private/loopback/link-local/reserved IP targets. Returns
+    (is_valid, reason).
+    """
+    try:
+        parsed = urlparse(url or "")
+    except ValueError:
+        return False, "Unparseable URL"
+
+    if parsed.scheme not in ("http", "https"):
+        return False, f"Unsupported scheme '{parsed.scheme}'; only http/https webhooks are allowed."
+
+    host = parsed.hostname
+    if not host:
+        return False, "URL is missing a hostname."
+
+    if ALLOW_INTERNAL_WEBHOOKS:
+        return True, ""
+
+    if host.lower() in ("localhost",):
+        return False, "Loopback webhook targets are blocked (set ALLOW_INTERNAL_WEBHOOKS=true to permit)."
+
+    try:
+        ip = ipaddress.ip_address(host)
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
+            return False, "Private/internal IP webhook targets are blocked (set ALLOW_INTERNAL_WEBHOOKS=true to permit)."
+    except ValueError:
+        pass  # Hostname, not a literal IP
+
+    return True, ""
 
 class WebhookDispatcher:
     def __init__(self, webhook_url=None):
@@ -80,6 +123,11 @@ class WebhookDispatcher:
         target_url = custom_webhook_url or self.webhook_url
         if not target_url:
             return {"status": "SKIPPED", "message": "No webhook URL configured (local mode)."}
+
+        is_valid, reason = validate_webhook_url(target_url)
+        if not is_valid:
+            logger.warning("Blocked webhook dispatch to %r: %s", target_url, reason)
+            return {"status": "BLOCKED", "error": f"Webhook URL rejected: {reason}"}
 
         # Auto-detect webhook type
         if "discord.com" in target_url:
