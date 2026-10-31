@@ -540,5 +540,22 @@ class TestPublicTargetBlock(unittest.TestCase):
                 os.environ["CYBERPULSE_LAB_CIDRS"] = previous
 
 
+class TestBruteForceLabAccounts(unittest.TestCase):
+
+    def test_brute_force_targets_lab_account_without_passwords(self):
+        from simulator.attack_simulator import simulate_t1110_brute_force
+        event = simulate_t1110_brute_force()
+        self.assertEqual(event["details"]["TargetUserName"], "lab.admin")
+        self.assertEqual(event["details"]["CredentialMaterial"], "none")
+
+    def test_real_looking_accounts_refused(self):
+        from simulator.lab_guard import TargetNotAllowed, validate_credential_attack
+        with self.assertRaises(TargetNotAllowed):
+            validate_credential_attack({"technique_id": "T1110.001", "details": {"TargetUserName": "jsmith"}})
+        with self.assertRaises(TargetNotAllowed):
+            validate_credential_attack({"technique_id": "T1110.003",
+                                        "details": {"TargetUserName": "lab.user1", "CredentialMaterial": "Winter2026!"}})
+
+
 if __name__ == "__main__":
     unittest.main()

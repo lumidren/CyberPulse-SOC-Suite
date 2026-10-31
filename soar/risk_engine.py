@@ -24,6 +24,7 @@ ASSET_CRITICALITY = {
 ACCOUNT_PRIVILEGES = {
     "CORP\\Administrator": 1.0,
     "admin": 1.0,
+    "lab.admin": 1.0,         # dummy lab admin used by the brute-force scenario
     "administrator": 1.0,
     "root": 1.0,
     "CORP\\finance_admin": 0.85,

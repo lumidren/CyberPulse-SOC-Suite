@@ -26,6 +26,9 @@ class TargetNotAllowed(RuntimeError):
 
 
 DEFAULT_LAB_CIDRS = "10.0.0.0/16"
+# Accounts a simulated credential attack may name (dummy lab accounts only)
+DEFAULT_LAB_ACCOUNTS = "lab.*"
+CREDENTIAL_ATTACK_TECHNIQUES = ("T1110",)
 DEFAULT_LAB_CLOUD_TARGETS = "aws-lab-account-*,cyberpulse-lab.onmicrosoft.com"
 CLOUD_SOURCES = {"aws:cloudtrail", "azure:signinlogs"}
 
@@ -43,6 +46,24 @@ def lab_cidrs():
 def lab_cloud_targets():
     raw = os.environ.get("CYBERPULSE_LAB_CLOUD_TARGETS", DEFAULT_LAB_CLOUD_TARGETS)
     return [p.strip().lower() for p in raw.split(",") if p.strip()]
+
+
+def lab_accounts():
+    raw = os.environ.get("CYBERPULSE_LAB_ACCOUNTS", DEFAULT_LAB_ACCOUNTS)
+    return [p.strip().lower() for p in raw.split(",") if p.strip()]
+
+
+def validate_credential_attack(event):
+    """Simulated credential attacks may only name dummy lab accounts and carry no password material."""
+    if not str(event.get("technique_id", "")).startswith(CREDENTIAL_ATTACK_TECHNIQUES):
+        return event
+    details = event.get("details", {})
+    account = str(details.get("TargetUserName") or event.get("user") or "").split("\\")[-1].lower()
+    if not any(fnmatch.fnmatch(account, p) for p in lab_accounts()):
+        raise TargetNotAllowed(f"Credential-attack simulation may only target lab accounts, not {account!r}.")
+    if details.get("CredentialMaterial", "none") != "none":
+        raise TargetNotAllowed("Simulated credential attacks must not carry password material.")
+    return event
 
 
 def resolve_target_ip(event):
@@ -91,5 +112,5 @@ def lab_only(generator):
     @functools.wraps(generator)
     def wrapper(*args, **kwargs):
         require_lab_mode()
-        return validate_target(generator(*args, **kwargs))
+        return validate_credential_attack(validate_target(generator(*args, **kwargs)))
     return wrapper
