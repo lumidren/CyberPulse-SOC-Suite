@@ -6,6 +6,8 @@ structured TheHive 5 case generation, and microsecond chronological timelines.
 
 import json
 import time
+
+from soar.redaction import redact_deep
 import random
 from datetime import datetime, timezone
 
@@ -136,7 +138,7 @@ class DFIREngine:
             "correlation_id": correlation_id,
             "created_at": utc_now,
             "rule": matched_rule,
-            "telemetry": event,
+            "telemetry": redact_deep(event),  # detection ran on the raw event; store it redacted
             "threat_intel": intel,
             "risk_assessment": risk_assessment,
             "policy_decision": policy_decision,

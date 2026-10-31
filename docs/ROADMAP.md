@@ -91,7 +91,7 @@ internal identifiers never go to external APIs.
 ## Phase 4 — Privacy & data handling (E43–E56)
 
 - [x] **E43** Privacy section explaining what data is stored. — **Done**: `docs/PRIVACY.md` + README '🔏 Privacy' section; test.
-- [ ] **E44** Redact secrets in logged command lines.
+- [x] **E44** Redact secrets in logged command lines. — **Done**: `soar/redaction.py` applied at ingest, incident storage, evidence and logging; `tests/test_redaction.py`.
 - [ ] **E45** Mask usernames in demo data and screenshots.
 - [ ] **E46** Don't commit real telemetry or logs.
 - [ ] **E47** Set and enforce a log retention period.

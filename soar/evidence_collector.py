@@ -2,6 +2,8 @@ import json
 import datetime
 import uuid
 
+from soar.redaction import redact_deep
+
 class VolatileEvidenceCollector:
     """
     Automated DFIR Volatile Evidence Collector (Pre-Containment Triage Packager)
@@ -50,7 +52,8 @@ class VolatileEvidenceCollector:
             }
         }
         
-        return evidence_package
+        # Memory strings and command lines routinely contain credentials: redact before storing
+        return redact_deep(evidence_package)
 
     def snapshot_process(self, host, pid, process_name, reason="pre-containment"):
         """Process + memory evidence captured immediately before a kill or isolation.

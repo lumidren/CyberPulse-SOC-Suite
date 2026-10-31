@@ -9,6 +9,8 @@ control characters are stripped from free-text values.
 
 import ipaddress
 import re
+
+from soar.redaction import redact
 from datetime import datetime, timezone
 
 MAX_DETAIL_KEYS = 100
@@ -58,7 +60,7 @@ def _clean_details(value, depth, problems, path="details"):
         return [_clean_details(v, depth + 1, problems, f"{path}[]") for v in value]
     if isinstance(value, bool) or value is None or isinstance(value, (int, float)):
         return value
-    return clean_text(value)
+    return redact(clean_text(value))  # never store credentials found in command lines
 
 
 def validate_event(payload):
