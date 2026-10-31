@@ -6,6 +6,7 @@ references:
     - https://attack.mitre.org/techniques/T1053/005/
 author: lumidren (CyberPulse SOC Suite)
 date: 2026-08-15
+modified: 2026-11-01
 tags:
     - attack.persistence
     - attack.t1053.005

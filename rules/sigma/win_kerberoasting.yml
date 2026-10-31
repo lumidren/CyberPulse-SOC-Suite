@@ -6,6 +6,7 @@ references:
     - https://attack.mitre.org/techniques/T1558/001/
 author: lumidren (CyberPulse SOC Suite)
 date: 2026-08-23
+modified: 2026-11-01
 tags:
     - attack.credential_access
     - attack.t1558.001
@@ -21,5 +22,5 @@ detection:
         ServiceName|endswith: '$' # Filter computer/machine accounts
     condition: selection and not filter
 falsepositives:
-    - Legacy legacy applications requiring RC4 encryption for Kerberos authentication
+    - Legacy applications requiring RC4 encryption for Kerberos authentication
 level: high
