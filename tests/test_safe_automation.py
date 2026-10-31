@@ -500,5 +500,23 @@ class TestLabModeGate(unittest.TestCase):
         self.assertEqual(simulate_t1003_lsass_dump()["event_id"], 10)
 
 
+class TestLabTargetAllowlist(unittest.TestCase):
+
+    def test_all_generators_target_the_lab(self):
+        from simulator.attack_simulator import SCRIPTED_GENERATORS
+        for _name, gen in SCRIPTED_GENERATORS:
+            gen()  # raises TargetNotAllowed if a generator drifts outside the lab
+
+    def test_out_of_lab_targets_refused(self):
+        from simulator.lab_guard import TargetNotAllowed, validate_target
+        with self.assertRaises(TargetNotAllowed):
+            validate_target({"computer_name": "unknown-host", "event_source": "Security"})
+        with self.assertRaises(TargetNotAllowed):
+            validate_target({"computer_name": "x", "target_ip": "192.168.50.5", "event_source": "Security"})
+        with self.assertRaises(TargetNotAllowed):
+            validate_target({"computer_name": "aws-prod-account-1", "event_source": "aws:cloudtrail"})
+        self.assertTrue(validate_target({"computer_name": "x", "target_ip": "10.0.3.3", "event_source": "Security"}))
+
+
 if __name__ == "__main__":
     unittest.main()

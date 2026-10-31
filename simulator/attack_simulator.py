@@ -201,13 +201,13 @@ def simulate_cloud_aws_assumerole():
         "technique_id": "T1548",
         "technique_name": "Abuse Elevation: Cross-Account AssumeRole",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "computer_name": "aws-prod-account-839201928",
+        "computer_name": "aws-lab-account-000000000000",
         "user": "contractor_temp",
         "source_ip": "185.220.101.33",
         "details": {
             "eventName": "AssumeRole",
             "eventSource": "sts.amazonaws.com",
-            "roleArn": "arn:aws:iam::123456789012:role/AdministratorAccess",
+            "roleArn": "arn:aws:iam::000000000000:role/AdministratorAccess",
             "durationSeconds": 3600
         }
     }
@@ -221,7 +221,7 @@ def simulate_cloud_entra_impossible_travel():
         "technique_id": "T1078",
         "technique_name": "Valid Accounts: Cloud Impossible Travel Anomaly",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "computer_name": "entra-tenant.onmicrosoft.com",
+        "computer_name": "cyberpulse-lab.onmicrosoft.com",
         "user": "finance_admin",
         "source_ip": "193.142.146.210",
         "details": {
