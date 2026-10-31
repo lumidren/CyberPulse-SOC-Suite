@@ -22,6 +22,7 @@ loudly rather than silently matching nothing.
 """
 
 import fnmatch
+import functools
 import ipaddress
 import os
 import re
@@ -93,6 +94,7 @@ def _event_value(event, field):
     return None, False
 
 
+@functools.lru_cache(maxsize=4096)
 def _glob_to_regex(pattern):
     return re.compile(fnmatch.translate(pattern), re.IGNORECASE | re.DOTALL)
 
