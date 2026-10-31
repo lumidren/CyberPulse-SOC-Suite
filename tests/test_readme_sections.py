@@ -33,6 +33,17 @@ class TestReadmeSections(unittest.TestCase):
         self.assertIn("## What leaves the machine", text)
         self.assertIn("## External threat-intel enrichment: what leaves your environment", text)
 
+    def test_third_party_credits_and_map_attribution(self):
+        self.assertIn("docs/THIRD_PARTY_NOTICES.md", readme())
+        with open(os.path.join(ROOT, "docs", "THIRD_PARTY_NOTICES.md"), encoding="utf-8") as fh:
+            notices = fh.read()
+        for name in ["Wazuh", "Sysmon", "Sigma", "pfSense", "Leaflet", "OpenStreetMap"]:
+            self.assertIn(name, notices)
+        with open(os.path.join(ROOT, "web", "app.js"), encoding="utf-8") as fh:
+            js = fh.read()
+        self.assertIn("attributionControl: true", js)
+        self.assertIn("OpenStreetMap", js)
+
     def test_human_oversight_section_present(self):
         text = readme()
         self.assertIn("## 🧑‍⚖️ Human Oversight", text)

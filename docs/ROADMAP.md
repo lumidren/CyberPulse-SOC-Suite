@@ -119,7 +119,7 @@ internal identifiers never go to external APIs.
 ## Phase 4c — Legal, licensing & attribution (E79–E88)
 
 - [x] **E79** Verify the MIT license file exists. — **Done earlier** (176e547): `LICENSE` (MIT) exists at the repo root.
-- [ ] **E80** Credit Wazuh, Sysmon, Sigma and pfSense; respect their licenses.
+- [x] **E80** Credit Wazuh, Sysmon, Sigma and pfSense; respect their licenses. — **Done**: `docs/THIRD_PARTY_NOTICES.md`; README credits section; OSM/CARTO attribution restored in `web/app.js`; test.
 - [ ] **E81** Check the license of any reused Sysmon config and credit the author.
 - [ ] **E82** Credit sources of any adapted Sigma rules.
 - [ ] **E83** MITRE ATT&CK attribution and terms notice.
