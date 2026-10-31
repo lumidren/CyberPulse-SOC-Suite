@@ -23,7 +23,8 @@ from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
-from soar.sigma_engine import SigmaEngine
+from soar.sigma_correlation import CorrelationEngine
+from soar.sigma_engine import SEVERITY_ORDER, SigmaEngine
 
 # SYNTHETIC lab threat-intel fixture. IPs are RFC 5737 documentation addresses
 # (198.51.100.0/24, 203.0.113.0/24) and providers are fictional, so no real
@@ -139,6 +140,7 @@ class SOAROrchestrator:
         # Detection logic lives in the Sigma rules (rules/sigma/*.yml), mapped to playbooks
         # by rules/soar_mapping.yml
         self.sigma = SigmaEngine()
+        self.correlation = CorrelationEngine()
         # Optional external enrichment (off unless EXTERNAL_ENRICHMENT_ENABLED=true + API keys)
         self.intel_client = ThreatIntelClient()
         # Circuit-breaker trips page a human through the configured notification channel
@@ -180,8 +182,17 @@ class SOAROrchestrator:
         return self.dfir_engine.incident_list
 
     def evaluate_detection(self, event):
-        """Match an event against the Sigma rules in rules/sigma/ (detection-as-code)."""
-        return self.sigma.evaluate(event)
+        """Match an event against the Sigma rules in rules/sigma/ (detection-as-code),
+        then feed it to the correlation rules in rules/sigma/correlations/."""
+        hit = self.sigma.evaluate(event)
+        fired = self.correlation.observe(event)
+        if not fired:
+            return hit
+        candidates = fired + ([hit] if hit else [])
+        candidates.sort(key=lambda r: -SEVERITY_ORDER.get(r["severity"], 0))
+        best = dict(candidates[0])
+        best["also_matched"] = [r["rule_id"] for r in candidates[1:]] + list((hit or {}).get("also_matched", []))
+        return best
 
     def enrich_threat_intel(self, event):
         """Non-blocking Threat Intelligence & GeoIP enrichment with Circuit Breaker"""

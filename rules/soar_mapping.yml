@@ -257,3 +257,9 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: e4b15c11d7bf7d666db7abe01598ec7cc5d759194c77db6e63d10ab5065b6417
+  c0b83687-14cb-437f-8d4e-66c73d3411ce:
+    soc_rule_id: SOC-RULE-043
+    name: Brute Force From One Source Against One Account (raw 4625 correlation)
+    action_recommended: BLOCK_SOURCE_IP_FIREWALL
+    version: 1.0.0
+    detection_sha256: 123b1280ee236fbc5f9c67fb07c4bba041a7dc60ccd0f9da6a1dc3c833ec3c2c
