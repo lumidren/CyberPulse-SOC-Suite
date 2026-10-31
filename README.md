@@ -56,6 +56,14 @@ under *SOAR Policies* below.
 
 ---
 
+## 🔏 Privacy
+
+The lab stores incidents, action records and ingested events **in memory only**;
+all demo data is synthetic. See [`docs/PRIVACY.md`](docs/PRIVACY.md) for exactly what is
+stored, for how long, and what leaves the machine.
+
+---
+
 ## ⚠️ Limitations
 
 Read this before drawing conclusions from anything else in the README.

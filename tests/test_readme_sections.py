@@ -25,6 +25,13 @@ class TestReadmeSections(unittest.TestCase):
             with open(os.path.join(ROOT, rel), encoding="utf-8") as fh:
                 self.assertIn("*** LAB USE ONLY ***", fh.read(), rel)
 
+    def test_privacy_section_present(self):
+        self.assertIn("## 🔏 Privacy", readme())
+        with open(os.path.join(ROOT, "docs", "PRIVACY.md"), encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("## What is stored", text)
+        self.assertIn("## What leaves the machine", text)
+
     def test_human_oversight_section_present(self):
         text = readme()
         self.assertIn("## 🧑‍⚖️ Human Oversight", text)
