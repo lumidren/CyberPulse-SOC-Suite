@@ -82,6 +82,14 @@ Endpoints deploy a hardened Sysmon configuration (based on Olaf Hartong's modula
   New-NetFirewallRule -DisplayName "SOC-Management-Allow" -Direction Inbound -Action Allow -RemoteAddress "10.0.1.10" -LocalPort 5986 -Protocol TCP -Priority 2
   ```
 
+### Process termination (graceful-first)
+Responders never use `taskkill /F /T`. The recorded plan (`soar/process_termination.py`)
+snapshots the process, requests a clean exit (`taskkill /PID <pid>`), waits a
+grace period (15 s), and only then force-kills that single PID; children are
+handled individually. **Data-loss risk:** forced termination can lose unsaved
+data, corrupt open files or databases, and destroy in-memory evidence. Active
+ransomware is the documented exception (grace 0) because delay costs more files.
+
 ### 2. Perimeter Gateway Block Playbook (`PB-FIREWALL-BLOCK-02`)
 * **Transport**: pfSense REST API or Linux `iptables` over SSH.
 * **Execution**:
