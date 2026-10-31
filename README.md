@@ -213,7 +213,7 @@ $$\text{Risk Score} = (S_{\text{rule}} \times 0.35) + (W_{\text{tactic}} \times 
 | **`T1059.001`** | Obfuscated PowerShell | Execution | Sysmon Event 1 | `SOC-RULE-004` | Process Kill + AD Account Lockout |
 | **`T1562.001`** | Defender Impairment | Defense Evasion | Sysmon Event 1 | `SOC-RULE-005` | Revert Policy + Host Isolation |
 | **`T1486`** | Ransomware Canary Encryption | Impact | Sysmon Event 11 | `SOC-RULE-006` | PID Kill + VSS Snapshot Recovery |
-| **`T1558.001`** | Kerberoasting TGS Request | Credential Access | Security Event 4769 | `SOC-RULE-007` | Reset Service Account & Revoke Ticket |
+| **`T1558.003`** | Kerberoasting TGS Request | Credential Access | Security Event 4769 | `SOC-RULE-007` | Reset Service Account & Revoke Ticket |
 | **`T1003.006`** | AD Replication Abuse (DCSync) | Credential Access | Security Event 4662 | `SOC-RULE-008` | Isolate Account & Revoke Privileges |
 | **`T1548`** | Cross-Account STS AssumeRole | Privilege Escalation | AWS CloudTrail | `SOC-RULE-009` | Attach Deny Policy & Invalidate STS |
 | **`T1078`** | Entra ID Impossible Travel | Initial Access | Azure SignInLogs | `SOC-RULE-010` | Revoke Refresh Tokens & Enforce MFA |

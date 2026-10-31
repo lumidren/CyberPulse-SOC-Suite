@@ -175,7 +175,7 @@ internal identifiers never go to external APIs.
 - [ ] **F14** Threshold tuning with historical data.
 - [ ] **F15** Allowlist/exception management per rule.
 - [ ] **F16** Canary-token and honeypot detection layer.
-- [ ] **F17** Kerberoasting, DCSync, Pass-the-Hash and Golden Ticket detections.
+- [x] **F17** Kerberoasting, DCSync, Pass-the-Hash and Golden Ticket detections. — **Done** (3 commits): Kerberoasting re-mapped to T1558.003; Pass-the-Hash and Golden Ticket rules added; DCSync existed (SOC-RULE-008).
 - [ ] **F18** Living-off-the-Land binary (LOLBAS) detections.
 - [ ] **F19** Ransomware precursor detections (shadow copy deletion, mass rename).
 - [x] **F20** Cloud attack detections (Azure AD, AWS CloudTrail). — **Done earlier** (8b3196c): SOC-RULE-009 (AWS AssumeRole) and SOC-RULE-010 (Entra impossible travel); extended in F1.

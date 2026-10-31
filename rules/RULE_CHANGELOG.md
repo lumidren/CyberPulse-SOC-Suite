@@ -37,6 +37,7 @@ bump here and in `rules/soar_mapping.yml`.
 
 ## SOC-RULE-007: Kerberoasting TGS Ticket Request with RC4 Encryption (`win_kerberoasting.yml`)
 
+* **1.0.2** (2026-11-01): Corrected the ATT&CK mapping: Kerberoasting is T1558.003 (T1558.001 is Golden Ticket).
 * **1.0.1** (2026-11-01): Fixed a typo in the false-positive note; date normalised to ISO; added `modified`.
 * **1.0.0** (2026-08-23): Initial rule.
 

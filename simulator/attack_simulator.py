@@ -159,11 +159,11 @@ def simulate_t1486_ransomware_canary():
 
 @lab_only
 def simulate_t1558_kerberoasting():
-    """T1558.001 - Steal or Forge Kerberos Tickets: Kerberoasting TGS Request"""
+    """T1558.003 - Steal or Forge Kerberos Tickets: Kerberoasting TGS Request"""
     return {
         "event_id": 4769,
         "event_source": "Security",
-        "technique_id": "T1558.001",
+        "technique_id": "T1558.003",
         "technique_name": "Steal or Forge Kerberos Tickets: Kerberoasting",
         "tactic": "Credential Access",
         "timestamp": datetime.now(timezone.utc).isoformat(),

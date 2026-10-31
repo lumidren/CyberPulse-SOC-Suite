@@ -110,7 +110,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         self.assertEqual(incident["containment_action"]["action_type"], "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS")
 
     def test_t1558_kerberoasting_detection(self):
-        """Verify T1558.001 Kerberoasting TGS request triggers SOC-RULE-007 and account reset"""
+        """Verify T1558.003 Kerberoasting TGS request triggers SOC-RULE-007 and account reset"""
         event = simulate_t1558_kerberoasting()
         incident = self.orchestrator.process_event(event)
 
