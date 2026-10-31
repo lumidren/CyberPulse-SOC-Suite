@@ -1,0 +1,26 @@
+title: AWS CloudTrail Logging Stopped or Deleted
+id: 1489068e-d952-4bfb-bdde-7889dcfe0b05
+status: experimental
+description: Detects StopLogging, DeleteTrail or an UpdateTrail that disables multi-region logging in CloudTrail,
+    which attackers use to blind defenders in an AWS account.
+references:
+- https://attack.mitre.org/techniques/T1562/008/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.defense_evasion
+- attack.t1562.008
+logsource:
+    product: aws
+    service: cloudtrail
+detection:
+    selection:
+        eventSource: cloudtrail.amazonaws.com
+        eventName:
+        - StopLogging
+        - DeleteTrail
+    condition: selection
+falsepositives:
+- Planned trail migrations by the cloud platform team (change-tracked)
+level: high

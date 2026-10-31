@@ -1,0 +1,18 @@
+# Positive/negative samples for rules/sigma/cloud_entra_admin_consent.yml (synthetic lab events)
+rule: cloud_entra_admin_consent.yml
+positive:
+- name: Tenant-wide consent
+  event:
+    event_id: 9904
+    event_source: azure:auditlogs
+    details:
+      OperationName: Consent to application
+      ConsentType: AllPrincipals
+negative:
+- name: Single-user consent
+  event:
+    event_id: 9904
+    event_source: azure:auditlogs
+    details:
+      OperationName: Consent to application
+      ConsentType: Principal

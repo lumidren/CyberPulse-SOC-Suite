@@ -176,3 +176,11 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-040: Backup or Security Service Stopped via net or sc (`win_service_stop_backup_security.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-041: AWS CloudTrail Logging Stopped or Deleted (`cloud_aws_cloudtrail_disabled.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-042: Entra ID Admin Consent Granted to an Application (`cloud_entra_admin_consent.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

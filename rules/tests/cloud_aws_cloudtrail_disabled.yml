@@ -1,0 +1,18 @@
+# Positive/negative samples for rules/sigma/cloud_aws_cloudtrail_disabled.yml (synthetic lab events)
+rule: cloud_aws_cloudtrail_disabled.yml
+positive:
+- name: StopLogging on the org trail
+  event:
+    event_id: 9903
+    event_source: aws:cloudtrail
+    details:
+      eventSource: cloudtrail.amazonaws.com
+      eventName: StopLogging
+negative:
+- name: DescribeTrails read-only call
+  event:
+    event_id: 9903
+    event_source: aws:cloudtrail
+    details:
+      eventSource: cloudtrail.amazonaws.com
+      eventName: DescribeTrails
