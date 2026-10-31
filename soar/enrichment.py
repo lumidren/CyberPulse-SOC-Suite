@@ -16,12 +16,16 @@ Privacy rules enforced here, not by convention:
   refused before any request is built.
 """
 
+import copy
 import ipaddress
 import json
 import os
 import re
+import threading
+import time
 import urllib.parse
 import urllib.request
+from collections import OrderedDict
 from datetime import datetime, timezone
 
 VT_IP_URL = "https://www.virustotal.com/api/v3/ip_addresses/{}"
@@ -69,12 +73,68 @@ def _default_transport(url, headers, timeout=8):
         return resp.status, json.loads(resp.read().decode("utf-8"))
 
 
+class IocCache:
+    """In-memory LRU cache with TTL for enrichment results (indicator -> verdicts).
+
+    Holds only public IPs / file hashes and the provider verdicts for them. It is
+    never written to disk, is emptied on restart, and can be cleared at any time
+    with clear() (POST /api/enrichment/cache/clear).
+    """
+
+    def __init__(self, maxsize=None, ttl_sec=None, clock=time.time):
+        self.maxsize = maxsize or int(os.environ.get("ENRICHMENT_CACHE_SIZE", "512"))
+        self.ttl_sec = ttl_sec or int(os.environ.get("ENRICHMENT_CACHE_TTL_SEC", "3600"))
+        self.clock = clock
+        self._data = OrderedDict()
+        self._lock = threading.Lock()
+
+    def get(self, key):
+        with self._lock:
+            item = self._data.get(key)
+            if not item:
+                return None
+            stored_at, value = item
+            if self.clock() - stored_at > self.ttl_sec:
+                del self._data[key]
+                return None
+            self._data.move_to_end(key)
+            return copy.deepcopy(value)
+
+    def put(self, key, value):
+        with self._lock:
+            self._data[key] = (self.clock(), copy.deepcopy(value))
+            self._data.move_to_end(key)
+            while len(self._data) > self.maxsize:
+                self._data.popitem(last=False)
+
+    def clear(self):
+        with self._lock:
+            n = len(self._data)
+            self._data.clear()
+            return n
+
+    def __len__(self):
+        return len(self._data)
+
+
 class ThreatIntelClient:
-    def __init__(self, vt_key=None, abuse_key=None, transport=None, enabled=None):
+    def __init__(self, vt_key=None, abuse_key=None, transport=None, enabled=None, cache=None):
         self.vt_key = vt_key if vt_key is not None else os.environ.get("VIRUSTOTAL_API_KEY", "")
         self.abuse_key = abuse_key if abuse_key is not None else os.environ.get("ABUSEIPDB_API_KEY", "")
         self.transport = transport or _default_transport
         self.enabled = external_enrichment_enabled() if enabled is None else enabled
+        self.cache = cache or IocCache()
+
+    def _cached(self, key, fetch):
+        hit = self.cache.get(key)
+        if hit is not None:
+            hit["cached"] = True
+            return hit
+        result = fetch()
+        if result.get("status") == "OK":
+            self.cache.put(key, result)
+        result["cached"] = False
+        return result
 
     def lookup(self, indicator):
         """Single entry point: only public IPs and file hashes are ever queried."""
@@ -94,6 +154,9 @@ class ThreatIntelClient:
             return {"status": "REFUSED", "verdicts": [], "reason": "Not a file hash."}
         if not self.vt_key:
             return {"status": "NO_PROVIDERS", "verdicts": []}
+        return self._cached(f"hash:{digest}", lambda: self._fetch_hash(digest))
+
+    def _fetch_hash(self, digest):
         status, body = self.transport(VT_FILE_URL.format(digest), {"x-apikey": self.vt_key})
         stats = body.get("data", {}).get("attributes", {}).get("last_analysis_stats", {}) if status == 200 else {}
         return {"status": "OK", "verdicts": [{"source": "VirusTotal", "indicator": digest, "http_status": status,
@@ -107,6 +170,9 @@ class ThreatIntelClient:
         if not is_shareable_ip(ip):
             return {"status": "SKIPPED_INTERNAL", "verdicts": [],
                     "reason": "Internal/non-routable address: never sent to external services."}
+        return self._cached(f"ip:{ip}", lambda: self._fetch_ip(ip))
+
+    def _fetch_ip(self, ip):
         verdicts = []
         if self.vt_key:
             verdicts.append(self._virustotal_ip(ip))
