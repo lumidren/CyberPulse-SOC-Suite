@@ -185,6 +185,8 @@ class ResilientContainmentEngine:
         target_user = action_record["target_user"]
         pid = action_record["pid"]
         process_name = action_record["process_name"]
+        # Snapshot the (simulated) responder state first so rollback can restore it exactly
+        action_record["pre_action_state"] = self._capture_state(action_record)
         action_record["status"] = "SUCCESS"
 
         if action_type == "BLOCK_SOURCE_IP_FIREWALL":
@@ -428,19 +430,67 @@ class ResilientContainmentEngine:
             rollback_entry["reversibility"] = reversibility
             rollback_entry["log"] = describe(record)
             rollback_entry["not_restored"] = not_restored
-        self._release_state(record)
+        rollback_entry["restored_state"] = self._release_state(record)
+        rollback_entry["pre_action_state"] = record.get("pre_action_state")
 
         record["status"] = "ROLLED_BACK"
         record["rollback_history"] = rollback_entry
         return rollback_entry
 
+    def _capture_state(self, record):
+        """What the target looked like before this action touched it.
+
+        A flag counts as pre-existing only if it was set outside SOAR; state held
+        by another active SOAR action is tracked by that action instead.
+        """
+        def external(key, registry, value):
+            return value in registry and not self._held_by_other_action(record, key)
+
+        return {
+            "captured_at": datetime.now(timezone.utc).isoformat(),
+            "host_isolated": external("host_isolated", self.host_isolation_registry, record.get("target_host")),
+            "ip_blocked": external("ip_blocked", self.blocked_ips, record.get("target_ip")),
+            "user_disabled": external("user_disabled", self.disabled_users, record.get("target_user")),
+        }
+
+    def _held_by_other_action(self, record, key):
+        """True if another still-active action holds the same effect on the same target."""
+        field = {"host_isolated": "target_host", "ip_blocked": "target_ip", "user_disabled": "target_user"}[key]
+        for other in self.action_registry.values():
+            if other is record or other["status"] != "SUCCESS":
+                continue
+            if other.get(field) == record.get(field) and self._effects(other).get(key):
+                return True
+        return False
+
+    @staticmethod
+    def _effects(record):
+        """Which responder-state flags an action turns on."""
+        return {
+            "host_isolated": record["action_type"] in ("ISOLATE_HOST_AND_KILL_PROCESS", "REVERT_DEFENDER_POLICY_AND_ISOLATE"),
+            "ip_blocked": record["action_type"] == "BLOCK_SOURCE_IP_FIREWALL",
+            "user_disabled": record["action_type"] in ACCOUNT_DISRUPTING_ACTIONS,
+        }
+
     def _release_state(self, record):
-        """Remove the action's effect from the simulated responder state."""
-        self.host_isolation_registry.discard(record.get("target_host"))
-        if record["action_type"] == "BLOCK_SOURCE_IP_FIREWALL":
-            self.blocked_ips.discard(record.get("target_ip"))
-        if record["action_type"] in ACCOUNT_DISRUPTING_ACTIONS:
-            self.disabled_users.discard(record.get("target_user"))
+        """Restore the pre-action state: undo only what this action changed and nothing still held."""
+        pre = record.get("pre_action_state", {})
+        effects = self._effects(record)
+        targets = {
+            "host_isolated": (self.host_isolation_registry, record.get("target_host")),
+            "ip_blocked": (self.blocked_ips, record.get("target_ip")),
+            "user_disabled": (self.disabled_users, record.get("target_user")),
+        }
+        restored = {}
+        for key, (registry, value) in targets.items():
+            if not effects[key]:
+                continue
+            if pre.get(key) or self._held_by_other_action(record, key):
+                restored[key] = "kept (was already set before this action, or another active action holds it)"
+                continue
+            registry.discard(value)
+            restored[key] = "restored to pre-action state"
+        return restored
 
 
 # action_type -> (reversibility, log builder, what cannot be restored)
