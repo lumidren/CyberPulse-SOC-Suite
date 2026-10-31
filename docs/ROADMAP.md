@@ -170,7 +170,7 @@ internal identifiers never go to external APIs.
 - [x] **F9** ⭐ Coverage heatmap exported as an ATT&CK Navigator layer. — **Done**: `scripts/export_navigator.py` → `docs/coverage/attack_navigator_layer.json`; README section; `tests/test_navigator_layer.py`.
 - [x] **F10** Data-source coverage analysis. — **Done**: `scripts/coverage_report.py` → `docs/coverage/DATA_SOURCES.md`; `tests/test_coverage_reports.py`.
 - [x] **F11** Detection gap report: techniques with no rule. — **Done**: `rules/coverage_targets.yml` → `docs/coverage/GAPS.md` (24/35 targets covered, 11 accepted gaps with blockers, 0 open).
-- [ ] **F12** Sigma correlation rules (multi-event chains).
+- [x] **F12** Sigma correlation rules (multi-event chains). — **Done**: `soar/sigma_correlation.py` (event_count / value_count / temporal) + `rules/sigma/correlations/`: SOC-RULE-043 raw-4625 brute force, SOC-RULE-044 password spraying, SOC-RULE-045 mass file write (closes the F19 mass-rename note; Sysmon has no rename event, see rule description). Not converted to SIEM queries (documented).
 - [ ] **F13** Behavioral baselining (rare parent-child process pairs).
 - [ ] **F14** Threshold tuning with historical data.
 - [ ] **F15** Allowlist/exception management per rule.

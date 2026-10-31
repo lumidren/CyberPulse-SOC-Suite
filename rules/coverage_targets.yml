@@ -11,8 +11,7 @@ targets:
   T1003.001: {name: "OS Credential Dumping: LSASS Memory", tactic: credential-access, why: "Core credential theft path in AD labs"}
   T1003.006: {name: "OS Credential Dumping: DCSync", tactic: credential-access, why: "Domain-wide credential compromise"}
   T1110.001: {name: "Brute Force: Password Guessing", tactic: credential-access, why: "Common against exposed RDP"}
-  T1110.003: {name: "Brute Force: Password Spraying", tactic: credential-access, why: "Low-and-slow spraying evades per-account thresholds",
-              blocker: "Needs a cross-account correlation over a long window (UEBA); see F12/F13"}
+  T1110.003: {name: "Brute Force: Password Spraying", tactic: credential-access, why: "Spraying evades per-account thresholds; SOC-RULE-044 covers bursts within 30 minutes, slower spraying is still missed"}
   T1555.003: {name: "Credentials from Password Stores: Credentials from Web Browsers", tactic: credential-access, why: "Common infostealer behaviour",
               blocker: "Needs Sysmon file-access auditing on browser profile paths (SACLs), not collected in the lab"}
   T1557.001: {name: "Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning", tactic: credential-access, why: "Frequent internal-network finding",

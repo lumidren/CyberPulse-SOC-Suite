@@ -24,7 +24,6 @@ Lowest scores first.
 | `SOC-RULE-028` | UAC Bypass via ms-settings Shell Open Command | 70 | 1/1 | 0 |
 | `SOC-RULE-042` | Entra ID Admin Consent Granted to an Application | 70 | 1/1 | 0 |
 | `SOC-RULE-001` | OS Credential Dumping via LSASS Memory Access | 80 | 2/3 | 0 |
-| `SOC-RULE-006` | Rapid File Encryption and Ransomware Canary Modification | 80 | 2/1 | 0 |
 | `SOC-RULE-010` | Microsoft Entra ID Impossible Travel Anomaly | 80 | 1/2 | 0 |
 | `SOC-RULE-012` | Pass-the-Hash Logon Patterns (NTLM and seclogo) | 90 | 2/3 | 0 |
 | `SOC-RULE-013` | Possible Golden Ticket Use via Kerberos Logon Domain Anomaly | 90 | 2/2 | 0 |
@@ -55,8 +54,9 @@ Lowest scores first.
 | `SOC-RULE-041` | AWS CloudTrail Logging Stopped or Deleted | 90 | 1/1 | 0 |
 | `SOC-RULE-002` | Password Brute Force Authentication Failure Spike | 100 | 1/2 | 0 |
 | `SOC-RULE-005` | Windows Defender Real-Time Protection Disabled via PowerShell | 100 | 1/1 | 0 |
+| `SOC-RULE-006` | Rapid File Encryption and Ransomware Canary Modification | 100 | 2/1 | 0 |
 | `SOC-RULE-007` | Kerberoasting TGS Ticket Request with RC4 Encryption | 100 | 1/2 | 0 |
 | `SOC-RULE-008` | Active Directory Replication Abuse (DCSync) via Non-DC Account | 100 | 1/1 | 0 |
 | `SOC-RULE-009` | Suspicious AWS STS AssumeRole Abuse Across External Account | 100 | 1/2 | 0 |
 
-Mean score: **87.1** across 42 rules.
+Mean score: **87.6** across 42 rules.

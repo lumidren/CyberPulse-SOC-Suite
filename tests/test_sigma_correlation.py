@@ -60,6 +60,38 @@ class TestBruteForceCorrelation(unittest.TestCase):
         self.assertEqual(results[9]["correlation"]["type"], "event_count")
 
 
+class TestSprayingAndMassWrite(unittest.TestCase):
+
+    def setUp(self):
+        self.engine = CorrelationEngine()
+
+    def test_spraying_fires_on_tenth_distinct_account(self):
+        fired = [ids(self.engine.observe(failed_logon(i, user=f"user{i:02d}", SubStatus="0xc000006a")))
+                 for i in range(10)]
+        self.assertIn("SOC-RULE-044", fired[9])
+        self.assertFalse(any("SOC-RULE-044" in f for f in fired[:9]))
+
+    def test_spraying_ignores_one_account_retried(self):
+        fired = [ids(self.engine.observe(failed_logon(i, SubStatus="0xc000006a"))) for i in range(20)]
+        self.assertFalse(any("SOC-RULE-044" in f for f in fired))
+
+    def file_write(self, n, image="C:\\Users\\Public\\enc.exe", path="C:\\Users\\j.doe\\Documents"):
+        return {"event_id": 11, "event_source": "Microsoft-Windows-Sysmon", "computer_name": "WIN-WORKSTATION09",
+                "timestamp": f"2026-11-01T10:00:{n // 10:02d}.{n % 10}Z",
+                "details": {"Image": image, "TargetFilename": f"{path}\\file{n}.docx.locked"}}
+
+    def test_mass_write_fires_at_100_files_in_a_minute(self):
+        fired = [ids(self.engine.observe(self.file_write(n))) for n in range(100)]
+        self.assertEqual(fired[99], ["SOC-RULE-045"])
+        self.assertFalse(any(fired[:99]))
+
+    def test_mass_write_ignores_known_writers_and_system_paths(self):
+        defender = [self.engine.observe(self.file_write(n, image="C:\\ProgramData\\Microsoft\\Windows Defender\\MsMpEng.exe"))
+                    for n in range(150)]
+        system = [self.engine.observe(self.file_write(n, path="C:\\Windows\\Temp")) for n in range(150)]
+        self.assertFalse(any(defender) or any(system))
+
+
 class TestCorrelationTypes(unittest.TestCase):
 
     def setUp(self):

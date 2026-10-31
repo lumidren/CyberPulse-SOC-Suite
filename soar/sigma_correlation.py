@@ -109,6 +109,11 @@ class CorrelationRule:
         self._state = defaultdict(deque)
 
     @property
+    def logsource(self):
+        """Telemetry the correlation depends on: that of its first base rule."""
+        return self.base_rules[0].logsource
+
+    @property
     def technique_ids(self):
         return [t.split(".", 1)[1].upper() for t in self.tags if t.lower().startswith("attack.t")]
 

@@ -188,3 +188,11 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-043: Brute Force From One Source Against One Account (raw 4625 correlation) (`correlations/win_brute_force_raw_logons.yml`)
 
 * **1.0.0** (2026-11-01): Initial correlation rule.
+
+## SOC-RULE-044: Password Spraying From One Source (distinct accounts correlation) (`correlations/win_password_spraying.yml`)
+
+* **1.0.0** (2026-11-01): Initial correlation rule.
+
+## SOC-RULE-045: Mass File Write by One Process (ransomware encryption or mass rename) (`correlations/win_mass_file_write.yml`)
+
+* **1.0.0** (2026-11-01): Initial correlation rule.

@@ -263,3 +263,15 @@ rules:
     action_recommended: BLOCK_SOURCE_IP_FIREWALL
     version: 1.0.0
     detection_sha256: 123b1280ee236fbc5f9c67fb07c4bba041a7dc60ccd0f9da6a1dc3c833ec3c2c
+  f14f3940-a592-4d15-a910-c55fefe12985:
+    soc_rule_id: SOC-RULE-044
+    name: Password Spraying From One Source (distinct accounts correlation)
+    action_recommended: BLOCK_SOURCE_IP_FIREWALL
+    version: 1.0.0
+    detection_sha256: fd5a5adacd244165ef52a4a31bc4a47fad95176941132c7ead3c066c939ae4b6
+  08be95d3-a7c6-4d3f-8ad0-c36c4f9c5a9d:
+    soc_rule_id: SOC-RULE-045
+    name: Mass File Write by One Process (ransomware encryption or mass rename)
+    action_recommended: KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS
+    version: 1.0.0
+    detection_sha256: 3eba70f214c7816fcd1b88637aa4400a84c34c6cd8d44aaaba9175844a522a6f

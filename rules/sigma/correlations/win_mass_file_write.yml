@@ -1,0 +1,58 @@
+title: File Created in a User or Share Path (base rule)
+name: user_path_file_create
+id: 9e4a1c2d-8b7f-4e3a-a6d5-2c0f9b8e1d47
+status: experimental
+description: >-
+    Sysmon Event 11 (file create or overwrite) under user profiles or shared folders, by a
+    process that is not a known heavy writer. Not an alert on its own.
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-11-01
+tags:
+    - attack.impact
+    - attack.t1486
+logsource:
+    product: windows
+    category: file_event
+detection:
+    selection:
+        TargetFilename|contains:
+            - '\Users\'
+            - '\Shares\'
+    filter_known_writers:
+        Image|endswith:
+            - '\MsMpEng.exe'
+            - '\SearchProtocolHost.exe'
+            - '\OneDrive.exe'
+            - '\TiWorker.exe'
+            - '\robocopy.exe'
+    condition: selection and not filter_known_writers
+level: informational
+---
+title: Mass File Write by One Process (ransomware encryption or mass rename)
+id: 08be95d3-a7c6-4d3f-8ad0-c36c4f9c5a9d
+status: experimental
+description: >-
+    One process on one host creates or overwrites 100+ files in user or share paths within
+    one minute, the pattern of ransomware writing encrypted copies. Sysmon has no rename
+    event, so in-place renames are only seen when the new name is written as a file create;
+    complete rename coverage needs Windows object-access auditing (Event 4663).
+references:
+    - https://attack.mitre.org/techniques/T1486/
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-11-01
+tags:
+    - attack.impact
+    - attack.t1486
+correlation:
+    type: event_count
+    rules:
+        - user_path_file_create
+    group-by:
+        - Computer
+        - Image
+    timespan: 1m
+    condition:
+        gte: 100
+falsepositives:
+    - Archive extraction, software builds or sync clients not in the filter list.
+level: critical
