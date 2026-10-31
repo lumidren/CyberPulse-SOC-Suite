@@ -12,6 +12,10 @@ from collections import deque
 from datetime import datetime, timezone
 
 
+# Actions that cut a host off the network
+ISOLATION_ACTIONS = {"ISOLATE_HOST_AND_KILL_PROCESS", "REVERT_DEFENDER_POLICY_AND_ISOLATE"}
+
+
 def _env_flag(name, default="false"):
     return os.environ.get(name, default).strip().lower() == "true"
 
@@ -26,6 +30,14 @@ class AutomationSafety:
         # Rate limit: max containment executions in any rolling hour
         self.max_actions_per_hour = int(os.environ.get("CONTAINMENT_MAX_ACTIONS_PER_HOUR", "20"))
         self._executions = deque()  # (timestamp, action_type, target)
+
+        # Isolation circuit breaker: N distinct hosts isolated within M minutes trips
+        # the kill switch and pages a human (mass isolation usually means a bad rule).
+        self.breaker_max_hosts = int(os.environ.get("ISOLATION_BREAKER_MAX_HOSTS", "3"))
+        self.breaker_window_sec = int(os.environ.get("ISOLATION_BREAKER_WINDOW_MIN", "10")) * 60
+        self._isolations = deque()  # (timestamp, host)
+        self.breaker_trips = []
+        self.pager = None  # callable(message) set by the orchestrator to reach a human
         self.kill_switch = {
             "engaged": _env_flag("CYBERPULSE_KILL_SWITCH"),
             "actor": "environment" if _env_flag("CYBERPULSE_KILL_SWITCH") else None,
@@ -78,6 +90,31 @@ class AutomationSafety:
         with self._lock:
             self._executions.append((self.clock(), action_record["action_type"],
                                      action_record.get("target_host") or action_record.get("target_ip")))
+        if action_record["action_type"] in ISOLATION_ACTIONS:
+            self._record_isolation(action_record.get("target_host"))
+
+    def _record_isolation(self, host):
+        with self._lock:
+            self._isolations.append((self.clock(), host))
+            self._prune(self._isolations, self.breaker_window_sec)
+            hosts = {h for _, h in self._isolations}
+            tripped = len(hosts) >= self.breaker_max_hosts and not self.kill_switch["engaged"]
+        if tripped:
+            self._trip_breaker(sorted(hosts))
+
+    def _trip_breaker(self, hosts):
+        minutes = self.breaker_window_sec // 60
+        reason = (f"Isolation circuit breaker: {len(hosts)} hosts isolated within {minutes} min "
+                  f"({', '.join(hosts)}). Automation halted pending human review.")
+        self.engage_kill_switch("isolation-circuit-breaker", reason)
+        trip = {"tripped_at": datetime.now(timezone.utc).isoformat(), "hosts": hosts, "reason": reason, "paged": False}
+        if self.pager:
+            try:
+                self.pager(reason)
+                trip["paged"] = True
+            except Exception as exc:  # paging must never crash containment
+                trip["page_error"] = str(exc)
+        self.breaker_trips.append(trip)
 
     def status(self):
         return {
@@ -85,5 +122,10 @@ class AutomationSafety:
             "rate_limit": {
                 "max_actions_per_hour": self.max_actions_per_hour,
                 "executions_last_hour": self.executions_last_hour(),
+            },
+            "isolation_circuit_breaker": {
+                "max_hosts": self.breaker_max_hosts,
+                "window_minutes": self.breaker_window_sec // 60,
+                "trips": list(self.breaker_trips),
             },
         }

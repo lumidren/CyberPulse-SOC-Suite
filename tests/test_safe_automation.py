@@ -179,5 +179,43 @@ class TestContainmentRateLimit(unittest.TestCase):
         self.assertEqual(self._block(engine, "203.0.113.5")["status"], "PENDING_ANALYST_APPROVAL")
 
 
+class TestIsolationCircuitBreaker(unittest.TestCase):
+
+    def test_mass_isolation_trips_kill_switch_and_pages(self):
+        pages = []
+        engine = ResilientContainmentEngine()
+        engine.safety.pager = pages.append
+        engine.safety.breaker_max_hosts = 3
+        for host in ["WKS-01", "WKS-02", "WKS-03"]:
+            act = stage(engine, host=host)
+            engine.approve_action(act["action_id"], approver="analyst_a")
+
+        self.assertTrue(engine.safety.is_halted())
+        self.assertEqual(engine.safety.kill_switch["actor"], "isolation-circuit-breaker")
+        self.assertEqual(len(pages), 1)
+        self.assertIn("3 hosts isolated", pages[0])
+        self.assertTrue(engine.safety.breaker_trips[0]["paged"])
+
+        # Nothing else runs until a human releases the switch
+        fourth = stage(engine, host="WKS-04")
+        self.assertEqual(engine.approve_action(fourth["action_id"], approver="analyst_a")["status"], "ERROR")
+
+    def test_isolations_outside_window_do_not_trip(self):
+        now = [0.0]
+        engine = ResilientContainmentEngine()
+        engine.safety.clock = lambda: now[0]
+        engine.safety.breaker_max_hosts = 2
+        engine.safety.breaker_window_sec = 600
+        for host in ["WKS-01", "WKS-02"]:
+            act = stage(engine, host=host)
+            engine.approve_action(act["action_id"], approver="analyst_a")
+            now[0] += 700
+        self.assertFalse(engine.safety.is_halted())
+
+    def test_orchestrator_wires_pager(self):
+        orch = SOAROrchestrator()
+        self.assertIsNotNone(orch.containment_engine.safety.pager)
+
+
 if __name__ == "__main__":
     unittest.main()

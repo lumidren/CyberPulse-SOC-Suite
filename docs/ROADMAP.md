@@ -45,7 +45,7 @@ internal identifiers never go to external APIs.
 - [x] **E18** Add a dry-run mode that logs what it would do. — **Done earlier**: DRY_RUN policy mode records `SIMULATED_NO_DISRUPTION` actions (`soar/resilient_containment.py`, test `test_dry_run_policy_mode`).
 - [x] **E19** Add a confidence threshold; below it, escalate instead of acting. — **Done**: `RULE_CONFIDENCE` + `CONFIDENCE_THRESHOLD` in `soar/risk_engine.py`; escalation path; tests.
 - [x] **E20** Rate-limit containment actions per hour. — **Done**: rolling-hour budget in `soar/safety.py`, enforced in `execute_containment`; tests with an injected clock.
-- [ ] **E21** Circuit breaker: if N hosts are isolated in M minutes, stop and page a human.
+- [x] **E21** Circuit breaker: if N hosts are isolated in M minutes, stop and page a human. — **Done**: isolation breaker in `soar/safety.py`; pager via `WebhookDispatcher.dispatch_text`; tests.
 - [ ] **E22** Allowlist of assets that can never be auto-isolated (DCs, SOC hosts, jump boxes).
 - [ ] **E23** Protected-accounts list that can never be auto-locked.
 - [ ] **E24** Protect the DC specifically: never auto-isolate 10.0.0.10.
