@@ -77,7 +77,9 @@ report_generator = IncidentReportGenerator()
 # ------------------------------------------------------------------------------
 ENV = os.environ.get("CYBERPULSE_ENV", "development").strip().lower()
 PORT = int(os.environ.get("PORT", "5000"))
-HOST = os.environ.get("HOST", "0.0.0.0")
+# Loopback by default: binding 0.0.0.0 exposes the console and API to every network
+# the machine is attached to. Only do that behind a TLS reverse proxy / firewall.
+HOST = os.environ.get("HOST", "127.0.0.1")
 MAX_BODY_BYTES = int(os.environ.get("MAX_BODY_BYTES", str(1024 * 1024)))  # 1 MiB
 MAX_DRAIN_BYTES = 8 * 1024 * 1024  # upper bound read-and-discarded for oversized bodies
 RATE_LIMIT_PER_MINUTE = int(os.environ.get("RATE_LIMIT_PER_MINUTE", "240"))
@@ -869,6 +871,9 @@ def run_server(port=None, host=None):
 
     logger.info("CyberPulse SOC Lab v%s running at http://%s:%s", __version__, display_host, bound_port)
     logger.info("Environment: %s | Serving web console from %s", ENV, WEB_DIR)
+    if bound_host in ("0.0.0.0", "::"):
+        logger.warning("Listening on ALL interfaces (%s). Anyone who can reach this port can try to sign in; "
+                       "keep it behind a firewall and a TLS reverse proxy.", bound_host)
     logger.info("Press Ctrl+C to stop.")
     try:
         httpd.serve_forever()

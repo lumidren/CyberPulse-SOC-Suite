@@ -10,7 +10,10 @@ class SyslogReceiver:
     Live Syslog Listener for CyberPulse.
     Listens for RFC 5424 syslog messages on a UDP port and normalizes them.
     """
-    def __init__(self, host='0.0.0.0', port=5514):
+    def __init__(self, host=None, port=5514):
+        # Loopback unless SYSLOG_HOST says otherwise (0.0.0.0 accepts packets from anywhere)
+        import os
+        host = host or os.environ.get("SYSLOG_HOST", "127.0.0.1")
         self.host = host
         self.port = port
         self.sock = None

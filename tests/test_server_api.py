@@ -259,6 +259,28 @@ class TestRestApiIntegration(unittest.TestCase):
         self.assertEqual(status, 404)
 
 
+class TestBindDefaults(unittest.TestCase):
+
+    def test_defaults_bind_loopback(self):
+        import importlib
+        previous = os.environ.pop("HOST", None)
+        try:
+            self.assertEqual(importlib.reload(server).HOST, "127.0.0.1")
+        finally:
+            if previous is not None:
+                os.environ["HOST"] = previous
+            importlib.reload(server)
+
+    def test_syslog_receiver_defaults_to_loopback(self):
+        from soar.syslog_receiver import SyslogReceiver
+        previous = os.environ.pop("SYSLOG_HOST", None)
+        try:
+            self.assertEqual(SyslogReceiver().host, "127.0.0.1")
+        finally:
+            if previous is not None:
+                os.environ["SYSLOG_HOST"] = previous
+
+
 class TestRateLimiter(unittest.TestCase):
 
     def test_sliding_window_saturation(self):

@@ -34,6 +34,10 @@ Still, the REST server and web console are real software, and this policy covers
 
 ## Deployment Guidance
 
+0. The server binds to **127.0.0.1** by default. Setting `HOST=0.0.0.0` exposes the
+   console and API on every interface the machine has; do that only behind a
+   firewall and a TLS-terminating reverse proxy.
+
 1. Never expose the lab server directly to the internet; front it with a reverse
    proxy that terminates TLS.
 2. Set `CYBERPULSE_ENV=production` and a strong `CYBERPULSE_API_KEY`
