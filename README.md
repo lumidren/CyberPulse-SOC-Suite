@@ -229,6 +229,14 @@ rules (`python scripts/export_navigator.py`). Load it in the
 Score = number of lab rules per technique. A coloured cell means a rule exists and passes its synthetic
 samples, not that the technique is reliably detected on real traffic.
 
+Related generated reports: [gap report](docs/coverage/GAPS.md), [data-source dependencies](docs/coverage/DATA_SOURCES.md),
+[rule quality scores](docs/coverage/QUALITY.md), [threshold tuning](docs/THRESHOLD_TUNING.md) and the
+[rare parent-child process baseline](docs/BEHAVIORAL_BASELINE.md).
+
+**Tuning exceptions.** Known-benign matches are allowlisted per rule in [`rules/exceptions.yml`](rules/exceptions.yml):
+every entry has an owner, a reason and an expiry (at most 180 days), cannot match a rule's own attack samples,
+and is counted when it suppresses an alert (`GET /api/exceptions`).
+
 ---
 
 ## ⏱️ Pipeline Latency (Lab-Measured on Emulated Traffic)

@@ -1,0 +1,11 @@
+# Per-rule exceptions (allowlist), roadmap F15. Loaded by soar/rule_exceptions.py.
+#
+# Every entry needs: id, rule (SOC rule id), reason, owner, created, expires
+# (at most 180 days after created), and match (Sigma selection syntax; every
+# field must match). Expired entries stop suppressing. Suppressions are counted
+# per exception and shown at GET /api/exceptions.
+#
+# Tests reject an exception that would suppress any of the rule's positive
+# samples in rules/tests/, so an allowlist entry cannot hide the attack the
+# rule exists for.
+exceptions: []

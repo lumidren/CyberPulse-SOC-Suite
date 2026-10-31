@@ -23,6 +23,7 @@ from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
+from soar.rule_exceptions import ExceptionRegistry
 from soar.sigma_correlation import CorrelationEngine
 from soar.sigma_engine import SEVERITY_ORDER, SigmaEngine
 
@@ -141,6 +142,7 @@ class SOAROrchestrator:
         # by rules/soar_mapping.yml
         self.sigma = SigmaEngine()
         self.correlation = CorrelationEngine()
+        self.exceptions = ExceptionRegistry()
         # Optional external enrichment (off unless EXTERNAL_ENRICHMENT_ENABLED=true + API keys)
         self.intel_client = ThreatIntelClient()
         # Circuit-breaker trips page a human through the configured notification channel
@@ -184,8 +186,8 @@ class SOAROrchestrator:
     def evaluate_detection(self, event):
         """Match an event against the Sigma rules in rules/sigma/ (detection-as-code),
         then feed it to the correlation rules in rules/sigma/correlations/."""
-        hit = self.sigma.evaluate(event)
-        fired = self.correlation.observe(event)
+        hit = self.sigma.evaluate(event, suppress=self._suppressed)
+        fired = [r for r in self.correlation.observe(event) if not self.exceptions.suppressing(r["rule_id"], event)]
         if not fired:
             return hit
         candidates = fired + ([hit] if hit else [])
@@ -193,6 +195,10 @@ class SOAROrchestrator:
         best = dict(candidates[0])
         best["also_matched"] = [r["rule_id"] for r in candidates[1:]] + list((hit or {}).get("also_matched", []))
         return best
+
+    def _suppressed(self, rule, event):
+        """True when an active exception in rules/exceptions.yml covers this rule match."""
+        return self.exceptions.suppressing(rule.soar.get("soc_rule_id", rule.id), event) is not None
 
     def enrich_threat_intel(self, event):
         """Non-blocking Threat Intelligence & GeoIP enrichment with Circuit Breaker"""

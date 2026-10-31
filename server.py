@@ -636,6 +636,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "full_auto_allowed": ALLOW_FULL_AUTO
             })
 
+        elif path == "/api/exceptions":
+            self._send_json(200, orchestrator.exceptions.status())
+
         elif path == "/api/safety":
             self._send_json(200, orchestrator.containment_engine.safety.status())
 
