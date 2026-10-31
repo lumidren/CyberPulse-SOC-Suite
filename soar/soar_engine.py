@@ -7,7 +7,6 @@ Live Syslog Ingestion, Identity Blast Radius Analysis, and Observability.
 """
 
 import json
-import random
 import time
 from datetime import datetime, timezone
 
@@ -104,6 +103,12 @@ THREAT_INTEL_CACHE = {
         "signature": "Trojan.Generic.Heuristic"
     }
 }
+
+MEASUREMENT_BASIS = (
+    "Lab-measured: in-process wall-clock time on emulated telemetry. "
+    "Containment is simulated (no network calls), so these numbers are not "
+    "comparable to production SOC latencies."
+)
 
 DATACENTER_GEO = {
     "name": "SOC-DC-NORTH-AMERICA",
@@ -275,16 +280,18 @@ class SOAROrchestrator:
         Adversary Emulation ➔ Telemetry ➔ Detection ➔ Enrichment ➔ Risk Scoring ➔ 
         Policy Decision ➔ Resilient Containment ➔ DFIR Incident ➔ Metrics ➔ Notifications
         """
+        # All stage timings below are wall-clock measurements of this process
+        # (time.perf_counter) on emulated telemetry; nothing is synthesized.
+        t_detect = time.perf_counter()
         matched_rule = self.evaluate_detection(event)
+        detection_ms = round((time.perf_counter() - t_detect) * 1000, 3)
         if not matched_rule:
             return None
 
-        # Stage 1: Detection Ingestion
-        detection_ms = round(random.uniform(1380, 1440), 2)
-
         # Stage 2: Threat Intel Enrichment
+        t_intel = time.perf_counter()
         intel = self.enrich_threat_intel(event)
-        intel_ms = round(random.uniform(580, 670), 2)
+        intel_ms = round((time.perf_counter() - t_intel) * 1000, 3)
 
         # Stage 3: Multi-Factor Risk Assessment
         risk_assessment = self.risk_engine.calculate_risk_score(event, matched_rule, intel)
@@ -313,15 +320,16 @@ class SOAROrchestrator:
             correlation_id=correlation_id
         )
 
-        total_ms = round(detection_ms + intel_ms + containment_action["latency_ms"], 2)
-        total_sec = round(total_ms / 1000.0, 2)
+        total_ms = round(detection_ms + intel_ms + containment_action["latency_ms"], 3)
+        total_sec = round(total_ms / 1000.0, 4)
 
         timing_breakdown = {
             "stage1_detection_ms": detection_ms,
             "stage2_threat_intel_ms": intel_ms,
             "stage3_containment_ms": containment_action["latency_ms"],
             "total_pipeline_latency_ms": total_ms,
-            "total_pipeline_sec": total_sec
+            "total_pipeline_sec": total_sec,
+            "measurement_basis": MEASUREMENT_BASIS
         }
 
         # Stage 6: Unified Incident & DFIR Case Creation

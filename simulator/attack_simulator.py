@@ -217,21 +217,25 @@ def simulate_cloud_entra_impossible_travel():
         }
     }
 
+# Every scripted generator, by short name. Used by the API, the benchmark and
+# the validation scripts so counts always cover the same set of techniques.
+SCRIPTED_GENERATORS = [
+    ("t1003", simulate_t1003_lsass_dump),
+    ("t1110", simulate_t1110_brute_force),
+    ("t1053", simulate_t1053_scheduled_task),
+    ("t1059", simulate_t1059_powershell_execution),
+    ("t1562", simulate_t1562_defender_tamper),
+    ("t1486", simulate_t1486_ransomware_canary),
+    ("t1558", simulate_t1558_kerberoasting),
+    ("t1003_dcsync", simulate_t1003_dcsync),
+    ("cloud_aws", simulate_cloud_aws_assumerole),
+    ("cloud_entra", simulate_cloud_entra_impossible_travel),
+]
+
+
 def generate_random_attack():
     """Selects and generates a random adversary emulation event"""
-    generators = [
-        simulate_t1003_lsass_dump,
-        simulate_t1110_brute_force,
-        simulate_t1053_scheduled_task,
-        simulate_t1059_powershell_execution,
-        simulate_t1562_defender_tamper,
-        simulate_t1486_ransomware_canary,
-        simulate_t1558_kerberoasting,
-        simulate_t1003_dcsync,
-        simulate_cloud_aws_assumerole,
-        simulate_cloud_entra_impossible_travel
-    ]
-    chosen = random.choice(generators)
+    _name, chosen = random.choice(SCRIPTED_GENERATORS)
     return chosen()
 
 if __name__ == "__main__":

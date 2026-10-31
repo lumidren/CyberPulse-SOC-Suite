@@ -131,17 +131,28 @@ $$\text{Risk Score} = (S_{\text{rule}} \times 0.35) + (W_{\text{tactic}} \times 
 
 ---
 
-## ⏱️ Pipeline Design Targets & Benchmark Observations
+## ⏱️ Pipeline Latency (Lab-Measured on Emulated Traffic)
 
-*Note: The numbers below reflect benchmark timings recorded by the Python execution harness during simulated adversary executions.*
+> **Every number in this section is lab-measured on emulated telemetry.** It is
+> in-process wall-clock time for synthetic events: detection runs on generated
+> logs, enrichment reads a local cache, and responders are simulated (no WinRM,
+> pfSense or AD calls). It is **not** a production SOC latency and should not be
+> compared with one.
 
-| Pipeline Stage | Target Latency | Simulated Benchmark | Architectural Role |
+Reproduce with `python scripts/benchmark_pipeline.py --runs 20` (DRY_RUN mode,
+10 generators × 20 runs = 200 events). Measured on 2026-10-31, Windows 11,
+Python 3.12.2:
+
+| Pipeline Stage | p50 | p95 | What is actually measured |
 | :--- | :---: | :---: | :--- |
-| **Detection & Matching** | < 2.0s | ~1.40s | Signature matching across Sysmon and CloudTrail event fields. |
-| **Threat Intel Enrichment** | < 1.0s | ~0.65s | Non-blocking reputation lookup protected by Circuit Breaker pattern. |
-| **Risk Scoring & Policy** | < 0.2s | ~0.15s | Multi-factor risk calculation and automated containment selection. |
-| **Containment Execution** | < 1.5s | ~1.15s | Simulated WinRM WFP isolation / firewall drop with rollback receipt generation. |
-| **Total Automated Pipeline** | **< 5.0s** | **~3.2s** | Closed-loop end-to-end processing target prior to Tier-1 escalation. |
+| **Detection & Matching** | 1 µs | 2 µs | Python rule evaluation over one synthetic event. |
+| **Threat Intel Enrichment** | 1 µs | 2 µs | Dictionary lookup in the local IoC cache (no external API). |
+| **Containment (simulated)** | 4 µs | 7 µs | Building the simulated action record; no network I/O. |
+| **Total In-Process Pipeline** | 7 µs | 11 µs | Sum of the three stages above. |
+
+Real-world latency would be dominated by log shipping, SIEM indexing, API
+round-trips and responder execution, none of which this lab measures yet
+(**not yet measured**).
 
 ---
 

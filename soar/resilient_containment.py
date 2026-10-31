@@ -6,7 +6,6 @@ idempotent operations, and automated containment rollback capabilities.
 
 import json
 import time
-import random
 from datetime import datetime, timezone
 
 class CircuitBreaker:
@@ -75,7 +74,7 @@ class ResilientContainmentEngine:
             action_record["status"] = "SIMULATED_NO_DISRUPTION"
             action_record["execution_protocol"] = "DRY-RUN Simulation Subsystem"
             action_record["execution_log"] = f"[DRY-RUN] Policy simulated {action_type} on {target_host} / {target_ip}. Zero host or network disruption occurred."
-            action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000 + 5.0, 2)
+            action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
             self.action_registry[action_id] = action_record
             return action_record
 
@@ -84,7 +83,7 @@ class ResilientContainmentEngine:
             action_record["status"] = "PENDING_ANALYST_APPROVAL"
             action_record["execution_protocol"] = "Human-in-the-Loop SOAR Gate"
             action_record["execution_log"] = f"Action {action_type} for {target_host} staged for Tier-2 analyst review & sign-off token."
-            action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000 + 3.0, 2)
+            action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
             self.action_registry[action_id] = action_record
             return action_record
 
@@ -184,9 +183,9 @@ class ResilientContainmentEngine:
             action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
             action_record["execution_log"] = "No disruptive containment policy matched. Staged for analyst review."
 
-        # Simulate real-world network transmission and execution delay (1.05s - 1.20s)
-        time.sleep(random.uniform(0.02, 0.05))
-        action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000 + random.uniform(1050, 1180), 2)
+        # Measured in-process time only. Responders are simulated, so this is NOT
+        # a network round-trip to WinRM/pfSense/AD and must not be presented as one.
+        action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
         self.action_registry[action_id] = action_record
         return action_record
 

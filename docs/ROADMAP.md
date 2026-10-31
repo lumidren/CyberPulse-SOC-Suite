@@ -23,7 +23,7 @@ internal identifiers never go to external APIs.
 ## Phase 1 — Honest claims & README (E1–E12)
 
 - [x] **E1** Drop "enterprise-grade"; describe the project as a lab. — **Done**: lab wording across UI/CLI/docs; guard in `tests/test_honest_claims.py`.
-- [ ] **E2** Label every metric as lab-measured on emulated traffic.
+- [x] **E2** Label every metric as lab-measured on emulated traffic. — **Done**: real timings in `soar/soar_engine.py`; `scripts/benchmark_pipeline.py`; README/UI labels.
 - [ ] **E3** Replace "0% false positives" with "0 false positives in N baseline runs", stating N.
 - [ ] **E4** Replace "100% true-positive" with an "X/Y scripted runs detected" count.
 - [ ] **E5** Document how the baseline traffic for the FP test is generated.

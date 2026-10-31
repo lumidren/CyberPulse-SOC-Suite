@@ -199,13 +199,34 @@ class TestSOCLabPlatform(unittest.TestCase):
     def test_soc_metrics_percentiles(self):
         """Verify SOC Metrics Engine computes MTTD, MTTC, and p95 latencies"""
         metrics_engine = SOCMetricsEngine()
+
+        # A fresh engine has no samples and must not invent numbers
+        empty = metrics_engine.get_soc_metrics()
+        self.assertEqual(empty["sample_count"], 0)
+        self.assertEqual(empty["operational_kpis"]["mttd_sec"], "not yet measured")
+        self.assertEqual(empty["latency_percentiles_sec"]["p95"], "not yet measured")
+        self.assertIn("Lab-measured", empty["measurement_basis"])
+
+        for i in range(1, 6):
+            metrics_engine.record_pipeline_execution(
+                detection_ms=1.0 * i, intel_ms=0.5 * i, containment_ms=2.0 * i, total_ms=3.5 * i
+            )
         metrics = metrics_engine.get_soc_metrics()
-        
+
         self.assertIn("operational_kpis", metrics)
         self.assertIn("latency_percentiles_sec", metrics)
+        self.assertEqual(metrics["sample_count"], 5)
         self.assertGreater(metrics["operational_kpis"]["mttd_sec"], 0)
         self.assertGreater(metrics["operational_kpis"]["mttc_sec"], 0)
         self.assertGreaterEqual(metrics["latency_percentiles_sec"]["p95"], metrics["latency_percentiles_sec"]["p50"])
+
+    def test_pipeline_timings_are_measured_not_synthesized(self):
+        """Pipeline timing must be real perf_counter measurements, not padded constants"""
+        incident = self.orchestrator.process_event(simulate_t1110_brute_force())
+        timing = incident["pipeline_timing"]
+        self.assertIn("measurement_basis", timing)
+        # Simulated responders do no I/O; a run taking >1s would indicate padding came back.
+        self.assertLess(timing["total_pipeline_latency_ms"], 1000.0)
 
     def test_attack_graph_generation(self):
         """Verify attack graph generates valid nodes and edges from incident data"""
