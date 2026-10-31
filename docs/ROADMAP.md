@@ -147,7 +147,7 @@ internal identifiers never go to external APIs.
 ## Phase 5 — Engineering quality (F86–F95)
 
 - [x] **F86** ⭐ Docker Compose for a one-command lab start. — **Done** (container run unverified: Docker daemon not running here; `docker compose config` validates): root `compose.yaml`; README quickstart; `tests/test_compose.py`.
-- [ ] **F87** ⭐ GitHub Actions CI: lint, test, security scan.
+- [x] **F87** ⭐ GitHub Actions CI: lint, test, security scan. — **Done**: lint/test/security jobs (earlier commits + E74/E78) plus least-privilege `permissions`, concurrency and timeouts; `tests/test_ci_workflow.py`. CI not yet observed on GitHub.
 - [ ] **F88** Unit and integration tests with coverage badges.
 - [ ] **F89** Terraform or Vagrant for lab provisioning.
 - [ ] **F90** Ansible roles to deploy Sysmon and Wazuh agents.
