@@ -1,16 +1,15 @@
+# Reference-only manifest: NO executable test is shipped in this repository.
+#
+# The lab emulates the process-creation telemetry of a Defender-tampering
+# attempt rather than actually disabling protection on a host.
 attack_technique: T1562.001
-display_name: "Impair Defenses: Disable Windows Defender"
-atomic_tests:
-- name: Disable Windows Defender Real-Time Protection via PowerShell
-  auto_generated_guid: 7891234a-9b12-4112-a123-018274619284
-  description: |
-    Attempts to disable real-time monitoring and script scanning using Set-MpPreference cmdlet.
-  supported_platforms:
-  - windows
-  executor:
-    name: powershell
-    elevation_required: true
-    command: |
-      Set-MpPreference -DisableRealtimeMonitoring $true -DisableScriptScanning $true
-    cleanup_command: |
-      Set-MpPreference -DisableRealtimeMonitoring $false -DisableScriptScanning $false
+display_name: "Impair Defenses: Disable or Modify Tools"
+upstream_reference: "Atomic Red Team, atomics/T1562.001 (run only in your own authorised lab)"
+execution: none
+emulated_by: simulator/attack_simulator.py::simulate_t1562_defender_tamper
+expected_telemetry:
+  - source: Sysmon
+    event_id: 1
+    fields:
+      CommandLine|contains: 'Set-MpPreference'
+expected_rule: SOC-RULE-005

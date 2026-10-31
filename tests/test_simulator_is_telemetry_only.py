@@ -68,5 +68,19 @@ class TestSimulatorIsTelemetryOnly(unittest.TestCase):
             self.assertNotIn(marker, flat)
 
 
+class TestNoShippedAttackTooling(unittest.TestCase):
+
+    def test_atomic_manifests_are_reference_only(self):
+        import yaml
+        folder = os.path.join(ROOT, "simulator", "atomic_tests")
+        for name in os.listdir(folder):
+            with open(os.path.join(folder, name), encoding="utf-8") as fh:
+                manifest = yaml.safe_load(fh)
+            self.assertEqual(manifest["execution"], "none", name)
+            self.assertNotIn("atomic_tests", manifest, name)   # no runnable test definitions
+            self.assertNotIn("executor", str(manifest), name)
+            self.assertIn("emulated_by", manifest, name)
+
+
 if __name__ == "__main__":
     unittest.main()
