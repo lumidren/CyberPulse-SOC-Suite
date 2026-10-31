@@ -211,7 +211,7 @@ DETECTION_CATALOGUE = [
     {
         "detection_id": "SOC-RULE-007",
         "title": "Kerberoasting TGS Ticket Request with RC4 Encryption",
-        "technique_id": "T1558.001",
+        "technique_id": "T1558.003",
         "tactic": "Credential Access",
         "severity": "HIGH",
         "confidence": "HIGH",

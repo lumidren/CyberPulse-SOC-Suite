@@ -2,7 +2,7 @@
 
 | Lifecycle Stage | Status | Author | Target Technique | Threat Actor Alignment |
 | :--- | :--- | :--- | :--- | :--- |
-| **Lab (v2.0)** | **Lab-validated on synthetic data; untested against real-world noise** | lumidren | **MITRE ATT&CK T1558.001** | APT29, FIN6, Silence, Vice Society |
+| **Lab (v2.0)** | **Lab-validated on synthetic data; untested against real-world noise** | lumidren | **MITRE ATT&CK T1558.003** | APT29, FIN6, Silence, Vice Society |
 
 ---
 

@@ -45,7 +45,7 @@ rules:
     soc_rule_id: SOC-RULE-007
     name: Kerberoasting TGS Ticket Request with RC4 Encryption
     action_recommended: RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET
-    version: 1.0.1
+    version: 1.0.2
     detection_sha256: cfc95fb95f160a4c00f910919736ed570f0e7a165d12ff0b52307a1d7cde8a99
   b41289cf-1123-4482-9912-781290341829:
     soc_rule_id: SOC-RULE-008

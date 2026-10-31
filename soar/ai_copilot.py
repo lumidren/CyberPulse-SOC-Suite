@@ -38,6 +38,17 @@ MITRE_TECHNIQUE_KNOWLEDGE = {
             "Restrict Domain Admin privileges and lateral movement."
         ]
     },
+    "T1558.003": {
+        "name": "Steal or Forge Kerberos Tickets: Kerberoasting",
+        "description": "Adversaries may abuse a valid Kerberos ticket-granting ticket (TGT) to request service tickets (TGS) for accounts with SPNs and crack them offline.",
+        "danger_level": "HIGH",
+        "known_actors": ["Wizard Spider", "FIN7"],
+        "typical_remediation": [
+            "Use long, random passwords or gMSAs for service accounts with SPNs.",
+            "Disable RC4 for Kerberos where possible (AES-only service accounts).",
+            "Monitor Security Event 4769 for RC4 (0x17) service-ticket requests."
+        ]
+    },
     "T1110.001": {
         "name": "Brute Force: Password Guessing",
         "description": "Adversaries may use password guessing to attempt to gain access to accounts by systematically trying different passwords.",

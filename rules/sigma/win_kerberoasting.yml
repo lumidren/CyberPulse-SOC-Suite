@@ -3,13 +3,13 @@ id: 9a38df41-6c23-4e89-a112-984712019481
 status: experimental
 description: Detects suspicious Kerberos Service Ticket (TGS) requests with RC4-HMAC (0x17) encryption targeting Service Principal Names (SPNs), characteristic of Kerberoasting attacks.
 references:
-    - https://attack.mitre.org/techniques/T1558/001/
+    - https://attack.mitre.org/techniques/T1558/003/
 author: lumidren (CyberPulse SOC Suite)
 date: 2026-08-23
 modified: 2026-11-01
 tags:
     - attack.credential_access
-    - attack.t1558.001
+    - attack.t1558.003
 logsource:
     product: windows
     service: security
