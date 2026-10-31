@@ -29,6 +29,15 @@ this lab in the formats those tools consume.
 | [BloodHound CE](https://github.com/SpecterOps/BloodHound) (SpecterOps) | Export format of `soar/bloodhound_exporter.py` | Apache 2.0 | Only the JSON schema is produced; no BloodHound code included. |
 | [Atomic Red Team](https://github.com/redcanaryco/atomic-red-team) (Red Canary) | Referenced by technique only in `simulator/atomic_tests/` | MIT | No tests are shipped (reference-only manifests). |
 
+## Sysmon configurations
+
+* `deploy/sysmon/sysmonconfig.xml` is a **minimal, original** configuration
+  written for this lab; it is not derived from a community configuration.
+* `deploy/vagrant/Vagrantfile` downloads **sysmon-modular by Olaf Hartong**
+  (<https://github.com/olafhartong/sysmon-modular>) at provision time. It is
+  not redistributed in this repository; credit belongs to its author, and its
+  own LICENSE governs reuse.
+
 ## Libraries and assets used by the code or console
 
 | Component | Licence (upstream) | Notes |
