@@ -9,7 +9,15 @@ import json
 import time
 from datetime import datetime, timezone
 
+from soar.protected_assets import protected_match
 from soar.safety import AutomationSafety
+
+# Actions that disrupt the target host, and the perimeter block that must never
+# drop one of our own protected addresses.
+HOST_DISRUPTING_ACTIONS = {
+    "ISOLATE_HOST_AND_KILL_PROCESS", "REVERT_DEFENDER_POLICY_AND_ISOLATE", "REMOVE_SCHEDULED_TASK",
+    "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS", "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK", "TERMINATE_PROCESS_TREE",
+}
 
 # Monotonic per-process sequence: IDs must never collide, even within one millisecond.
 _ID_SEQUENCE = itertools.count(1)
@@ -81,6 +89,19 @@ class ResilientContainmentEngine:
             "rollback_plan": {},
             "latency_ms": 0
         }
+
+        # Protected assets are never isolated or blocked through SOAR (any mode, any approval)
+        protection = self._protected_asset_for(action_record)
+        if protection:
+            action_record["status"] = "BLOCKED_PROTECTED_ASSET"
+            action_record["execution_protocol"] = "Protected Asset Allowlist"
+            action_record["execution_log"] = (
+                f"{action_type} refused: {target_host or target_ip} is protected ({protection}). "
+                "Contain it manually through the change process."
+            )
+            action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
+            self.action_registry[action_id] = action_record
+            return action_record
 
         # Handle DRY-RUN Simulation Mode
         if execution_intent == "DRY_RUN_SIMULATION":
@@ -246,6 +267,15 @@ class ResilientContainmentEngine:
             action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
             action_record["execution_log"] = "No disruptive containment policy matched. Staged for analyst review."
 
+    @staticmethod
+    def _protected_asset_for(record):
+        """Protection entry blocking this action, if any."""
+        if record["action_type"] in HOST_DISRUPTING_ACTIONS:
+            return protected_match(host=record.get("target_host"))
+        if record["action_type"] == "BLOCK_SOURCE_IP_FIREWALL":
+            return protected_match(ip=record.get("target_ip"))
+        return None
+
     def pending_approvals(self):
         """Actions staged for analyst sign-off, oldest first."""
         return [r for r in self.action_registry.values() if r["status"] == "PENDING_ANALYST_APPROVAL"]
@@ -261,6 +291,9 @@ class ResilientContainmentEngine:
             return {"status": "ERROR", "message": "An approver identity is required."}
         if self.safety.is_halted():
             return {"status": "ERROR", "message": "Kill switch engaged: approvals cannot execute until it is released."}
+        protection = self._protected_asset_for(record)
+        if protection:
+            return {"status": "ERROR", "message": f"{record['target_host']} is a protected asset ({protection}); contain it manually."}
 
         t_start = time.perf_counter()
         record["approval"] = {

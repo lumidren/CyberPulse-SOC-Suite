@@ -46,9 +46,9 @@ internal identifiers never go to external APIs.
 - [x] **E19** Add a confidence threshold; below it, escalate instead of acting. — **Done**: `RULE_CONFIDENCE` + `CONFIDENCE_THRESHOLD` in `soar/risk_engine.py`; escalation path; tests.
 - [x] **E20** Rate-limit containment actions per hour. — **Done**: rolling-hour budget in `soar/safety.py`, enforced in `execute_containment`; tests with an injected clock.
 - [x] **E21** Circuit breaker: if N hosts are isolated in M minutes, stop and page a human. — **Done**: isolation breaker in `soar/safety.py`; pager via `WebhookDispatcher.dispatch_text`; tests.
-- [ ] **E22** Allowlist of assets that can never be auto-isolated (DCs, SOC hosts, jump boxes).
+- [x] **E22** Allowlist of assets that can never be auto-isolated (DCs, SOC hosts, jump boxes). — **Done**: `soar/protected_assets.py` defaults (DC, SOC subnet, JUMP-*/PAW-*) + `PROTECTED_ASSETS`; enforced in the engine and on approval; tests.
 - [ ] **E23** Protected-accounts list that can never be auto-locked.
-- [ ] **E24** Protect the DC specifically: never auto-isolate 10.0.0.10.
+- [x] **E24** Protect the DC specifically: never auto-isolate 10.0.0.10. — 🔀 **Merged into E22**: `10.0.0.10` (and `WIN-DC01*` via the lab inventory) is a default protected asset; test `test_dc_is_never_isolated_even_with_approval`.
 - [ ] **E25** Auto-expiry (TTL) on isolation rules.
 - [ ] **E26** One-click rollback for every action.
 - [ ] **E27** Store pre-action state so rollback restores it.

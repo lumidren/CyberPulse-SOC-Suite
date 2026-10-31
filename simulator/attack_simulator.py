@@ -18,7 +18,7 @@ def simulate_t1003_lsass_dump():
         "technique_name": "OS Credential Dumping: LSASS Memory",
         "tactic": "Credential Access",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "computer_name": "WIN-DC01.corp.local",
+        "computer_name": "WIN-WORKSTATION09",
         "user": "CORP\\Administrator",
         "source_ip": "185.220.101.33",
         "details": {

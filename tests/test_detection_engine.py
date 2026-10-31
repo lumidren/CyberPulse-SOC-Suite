@@ -156,19 +156,19 @@ class TestSOCLabPlatform(unittest.TestCase):
         containment = ResilientContainmentEngine()
         act = containment.execute_containment(
             action_type="ISOLATE_HOST_AND_KILL_PROCESS",
-            target_host="WIN-DC01.corp.local",
+            target_host="WIN-WORKSTATION09",
             target_ip="185.220.101.33",
             target_user="CORP\\Administrator",
             pid=4812,
             process_name="mimikatz.exe"
         )
         self.assertEqual(act["status"], "SUCCESS")
-        self.assertIn("WIN-DC01.corp.local", containment.host_isolation_registry)
+        self.assertIn("WIN-WORKSTATION09", containment.host_isolation_registry)
 
         # Execute Rollback
         rb = containment.rollback_containment(act["action_id"], actor="analyst_test")
         self.assertEqual(rb["status"], "SUCCESS")
-        self.assertNotIn("WIN-DC01.corp.local", containment.host_isolation_registry)
+        self.assertNotIn("WIN-WORKSTATION09", containment.host_isolation_registry)
 
     def test_action_ids_are_unique_within_a_millisecond(self):
         """Regression: ms-based IDs collided and overwrote registry entries"""
