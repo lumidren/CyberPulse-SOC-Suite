@@ -388,5 +388,38 @@ class TestPreActionState(unittest.TestCase):
         self.assertNotIn("WKS-22", engine.host_isolation_registry)
 
 
+class TestGracefulTermination(unittest.TestCase):
+
+    def test_plan_is_graceful_first_single_pid(self):
+        from soar.process_termination import termination_plan
+        plan = termination_plan(4812, "tool.exe")
+        actions = [s["action"] for s in plan["steps"]]
+        self.assertEqual(actions, ["snapshot_process", "request_exit", "wait", "force_terminate_if_running"])
+        self.assertEqual(plan["steps"][1]["argv"], ["taskkill.exe", "/PID", "4812"])
+        for step in plan["steps"]:
+            self.assertNotIn("/T", step.get("argv", []))
+        self.assertIn("unsaved data", plan["data_loss_risk"])
+
+    def test_system_pids_refused(self):
+        from soar.process_termination import termination_plan
+        with self.assertRaises(ValueError):
+            termination_plan(4, "System")
+
+    def test_ransomware_is_force_killed_with_reason(self):
+        engine = ResilientContainmentEngine()
+        act = engine.execute_containment(
+            action_type="KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS", target_host="WIN-WORKSTATION09",
+            target_ip="10.0.0.45", target_user="CORP\\j.doe", pid=6104, process_name="locker.exe")
+        plan = act["termination_plan"]
+        self.assertEqual(plan["grace_seconds"], 0)
+        self.assertEqual(plan["steps"][-1]["action"], "force_terminate")
+
+    def test_isolation_records_graceful_plan(self):
+        engine = ResilientContainmentEngine()
+        act = stage(engine)
+        engine.approve_action(act["action_id"], approver="analyst_a")
+        self.assertEqual(act["termination_plan"]["grace_seconds"], 15)
+
+
 if __name__ == "__main__":
     unittest.main()

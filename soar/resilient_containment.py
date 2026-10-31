@@ -9,6 +9,7 @@ import json
 import time
 from datetime import datetime, timezone
 
+from soar.process_termination import RANSOMWARE_GRACE_SECONDS, termination_plan
 from soar.protected_assets import protected_account_match, protected_match
 from soar.safety import AutomationSafety
 
@@ -17,6 +18,10 @@ from soar.safety import AutomationSafety
 HOST_DISRUPTING_ACTIONS = {
     "ISOLATE_HOST_AND_KILL_PROCESS", "REVERT_DEFENDER_POLICY_AND_ISOLATE", "REMOVE_SCHEDULED_TASK",
     "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS", "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK", "TERMINATE_PROCESS_TREE",
+}
+# Actions that stop a process (graceful-first plan recorded, see soar/process_termination.py)
+PROCESS_KILLING_ACTIONS = {
+    "ISOLATE_HOST_AND_KILL_PROCESS", "TERMINATE_PROCESS_TREE", "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS",
 }
 # Actions that lock, disable, reset or revoke the target account
 ACCOUNT_DISRUPTING_ACTIONS = {
@@ -189,6 +194,15 @@ class ResilientContainmentEngine:
         action_record["pre_action_state"] = self._capture_state(action_record)
         action_record["status"] = "SUCCESS"
 
+        # Any action that stops a process records a graceful-first termination plan
+        if action_type in PROCESS_KILLING_ACTIONS and pid:
+            grace = RANSOMWARE_GRACE_SECONDS if action_type == "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS" else None
+            kwargs = {"grace_seconds": grace} if grace is not None else {}
+            try:
+                action_record["termination_plan"] = termination_plan(pid, process_name, **kwargs)
+            except (TypeError, ValueError) as exc:
+                action_record["termination_plan"] = {"error": str(exc)}
+
         if action_type == "BLOCK_SOURCE_IP_FIREWALL":
             action_record["execution_protocol"] = "pfSense REST API / iptables Netfilter"
             action_record["execution_log"] = f"[pfSense Gateway 10.0.0.1:8443] Injected packet drop rule: DROP INBOUND TCP/UDP from {target_ip}/32 on WAN."
@@ -201,7 +215,7 @@ class ResilientContainmentEngine:
 
         elif action_type == "ISOLATE_HOST_AND_KILL_PROCESS":
             action_record["execution_protocol"] = "WinRM over TLS (Port 5986) + WFP NetFirewallRule"
-            action_record["execution_log"] = f"[WinRM TLS 5986 -> {target_host}] Injected WFP emergency isolation filter (allow only 10.0.1.10). Terminated PID {pid} ({process_name})."
+            action_record["execution_log"] = f"[WinRM TLS 5986 -> {target_host}] Injected WFP emergency isolation filter (allow only 10.0.1.10). Stopping PID {pid} ({process_name}) graceful-first (see termination_plan)."
             action_record["rollback_plan"] = {
                 "method": "WINRM_POWERSHELL",
                 "command": "Remove-NetFirewallRule -DisplayName 'SOC-Emergency-Isolation' -ErrorAction SilentlyContinue"
@@ -215,7 +229,7 @@ class ResilientContainmentEngine:
 
         elif action_type == "TERMINATE_PROCESS_TREE":
             action_record["execution_protocol"] = "WinRM + Active Directory LDAP"
-            action_record["execution_log"] = f"[WinRM -> {target_host}] Terminated process tree for {process_name} (PID: {pid}). Revoked session and locked account {target_user}."
+            action_record["execution_log"] = f"[WinRM -> {target_host}] Stopping {process_name} (PID {pid}) graceful-first, children by PID (see termination_plan). Revoked session and locked account {target_user}."
             action_record["rollback_plan"] = {
                 "method": "ACTIVE_DIRECTORY_LDAP",
                 "command": f"Set-ADUser -Identity '{target_user}' -Enabled $true"
@@ -233,7 +247,7 @@ class ResilientContainmentEngine:
 
         elif action_type == "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS":
             action_record["execution_protocol"] = "WinRM + Volume Shadow Copy (VSS)"
-            action_record["execution_log"] = f"[WinRM -> {target_host}] Terminated ransomware PID {pid}. Restored canary files from VSS Snapshot #41."
+            action_record["execution_log"] = f"[WinRM -> {target_host}] Force-terminated ransomware PID {pid} immediately (no grace period: encryption in progress). Restored canary files from VSS Snapshot #41."
             action_record["rollback_plan"] = {"method": "VSS_VERIFIED", "note": "Files restored from shadow copy."}
 
         elif action_type == "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET":
