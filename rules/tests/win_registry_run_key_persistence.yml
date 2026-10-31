@@ -1,0 +1,21 @@
+# Positive/negative samples for rules/sigma/win_registry_run_key_persistence.yml (synthetic lab events)
+rule: win_registry_run_key_persistence.yml
+positive:
+- name: Run key pointing to Public folder
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\reg.exe'
+      CommandLine: 'reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v Updater /t REG_SZ /d C:\Users\Public\u.exe
+        /f'
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: Query the Run key
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\reg.exe'
+      CommandLine: 'reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run'
+      ParentImage: 'C:\Windows\System32\cmd.exe'

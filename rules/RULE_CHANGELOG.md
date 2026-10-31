@@ -108,3 +108,23 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-023: Script Host Running a Script from a User-Writable Path (`win_script_host_user_writable.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-024: Run Key Persistence Added via reg.exe (`win_registry_run_key_persistence.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-025: Service Installed from a Suspicious Path or Command (`win_service_install_suspicious_path.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-026: Account Added to the Local Administrators Group (`win_local_admin_group_addition.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-027: WMI Event Subscription Persistence (`win_wmi_event_subscription.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-028: UAC Bypass via ms-settings Shell Open Command (`win_uac_bypass_ms_settings.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

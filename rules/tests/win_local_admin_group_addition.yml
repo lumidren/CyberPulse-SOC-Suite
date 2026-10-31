@@ -1,0 +1,18 @@
+# Positive/negative samples for rules/sigma/win_local_admin_group_addition.yml (synthetic lab events)
+rule: win_local_admin_group_addition.yml
+positive:
+- name: Backdoor account added to Administrators
+  event:
+    event_id: 4732
+    event_source: Security
+    details:
+      TargetUserName: Administrators
+      MemberName: 'CORP\svc_helpdesk2'
+negative:
+- name: User added to Remote Desktop Users
+  event:
+    event_id: 4732
+    event_source: Security
+    details:
+      TargetUserName: Remote Desktop Users
+      MemberName: 'CORP\j.doe'

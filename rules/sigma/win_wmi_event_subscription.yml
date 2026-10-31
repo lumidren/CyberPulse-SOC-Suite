@@ -1,0 +1,29 @@
+title: WMI Event Subscription Persistence
+id: a0292324-c8d5-43e7-8812-5548d1eb5e16
+status: experimental
+description: Detects creation of a WMI event filter, consumer or binding (Sysmon 19/20/21) with a command-line or
+    script consumer, a stealthy persistence technique.
+references:
+- https://attack.mitre.org/techniques/T1546/003/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.persistence
+- attack.privilege_escalation
+- attack.t1546.003
+logsource:
+    product: windows
+    category: wmi_event
+detection:
+    selection_consumer:
+        EventID: 20
+        Type:
+        - Command Line
+        - Script
+    selection_binding:
+        EventID: 21
+    condition: 1 of selection_*
+falsepositives:
+- Management agents (SCCM, monitoring) that register WMI consumers
+level: high
