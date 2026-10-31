@@ -26,6 +26,16 @@ There is no database: restarting the server erases incident data.
   and command lines. Treat the server as holding personal data: restrict who
   can sign in, keep it on loopback or behind TLS, and limit retention.
 
+## Who can view telemetry
+
+Incident data contains the underlying Sysmon/Security event fields. Anyone
+holding the API key, or a dashboard session created with it, can read it;
+there is no finer-grained role yet. Every read of a telemetry-bearing
+endpoint (`/api/incidents*`, `/api/alerts`, `/api/approvals`, `/api/syslog*`)
+writes a `DATA_ACCESS` audit-log line with the client IP and how the caller
+authenticated (`api-key` or `session`). Review those lines to see who viewed
+the Sysmon streams, and share the API key only with people who need it.
+
 ## Data minimisation
 
 Ingested events keep only the top-level fields the pipeline uses and an

@@ -293,6 +293,8 @@ SESSION_COOKIE = "cp_session"
 SESSION_TTL_MIN = int(os.environ.get("SESSION_TTL_MIN", "480"))
 COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true" if ENV == "production" else "false").lower() == "true"
 session_store = SessionStore(ttl_sec=SESSION_TTL_MIN * 60)
+# Endpoints whose responses contain telemetry; every read is audit-logged (E55)
+TELEMETRY_VIEW_PREFIXES = ("/api/incidents", "/api/alerts", "/api/approvals", "/api/syslog")
 # Static files reachable without a session (everything else in web/ needs login)
 PUBLIC_STATIC_PATHS = {"/login.html", "/login.js", "/styles.css", "/favicon.ico"}
 
@@ -346,6 +348,13 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if api_key_header:
             return self._key_matches(api_key_header.strip())
         return False
+
+    def _principal(self):
+        """How the caller authenticated, for the audit trail (never the secret itself)."""
+        if self._has_valid_api_key():
+            return "api-key"
+        session = self._session()
+        return f"session:{session['principal']}" if session else "anonymous"
 
     def _csrf_ok(self):
         """Cookie-authenticated state changes need the session's CSRF token and a same-origin request.
@@ -543,6 +552,10 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if path.startswith("/api/"):
             if not self._check_api_access():
                 return
+            if path.startswith(TELEMETRY_VIEW_PREFIXES):
+                # Who looked at telemetry (Sysmon/Security events, evidence, reports), and how
+                audit_logger.info("DATA_ACCESS client=%s principal=%s path=%s",
+                                  self._client_ip(), self._principal(), path)
         elif path not in PUBLIC_STATIC_PATHS and not self._session():
             # Console pages and scripts require a dashboard session
             self._redirect("/login.html")
