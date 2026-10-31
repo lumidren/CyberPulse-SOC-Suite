@@ -16,7 +16,7 @@ this lab in the formats those tools consume.
 | :--- | :--- | :--- | :--- |
 | [Wazuh](https://wazuh.com) | SIEM rules/decoders in `rules/wazuh/`, `deploy/wazuh/`; container in `deploy/docker-compose.yml` | GPLv2 (Wazuh manager/agent) | Our XML rules are original lab content. |
 | [Sysmon](https://learn.microsoft.com/sysinternals/downloads/sysmon) (Microsoft Sysinternals) | Telemetry schema emulated by the simulator; `deploy/sysmon/sysmonconfig.xml` | Sysinternals Software License Terms (proprietary, free to use) | Binary is downloaded by the Vagrantfile from Microsoft at provision time, never redistributed here. |
-| [Sigma](https://github.com/SigmaHQ/sigma) | Rule format for `rules/sigma/` | Sigma specification: LGPL; SigmaHQ rule repository: Detection Rule License (DRL) 1.1 | See `rules/sigma/README.md` for rule provenance. |
+| [Sigma](https://github.com/SigmaHQ/sigma) | Rule format for `rules/sigma/` | Sigma specification: LGPL; SigmaHQ rule repository: Detection Rule License (DRL) 1.1 | Rules written for this lab; credit for the public patterns they follow (notably SigmaHQ) in `rules/sigma/README.md`. |
 | [pfSense](https://www.pfsense.org) (Netgate) | Simulated perimeter-block responder | pfSense CE: Apache 2.0 | Only described/simulated; no pfSense code included. |
 | [OpenSearch](https://opensearch.org) | Indexer container | Apache 2.0 | |
 | [TheHive](https://strangebee.com/thehive/) (StrangeBee) | Case template `integrations/thehive/` | TheHive 5: StrangeBee licence (community/commercial editions) | Template is original lab content. |

@@ -4,7 +4,7 @@ status: experimental
 description: Detects process access requests targeting lsass.exe memory space (GrantedAccess 0x1010 or 0x1400), indicative of Mimikatz or ProcDump credential dumping.
 references:
     - https://attack.mitre.org/techniques/T1003/001/
-author: SOC Portfolio Lab Team
+author: lumidren (CyberPulse SOC Suite)
 date: 2026/08/15
 tags:
     - attack.credential_access

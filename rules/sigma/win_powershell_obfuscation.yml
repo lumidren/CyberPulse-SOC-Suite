@@ -4,7 +4,7 @@ status: experimental
 description: Detects obfuscated or policy-bypassing PowerShell invocations commonly used by download cradles and in-memory stagers, including encoded commands, profile bypass, and hidden windows.
 references:
     - https://attack.mitre.org/techniques/T1059/001/
-author: CyberPulse SOC Suite
+author: lumidren (CyberPulse SOC Suite)
 date: 2026/08/21
 tags:
     - attack.execution
