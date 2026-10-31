@@ -421,5 +421,34 @@ class TestGracefulTermination(unittest.TestCase):
         self.assertEqual(act["termination_plan"]["grace_seconds"], 15)
 
 
+class TestEvidenceBeforeKill(unittest.TestCase):
+
+    def test_snapshot_taken_before_termination(self):
+        engine = ResilientContainmentEngine()
+        act = stage(engine)
+        engine.approve_action(act["action_id"], approver="analyst_a")
+        snap = act["pre_containment_snapshot"]
+        self.assertEqual(snap["process"]["pid"], 4812)
+        self.assertEqual(snap["memory_acquisition"]["status"], "SIMULATED")
+        self.assertTrue(snap["memory_acquisition"]["order"][0].startswith("1. process memory dump"))
+        self.assertEqual(act["termination_plan"]["steps"][0]["action"], "snapshot_process")
+
+    def test_ip_block_needs_no_process_snapshot(self):
+        engine = ResilientContainmentEngine()
+        act = engine.execute_containment(
+            action_type="BLOCK_SOURCE_IP_FIREWALL", target_host="CORP-RDP-GW01", target_ip="203.0.113.7",
+            target_user="admin", pid=None, process_name=None)
+        self.assertNotIn("pre_containment_snapshot", act)
+
+    def test_pipeline_collects_evidence_before_containment(self):
+        from datetime import datetime
+        orch = SOAROrchestrator(policy_mode="AUTOMATIC")
+        from simulator.attack_simulator import simulate_t1110_brute_force
+        inc = orch.process_event(simulate_t1110_brute_force())
+        collected = datetime.fromisoformat(inc["evidence_package"]["collection_metadata"]["timestamp"])
+        acted = datetime.fromisoformat(inc["containment_action"]["timestamp"])
+        self.assertLessEqual(collected, acted)
+
+
 if __name__ == "__main__":
     unittest.main()

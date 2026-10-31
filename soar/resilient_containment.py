@@ -9,6 +9,7 @@ import json
 import time
 from datetime import datetime, timezone
 
+from soar.evidence_collector import VolatileEvidenceCollector
 from soar.process_termination import RANSOMWARE_GRACE_SECONDS, termination_plan
 from soar.protected_assets import protected_account_match, protected_match
 from soar.safety import AutomationSafety
@@ -66,8 +67,9 @@ class CircuitBreaker:
         return True
 
 class ResilientContainmentEngine:
-    def __init__(self, safety=None):
+    def __init__(self, safety=None, evidence_collector=None):
         self.safety = safety or AutomationSafety()
+        self.evidence_collector = evidence_collector or VolatileEvidenceCollector()
         self.action_registry = {} # action_id -> action record
         self.circuit_breaker = CircuitBreaker()
         self.host_isolation_registry = set()
@@ -193,6 +195,11 @@ class ResilientContainmentEngine:
         # Snapshot the (simulated) responder state first so rollback can restore it exactly
         action_record["pre_action_state"] = self._capture_state(action_record)
         action_record["status"] = "SUCCESS"
+
+        # Evidence before disruption: snapshot process + memory before any kill or isolation
+        if action_type in PROCESS_KILLING_ACTIONS or action_type in ("REVERT_DEFENDER_POLICY_AND_ISOLATE",):
+            action_record["pre_containment_snapshot"] = self.evidence_collector.snapshot_process(
+                target_host, pid, process_name)
 
         # Any action that stops a process records a graceful-first termination plan
         if action_type in PROCESS_KILLING_ACTIONS and pid:

@@ -316,7 +316,10 @@ class SOAROrchestrator:
         if execution_intent:
             policy_decision["execution_intent"] = execution_intent
 
-        # Stage 5: Resilient Containment Dispatch
+        # Stage 5a: Volatile evidence is collected BEFORE any containment can run
+        evidence_package = self.evidence_collector.collect_volatile_evidence(event, None)
+
+        # Stage 5b: Resilient Containment Dispatch
         target_host = event.get("computer_name")
         target_ip = event.get("source_ip")
         target_user = event.get("user")
@@ -368,8 +371,7 @@ class SOAROrchestrator:
             contained=(containment_action["status"] == "SUCCESS")
         )
 
-        # Stage 8: Pre-Containment Volatile Evidence Collection
-        evidence_package = self.evidence_collector.collect_volatile_evidence(event, containment_action)
+        # Stage 8: Attach the pre-containment evidence collected in stage 5a
         incident["evidence_package"] = evidence_package
         incident["thehive_evidence_attachment"] = self.evidence_collector.package_for_thehive(evidence_package)
 

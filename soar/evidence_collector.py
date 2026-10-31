@@ -52,6 +52,33 @@ class VolatileEvidenceCollector:
         
         return evidence_package
 
+    def snapshot_process(self, host, pid, process_name, reason="pre-containment"):
+        """Process + memory evidence captured immediately before a kill or isolation.
+
+        Lab responders are simulated, so this records *what a real responder must
+        collect and in which order*; no memory is actually acquired here.
+        """
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        return {
+            "collected_at": now,
+            "reason": reason,
+            "host": host,
+            "process": {"pid": pid, "image": process_name},
+            "collected_items": [
+                "process metadata (image path, command line, parent, user, start time, hashes)",
+                "open handles and loaded modules",
+                "active network connections for the PID",
+            ],
+            "memory_acquisition": {
+                "order": [
+                    "1. process memory dump of the target PID (before termination)",
+                    "2. full physical memory image of the host (before network isolation, if policy allows)",
+                ],
+                "status": "SIMULATED",
+                "note": "Lab responders are simulated; no memory was acquired.",
+            },
+        }
+
     def package_for_thehive(self, evidence_package):
         """
         Wraps the evidence into a TheHive 5 attachment-compatible structure.
