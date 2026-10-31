@@ -8,6 +8,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from soar.input_validation import DETAIL_FIELD_ALLOWLIST  # noqa: E402
+from soar.sigma_correlation import CorrelationEngine  # noqa: E402
 from soar.sigma_engine import SigmaEngine  # noqa: E402
 
 TACTICS = {"initial_access", "execution", "persistence", "privilege_escalation", "defense_evasion",
@@ -33,6 +34,15 @@ class TestRuleCoverage(unittest.TestCase):
         aliases = {"EventID", "Computer", "IpAddress", "SourceIp", "sourceIPAddress", "IPAddress", "User"}
         needed = {spec.split("|")[0] for r in self.rules for sel in r.selections.values()
                   for item in (sel if isinstance(sel, list) else [sel]) if isinstance(item, dict) for spec in item}
+        self.assertEqual(needed - DETAIL_FIELD_ALLOWLIST - aliases, set())
+
+    def test_correlation_fields_survive_ingest_minimisation(self):
+        aliases = {"EventID", "Computer", "IpAddress", "SourceIp", "sourceIPAddress", "IPAddress", "User"}
+        engine = CorrelationEngine()
+        needed = {spec.split("|")[0] for r in engine.base_rules.values() for sel in r.selections.values()
+                  if isinstance(sel, dict) for spec in sel}
+        for corr in engine.rules:
+            needed |= set(corr.group_by) | ({corr.value_field} if corr.value_field else set())
         self.assertEqual(needed - DETAIL_FIELD_ALLOWLIST - aliases, set())
 
 
