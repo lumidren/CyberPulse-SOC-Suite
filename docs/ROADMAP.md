@@ -53,7 +53,7 @@ internal identifiers never go to external APIs.
 - [x] **E26** One-click rollback for every action. — **Done**: `ROLLBACK_PLAYBOOKS` covers every action in `ACTION_TIERS` with FULL/PARTIAL reversibility; endpoint/UI updated; tests.
 - [x] **E27** Store pre-action state so rollback restores it. — **Done**: `pre_action_state` snapshot in `_apply_action`; state-aware `_release_state`; tests.
 - [x] **E28** Replace `taskkill /F /T` with graceful-first termination, or document the data-loss risk. — **Done**: `soar/process_termination.py`; plan recorded on kill actions; risk documented in `docs/ARCHITECTURE.md`; tests.
-- [ ] **E29** Snapshot memory/process info before killing a process.
+- [x] **E29** Snapshot memory/process info before killing a process. — **Done**: `snapshot_process` in `soar/evidence_collector.py`, recorded by the engine before kills/isolation; pipeline reordered; tests.
 - [ ] **E30** Export scheduled-task XML before removing a task.
 
 ## Phase 2b — Simulator safety (E31–E42)
@@ -212,7 +212,7 @@ internal identifiers never go to external APIs.
 - [ ] **F45** Email quarantine playbook for phishing.
 - [ ] **F46** Phishing triage playbook (URL detonation, header analysis).
 - [ ] **F47** Automatic sandbox submission for suspicious files.
-- [ ] **F48** Memory acquisition before isolation.
+- [x] **F48** Memory acquisition before isolation. — 🔀 **Merged into E29**: memory acquisition order (process dump before kill, host image before isolation) is recorded in `pre_containment_snapshot`; simulated in the lab.
 - [ ] **F49** Automatic evidence collection (triage package) per incident.
 - [ ] **F50** Chain-of-custody hashing for collected evidence.
 
