@@ -111,6 +111,7 @@ class SyslogReceiver:
                     if not event.get("source_ip"):
                         event["source_ip"] = addr[0]
                     event = validate_event(event)  # same validation as the webhook receiver
+                    event.pop("dropped_fields", None)
                     event["received_at"] = time.time()
                     self.events.append(event)
                     self.total_parsed += 1
@@ -176,10 +177,12 @@ class WebhookIngestionHandler:
         except ValidationError as exc:
             return {"status": "ERROR", "error": str(exc), "problems": exc.problems}
 
+        dropped = event.pop("dropped_fields", [])
         return {
             "status": "SUCCESS",
             "event_id": event["event_id"],
-            "normalized_event": event
+            "normalized_event": event,
+            "dropped_fields": dropped,
         }
 
 if __name__ == '__main__':

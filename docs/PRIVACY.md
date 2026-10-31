@@ -25,6 +25,15 @@ There is no database: restarting the server erases incident data.
   and command lines. Treat the server as holding personal data: restrict who
   can sign in, keep it on loopback or behind TLS, and limit retention.
 
+## Data minimisation
+
+Ingested events keep only the top-level fields the pipeline uses and an
+allowlist of detail fields read by detection rules, risk scoring and the
+triage views (`soar/input_validation.py::DETAIL_FIELD_ALLOWLIST`). Anything
+else is dropped before storage; the ingest response lists the dropped field
+*names* (never their values). Extend the list with `INGEST_EXTRA_FIELDS` only
+when a new rule needs a field.
+
 ## Never commit real telemetry
 
 Only synthetic data belongs in this repository. Real event logs (`.evtx`,

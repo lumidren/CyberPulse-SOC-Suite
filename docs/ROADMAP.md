@@ -95,7 +95,7 @@ internal identifiers never go to external APIs.
 - [x] **E45** Mask usernames in demo data and screenshots. — **Done**: `soar/privacy.py`, masking in `_send_json` for incident endpoints and in reports (default on); `tests/test_privacy.py`.
 - [x] **E46** Don't commit real telemetry or logs. — **Done**: verified 0 tracked telemetry files; `.gitignore` patterns; `tests/test_no_real_telemetry.py`; PRIVACY.md rule.
 - [x] **E47** Set and enforce a log retention period. — **Done**: `apply_retention` (sweeper), bounded syslog deque, rotating `LOG_FILE`; PRIVACY.md updated; tests.
-- [ ] **E48** Data minimization: ingest only the fields detections need.
+- [x] **E48** Data minimization: ingest only the fields detections need. — **Done**: `DETAIL_FIELD_ALLOWLIST` in `soar/input_validation.py`; dropped field names reported; PRIVACY.md section; tests.
 - [ ] **E49** Document that IPs sent to VirusTotal/AbuseIPDB leave your environment.
 - [ ] **E50** Never send internal/RFC1918 IPs to external APIs.
 - [ ] **E51** Never send hostnames, usernames or file contents to enrichment APIs.

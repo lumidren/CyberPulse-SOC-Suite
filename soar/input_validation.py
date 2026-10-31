@@ -8,6 +8,7 @@ control characters are stripped from free-text values.
 """
 
 import ipaddress
+import os
 import re
 
 from soar.redaction import redact
@@ -24,6 +25,31 @@ EVENT_ID_RE = re.compile(r"^[A-Za-z0-9_.:-]{1,64}$")
 SOURCE_RE = re.compile(r"^[A-Za-z0-9:/._ -]{1,128}$")
 TECHNIQUE_RE = re.compile(r"^(T\d{4}(\.\d{3})?|Unknown|BENIGN)$")
 DETAIL_KEY_RE = re.compile(r"^[A-Za-z0-9_.|-]{1,64}$")
+# Data minimisation (roadmap E48): only detail fields that detection rules, risk
+# scoring or the triage views read are kept; everything else is dropped at ingest.
+# Extend with INGEST_EXTRA_FIELDS (comma-separated) when a new rule needs a field.
+DETAIL_FIELD_ALLOWLIST = {
+    # process / Sysmon
+    "Image", "CommandLine", "ParentImage", "ParentCommandLine", "ProcessId", "SourceImage", "SourceProcessId",
+    "TargetImage", "TargetProcessId", "GrantedAccess", "CallTrace", "ImageLoaded", "Hashes", "FileHash_SHA256",
+    "TargetFilename", "RansomNote", "Signed",
+    # Windows Security
+    "LogonType", "FailedAttemptsCount", "TargetUserName", "TargetDomainName", "Status", "SubStatus",
+    "WorkstationName", "IpPort", "TaskName", "TaskContent", "Principal", "ServiceName", "TicketOptions",
+    "TicketEncryptionType", "AccessMask", "Properties", "SubjectUserName",
+    # cloud
+    "eventName", "eventSource", "roleArn", "durationSeconds", "Category", "OperationName",
+    "RiskLevelDuringSignIn", "RiskEventTypes", "Location", "PreviousLocation",
+    # provenance
+    "simulation", "CredentialMaterial", "raw",
+}
+
+
+def detail_allowlist():
+    extra = {f.strip() for f in os.environ.get("INGEST_EXTRA_FIELDS", "").split(",") if f.strip()}
+    return DETAIL_FIELD_ALLOWLIST | extra
+
+
 CONTROL_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 
@@ -121,6 +147,11 @@ def validate_event(payload):
     if problems:
         raise ValidationError(problems)
 
+    # Minimise: keep only fields the pipeline uses; report dropped field *names* only
+    allowed = detail_allowlist()
+    dropped = sorted(k for k in details if k not in allowed)
+    details = {k: v for k, v in details.items() if k in allowed}
+
     return {
         "event_id": event_id,
         "event_source": event_source,
@@ -131,4 +162,5 @@ def validate_event(payload):
         "source_ip": source_ip,
         "details": details,
         "simulation": bool(payload.get("simulation", False)),
+        "dropped_fields": dropped,
     }
