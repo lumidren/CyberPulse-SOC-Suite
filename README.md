@@ -56,6 +56,15 @@ under *SOAR Policies* below.
 
 ---
 
+## 📜 Credits & Third-Party Licences
+
+CyberPulse configures and integrates with Wazuh, Sysmon, Sigma, pfSense,
+OpenSearch, TheHive, MISP, Splunk, Velociraptor, osquery, YARA, BloodHound CE
+and others; none of their binaries are redistributed here. See
+[`docs/THIRD_PARTY_NOTICES.md`](docs/THIRD_PARTY_NOTICES.md) for credits and licences.
+
+---
+
 ## 🔏 Privacy
 
 The lab stores incidents, action records and ingested events **in memory only**;
