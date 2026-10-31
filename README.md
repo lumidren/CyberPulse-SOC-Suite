@@ -221,6 +221,16 @@ $$\text{Risk Score} = (S_{\text{rule}} \times 0.35) + (W_{\text{tactic}} \times 
 
 ---
 
+## 🗺️ ATT&CK Coverage Heatmap
+
+[`docs/coverage/attack_navigator_layer.json`](docs/coverage/attack_navigator_layer.json) is generated from the
+rules (`python scripts/export_navigator.py`). Load it in the
+[ATT&CK Navigator](https://mitre-attack.github.io/attack-navigator/) via *Open Existing Layer -> Upload*.
+Score = number of lab rules per technique. A coloured cell means a rule exists and passes its synthetic
+samples, not that the technique is reliably detected on real traffic.
+
+---
+
 ## ⏱️ Pipeline Latency (Lab-Measured on Emulated Traffic)
 
 > **Every number in this section is lab-measured on emulated telemetry.** It is
