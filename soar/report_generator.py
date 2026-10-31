@@ -62,6 +62,13 @@ class IncidentReportGenerator:
             </div>
             """
 
+        # Third-party attribution for any external enrichment verdicts in this incident
+        external = (incident.get("threat_intel", {}) or {}).get("external", {}) or {}
+        attributions = sorted({v.get("attribution") for part in external.values() if isinstance(part, dict)
+                               for v in part.get("verdicts", []) if v.get("attribution")})
+        attribution_html = "".join(f"<div>{a}</div>" for a in attributions) or \
+            "<div>No third-party reputation data used (lab fixture only).</div>"
+
         # Format remediation items
         remediation_items = ""
         for r in ai.get("remediation_guidance", []):
@@ -150,6 +157,10 @@ class IncidentReportGenerator:
     <div class="section-card">
         <h3 class="section-title">6. Post-Incident Remediation & Hardening Plan</h3>
         <ul style="font-size:12px;color:#cbd5e1;">{remediation_items}</ul>
+    </div>
+
+    <div class="section-card" style="font-size:11px;color:#94a3b8;">
+        <strong>Threat-intel sources:</strong> {attribution_html}
     </div>
 
     <div class="signoff">

@@ -235,5 +235,23 @@ class TestAbuseIpdbLimits(unittest.TestCase):
         self.assertNotIn("/report", inspect.getsource(enrichment))
 
 
+class TestAttribution(unittest.TestCase):
+
+    def test_every_provider_verdict_is_attributed(self):
+        c = client(RecordingTransport())
+        for verdict in c.lookup("8.8.8.8")["verdicts"]:
+            self.assertIn(verdict["source"], verdict["attribution"])
+            self.assertIn("https://", verdict["attribution"])
+
+    def test_report_lists_sources(self):
+        from soar.report_generator import IncidentReportGenerator
+        incident = {"threat_intel": {"external": {"ip": client(RecordingTransport()).lookup("8.8.8.8")}}}
+        html = IncidentReportGenerator().generate_html_report(incident)
+        self.assertIn("Reputation data from VirusTotal", html)
+        self.assertIn("Reputation data from AbuseIPDB", html)
+        empty = IncidentReportGenerator().generate_html_report({})
+        self.assertIn("lab fixture only", empty)
+
+
 if __name__ == "__main__":
     unittest.main()
