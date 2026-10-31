@@ -169,7 +169,7 @@ internal identifiers never go to external APIs.
 - [ ] **F8** Rule-quality score (coverage, FP risk, data-source dependency).
 - [x] **F9** ⭐ Coverage heatmap exported as an ATT&CK Navigator layer. — **Done**: `scripts/export_navigator.py` → `docs/coverage/attack_navigator_layer.json`; README section; `tests/test_navigator_layer.py`.
 - [x] **F10** Data-source coverage analysis. — **Done**: `scripts/coverage_report.py` → `docs/coverage/DATA_SOURCES.md`; `tests/test_coverage_reports.py`.
-- [ ] **F11** Detection gap report: techniques with no rule.
+- [x] **F11** Detection gap report: techniques with no rule. — **Done**: `rules/coverage_targets.yml` → `docs/coverage/GAPS.md` (24/35 targets covered, 11 accepted gaps with blockers, 0 open).
 - [ ] **F12** Sigma correlation rules (multi-event chains).
 - [ ] **F13** Behavioral baselining (rare parent-child process pairs).
 - [ ] **F14** Threshold tuning with historical data.

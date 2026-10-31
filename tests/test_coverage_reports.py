@@ -7,7 +7,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from scripts.coverage_report import OUT, REPORTS, data_sources  # noqa: E402
+from scripts.coverage_report import OUT, REPORTS, data_sources, gaps, load_targets, simulated_techniques  # noqa: E402
 from soar.sigma_engine import SigmaEngine  # noqa: E402
 
 
@@ -22,6 +22,21 @@ class TestCoverageReports(unittest.TestCase):
         table = data_sources()
         self.assertEqual(sum(len(e["rules"]) for e in table.values()), len(SigmaEngine().rules))
         self.assertFalse(any("/" in source and "(" not in source for source in table), "unmapped logsource")
+
+    def test_gap_report_has_no_open_gaps(self):
+        # Every uncovered target must carry a recorded blocker; anything else is an oversight.
+        _, uncovered = gaps()
+        self.assertEqual([t for t, e in uncovered.items() if not e.get("blocker")], [])
+
+    def test_simulated_techniques_are_all_detected(self):
+        covered = {tid.split(".")[0] for r in SigmaEngine().rules for tid in r.technique_ids}
+        covered |= {tid for r in SigmaEngine().rules for tid in r.technique_ids}
+        self.assertEqual(simulated_techniques() - covered, set())
+
+    def test_targets_are_valid_technique_ids(self):
+        for tid, entry in load_targets().items():
+            self.assertRegex(tid, r"^T\d{4}(\.\d{3})?$")
+            self.assertTrue(entry.get("name") and entry.get("tactic") and entry.get("why"), tid)
 
 
 if __name__ == "__main__":
