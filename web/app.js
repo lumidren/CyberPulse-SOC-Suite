@@ -6,9 +6,24 @@
 // Authentication: the console uses the HttpOnly session cookie set at sign-in
 // (see login.html). No API key is ever embedded in or stored by this script.
 const _nativeFetch = window.fetch;
+let csrfToken = null;  // per-session token, held in memory only
+
+async function ensureCsrfToken() {
+    if (csrfToken) return csrfToken;
+    const res = await _nativeFetch("/api/session", { credentials: "same-origin" });
+    const data = await res.json();
+    if (!data.authenticated) window.location.replace("/login.html");
+    csrfToken = data.csrf_token;
+    return csrfToken;
+}
+
 window.fetch = async function(url, options = {}) {
     if (typeof url === "string" && url.startsWith("/api/")) {
         options = Object.assign({ credentials: "same-origin" }, options || {});
+        const method = (options.method || "GET").toUpperCase();
+        if (method !== "GET") {
+            options.headers = Object.assign({}, options.headers || {}, { "X-CSRF-Token": await ensureCsrfToken() });
+        }
         const res = await _nativeFetch(url, options);
         if (res.status === 401) {
             window.location.replace("/login.html");
