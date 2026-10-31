@@ -171,7 +171,7 @@ internal identifiers never go to external APIs.
 - [x] **F10** Data-source coverage analysis. — **Done**: `scripts/coverage_report.py` → `docs/coverage/DATA_SOURCES.md`; `tests/test_coverage_reports.py`.
 - [x] **F11** Detection gap report: techniques with no rule. — **Done**: `rules/coverage_targets.yml` → `docs/coverage/GAPS.md` (24/35 targets covered, 11 accepted gaps with blockers, 0 open).
 - [x] **F12** Sigma correlation rules (multi-event chains). — **Done**: `soar/sigma_correlation.py` (event_count / value_count / temporal) + `rules/sigma/correlations/`: SOC-RULE-043 raw-4625 brute force, SOC-RULE-044 password spraying, SOC-RULE-045 mass file write (closes the F19 mass-rename note; Sysmon has no rename event, see rule description). Not converted to SIEM queries (documented).
-- [ ] **F13** Behavioral baselining (rare parent-child process pairs).
+- [x] **F13** Behavioral baselining (rare parent-child process pairs). — **Done**: `soar/process_baseline.py`, `scripts/rare_process_pairs.py` → `docs/BEHAVIORAL_BASELINE.md`. Triage hint only, never drives containment. Honest result: does not discriminate on the 4-pair synthetic baseline.
 - [ ] **F14** Threshold tuning with historical data.
 - [ ] **F15** Allowlist/exception management per rule.
 - [ ] **F16** Canary-token and honeypot detection layer.
