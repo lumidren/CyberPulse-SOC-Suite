@@ -91,8 +91,7 @@ class SOCMetricsEngine:
                 "mttd_sec": self._mean_sec(self.detection_latencies),   # Mean Time to Detect (in-process)
                 "mtta_sec": self._mean_sec(self.intel_latencies),       # Mean enrichment time (local cache)
                 "mttc_sec": self._mean_sec(self.containment_latencies), # Mean simulated-containment time
-                "total_mttp_sec": self._mean_sec(self.total_pipeline_latencies),
-                "analyst_baseline_sec": 1200.0 # 20 minutes manual baseline
+                "total_mttp_sec": self._mean_sec(self.total_pipeline_latencies)
             },
             "latency_percentiles_sec": {
                 "p50": pct_sec(50),

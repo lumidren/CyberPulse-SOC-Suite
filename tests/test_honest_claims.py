@@ -33,6 +33,8 @@ BANNED_CLAIMS = [
      "Self-authored attack runs are a regression check; report 'X/Y scripted runs detected'."),
     ("E6", re.compile(r"15\s?[-–]\s?25\s?min", re.I),
      "Uncited manual-analyst benchmark; remove it or cite a source."),
+    ("E7", re.compile(r"analyst_baseline|Manual Baseline", re.I),
+     "Automated in-process seconds are not comparable to a human triage cycle."),
 ]
 
 
