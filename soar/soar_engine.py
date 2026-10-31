@@ -135,6 +135,18 @@ class SOAROrchestrator:
         self.containment_engine.safety.pager = lambda message: self.dispatcher.dispatch_text(
             f"🚨 [CyberPulse PAGE] {message}")
 
+    def expire_containment(self):
+        """Roll back expired actions and record it on their incidents."""
+        expired = self.containment_engine.expire_actions()
+        for entry in expired:
+            inc = self.dfir_engine.find_by_action_id(entry["original_action_id"])
+            if inc:
+                self.dfir_engine.refresh_status(inc)
+                self.dfir_engine.add_analyst_note(
+                    inc["incident_id"], f"Containment {entry['original_action_id']} expired and was rolled back. "
+                    "Renew it if the threat is still active.", author="ttl-expiry")
+        return expired
+
     @property
     def alert_history(self):
         """Backward compatibility for existing API callers"""

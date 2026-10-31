@@ -629,6 +629,23 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             )
             self._send_json(200, {"status": "SUCCESS", "kill_switch": state})
 
+        elif path.startswith("/api/actions/") and path.endswith("/extend"):
+            parts = [s for s in path.split("/") if s]
+            try:
+                minutes = int(data.get("minutes", 60))
+            except (TypeError, ValueError):
+                minutes = 0
+            if len(parts) != 4 or not 1 <= minutes <= 1440:
+                self._send_json(400, {"error": "Provide 'minutes' between 1 and 1440."})
+                return
+            actor = str(data.get("actor", "")).strip()
+            result = orchestrator.containment_engine.extend_action(parts[2], minutes, actor)
+            if result["status"] != "SUCCESS":
+                self._send_json(400, result)
+                return
+            audit_logger.info("TTL_EXTEND client=%s action=%s minutes=%s actor=%s", self._client_ip(), parts[2], minutes, actor)
+            self._send_json(200, result)
+
         elif path.startswith("/api/incidents/") and path.endswith("/rollback"):
             inc_id = path.split("/")[3]
             if inc_id in orchestrator.dfir_engine.incidents:
@@ -706,8 +723,21 @@ def create_server(host=None, port=None):
     ThreadingHTTPServer.daemon_threads = True
     return ThreadingHTTPServer((host, port), SOCHttpRequestHandler)
 
+def _start_ttl_sweeper(interval_sec=60):
+    """Background thread that rolls back containment whose TTL has expired."""
+    def sweep():
+        while True:
+            time.sleep(interval_sec)
+            try:
+                for entry in orchestrator.expire_containment():
+                    audit_logger.info("TTL_EXPIRY action=%s rollback=%s", entry["original_action_id"], entry["rollback_id"])
+            except Exception:
+                logger.exception("TTL sweeper failed")
+    threading.Thread(target=sweep, name="ttl-sweeper", daemon=True).start()
+
 def run_server(port=None, host=None):
     httpd = create_server(host=host, port=port)
+    _start_ttl_sweeper()
     bound_host, bound_port = httpd.server_address[:2]
     display_host = "localhost" if bound_host in ("0.0.0.0", "::") else bound_host
 

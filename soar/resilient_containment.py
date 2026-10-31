@@ -169,6 +169,7 @@ class ResilientContainmentEngine:
         # Execute Concrete Containment Playbooks
         self._apply_action(action_record)
         self.safety.record_execution(action_record)
+        self._set_expiry(action_record)
 
         # Measured in-process time only. Responders are simulated, so this is NOT
         # a network round-trip to WinRM/pfSense/AD and must not be presented as one.
@@ -302,6 +303,38 @@ class ResilientContainmentEngine:
             return protected_account_match(record.get("target_user"))
         return None
 
+    def _set_expiry(self, record, minutes=None):
+        """Stamp a TTL on isolation / block actions so they cannot linger forever."""
+        ttl = minutes if minutes is not None else self.safety.ttl_for(record["action_type"])
+        if not ttl or record["status"] != "SUCCESS":
+            return
+        expires = self.safety.clock() + ttl * 60
+        record["expires_at_epoch"] = expires
+        record["expires_at"] = datetime.fromtimestamp(expires, timezone.utc).isoformat()
+
+    def extend_action(self, action_id, minutes, actor):
+        """Analyst renews an active action's TTL from now."""
+        record = self.action_registry.get(action_id)
+        if not record or record["status"] != "SUCCESS" or "expires_at_epoch" not in record:
+            return {"status": "ERROR", "message": f"Action {action_id} is not an active, expiring action."}
+        if not actor:
+            return {"status": "ERROR", "message": "An actor is required to extend an action."}
+        self._set_expiry(record, minutes=int(minutes))
+        record.setdefault("ttl_extensions", []).append(
+            {"actor": actor, "minutes": int(minutes), "timestamp": datetime.now(timezone.utc).isoformat()})
+        return {"status": "SUCCESS", "action": record}
+
+    def expire_actions(self):
+        """Roll back every active action whose TTL has passed. Returns the rollback entries."""
+        now = self.safety.clock()
+        expired = []
+        for record in list(self.action_registry.values()):
+            if record["status"] == "SUCCESS" and record.get("expires_at_epoch", float("inf")) <= now:
+                entry = self.rollback_containment(record["action_id"], actor="ttl-expiry")
+                entry["reason"] = "TTL expired; renew explicitly if containment is still needed."
+                expired.append(entry)
+        return expired
+
     def pending_approvals(self):
         """Actions staged for analyst sign-off, oldest first."""
         return [r for r in self.action_registry.values() if r["status"] == "PENDING_ANALYST_APPROVAL"]
@@ -335,6 +368,7 @@ class ResilientContainmentEngine:
         self._apply_action(record)
         # Approved actions count toward the hourly budget (they are not blocked by it)
         self.safety.record_execution(record)
+        self._set_expiry(record)
         record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
         return {"status": "SUCCESS", "action": record}
 
