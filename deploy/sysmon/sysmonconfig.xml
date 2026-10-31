@@ -1,3 +1,13 @@
+<!--
+  CyberPulse lab Sysmon configuration (minimal, original).
+  Written for this lab to emit the events its detections use (process creation,
+  LSASS access, driver loads, file creation). It is not derived from a community
+  configuration. For broad production coverage, consider well-maintained community
+  configurations such as Olaf Hartong's sysmon-modular
+  (https://github.com/olafhartong/sysmon-modular), crediting the author and
+  following the licence in that repository.
+  Sysmon itself is Microsoft Sysinternals software (see docs/THIRD_PARTY_NOTICES.md).
+-->
 <Sysmon schemaversion="4.90">
   <!-- Hash algorithms: SHA256 and IMPHASH -->
   <HashAlgorithms>SHA256,IMPHASH</HashAlgorithms>
