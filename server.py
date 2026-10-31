@@ -591,6 +591,11 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/safety":
             self._send_json(200, orchestrator.containment_engine.safety.status())
 
+        elif path == "/api/enrichment":
+            client = orchestrator.intel_client
+            self._send_json(200, {"enabled": client.enabled,
+                                  "providers": {"virustotal": bool(client.vt_key), "abuseipdb": bool(client.abuse_key)}})
+
         elif path == "/api/version":
             self._send_json(200, {
                 "service": "cyberpulse-soc",
@@ -605,7 +610,8 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json(200, metrics)
 
         elif path == "/api/health":
-            health = orchestrator.health_monitor.check_all_integrations()
+            health = orchestrator.health_monitor.check_all_integrations(
+                enrichment_enabled=orchestrator.intel_client.enabled)
             self._send_json(200, health)
 
         elif path == "/api/detections":
@@ -800,6 +806,15 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             )
             self._send_json(200, {"status": "SUCCESS", "decision": decision, "incident_id": inc["incident_id"] if inc else None,
                                   "action": result["action"]})
+
+        elif path == "/api/enrichment/config":
+            enabled = data.get("enabled")
+            if not isinstance(enabled, bool):
+                self._send_json(400, {"error": "Provide {'enabled': true|false}."})
+                return
+            orchestrator.intel_client.enabled = enabled
+            audit_logger.info("ENRICHMENT_TOGGLE client=%s enabled=%s", self._client_ip(), enabled)
+            self._send_json(200, {"status": "SUCCESS", "enabled": enabled})
 
         elif path == "/api/safety/kill-switch":
             actor = str(data.get("actor", "")).strip()

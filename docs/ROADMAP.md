@@ -99,7 +99,7 @@ internal identifiers never go to external APIs.
 - [ ] **E49** Document that IPs sent to VirusTotal/AbuseIPDB leave your environment.
 - [x] **E50** Never send internal/RFC1918 IPs to external APIs. — **Done**: `soar/enrichment.py` (`is_shareable_ip`, opt-in client) wired into `enrich_threat_intel`; `tests/test_enrichment.py`. Not run against live APIs (needs your keys).
 - [x] **E51** Never send hostnames, usernames or file contents to enrichment APIs. — **Done**: `classify_indicator`/`lookup` in `soar/enrichment.py`; pipeline sends only IP + hash; spy test over all scenarios.
-- [ ] **E52** Option to disable external enrichment.
+- [x] **E52** Option to disable external enrichment. — **Done**: health probes gated on enrichment; `/api/enrichment` + `/api/enrichment/config`; PRIVACY.md updated; tests.
 - [ ] **E53** Document the local LRU IoC cache and how to clear it.
 - [ ] **E54** Use synthetic data in the public demo.
 - [ ] **E55** Audit-log note on who can view the Sysmon streams.

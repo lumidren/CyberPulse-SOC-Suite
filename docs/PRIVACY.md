@@ -53,8 +53,8 @@ you need full names for a real investigation. Take screenshots with masking on.
 ## What leaves the machine
 
 * Notification webhooks (Discord/Slack), only if you configure a URL; SSRF-guarded.
-* The integration health check (`GET /api/health`) currently sends reachability
-  probes to `api.virustotal.com` and `api.abuseipdb.com`. No indicator or
-  personal data is included, but the request itself reveals that this host
-  runs the lab.
+* External threat-intel enrichment and the related health-check probes are
+  **off by default** (`EXTERNAL_ENRICHMENT_ENABLED=false`, or toggle at runtime
+  with `POST /api/enrichment/config`). While off, nothing is sent to
+  VirusTotal or AbuseIPDB, not even a reachability probe.
 * No incident data is sent to any third party.
