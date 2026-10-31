@@ -170,6 +170,18 @@ class TestSOCLabPlatform(unittest.TestCase):
         self.assertEqual(rb["status"], "SUCCESS")
         self.assertNotIn("WIN-DC01.corp.local", containment.host_isolation_registry)
 
+    def test_action_ids_are_unique_within_a_millisecond(self):
+        """Regression: ms-based IDs collided and overwrote registry entries"""
+        containment = ResilientContainmentEngine()
+        ids = set()
+        for _ in range(200):
+            act = containment.execute_containment(
+                action_type="BLOCK_SOURCE_IP_FIREWALL", target_host="CORP-RDP-GW01", target_ip="203.0.113.7",
+                target_user="admin", pid=None, process_name=None)
+            ids.add(act["action_id"])
+        self.assertEqual(len(ids), 200)
+        self.assertEqual(len(containment.action_registry), 200)
+
     def test_dry_run_policy_mode(self):
         """Verify DRY_RUN mode simulates containment without host disruption"""
         orch_dry = SOAROrchestrator(policy_mode="DRY_RUN")

@@ -4,9 +4,19 @@ Provides fault-tolerant execution, non-blocking enrichment fallback,
 idempotent operations, and automated containment rollback capabilities.
 """
 
+import itertools
 import json
 import time
 from datetime import datetime, timezone
+
+# Monotonic per-process sequence: IDs must never collide, even within one millisecond.
+_ID_SEQUENCE = itertools.count(1)
+
+
+def next_id(prefix):
+    """Unique, sortable ID such as ACT-1730412345-000042."""
+    return f"{prefix}-{int(time.time())}-{next(_ID_SEQUENCE):06d}"
+
 
 class CircuitBreaker:
     def __init__(self, failure_threshold=3, recovery_time_sec=60):
@@ -47,7 +57,7 @@ class ResilientContainmentEngine:
         Executes idempotent policy-driven containment with audit logging and rollback metadata.
         """
         t_start = time.perf_counter()
-        action_id = f"ACT-{int(time.time()*1000)%1000000:06d}"
+        action_id = next_id("ACT")
         idempotency_key = f"{action_type}:{target_host}:{target_ip}:{pid}"
 
         action_record = {
@@ -264,7 +274,7 @@ class ResilientContainmentEngine:
         target_user = record["target_user"]
 
         rollback_entry = {
-            "rollback_id": f"RB-{int(time.time()*1000)%1000000:06d}",
+            "rollback_id": next_id("RB"),
             "original_action_id": action_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "actor": actor,
