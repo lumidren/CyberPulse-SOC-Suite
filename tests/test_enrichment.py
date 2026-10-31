@@ -253,5 +253,32 @@ class TestAttribution(unittest.TestCase):
         self.assertIn("lab fixture only", empty)
 
 
+class TestNoRedistribution(unittest.TestCase):
+
+    def test_exports_strip_provider_data(self):
+        from soar.enrichment import strip_provider_data
+        incident = {"incident_id": "INC-1", "threat_intel": {"external": client(RecordingTransport()).lookup("8.8.8.8")}}
+        exported = strip_provider_data(incident)
+        self.assertNotIn("verdicts", str(exported["threat_intel"]["external"]))
+        self.assertIn("verdicts", incident["threat_intel"]["external"])  # in-memory copy untouched
+
+    def test_no_provider_responses_committed(self):
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        markers = ("last_analysis_stats", "abuseConfidenceScore", "last_analysis_results")
+        allowed = {os.path.join("soar", "enrichment.py"), os.path.join("tests", "test_enrichment.py")}
+        offenders = []
+        for dirpath, dirs, files in os.walk(root):
+            dirs[:] = [d for d in dirs if d not in (".git", "__pycache__")]
+            for name in files:
+                rel = os.path.relpath(os.path.join(dirpath, name), root)
+                if rel in allowed or not name.endswith((".json", ".py", ".md", ".js", ".html", ".csv", ".yml")):
+                    continue
+                with open(os.path.join(dirpath, name), encoding="utf-8", errors="ignore") as fh:
+                    text = fh.read()
+                if any(m in text for m in markers):
+                    offenders.append(rel)
+        self.assertEqual(offenders, [])
+
+
 if __name__ == "__main__":
     unittest.main()

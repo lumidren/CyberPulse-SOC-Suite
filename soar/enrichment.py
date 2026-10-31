@@ -41,6 +41,16 @@ ATTRIBUTION = {
 }
 
 
+def strip_provider_data(incident):
+    """Copy of an incident with third-party verdict payloads removed, for anything written
+    to disk or shared (exports). Providers' data is used, never redistributed (E61)."""
+    stripped = copy.deepcopy(incident)
+    intel = stripped.get("threat_intel") or {}
+    if "external" in intel:
+        intel["external"] = {"note": "Third-party reputation data removed from exports (provider terms)."}
+    return stripped
+
+
 def attributed(verdict):
     verdict["attribution"] = ATTRIBUTION.get(verdict.get("source"), "")
     return verdict
