@@ -51,6 +51,27 @@ class TestMasking(unittest.TestCase):
             httpd.server_close()
 
 
+class TestDataMinimisation(unittest.TestCase):
+
+    def test_unneeded_fields_dropped_at_ingest(self):
+        from soar.syslog_receiver import WebhookIngestionHandler
+        res = WebhookIngestionHandler().handle_ingest({
+            "event_id": 1, "computer_name": "WIN-WORKSTATION09", "source_ip": "10.0.0.45",
+            "employee_email": "someone@example.com",           # unknown top-level field
+            "details": {"CommandLine": "whoami", "HomeAddress": "1 Main St", "SalaryBand": "B"}})
+        event = res["normalized_event"]
+        self.assertNotIn("employee_email", event)
+        self.assertEqual(set(event["details"]), {"CommandLine"})
+        self.assertEqual(res["dropped_fields"], ["HomeAddress", "SalaryBand"])
+        self.assertNotIn("1 Main St", str(res))
+
+    def test_simulator_fields_are_all_allowlisted(self):
+        from simulator.attack_simulator import SCRIPTED_GENERATORS
+        from soar.input_validation import DETAIL_FIELD_ALLOWLIST
+        for _name, gen in SCRIPTED_GENERATORS:
+            self.assertEqual(set(gen()["details"]) - DETAIL_FIELD_ALLOWLIST, set(), _name)
+
+
 class TestRetention(unittest.TestCase):
 
     def test_old_incidents_and_actions_are_purged(self):
