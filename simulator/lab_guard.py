@@ -11,12 +11,55 @@ This is a deliberate speed bump: emulated attack telemetry should never be
 injected into a pipeline that also handles real events by accident.
 """
 
+import fnmatch
 import functools
+import ipaddress
 import os
 
 
 class LabModeRequired(RuntimeError):
     """Raised when the simulator is invoked without the explicit lab flag."""
+
+
+class TargetNotAllowed(RuntimeError):
+    """Raised when a simulated event would target something outside the lab."""
+
+
+DEFAULT_LAB_CIDRS = "10.0.0.0/16"
+DEFAULT_LAB_CLOUD_TARGETS = "aws-lab-account-*,cyberpulse-lab.onmicrosoft.com"
+CLOUD_SOURCES = {"aws:cloudtrail", "azure:signinlogs"}
+
+
+def lab_cidrs():
+    raw = os.environ.get("CYBERPULSE_LAB_CIDRS", DEFAULT_LAB_CIDRS)
+    return [ipaddress.ip_network(c.strip(), strict=False) for c in raw.split(",") if c.strip()]
+
+
+def lab_cloud_targets():
+    raw = os.environ.get("CYBERPULSE_LAB_CLOUD_TARGETS", DEFAULT_LAB_CLOUD_TARGETS)
+    return [p.strip().lower() for p in raw.split(",") if p.strip()]
+
+
+def resolve_target_ip(event):
+    """Target IP of a simulated event: explicit target_ip, else the lab inventory address."""
+    from soar.protected_assets import ASSET_INVENTORY
+    return event.get("target_ip") or ASSET_INVENTORY.get(event.get("computer_name", ""))
+
+
+def validate_target(event):
+    """Refuse events whose target is outside the lab allowlist (lab CIDRs / lab cloud accounts)."""
+    target = event.get("computer_name", "")
+    if event.get("event_source") in CLOUD_SOURCES:
+        if not any(fnmatch.fnmatch(target.lower(), p) for p in lab_cloud_targets()):
+            raise TargetNotAllowed(f"Cloud target {target!r} is not an allowlisted lab account/tenant.")
+        return event
+    ip = resolve_target_ip(event)
+    if not ip:
+        raise TargetNotAllowed(f"Target {target!r} has no lab inventory address; refusing to simulate.")
+    addr = ipaddress.ip_address(ip)
+    if not any(addr in net for net in lab_cidrs()):
+        raise TargetNotAllowed(f"Target {target} ({ip}) is outside the lab CIDRs {DEFAULT_LAB_CIDRS!r}.")
+    return event
 
 
 LAB_FLAG = "CYBERPULSE_LAB_MODE"
@@ -39,5 +82,5 @@ def lab_only(generator):
     @functools.wraps(generator)
     def wrapper(*args, **kwargs):
         require_lab_mode()
-        return generator(*args, **kwargs)
+        return validate_target(generator(*args, **kwargs))
     return wrapper

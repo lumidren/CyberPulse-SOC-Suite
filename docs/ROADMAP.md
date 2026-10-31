@@ -60,7 +60,7 @@ internal identifiers never go to external APIs.
 
 - [x] **E31** Bold warning: lab use only, never on production or networks you don't own. — **Done**: warning in README, simulator docstrings and `start_lab.py` banner; test.
 - [x] **E32** Simulator refuses to run unless a lab flag is set. — **Done**: `simulator/lab_guard.py` decorator on every generator; API 403; scripts/CLI/CI/.env updated; tests.
-- [ ] **E33** Target allowlist limited to the lab CIDR.
+- [x] **E33** Target allowlist limited to the lab CIDR. — **Done**: `validate_target` in `simulator/lab_guard.py` (lab CIDRs + lab cloud targets) applied to every generator; tests.
 - [ ] **E34** Block the simulator from running against public IPs.
 - [ ] **E35** Confirm the LSASS "dump" is simulated, not a real credential dump.
 - [ ] **E36** If it touches real credentials, document that and use dummy accounts only.
