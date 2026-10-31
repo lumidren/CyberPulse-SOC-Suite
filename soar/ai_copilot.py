@@ -1,6 +1,5 @@
 import json
 import logging
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +109,7 @@ class SOCCopilot:
         risk = incident.get("risk_assessment", {})
         intel = incident.get("threat_intel", {})
         containment = incident.get("containment_action", {})
-        
+
         technique_id = rule.get("technique_id", "Unknown")
         tech_info = MITRE_TECHNIQUE_KNOWLEDGE.get(technique_id, {
             "name": "Unknown Technique",
@@ -124,7 +123,7 @@ class SOCCopilot:
         target_host = telemetry.get("target_host", telemetry.get("hostname", "Unknown Host"))
         source_ip = telemetry.get("source_ip", "Unknown IP")
         risk_score = risk.get("risk_score", 50)
-        
+
         # 1. Executive Summary
         action_taken = containment.get("action", "No automated containment action was taken")
         if containment.get("status") == "success":
@@ -141,7 +140,7 @@ class SOCCopilot:
         # 2. Root Cause Analysis
         user = telemetry.get("user", "Unknown User")
         process_name = telemetry.get("process_name", "Unknown Process")
-        
+
         rca = {
             "initial_vector": f"Potential exploitation or access from {source_ip} leveraging {process_name}.",
             "privilege_escalation_path": f"Monitored account '{user}' executing actions aligned with {tech_info['name']}.",
@@ -156,7 +155,7 @@ class SOCCopilot:
         remediation.append(f"Reset credentials for user account '{user}' across all domains.")
         if intel.get("indicators"):
             remediation.append("Block identified malicious indicators (IPs, Hashes) at the perimeter firewall and EDR.")
-        
+
         # Limit to 4-6 items
         remediation = remediation[:6]
 

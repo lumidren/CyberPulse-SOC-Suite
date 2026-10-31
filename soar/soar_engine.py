@@ -1,6 +1,6 @@
 """
 SOAR Engine & Detection Orchestrator for the CyberPulse SOC Lab
-Integrates Detection Matching, Non-Blocking Threat Intel, Multi-Factor Risk Scoring, 
+Integrates Detection Matching, Non-Blocking Threat Intel, Multi-Factor Risk Scoring,
 Configurable Policy Evaluation, Resilient Containment, DFIR Case Generation,
 Attack Graph Visualization, DFIR Evidence Collection, AI Analyst Copilot,
 Live Syslog Ingestion, Identity Blast Radius Analysis, and Observability.
@@ -322,7 +322,7 @@ class SOAROrchestrator:
     def process_event(self, event, custom_webhook_url=None, execution_intent=None):
         """
         Full Closed-Loop SOC Pipeline Execution:
-        Adversary Emulation ➔ Telemetry ➔ Detection ➔ Enrichment ➔ Risk Scoring ➔ 
+        Adversary Emulation ➔ Telemetry ➔ Detection ➔ Enrichment ➔ Risk Scoring ➔
         Policy Decision ➔ Resilient Containment ➔ DFIR Incident ➔ Metrics ➔ Notifications
         """
         # All stage timings below are wall-clock measurements of this process

@@ -1,6 +1,6 @@
 """
 Lab Backend & REST API Server for the CyberPulse SOC Lab
-Provides endpoints for Incident Triage, DFIR Timelines, SOAR Rollbacks, 
+Provides endpoints for Incident Triage, DFIR Timelines, SOAR Rollbacks,
 Performance Metrics, Integration Health, Detection Catalogue, and Purple Team Scenarios.
 """
 
@@ -672,7 +672,8 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             ]
             self._send_json(200, {
                 "total_rules": len(rules),
-                "validation_note": "Counts come from scripts/validate_detections.py on self-authored synthetic events; not real-world efficacy. No rule has been tested against real-world noise.",
+                "validation_note": ("Counts come from scripts/validate_detections.py on self-authored synthetic events; "
+                                    "not real-world efficacy. No rule has been tested against real-world noise."),
                 "rules": rules
             })
 

@@ -4,7 +4,6 @@ Transforms the simulated Active Directory topology into BloodHound CE (v4.x/v5.x
 compatible JSON graph export files (users.json, groups.json, computers.json).
 """
 
-import json
 from datetime import datetime, timezone
 from soar.identity_graph import LAB_AD_TOPOLOGY
 
@@ -155,4 +154,5 @@ class BloodHoundExporter:
 if __name__ == "__main__":
     exporter = BloodHoundExporter()
     bundle = exporter.export_all()
-    print(f"[*] Exported {bundle['users']['meta']['count']} users, {bundle['groups']['meta']['count']} groups, {bundle['computers']['meta']['count']} computers.")
+    print(f"[*] Exported {bundle['users']['meta']['count']} users, {bundle['groups']['meta']['count']} groups, "
+          f"{bundle['computers']['meta']['count']} computers.")

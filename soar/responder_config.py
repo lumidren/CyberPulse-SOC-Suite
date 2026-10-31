@@ -11,12 +11,11 @@ they were real so the documented deployment is safe by construction:
   never a built-in or domain-wide admin (see docs/SERVICE_ACCOUNT.md).
 """
 
+import os
 import re
+from urllib.parse import urlparse
 
 PRIVILEGED_IDENTITY_RE = re.compile(r"(?i)(^|\\)(administrator|admin|root|krbtgt|domain admins?|enterprise admins?)$")
-
-import os
-from urllib.parse import urlparse
 
 
 def winrm_settings(env=None):

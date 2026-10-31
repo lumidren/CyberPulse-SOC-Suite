@@ -11,7 +11,6 @@ no credential access, no network traffic).
 
 import json
 import random
-import time
 from datetime import datetime, timezone
 
 from simulator.lab_guard import lab_only

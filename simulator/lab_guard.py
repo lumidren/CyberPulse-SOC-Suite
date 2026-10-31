@@ -18,6 +18,7 @@ import os
 import threading
 import time
 from collections import deque
+from typing import Any, Callable, Deque, Dict, List, Optional, Tuple
 
 
 class LabModeRequired(RuntimeError):
@@ -36,7 +37,7 @@ DEFAULT_LAB_CLOUD_TARGETS = "aws-lab-account-*,cyberpulse-lab.onmicrosoft.com"
 CLOUD_SOURCES = {"aws:cloudtrail", "azure:signinlogs"}
 
 
-def lab_cidrs():
+def lab_cidrs() -> List[Any]:
     """Configured lab ranges. Publicly routable ranges are rejected outright."""
     raw = os.environ.get("CYBERPULSE_LAB_CIDRS", DEFAULT_LAB_CIDRS)
     nets = [ipaddress.ip_network(c.strip(), strict=False) for c in raw.split(",") if c.strip()]
@@ -46,17 +47,17 @@ def lab_cidrs():
     return nets
 
 
-def lab_cloud_targets():
+def lab_cloud_targets() -> List[str]:
     raw = os.environ.get("CYBERPULSE_LAB_CLOUD_TARGETS", DEFAULT_LAB_CLOUD_TARGETS)
     return [p.strip().lower() for p in raw.split(",") if p.strip()]
 
 
-def lab_accounts():
+def lab_accounts() -> List[str]:
     raw = os.environ.get("CYBERPULSE_LAB_ACCOUNTS", DEFAULT_LAB_ACCOUNTS)
     return [p.strip().lower() for p in raw.split(",") if p.strip()]
 
 
-def validate_credential_attack(event):
+def validate_credential_attack(event: Dict[str, Any]) -> Dict[str, Any]:
     """Simulated credential attacks may only name dummy lab accounts and carry no password material."""
     if not str(event.get("technique_id", "")).startswith(CREDENTIAL_ATTACK_TECHNIQUES):
         return event
@@ -78,16 +79,16 @@ class SimulationThrottle:
     traffic and are not throttled.
     """
 
-    def __init__(self, clock=time.monotonic):
+    def __init__(self, clock: Callable[[], float] = time.monotonic) -> None:
         self.clock = clock
         self.limits = {
             "brute_force": int(os.environ.get("SIM_BRUTE_FORCE_PER_MIN", "6")),
             "any": int(os.environ.get("SIM_PER_MIN", "60")),
         }
-        self._windows = {k: deque() for k in self.limits}
+        self._windows: Dict[str, Deque[float]] = {k: deque() for k in self.limits}
         self._lock = threading.Lock()
 
-    def allow(self, techniques):
+    def allow(self, techniques: List[str]) -> Tuple[bool, Optional[str]]:
         """Record one simulation covering `techniques`; False if any cap is reached."""
         kinds = ["any"]
         if any(str(t).startswith(CREDENTIAL_ATTACK_TECHNIQUES) for t in techniques):
@@ -105,13 +106,13 @@ class SimulationThrottle:
         return True, None
 
 
-def resolve_target_ip(event):
+def resolve_target_ip(event: Dict[str, Any]) -> Optional[str]:
     """Target IP of a simulated event: explicit target_ip, else the lab inventory address."""
     from soar.protected_assets import ASSET_INVENTORY
     return event.get("target_ip") or ASSET_INVENTORY.get(event.get("computer_name", ""))
 
 
-def validate_target(event):
+def validate_target(event: Dict[str, Any]) -> Dict[str, Any]:
     """Refuse events whose target is outside the lab allowlist (lab CIDRs / lab cloud accounts)."""
     target = event.get("computer_name", "")
     if event.get("event_source") in CLOUD_SOURCES:
@@ -134,11 +135,11 @@ def validate_target(event):
 LAB_FLAG = "CYBERPULSE_LAB_MODE"
 
 
-def lab_mode_enabled():
+def lab_mode_enabled() -> bool:
     return os.environ.get(LAB_FLAG, "").strip().lower() == "true"
 
 
-def require_lab_mode():
+def require_lab_mode() -> None:
     if not lab_mode_enabled():
         raise LabModeRequired(
             f"The attack simulator only runs in a declared lab: set {LAB_FLAG}=true "
@@ -146,17 +147,17 @@ def require_lab_mode():
         )
 
 
-def tag_simulated(event):
+def tag_simulated(event: Dict[str, Any]) -> Dict[str, Any]:
     """Mark an event as synthetic so no consumer can mistake it for real telemetry."""
     event["simulation"] = True
     event.setdefault("details", {})["simulation"] = True
     return event
 
 
-def lab_only(generator):
+def lab_only(generator: Callable[..., Dict[str, Any]]) -> Callable[..., Dict[str, Any]]:
     """Decorator: refuse to emit attack telemetry outside lab mode; tag what is emitted."""
     @functools.wraps(generator)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Dict[str, Any]:
         require_lab_mode()
         return tag_simulated(validate_credential_attack(validate_target(generator(*args, **kwargs))))
     return wrapper

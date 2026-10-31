@@ -13,6 +13,9 @@ Signals:
 * live VirusTotal / AbuseIPDB verdicts, when external enrichment is enabled.
 """
 
+from typing import Any, Dict, List, Optional
+
+
 FIXTURE_TIMESTAMP = "static lab fixture (synthetic, no lookup time)"
 MIN_CORROBORATING_SOURCES = 2
 UNCORROBORATED_WEIGHT = 0.5
@@ -22,7 +25,7 @@ VT_FLAG_ENGINES = 3
 ABUSE_FLAG_CONFIDENCE = 50
 
 
-def _signals(intel):
+def _signals(intel: Dict[str, Any]) -> List[Dict[str, Any]]:
     signals = []
     fixture = intel.get("ip_reputation", {}) or {}
     vt = fixture.get("virustotal_positives") or 0
@@ -50,7 +53,7 @@ def _signals(intel):
     return signals
 
 
-def consensus(intel):
+def consensus(intel: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     """Return {'score', 'raw_score', 'sources', 'flagging_sources', 'corroborated'}."""
     signals = _signals(intel or {})
     flagging = [s for s in signals if s["flags"]]

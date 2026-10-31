@@ -1,10 +1,9 @@
 """
 Multi-Factor Risk & Policy Decision Engine for CyberPulse SOC Suite
-Calculates composite risk scores based on Asset Criticality, Account Privilege, 
+Calculates composite risk scores based on Asset Criticality, Account Privilege,
 MITRE Tactic Weight, Threat Intel Reputation, and Historical Frequency.
 """
 
-import json
 import os
 import time
 

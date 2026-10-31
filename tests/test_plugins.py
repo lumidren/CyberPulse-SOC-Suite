@@ -41,7 +41,7 @@ class TestPlugins(unittest.TestCase):
         engine = ResilientContainmentEngine()
         staged = engine.execute_containment(
             action_type="NOTIFY_ASSET_OWNER", target_host="WIN-WORKSTATION09", target_ip="10.0.0.45",
-            target_user="CORP\j.doe", pid=None, process_name=None, execution_intent="PENDING_APPROVAL")
+            target_user=r"CORP\j.doe", pid=None, process_name=None, execution_intent="PENDING_APPROVAL")
         engine.safety.engage_kill_switch("lead", "test")
         self.assertEqual(engine.approve_action(staged["action_id"], approver="a")["status"], "ERROR")
         engine.safety.release_kill_switch("lead", "test")

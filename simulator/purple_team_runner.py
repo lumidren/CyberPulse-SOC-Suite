@@ -122,7 +122,7 @@ class PurpleTeamRunner:
 
             stage_verified = False
             matched_rule_id = alert.get("rule", {}).get("rule_id") if alert else None
-            
+
             if alert and matched_rule_id == stage["expected_rule"]:
                 stage_verified = True
             else:

@@ -154,7 +154,7 @@ internal identifiers never go to external APIs.
 - [x] **F91** Structured logging and metrics (Prometheus, Grafana). — **Done**: `soar/observability.py`, `LOG_FORMAT=json`, `/metrics`; `deploy/monitoring/` Prometheus + Grafana examples (statically tested only); tests.
 - [x] **F92** Plugin architecture for new enrichers and responders. — **Done**: `soar/plugins.py` registry + allowlisted loader; `plugins/` examples; engine/pipeline wiring; `tests/test_plugins.py`.
 - [x] **F93** Config file with schema validation. — **Done**: `soar/config.py` schema + `python -m soar.config --check`; `config/cyberpulse.example.yml`; startup validation in `server.py`; `tests/test_config.py`.
-- [ ] **F94** Type hints and static analysis (mypy, ruff).
+- [x] **F94** Type hints and static analysis (mypy, ruff). — **Done**: `pyproject.toml` ruff + mypy config; codebase ruff-clean; 10 modules strictly typed; CI lint/type steps; `requirements-typecheck.txt` (hash-pinned).
 - [ ] **F95** Release process with tags and semantic versioning.
 
 ## Phase 6 — Detection engineering (F1–F20)

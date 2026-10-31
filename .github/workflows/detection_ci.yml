@@ -42,10 +42,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install --require-hashes -r requirements.txt
         pip install --require-hashes -r requirements-dev.txt
+        pip install --require-hashes -r requirements-typecheck.txt
 
-    - name: Lint (flake8 critical errors)
-      run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+    - name: Lint (ruff, config in pyproject.toml)
+      run: ruff check .
+
+    - name: Type check (mypy, strict on safety-critical modules)
+      run: mypy
 
     - name: Run Unit & Integration Tests with coverage (floor in .coveragerc)
       run: |

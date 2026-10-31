@@ -6,7 +6,6 @@ Author: lumidren (https://github.com/lumidren/CyberPulse-SOC-Suite)
 
 import os
 import sys
-import time
 import json
 import unittest
 
@@ -19,9 +18,9 @@ from soar.soar_engine import SOAROrchestrator
 from server import run_server
 
 BANNER = r"""
-  ______               __                 _______         __                 
- /      \             |  \               |       \       |  \                
-|  $$$$$$\__    __  __| $$  ______   ____| $$$$$$$\__   _| $$  _______  ____ 
+  ______               __                 _______         __
+ /      \             |  \               |       \       |  \
+|  $$$$$$\__    __  __| $$  ______   ____| $$$$$$$\__   _| $$  _______  ____
 | $$   \$$  \  /  \|  \$$ |      \ /      \ $$__/  \ | | | $$ /       \/      \
 | $$     \$$\/  $$$$$$| $$ \$$$$$$\  $$$$$$\ $$    $$ | | | $$|  $$$$$$$  $$$$$$\
 | $$   __ >$$  $$ | $$| $$ /      $$ $$  | $$ $$$$$$$| | | | $$ \$$    \| $$    $$
@@ -70,7 +69,7 @@ def run_purple_campaign(scenario_key):
     runner = PurpleTeamRunner(orchestrator)
     print(f"\n[*] Launching Purple Team Scenario: {scenario_key}...")
     res = runner.run_scenario(scenario_key)
-    
+
     print("\n" + "="*80)
     print(f" 🛡️  PURPLE TEAM EXECUTION RESULT: {res['scenario_name']}")
     print("="*80)
@@ -91,8 +90,9 @@ def run_health_probe():
     print("\n" + "="*80)
     print(f" 🩺  INTEGRATION HEALTH & DIAGNOSTICS ({health['timestamp']})")
     print("="*80)
-    for key, s in health["services"].items():
-        status_str = f"\033[92m[{s['status']}]\033[0m" if s["status"] == "HEALTHY" else (f"\033[93m[{s['status']}]\033[0m" if s["status"] == "DEGRADED" else f"\033[94m[{s['status']}]\033[0m")
+    for _key, s in health["services"].items():
+        colour = {"HEALTHY": "92", "DEGRADED": "93"}.get(s["status"], "94")
+        status_str = f"\033[{colour}m[{s['status']}]\033[0m"
         print(f"  {s['name']:<38} {status_str:<20} Target: {s['target']}")
         print(f"    -> Message: {s['message']} (Latency: {s['latency_ms']}ms | Mode: {s['mode']})")
     print("="*80 + "\n")
@@ -107,7 +107,7 @@ def test_webhook():
     orchestrator = SOAROrchestrator(webhook_url=url)
     event = generate_random_attack()
     incident = orchestrator.process_event(event, custom_webhook_url=url)
-    
+
     dispatch_res = incident.get("webhook_dispatch", {})
     if dispatch_res.get("status") == "SUCCESS":
         print("\033[92m[✓] Webhook dispatched successfully! Check your Discord/Slack channel.\033[0m\n")
@@ -118,7 +118,7 @@ def export_dossier():
     orchestrator = SOAROrchestrator()
     event = generate_random_attack()
     incident = orchestrator.process_event(event)
-    
+
     # Exports never contain third-party (VirusTotal/AbuseIPDB) data, only our own findings
     from soar.enrichment import strip_provider_data
     incident = strip_provider_data(incident)

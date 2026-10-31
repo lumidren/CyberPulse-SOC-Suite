@@ -5,7 +5,6 @@ for CISO briefings, compliance audits, and post-incident reviews.
 """
 
 import html
-import json
 from datetime import datetime, timezone
 
 
@@ -29,13 +28,11 @@ class IncidentReportGenerator:
         inc_id = incident.get("incident_id", "INC-UNKNOWN")
         corr_id = incident.get("correlation_id", "N/A")
         created_at = incident.get("created_at", datetime.now(timezone.utc).isoformat())
-        rule = incident.get("rule", {})
         telemetry = incident.get("telemetry", {})
         risk = incident.get("risk_assessment", {})
         containment = incident.get("containment_action", {})
         ai = incident.get("ai_analysis", {})
         evidence = incident.get("evidence_package", {})
-        observables = incident.get("observables", [])
         timeline = incident.get("timeline", [])
 
         # Format socket table rows

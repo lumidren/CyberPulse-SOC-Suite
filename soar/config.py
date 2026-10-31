@@ -138,7 +138,7 @@ def validate(file_values, env=None):
     """Return the list of problems in file values and environment values."""
     env = os.environ if env is None else env
     problems = []
-    for key, value in file_values.items():
+    for key in file_values:
         if key not in SCHEMA:
             problems.append(f"config file: unknown setting {key}")
         elif SCHEMA[key][2]:
