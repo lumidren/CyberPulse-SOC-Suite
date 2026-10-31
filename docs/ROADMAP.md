@@ -54,7 +54,7 @@ internal identifiers never go to external APIs.
 - [x] **E27** Store pre-action state so rollback restores it. — **Done**: `pre_action_state` snapshot in `_apply_action`; state-aware `_release_state`; tests.
 - [x] **E28** Replace `taskkill /F /T` with graceful-first termination, or document the data-loss risk. — **Done**: `soar/process_termination.py`; plan recorded on kill actions; risk documented in `docs/ARCHITECTURE.md`; tests.
 - [x] **E29** Snapshot memory/process info before killing a process. — **Done**: `snapshot_process` in `soar/evidence_collector.py`, recorded by the engine before kills/isolation; pipeline reordered; tests.
-- [ ] **E30** Export scheduled-task XML before removing a task.
+- [x] **E30** Export scheduled-task XML before removing a task. — **Done**: `task_export` + disable-not-delete in `_apply_action`; pipeline passes task details; FULL rollback; tests.
 
 ## Phase 2b — Simulator safety (E31–E42)
 

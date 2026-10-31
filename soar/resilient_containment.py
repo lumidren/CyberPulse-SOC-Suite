@@ -4,6 +4,7 @@ Provides fault-tolerant execution, non-blocking enrichment fallback,
 idempotent operations, and automated containment rollback capabilities.
 """
 
+import hashlib
 import itertools
 import json
 import time
@@ -76,7 +77,7 @@ class ResilientContainmentEngine:
         self.blocked_ips = set()
         self.disabled_users = set()
 
-    def execute_containment(self, action_type, target_host, target_ip, target_user, pid, process_name, execution_intent="EXECUTE_IMMEDIATE", correlation_id=None):
+    def execute_containment(self, action_type, target_host, target_ip, target_user, pid, process_name, execution_intent="EXECUTE_IMMEDIATE", correlation_id=None, context=None):
         """
         Executes idempotent policy-driven containment with audit logging and rollback metadata.
         """
@@ -85,6 +86,7 @@ class ResilientContainmentEngine:
         idempotency_key = f"{action_type}:{target_host}:{target_ip}:{pid}"
 
         action_record = {
+            "context": dict(context or {}),
             "action_id": action_id,
             "correlation_id": correlation_id or f"CORR-{action_id}",
             "idempotency_key": idempotency_key,
@@ -230,9 +232,30 @@ class ResilientContainmentEngine:
             self.host_isolation_registry.add(target_host)
 
         elif action_type == "REMOVE_SCHEDULED_TASK":
+            task_name = action_record["context"].get("task_name")
+            if not task_name:
+                action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
+                action_record["execution_log"] = "No task name in telemetry; cannot export the task first, so it was not touched."
+                return
+            # Export first, then DISABLE (reversible). Deletion is left to an analyst after review.
+            task_xml = action_record["context"].get("task_xml") or ""
+            action_record["task_export"] = {
+                "task_name": task_name,
+                "exported_at": datetime.now(timezone.utc).isoformat(),
+                "export_argv": ["schtasks.exe", "/Query", "/TN", task_name, "/XML"],
+                "xml": task_xml,
+                "sha256": hashlib.sha256(task_xml.encode("utf-8")).hexdigest(),
+            }
             action_record["execution_protocol"] = "WinRM PowerShell Remoting"
-            action_record["execution_log"] = f"[WinRM TLS 5986 -> {target_host}] Unregistered malicious scheduled task via Unregister-ScheduledTask."
-            action_record["rollback_plan"] = {"method": "MANUAL", "note": "Task permanently unregistered."}
+            action_record["execution_log"] = (
+                f"[WinRM TLS 5986 -> {target_host}] Exported task XML for {task_name} "
+                f"(sha256 {action_record['task_export']['sha256'][:12]}...), then disabled the task. Not deleted."
+            )
+            action_record["rollback_plan"] = {
+                "method": "WINRM",
+                "argv": ["schtasks.exe", "/Change", "/TN", task_name, "/ENABLE"],
+                "fallback": "Re-register from task_export.xml if the task was later deleted.",
+            }
 
         elif action_type == "TERMINATE_PROCESS_TREE":
             action_record["execution_protocol"] = "WinRM + Active Directory LDAP"
@@ -529,9 +552,10 @@ ROLLBACK_PLAYBOOKS = {
         lambda r: f"[WinRM -> {r['target_host']}] Removed isolation rule. Network restored.",
         "Defender real-time protection stays re-enabled (intentionally not reverted to the tampered state)."),
     "REMOVE_SCHEDULED_TASK": (
-        "PARTIAL",
-        lambda r: f"[WinRM -> {r['target_host']}] Re-registration of the removed task is required from its pre-action export.",
-        "The task is only restored if its definition was exported before removal."),
+        "FULL",
+        lambda r: f"[WinRM -> {r['target_host']}] Re-enabled task {r['task_export']['task_name']} "
+                  f"(exported XML sha256 {r['task_export']['sha256'][:12]}... kept for re-registration).",
+        None),
     "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS": (
         "PARTIAL",
         lambda r: f"[WinRM -> {r['target_host']}] Containment record released; restored files are kept.",
