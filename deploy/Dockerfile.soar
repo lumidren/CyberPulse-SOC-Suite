@@ -6,7 +6,7 @@ RUN useradd --create-home --shell /usr/sbin/nologin cyberpulse
 WORKDIR /app
 
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 
 COPY simulator/ ./simulator/
 COPY scripts/ ./scripts/

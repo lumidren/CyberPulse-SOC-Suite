@@ -1,0 +1,2 @@
+# Runtime dependencies (compile with: pip-compile --generate-hashes requirements.in)
+pyyaml>=6.0.1
