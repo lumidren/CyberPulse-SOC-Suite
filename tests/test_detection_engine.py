@@ -413,6 +413,21 @@ class TestSOCLabPlatform(unittest.TestCase):
         self.assertIn("Microsecond Chronological Audit Timeline", html_report)
         self.assertEqual(json_report["report_standard"], "NIST SP 800-61 Rev. 2")
 
+    def test_report_escapes_untrusted_fields(self):
+        """Ingested strings are HTML-escaped in generated reports (roadmap E69)"""
+        incident = self.orchestrator.process_event(simulate_t1003_lsass_dump())
+        incident = dict(incident, telemetry=dict(incident["telemetry"], computer_name="<script>alert(1)</script>"))
+        html_report = IncidentReportGenerator().generate_html_report(incident)
+        self.assertNotIn("<script>alert(1)</script>", html_report)
+        self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", html_report)
+
+    def test_console_escapes_api_data_before_rendering(self):
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        with open(os.path.join(root, "web", "app.js"), encoding="utf-8") as fh:
+            js = fh.read()
+        self.assertIn("function escapeHtml(value)", js)
+        self.assertNotRegex(js, r"await (res|response)\.json\(\)")
+
     def test_cloud_detection_aws_and_entra(self):
         """Verify AWS STS AssumeRole and Entra ID Impossible Travel detections and containments"""
         # AWS STS AssumeRole Abuse

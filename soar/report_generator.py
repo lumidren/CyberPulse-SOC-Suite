@@ -4,14 +4,28 @@ Produces executive-ready standalone HTML and structured JSON forensic reports
 for CISO briefings, compliance audits, and post-incident reviews.
 """
 
+import html
 import json
 from datetime import datetime, timezone
+
+
+def _escape_deep(value):
+    """HTML-escape every string in a nested structure (incident data is untrusted)."""
+    if isinstance(value, dict):
+        return {k: _escape_deep(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_escape_deep(v) for v in value]
+    if isinstance(value, str):
+        return html.escape(value, quote=True)
+    return value
 
 class IncidentReportGenerator:
     """
     Generates publication-quality NIST SP 800-61 Rev. 2 Incident Response Reports.
     """
     def generate_html_report(self, incident: dict) -> str:
+        # Everything interpolated below comes from (possibly ingested) telemetry
+        incident = _escape_deep(incident)
         inc_id = incident.get("incident_id", "INC-UNKNOWN")
         corr_id = incident.get("correlation_id", "N/A")
         created_at = incident.get("created_at", datetime.now(timezone.utc).isoformat())
