@@ -5,7 +5,7 @@ description: Detects process access requests targeting lsass.exe memory space (G
 references:
     - https://attack.mitre.org/techniques/T1003/001/
 author: lumidren (CyberPulse SOC Suite)
-date: 2026/08/15
+date: 2026-08-15
 tags:
     - attack.credential_access
     - attack.t1003.001
