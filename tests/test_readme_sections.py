@@ -31,6 +31,7 @@ class TestReadmeSections(unittest.TestCase):
             text = fh.read()
         self.assertIn("## What is stored", text)
         self.assertIn("## What leaves the machine", text)
+        self.assertIn("## External threat-intel enrichment: what leaves your environment", text)
 
     def test_human_oversight_section_present(self):
         text = readme()
