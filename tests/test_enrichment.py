@@ -194,6 +194,8 @@ class TestVirusTotalRateLimit(unittest.TestCase):
         self.assertEqual(len(transport.calls), 4)
         now[0] += 61
         self.assertEqual(c.lookup("8.8.4.99")["verdicts"][0].get("status", "OK"), "OK")
+        # a rate-limited answer must not be cached: retrying later reaches the provider
+        self.assertEqual(c.lookup("8.8.4.5")["verdicts"][0].get("status", "OK"), "OK")
 
     def test_backoff_after_429(self):
         from soar.enrichment import ProviderLimiter
