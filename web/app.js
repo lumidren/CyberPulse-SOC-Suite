@@ -3,23 +3,25 @@
 // Author: lumidren (https://github.com/lumidren/CyberPulse-SOC-Suite)
 // ==============================================================================
 
-// Global API Key configuration (can be overridden via localStorage)
-const SOC_API_KEY = window.localStorage?.getItem("CYBERPULSE_API_KEY") || "cyberpulse-dev-secret-key-2026";
-
-// Transparent authenticated fetch interceptor for all /api/* requests
+// Authentication: the console uses the HttpOnly session cookie set at sign-in
+// (see login.html). No API key is ever embedded in or stored by this script.
 const _nativeFetch = window.fetch;
 window.fetch = async function(url, options = {}) {
     if (typeof url === "string" && url.startsWith("/api/")) {
-        options = options || {};
-        options.headers = options.headers || {};
-        if (options.headers instanceof Headers) {
-            if (!options.headers.has("X-API-Key")) options.headers.set("X-API-Key", SOC_API_KEY);
-        } else {
-            if (!options.headers["X-API-Key"]) options.headers["X-API-Key"] = SOC_API_KEY;
+        options = Object.assign({ credentials: "same-origin" }, options || {});
+        const res = await _nativeFetch(url, options);
+        if (res.status === 401) {
+            window.location.replace("/login.html");
         }
+        return res;
     }
     return _nativeFetch(url, options);
 };
+
+async function logout() {
+    await fetch("/api/session/logout", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    window.location.replace("/login.html");
+}
 
 let map;
 let datacenterMarker;

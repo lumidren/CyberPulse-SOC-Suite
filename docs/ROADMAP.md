@@ -73,7 +73,7 @@ internal identifiers never go to external APIs.
 
 ## Phase 3 — Securing the tool itself (E65–E78)
 
-- [ ] **E65** Authentication on the localhost:5000 dashboard.
+- [x] **E65** Authentication on the localhost:5000 dashboard. — **Done**: `soar/auth.py` sessions, `/api/session` login/logout, `web/login.html`, page gating in `server.py`; `tests/test_dashboard_auth.py`.
 - [ ] **E66** Bind to 127.0.0.1 by default; document the 0.0.0.0 risk.
 - [ ] **E67** CSRF protection on the simulation trigger endpoints.
 - [ ] **E68** HMAC-signature authentication on the SOAR webhook receiver.
