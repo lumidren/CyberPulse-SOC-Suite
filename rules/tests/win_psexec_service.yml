@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_psexec_service.yml (synthetic lab events)
+rule: win_psexec_service.yml
+positive:
+- name: Shell spawned by PSEXESVC
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\cmd.exe'
+      CommandLine: cmd.exe
+      ParentImage: 'C:\Windows\PSEXESVC.exe'
+negative:
+- name: Shell spawned by Explorer
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\cmd.exe'
+      CommandLine: cmd.exe
+      ParentImage: 'C:\Windows\explorer.exe'

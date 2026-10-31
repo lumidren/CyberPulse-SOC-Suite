@@ -1,0 +1,28 @@
+title: PsExec-Style Remote Service Execution
+id: 701b2359-66e7-42d5-9f60-66d02878999d
+status: experimental
+description: Detects the PSEXESVC service binary (or renamed PsExec-like services) starting, the hallmark of remote
+    execution over SMB with PsExec or its clones.
+references:
+- https://attack.mitre.org/techniques/T1569/002/
+- https://attack.mitre.org/techniques/T1021/002/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.lateral_movement
+- attack.execution
+- attack.t1569.002
+- attack.t1021.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '\PSEXESVC.exe'
+    selection_parent:
+        ParentImage|endswith: '\PSEXESVC.exe'
+    condition: 1 of selection_*
+falsepositives:
+- Administrators using Sysinternals PsExec for sanctioned remote maintenance
+level: high

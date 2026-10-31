@@ -203,3 +203,21 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: d89b88590c3ec50a04346abd108e6b3f1fac13016c4e57f282612f7dd7750fa5
+  4df90a3f-121f-4e5e-b371-301acbac1442:
+    soc_rule_id: SOC-RULE-034
+    name: Active Directory Reconnaissance Commands
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 497c8e918ddfe40bd5581011690288b5e1e9c9e3de22531ce98496c414074944
+  701b2359-66e7-42d5-9f60-66d02878999d:
+    soc_rule_id: SOC-RULE-035
+    name: PsExec-Style Remote Service Execution
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: bc8e60223809a946c5a758eff3c7cd51b2bd6b04e1fb6fd5d020630892e37db9
+  8ea69475-f81f-49fc-98eb-6cf9a33446dc:
+    soc_rule_id: SOC-RULE-036
+    name: Shell Spawned by WinRM Remote Session Host
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: fb859e619634782aae27745c745d98a962ca0bb26b341b834fb266fa8257b99e

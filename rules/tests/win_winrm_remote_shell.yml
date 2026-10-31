@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_winrm_remote_shell.yml (synthetic lab events)
+rule: win_winrm_remote_shell.yml
+positive:
+- name: whoami over WinRM
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\whoami.exe'
+      CommandLine: whoami /all
+      ParentImage: 'C:\Windows\System32\wsmprovhost.exe'
+negative:
+- name: whoami from a local shell
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\whoami.exe'
+      CommandLine: whoami /all
+      ParentImage: 'C:\Windows\System32\cmd.exe'
