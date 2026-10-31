@@ -47,9 +47,12 @@ jobs:
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-    - name: Run Detection-as-Code Unit & Integration Tests
+    - name: Run Unit & Integration Tests with coverage (floor in .coveragerc)
       run: |
-        python -m unittest discover -s tests -p "test_*.py" -v
+        coverage run -m unittest discover -s tests -p "test_*.py" -v
+        coverage report
+        echo "### Test coverage" >> "$GITHUB_STEP_SUMMARY"
+        coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
 
     - name: Validate Sigma YAML Schema & MITRE Tags
       run: |

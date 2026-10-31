@@ -1,7 +1,8 @@
 # 🛡️ CyberPulse SOC Suite: Detection Engineering & Resilient SOAR Architecture Lab
 
 [![Detection-as-Code CI/CD](https://github.com/lumidren/CyberPulse-SOC-Suite/actions/workflows/detection_ci.yml/badge.svg)](https://github.com/lumidren/CyberPulse-SOC-Suite/actions)
-![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
+![Coverage](https://img.shields.io/badge/coverage-79%25%20(measured%202026--11--01)-yellowgreen)
+![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg)
 ![SIEM Support](https://img.shields.io/badge/SIEM-Wazuh%20%7C%20Splunk%20%7C%20Sysmon%20v14-orange)
 ![SOAR](https://img.shields.io/badge/SOAR-Resilient%20%7C%20Rollback%20Capable-green)
 ![DFIR](https://img.shields.io/badge/DFIR-TheHive%205%20%7C%20NIST%20SP%20800--61-blue)
@@ -292,10 +293,16 @@ pip install --require-hashes -r requirements.txt
 pip install --require-hashes -r requirements-dev.txt
 ```
 
-### 2. Run the Automated Test Suite (35+ Unit & Integration Tests):
+### 2. Run the Automated Test Suite:
 ```bash
-python -m unittest discover -s tests -p "test_*.py" -v
+CYBERPULSE_LAB_MODE=true python -m unittest discover -s tests -p "test_*.py" -v
 ```
+With coverage (CI fails below the floor in `.coveragerc`):
+```bash
+CYBERPULSE_LAB_MODE=true coverage run -m unittest discover -s tests -p "test_*.py"
+coverage report
+```
+The coverage badge shows the figure measured on the date in the badge; the CI job summary shows the current value.
 
 ### 3. Launch the Web Operations Console:
 ```bash
