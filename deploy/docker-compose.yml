@@ -10,7 +10,7 @@ services:
       - "9200:9200"
     environment:
       - "discovery.type=single-node"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=SecretPassword123!"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD:?Set OPENSEARCH_ADMIN_PASSWORD in your .env}"
       - "plugins.security.ssl.http.enabled=false"
     volumes:
       - wazuh-indexer-data:/usr/share/opensearch/data

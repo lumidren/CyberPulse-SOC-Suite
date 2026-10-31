@@ -80,7 +80,7 @@ internal identifiers never go to external APIs.
 - [x] **E69** Validate and sanitize all webhook inputs. — **Done** (2 commits): `soar/input_validation.py` on webhook + syslog input; output escaping in the report and console; tests.
 - [x] **E70** Prevent command injection in taskkill/netsh/iptables calls; never concatenate strings. — **Done**: `soar/command_builder.py` validators + argv builders used by the engine; invalid input → manual review; `tests/test_command_builder.py`.
 - [x] **E71** Parameterized, validated arguments for WinRM and PowerShell. — **Done**: `ps_invocation`/`graph_revoke_sessions` in `soar/command_builder.py`; engine uses them; tests.
-- [ ] **E72** Never hardcode API keys; use environment variables or a secrets manager.
+- [x] **E72** Never hardcode API keys; use environment variables or a secrets manager. — **Done**: random dev key in `server.py`, compose/.env placeholders, `tests/test_secret_hygiene.py`.
 - [x] **E73** Add `.env.example` and a `.gitignore` for secrets. — **Done earlier** (62c8760, 176e547): `.env.example` documents every setting; `.gitignore` excludes `.env*`.
 - [ ] **E74** Scan repo history for leaked keys (gitleaks/trufflehog).
 - [ ] **E75** WinRM over HTTPS with certificate validation, not skip-verify.
