@@ -10,6 +10,14 @@
     <group>cyberpulse,sigma_generated,</group>
 </rule>
 
+<!-- SOC-RULE-048: AWS Canary Credential Used (generated from rules/sigma/cloud_aws_canary_credential_use.yml; review before use) -->
+<rule id="110480" level="14">
+    <if_group>amazon</if_group>
+    <field name="aws.userIdentity.userName" type="pcre2">(?i)(?:^canary\-backup\-reader$|^canary\-ci\-deployer$)</field>
+    <description>SOC-RULE-048: AWS Canary Credential Used</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+
 <!-- SOC-RULE-041: AWS CloudTrail Logging Stopped or Deleted (generated from rules/sigma/cloud_aws_cloudtrail_disabled.yml; review before use) -->
 <rule id="110410" level="12">
     <if_group>amazon</if_group>
@@ -143,6 +151,25 @@
     <field name="win.eventdata.authenticationPackageName" type="pcre2">(?i)(?:^Kerberos$)</field>
     <field name="win.eventdata.targetDomainName" type="pcre2" negate="yes">(?i)(?:^(CORP|NT AUTHORITY)$)</field>
     <description>SOC-RULE-013: Possible Golden Ticket Use via Kerberos Logon Domain Anomaly</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+
+<!-- SOC-RULE-046: Authentication Attempt Against a Honey Account (generated from rules/sigma/win_honey_account_activity.yml; review before use) -->
+<rule id="110460" level="14">
+    <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^4624$|^4625$|^4648$|^4768$|^4769$|^4771$|^4776$)</field>
+    <field name="win.eventdata.targetUserName" type="pcre2">(?i)(?:^svc_sql_legacy$|^adm_backup_old$)</field>
+    <description>SOC-RULE-046: Authentication Attempt Against a Honey Account</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+
+<!-- SOC-RULE-047: Access to a Canary File (generated from rules/sigma/win_honey_file_access.yml; review before use) -->
+<rule id="110470" level="12">
+    <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^4663$)</field>
+    <field name="win.eventdata.objectName" type="pcre2">(?i)(?:\\Passwords_2019\.xlsx$|\\vpn_credentials\.txt$|\\Payroll_Q4_FINAL\.xlsx$)</field>
+    <field name="win.eventdata.processName" type="pcre2" negate="yes">(?i)(?:\\MsMpEng\.exe$|\\wbengine\.exe$)</field>
+    <description>SOC-RULE-047: Access to a Canary File</description>
     <group>cyberpulse,sigma_generated,</group>
 </rule>
 

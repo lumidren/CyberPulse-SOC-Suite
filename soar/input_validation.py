@@ -45,6 +45,8 @@ DETAIL_FIELD_ALLOWLIST = {
     "LogonProcessName", "AuthenticationPackageName", "KeyLength", "MemberName", "PreAuthType", "ImagePath",
     "TargetObject", "Details", "Type", "Destination", "Name", "Query", "SubjectDomainName",
     "SignatureStatus",
+    # deception rules (F16): object access on canary files, canary IAM user
+    "ObjectName", "ProcessName", "userIdentity.userName",
     # provenance
     "simulation", "CredentialMaterial", "raw",
 }

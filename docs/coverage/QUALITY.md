@@ -52,6 +52,9 @@ Lowest scores first.
 | `SOC-RULE-039` | Rclone Copying Data to Cloud Storage | 90 | 1/1 | 0 |
 | `SOC-RULE-040` | Backup or Security Service Stopped via net or sc | 90 | 2/2 | 0 |
 | `SOC-RULE-041` | AWS CloudTrail Logging Stopped or Deleted | 90 | 1/1 | 0 |
+| `SOC-RULE-046` | Authentication Attempt Against a Honey Account | 90 | 2/2 | 0 |
+| `SOC-RULE-047` | Access to a Canary File | 90 | 1/2 | 0 |
+| `SOC-RULE-048` | AWS Canary Credential Used | 90 | 2/1 | 0 |
 | `SOC-RULE-002` | Password Brute Force Authentication Failure Spike | 100 | 1/2 | 0 |
 | `SOC-RULE-005` | Windows Defender Real-Time Protection Disabled via PowerShell | 100 | 1/1 | 0 |
 | `SOC-RULE-006` | Rapid File Encryption and Ransomware Canary Modification | 100 | 2/1 | 0 |
@@ -59,4 +62,4 @@ Lowest scores first.
 | `SOC-RULE-008` | Active Directory Replication Abuse (DCSync) via Non-DC Account | 100 | 1/1 | 0 |
 | `SOC-RULE-009` | Suspicious AWS STS AssumeRole Abuse Across External Account | 100 | 1/2 | 0 |
 
-Mean score: **87.6** across 42 rules.
+Mean score: **87.8** across 45 rules.

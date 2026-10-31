@@ -1,0 +1,2 @@
+// SOC-RULE-047: Access to a Canary File (generated from rules/sigma/win_honey_file_access.yml; review before use)
+((event.code:4663 AND (winlog.event_data.ObjectName:*\\Passwords_2019.xlsx OR winlog.event_data.ObjectName:*\\vpn_credentials.txt OR winlog.event_data.ObjectName:*\\Payroll_Q4_FINAL.xlsx)) AND NOT ((winlog.event_data.ProcessName:*\\MsMpEng.exe OR winlog.event_data.ProcessName:*\\wbengine.exe)))

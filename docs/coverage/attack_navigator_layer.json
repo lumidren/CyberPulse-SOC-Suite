@@ -37,6 +37,13 @@
       "showSubtechniques": true
     },
     {
+      "techniqueID": "T1005",
+      "score": 1,
+      "comment": "Lab rules (synthetic-tested only): SOC-RULE-047",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
       "techniqueID": "T1021.002",
       "score": 1,
       "comment": "Lab rules (synthetic-tested only): SOC-RULE-035",
@@ -107,11 +114,25 @@
       "showSubtechniques": false
     },
     {
+      "techniqueID": "T1078.002",
+      "score": 1,
+      "comment": "Lab rules (synthetic-tested only): SOC-RULE-046",
+      "enabled": true,
+      "showSubtechniques": true
+    },
+    {
       "techniqueID": "T1078.004",
       "score": 1,
       "comment": "Lab rules (synthetic-tested only): SOC-RULE-009",
       "enabled": true,
       "showSubtechniques": true
+    },
+    {
+      "techniqueID": "T1083",
+      "score": 1,
+      "comment": "Lab rules (synthetic-tested only): SOC-RULE-047",
+      "enabled": true,
+      "showSubtechniques": false
     },
     {
       "techniqueID": "T1087.002",
@@ -131,6 +152,13 @@
       "techniqueID": "T1105",
       "score": 1,
       "comment": "Lab rules (synthetic-tested only): SOC-RULE-014",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
+      "techniqueID": "T1110",
+      "score": 1,
+      "comment": "Lab rules (synthetic-tested only): SOC-RULE-046",
       "enabled": true,
       "showSubtechniques": false
     },
@@ -278,6 +306,13 @@
       "techniqueID": "T1550.002",
       "score": 1,
       "comment": "Lab rules (synthetic-tested only): SOC-RULE-012",
+      "enabled": true,
+      "showSubtechniques": true
+    },
+    {
+      "techniqueID": "T1552.001",
+      "score": 1,
+      "comment": "Lab rules (synthetic-tested only): SOC-RULE-048",
       "enabled": true,
       "showSubtechniques": true
     },

@@ -196,3 +196,15 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-045: Mass File Write by One Process (ransomware encryption or mass rename) (`correlations/win_mass_file_write.yml`)
 
 * **1.0.0** (2026-11-01): Initial correlation rule.
+
+## SOC-RULE-046: Authentication Attempt Against a Honey Account (`win_honey_account_activity.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-047: Access to a Canary File (`win_honey_file_access.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-048: AWS Canary Credential Used (`cloud_aws_canary_credential_use.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

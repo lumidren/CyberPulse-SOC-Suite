@@ -1,0 +1,35 @@
+title: Access to a Canary File
+id: 9ca3f8a2-d64e-4b9a-a384-cbd394d06768
+status: experimental
+description: Object-access audit (Event 4663) on a decoy file planted where an intruder looks for credentials or
+    finance data. Needs a SACL on the decoy files (docs/CANARIES.md).
+references:
+- https://attack.mitre.org/techniques/T1005/
+- https://attack.mitre.org/techniques/T1083/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.collection
+- attack.discovery
+- attack.t1005
+- attack.t1083
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4663
+        ObjectName|endswith:
+        - '\Passwords_2019.xlsx'
+        - '\vpn_credentials.txt'
+        - '\Payroll_Q4_FINAL.xlsx'
+    filter_backup:
+        ProcessName|endswith:
+        - '\MsMpEng.exe'
+        - '\wbengine.exe'
+    condition: selection and not filter_backup
+falsepositives:
+- Backup or AV software not in the filter reading every file
+- Users opening the decoy out of curiosity (that is still worth a conversation)
+level: high

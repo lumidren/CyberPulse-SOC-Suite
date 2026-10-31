@@ -1,0 +1,25 @@
+# Positive/negative samples for rules/sigma/win_honey_file_access.yml (synthetic lab events)
+rule: win_honey_file_access.yml
+positive:
+- name: Explorer opens decoy credentials
+  event:
+    event_id: 4663
+    event_source: Security
+    details:
+      ObjectName: '\\FS01\IT\vpn_credentials.txt'
+      ProcessName: 'C:\Windows\explorer.exe'
+negative:
+- name: Defender scans decoy
+  event:
+    event_id: 4663
+    event_source: Security
+    details:
+      ObjectName: 'D:\Finance\Passwords_2019.xlsx'
+      ProcessName: 'C:\ProgramData\Microsoft\Windows Defender\MsMpEng.exe'
+- name: Normal file
+  event:
+    event_id: 4663
+    event_source: Security
+    details:
+      ObjectName: 'D:\Finance\Budget_2026.xlsx'
+      ProcessName: 'C:\Windows\explorer.exe'

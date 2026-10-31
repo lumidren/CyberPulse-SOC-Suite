@@ -1,0 +1,2 @@
+// SOC-RULE-046: Authentication Attempt Against a Honey Account (generated from rules/sigma/win_honey_account_activity.yml; review before use)
+(((event.code:4624 OR event.code:4625 OR event.code:4648 OR event.code:4768 OR event.code:4769 OR event.code:4771 OR event.code:4776)) AND ((winlog.event_data.TargetUserName:svc_sql_legacy OR winlog.event_data.TargetUserName:adm_backup_old)))
