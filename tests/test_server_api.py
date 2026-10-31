@@ -190,6 +190,14 @@ class TestRestApiIntegration(unittest.TestCase):
             server.simulation_throttle.limits.update(original)
             server.simulation_throttle._windows["brute_force"].clear()
 
+    def test_version_reports_lab_mode_for_banner(self):
+        status, body = _request(self.base_url, "/api/version")
+        self.assertEqual(status, 200)
+        self.assertIs(body["lab_mode"], True)
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "web", "index.html"),
+                  encoding="utf-8") as fh:
+            self.assertIn('id="labModeBanner"', fh.read())
+
     def test_incident_list_pagination(self):
         """Incident list honors limit/offset and reports totals"""
         for _ in range(3):

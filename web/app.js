@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadHealthStatus();
     loadSyslogStats();
     loadPolicyMode();
+    loadLabModeBanner();
     loadSafetyStatus();
     
     // Poll metrics & health periodically
@@ -526,6 +527,21 @@ async function loadPolicyMode() {
         if (select && data.active_policy_mode) select.value = data.active_policy_mode;
     } catch (err) {
         console.error("Load policy mode error:", err);
+    }
+}
+
+// Test-mode banner: tells every viewer this is a lab with synthetic data
+async function loadLabModeBanner() {
+    try {
+        const res = await fetch("/api/version");
+        const data = await res.json();
+        const text = document.getElementById("labModeBannerText");
+        if (!text) return;
+        text.innerText = data.lab_mode
+            ? "LAB / TEST MODE — simulator ENABLED: all attack data is synthetic; responders are simulated."
+            : "LAB CONSOLE — simulator disabled; responders are simulated. Not for production use.";
+    } catch (err) {
+        console.error("Load lab mode error:", err);
     }
 }
 

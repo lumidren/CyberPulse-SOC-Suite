@@ -460,6 +460,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "service": "cyberpulse-soc",
                 "version": __version__,
                 "environment": ENV,
+                "lab_mode": lab_mode_enabled(),
                 "detection_rules": len(DETECTION_CATALOGUE)
             })
 
