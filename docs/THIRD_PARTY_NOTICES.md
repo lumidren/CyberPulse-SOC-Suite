@@ -32,7 +32,7 @@ this lab in the formats those tools consume.
 ## Sysmon configurations
 
 * `deploy/sysmon/sysmonconfig.xml` is a **minimal** configuration written for
-  this lab (added in commit 92325c0); no upstream source is recorded for it. If
+  this lab (added in commit aedb66c); no upstream source is recorded for it. If
   you recognise it as derived from a community config, please open an issue so
   the author can be credited.
 * `deploy/vagrant/Vagrantfile` downloads **sysmon-modular by Olaf Hartong**
