@@ -212,5 +212,28 @@ class TestVirusTotalRateLimit(unittest.TestCase):
         self.assertEqual(limiter.try_acquire()[1], 120)
 
 
+class TestAbuseIpdbLimits(unittest.TestCase):
+
+    def test_daily_quota_enforced(self):
+        transport = RecordingTransport()
+        previous = os.environ.get("ABUSEIPDB_DAILY_QUOTA")
+        os.environ["ABUSEIPDB_DAILY_QUOTA"] = "2"
+        try:
+            c = ThreatIntelClient(vt_key="", abuse_key="ab", transport=transport, enabled=True)
+        finally:
+            if previous is None:
+                os.environ.pop("ABUSEIPDB_DAILY_QUOTA", None)
+            else:
+                os.environ["ABUSEIPDB_DAILY_QUOTA"] = previous
+        results = [c.lookup(f"8.8.8.{i}")["verdicts"][0].get("status", "OK") for i in range(3)]
+        self.assertEqual(results, ["OK", "OK", "RATE_LIMITED"])
+        self.assertEqual(len(transport.calls), 2)
+
+    def test_never_reports_to_abuseipdb(self):
+        import inspect
+        from soar import enrichment
+        self.assertNotIn("/report", inspect.getsource(enrichment))
+
+
 if __name__ == "__main__":
     unittest.main()
