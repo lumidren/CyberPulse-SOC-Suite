@@ -131,6 +131,9 @@ class SOAROrchestrator:
         self.syslog_receiver = SyslogReceiver(port=5514)
         self.webhook_ingest = WebhookIngestionHandler()
         self.identity_engine = IdentityBlastRadiusEngine()
+        # Circuit-breaker trips page a human through the configured notification channel
+        self.containment_engine.safety.pager = lambda message: self.dispatcher.dispatch_text(
+            f"🚨 [CyberPulse PAGE] {message}")
 
     @property
     def alert_history(self):

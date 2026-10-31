@@ -118,6 +118,29 @@ class WebhookDispatcher:
             ]
         }
 
+    def dispatch_text(self, text, custom_webhook_url=None):
+        """Send a plain-text page (e.g. circuit-breaker trip) to the configured webhook."""
+        target_url = custom_webhook_url or self.webhook_url
+        if not target_url:
+            logger.critical("PAGE (no webhook configured): %s", text)
+            return {"status": "SKIPPED", "message": "No webhook URL configured; page written to the log."}
+        is_valid, reason = validate_webhook_url(target_url)
+        if not is_valid:
+            logger.critical("PAGE (webhook blocked: %s): %s", reason, text)
+            return {"status": "BLOCKED", "error": f"Webhook URL rejected: {reason}"}
+        payload = {"content": text} if "discord.com" in target_url else {"text": text}
+        try:
+            req = urllib.request.Request(
+                target_url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json", "User-Agent": "CyberPulse-SOC/2.0"}
+            )
+            with urllib.request.urlopen(req, timeout=5) as response:
+                return {"status": "SUCCESS", "code": response.status}
+        except Exception as e:
+            logger.critical("PAGE (delivery failed: %s): %s", e, text)
+            return {"status": "ERROR", "error": str(e)}
+
     def dispatch(self, alert, custom_webhook_url=None):
         """Transmit webhook payload to configured endpoint"""
         target_url = custom_webhook_url or self.webhook_url
