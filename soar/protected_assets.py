@@ -40,6 +40,38 @@ DEFAULT_PROTECTED_ASSETS = [
 ]
 
 
+# Accounts SOAR may never lock, disable, reset or revoke. Locking these causes
+# outages or removes the way back in during an incident.
+DEFAULT_PROTECTED_ACCOUNTS = [
+    "krbtgt",                 # resetting it blindly breaks every Kerberos ticket in the domain
+    "Administrator",          # built-in domain admin / break-glass of last resort
+    "breakglass*",            # emergency access accounts
+    "emergency-*",
+    "svc_cyberpulse_soar",    # the SOAR's own service account
+    "svc_backup",             # backup jobs
+]
+
+
+def _normalise_account(user):
+    """'CORP\\j.doe' or 'j.doe@corp.local' -> 'j.doe' (lower-case)."""
+    name = (user or "").split("\\")[-1].split("@")[0]
+    return name.strip().lower()
+
+
+def protected_account_match(user, entries=None):
+    """Return the protecting entry for an account, or None."""
+    if not user:
+        return None
+    if entries is None:
+        extra = [e.strip() for e in os.environ.get("PROTECTED_ACCOUNTS", "").split(",") if e.strip()]
+        entries = DEFAULT_PROTECTED_ACCOUNTS + extra
+    name = _normalise_account(user)
+    for entry in entries:
+        if fnmatch.fnmatch(name, entry.lower()):
+            return entry
+    return None
+
+
 def _load_entries():
     extra = [e.strip() for e in os.environ.get("PROTECTED_ASSETS", "").split(",") if e.strip()]
     return DEFAULT_PROTECTED_ASSETS + extra
