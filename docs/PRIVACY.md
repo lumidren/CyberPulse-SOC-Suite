@@ -25,6 +25,14 @@ There is no database: restarting the server erases incident data.
   and command lines. Treat the server as holding personal data: restrict who
   can sign in, keep it on loopback or behind TLS, and limit retention.
 
+## Masking
+
+Account names are **masked by default** in the console, in API responses that
+carry incident data, and in generated reports (`CORP\j.doe` -> `CORP\j***e`),
+so demos and screenshots never show them. Detection, scoring and containment
+use the real values server-side. Set `PRIVACY_MASK_USERNAMES=false` only when
+you need full names for a real investigation. Take screenshots with masking on.
+
 ## What leaves the machine
 
 * Notification webhooks (Discord/Slack), only if you configure a URL; SSRF-guarded.
