@@ -4,7 +4,7 @@ status: experimental
 description: Detects attempts to impair host defenses by disabling Windows Defender real-time monitoring and script scanning via Set-MpPreference or registry modification.
 references:
     - https://attack.mitre.org/techniques/T1562/001/
-author: CyberPulse SOC Suite
+author: lumidren (CyberPulse SOC Suite)
 date: 2026/08/21
 tags:
     - attack.defense_evasion

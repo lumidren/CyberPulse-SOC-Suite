@@ -121,7 +121,7 @@ internal identifiers never go to external APIs.
 - [x] **E79** Verify the MIT license file exists. — **Done earlier** (176e547): `LICENSE` (MIT) exists at the repo root.
 - [x] **E80** Credit Wazuh, Sysmon, Sigma and pfSense; respect their licenses. — **Done**: `docs/THIRD_PARTY_NOTICES.md`; README credits section; OSM/CARTO attribution restored in `web/app.js`; test.
 - [x] **E81** Check the license of any reused Sysmon config and credit the author. — **Done**: provenance header in `sysmonconfig.xml`, credit in `Vagrantfile`, notices section. sysmon-modular's licence is referenced, not restated.
-- [ ] **E82** Credit sources of any adapted Sigma rules.
+- [x] **E82** Credit sources of any adapted Sigma rules. — **Done**: `rules/sigma/README.md` provenance + DRL 1.1 adaptation rules; normalised authors; `tests/test_sigma_metadata.py`.
 - [ ] **E83** MITRE ATT&CK attribution and terms notice.
 - [ ] **E84** Trademark disclaimer (Microsoft, Fortinet, pfSense, VirusTotal).
 - [ ] **E85** "Not affiliated with" statement.

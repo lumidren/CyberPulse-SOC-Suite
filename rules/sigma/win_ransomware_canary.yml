@@ -4,7 +4,7 @@ status: experimental
 description: Detects suspicious mass file creation with known ransomware extension patterns (.locked, .encrypted, HOW_TO_DECRYPT) targeting canary decoy directories.
 references:
     - https://attack.mitre.org/techniques/T1486/
-author: CyberPulse SOC Suite
+author: lumidren (CyberPulse SOC Suite)
 date: 2026/08/21
 tags:
     - attack.impact

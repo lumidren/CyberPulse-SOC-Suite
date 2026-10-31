@@ -4,7 +4,7 @@ status: experimental
 description: Detects creation of a new Windows Scheduled Task containing suspicious script interpreters or web download strings.
 references:
     - https://attack.mitre.org/techniques/T1053/005/
-author: SOC Portfolio Lab Team
+author: lumidren (CyberPulse SOC Suite)
 date: 2026/08/15
 tags:
     - attack.persistence
