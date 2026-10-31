@@ -1,0 +1,38 @@
+---
+- name: Require a pinned Sysmon checksum
+  ansible.builtin.assert:
+    that: sysmon_sha256 | length == 64
+    fail_msg: "Set sysmon_sha256 to the SHA-256 of the Sysmon64.exe you reviewed."
+
+- name: Create Sysmon directory
+  ansible.windows.win_file:
+    path: "{{ sysmon_install_dir }}"
+    state: directory
+
+- name: Download Sysmon64.exe (checksum verified)
+  ansible.windows.win_get_url:
+    url: "{{ sysmon_download_url }}"
+    dest: "{{ sysmon_install_dir }}\\Sysmon64.exe"
+    checksum: "{{ sysmon_sha256 }}"
+    checksum_algorithm: sha256
+
+- name: Copy the lab Sysmon configuration
+  ansible.windows.win_copy:
+    src: "{{ sysmon_config_src }}"
+    dest: "{{ sysmon_install_dir }}\\sysmonconfig.xml"
+  register: sysmon_config
+
+- name: Check whether Sysmon is installed
+  ansible.windows.win_service_info:
+    name: Sysmon64
+  register: sysmon_service
+
+- name: Install Sysmon with the lab configuration
+  ansible.windows.win_command:
+    argv: ["{{ sysmon_install_dir }}\\Sysmon64.exe", "-accepteula", "-i", "{{ sysmon_install_dir }}\\sysmonconfig.xml"]
+  when: not sysmon_service.exists
+
+- name: Apply an updated configuration to an existing install
+  ansible.windows.win_command:
+    argv: ["{{ sysmon_install_dir }}\\Sysmon64.exe", "-c", "{{ sysmon_install_dir }}\\sysmonconfig.xml"]
+  when: sysmon_service.exists and sysmon_config.changed

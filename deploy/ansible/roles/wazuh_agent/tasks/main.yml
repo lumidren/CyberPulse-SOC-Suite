@@ -1,0 +1,33 @@
+---
+- name: Require a pinned Wazuh agent checksum
+  ansible.builtin.assert:
+    that: wazuh_agent_sha256 | length == 64
+    fail_msg: "Set wazuh_agent_sha256 to the SHA-256 of the Wazuh agent MSI you reviewed."
+
+- name: Download the Wazuh agent MSI (checksum verified)
+  ansible.windows.win_get_url:
+    url: "{{ wazuh_agent_msi_url }}"
+    dest: C:\Windows\Temp\wazuh-agent.msi
+    checksum: "{{ wazuh_agent_sha256 }}"
+    checksum_algorithm: sha256
+
+- name: Install the Wazuh agent pointed at the lab manager
+  ansible.windows.win_package:
+    path: C:\Windows\Temp\wazuh-agent.msi
+    arguments:
+      - "WAZUH_MANAGER={{ wazuh_manager_address }}"
+      - "WAZUH_AGENT_GROUP={{ wazuh_agent_group }}"
+    state: present
+
+- name: Ship Sysmon events to Wazuh (eventchannel localfile block)
+  community.windows.win_lineinfile:
+    path: C:\Program Files (x86)\ossec-agent\ossec.conf
+    insertbefore: "</ossec_config>"
+    line: "<localfile><location>Microsoft-Windows-Sysmon/Operational</location><log_format>eventchannel</log_format></localfile>"
+  notify: Restart Wazuh agent
+
+- name: Ensure the Wazuh agent service is running
+  ansible.windows.win_service:
+    name: WazuhSvc
+    state: started
+    start_mode: auto

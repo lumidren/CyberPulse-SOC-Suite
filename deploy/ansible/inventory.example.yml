@@ -1,0 +1,21 @@
+---
+# Example inventory for the Vagrant lab (deploy/vagrant). Copy and adjust.
+# WinRM over HTTPS (5986) with certificate validation: trust the lab cert the
+# Vagrant provisioner exported to deploy/vagrant/certs/.
+lab_windows:
+  hosts:
+    WIN-DC01:
+      ansible_host: 10.0.0.10
+    WIN-WORKSTATION09:
+      ansible_host: 10.0.0.45
+  vars:
+    ansible_connection: winrm
+    ansible_port: 5986
+    ansible_winrm_scheme: https
+    ansible_winrm_transport: ntlm
+    ansible_winrm_server_cert_validation: validate
+    ansible_winrm_ca_trust_path: "{{ playbook_dir }}/../vagrant/certs/lab-ca-bundle.pem"
+    # Dedicated least-privilege deployment account (docs/SERVICE_ACCOUNT.md), password from a vault
+    ansible_user: "CORP\\svc_cyberpulse_deploy"
+    ansible_password: "{{ vault_deploy_password }}"
+    wazuh_manager_address: 10.0.1.5

@@ -1,0 +1,8 @@
+---
+# Pin the agent version to your manager's version (deploy/docker-compose.yml uses 4.7.2)
+wazuh_agent_version: 4.7.2-1
+wazuh_agent_msi_url: "https://packages.wazuh.com/4.x/windows/wazuh-agent-{{ wazuh_agent_version }}.msi"
+# Required: SHA-256 of the MSI you have reviewed. The role refuses to run without it.
+wazuh_agent_sha256: ""
+wazuh_manager_address: 10.0.1.5
+wazuh_agent_group: cyberpulse-lab

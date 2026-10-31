@@ -1,0 +1,14 @@
+---
+# CyberPulse lab: deploy Sysmon and the Wazuh agent to lab Windows hosts.
+#
+#   ansible-galaxy collection install ansible.windows community.windows
+#   ansible-playbook -i inventory.example.yml site.yml
+#
+# LAB USE ONLY: run against hosts you own or are authorised to manage.
+# Downloads are pinned by SHA-256 (set the checksums in group_vars before use).
+- name: Telemetry agents for CyberPulse lab Windows hosts
+  hosts: lab_windows
+  gather_facts: false
+  roles:
+    - role: sysmon
+    - role: wazuh_agent
