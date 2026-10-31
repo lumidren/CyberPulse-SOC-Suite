@@ -27,7 +27,7 @@ internal identifiers never go to external APIs.
 - [x] **E3** Replace "0% false positives" with "0 false positives in N baseline runs", stating N. — **Done**: `scripts/validate_detections.py` → `docs/VALIDATION_RESULTS.md` (currently 319 FPs in 600 baseline events); sync test.
 - [x] **E4** Replace "100% true-positive" with an "X/Y scripted runs detected" count. — **Done**: catalogue + `docs/VALIDATION_RESULTS.md` show '60/60 scripted runs detected'; guard bans '100% True-Positive'.
 - [x] **E5** Document how the baseline traffic for the FP test is generated. — **Done**: `simulator/benign_baseline.py`, `docs/BASELINE_TRAFFIC.md`, `tests/test_benign_baseline.py`.
-- [ ] **E6** Remove the "15–25 min manual analyst benchmark" or cite a source.
+- [x] **E6** Remove the "15–25 min manual analyst benchmark" or cite a source. — **Done**: phrase verified absent (introduced in d0342e0, since removed); guard pattern in `tests/test_honest_claims.py`.
 - [ ] **E7** Stop comparing a 20 min manual MTTR to automated pipeline seconds.
 - [ ] **E8** Add a Limitations section to the README.
 - [ ] **E9** State that the rules are untested against real-world noise.
