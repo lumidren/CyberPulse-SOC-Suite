@@ -1,0 +1,41 @@
+title: Active Directory Reconnaissance Commands
+id: 4df90a3f-121f-4e5e-b371-301acbac1442
+status: experimental
+description: Detects enumeration of privileged groups and domain trusts with net, nltest or AdFind, typical of an
+    intruder mapping the domain before escalating.
+references:
+- https://attack.mitre.org/techniques/T1087/002/
+- https://attack.mitre.org/techniques/T1482/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.discovery
+- attack.t1087.002
+- attack.t1482
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_net:
+        Image|endswith:
+        - '\net.exe'
+        - '\net1.exe'
+        CommandLine|contains:
+        - group "domain admins"
+        - group "enterprise admins"
+        - group domain admins
+    selection_nltest:
+        Image|endswith: '\nltest.exe'
+        CommandLine|contains:
+        - /domain_trusts
+        - /dclist
+    selection_adfind:
+        CommandLine|contains:
+        - adfind
+        - -sc trustdmp
+        - objectcategory=person
+    condition: 1 of selection_*
+falsepositives:
+- Identity administrators auditing group membership from admin workstations
+level: medium

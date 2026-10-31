@@ -1,0 +1,28 @@
+title: Shell Spawned by WinRM Remote Session Host
+id: 8ea69475-f81f-49fc-98eb-6cf9a33446dc
+status: experimental
+description: Detects cmd or PowerShell started by wsmprovhost.exe, i.e. commands run over a WinRM/PowerShell Remoting
+    session, a common lateral-movement channel.
+references:
+- https://attack.mitre.org/techniques/T1021/006/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.lateral_movement
+- attack.t1021.006
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        ParentImage|endswith: '\wsmprovhost.exe'
+        Image|endswith:
+        - '\cmd.exe'
+        - '\powershell.exe'
+        - '\whoami.exe'
+        - '\net.exe'
+    condition: selection
+falsepositives:
+- 'Configuration management over WinRM (Ansible, DSC, the SOAR''s own JEA endpoint): allowlist their accounts'
+level: medium

@@ -1,0 +1,28 @@
+# Positive/negative samples for rules/sigma/win_ad_reconnaissance.yml (synthetic lab events)
+rule: win_ad_reconnaissance.yml
+positive:
+- name: Enumerate Domain Admins
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\net.exe'
+      CommandLine: net group "domain admins" /domain
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+- name: List domain trusts
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\nltest.exe'
+      CommandLine: nltest /domain_trusts /all_trusts
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: net use mapping a share
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\net.exe'
+      CommandLine: 'net use Z: \\fs01\share'
+      ParentImage: 'C:\Windows\System32\cmd.exe'

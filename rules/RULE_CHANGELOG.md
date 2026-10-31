@@ -148,3 +148,15 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-033: AS-REP Roasting: TGT Without Pre-Authentication over RC4 (`win_asrep_roasting.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-034: Active Directory Reconnaissance Commands (`win_ad_reconnaissance.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-035: PsExec-Style Remote Service Execution (`win_psexec_service.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-036: Shell Spawned by WinRM Remote Session Host (`win_winrm_remote_shell.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
