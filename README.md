@@ -28,7 +28,7 @@ To maintain engineering transparency, the repository separates **deployable conf
 │ • Wazuh Manager XML detection rules      │ • Multi-Factor Risk & Policy Decision Engine     │
 │ • Sysmon v14 XML auditing configuration  │ • Resilient Containment with Rollback Engine     │
 │ • WDAC Kernel Driver Blocklist (XML)     │ • Pre-Containment DFIR Volatile Packager         │
-│ • Splunk savedsearches.conf & inputs.conf│ • 100% Offline AI SOC Analyst Copilot            │
+│ • Splunk savedsearches.conf & inputs.conf│ • Template-based (offline) triage summary        │
 │ • TheHive 5 Case templates (JSON)        │ • BloodHound CE v5 JSON Schema Exporter          │
 │ • YARA signature rules                   │ • RFC 5424 Syslog UDP Receiver (Port 5514)       │
 └──────────────────────────────────────────┴──────────────────────────────────────────────────┘
@@ -99,7 +99,7 @@ flowchart TD
     subgraph 4. Forensics & Case Management Layer
         POL --> DFIR[DFIR Volatile Evidence Collector]
         DFIR --> GRAPH[Attack Graph & Process Lineage]
-        DFIR --> COPILOT[Offline AI SOC Copilot Briefing]
+        DFIR --> COPILOT[Template-based Triage Summary]
         DFIR --> ID[AD Identity Blast Radius & BloodHound Export]
         DFIR --> TH5[TheHive 5 Case Dossier]
         DFIR --> REPORT[NIST SP 800-61 HTML Report Generator]
@@ -237,7 +237,7 @@ python server.py
 ```
 Open **`http://localhost:5000`** in your browser to access:
 * **SOC Overview**: GeoIP threat map, operational KPI meters, and attack simulation launcher.
-* **Incident DFIR**: Interactive attack graph, AI Copilot incident briefing, pre-containment volatile evidence box, Active Directory identity blast radius, and 1-click rollback.
+* **Incident DFIR**: Interactive attack graph, template-based triage summary, pre-containment volatile evidence box, Active Directory identity blast radius, and 1-click rollback.
 * **Detection Catalogue**: Searchable rulebase linked to Detection Engineering Lifecycle (DELC) write-ups.
 * **SOAR Policies**: Risk tier configuration and Dry-Run mode toggles.
 * **Purple Team Replay**: Interactive APT29 and LockBit kill chain execution.
@@ -246,16 +246,25 @@ Open **`http://localhost:5000`** in your browser to access:
 
 ---
 
-## 💼 Technical Resume Summary
+## 💼 Portfolio Summary (Accurate Resume Lines)
+
+Each line below describes something a reader can verify in this repository.
+Lab scope is stated explicitly so the lines survive a technical interview.
 
 ```text
-CyberPulse SOC Suite – Detection Engineering & Resilient SOAR Architecture Lab
+CyberPulse SOC Lab – Detection Engineering & SOAR Simulation (personal lab project)
 GitHub: https://github.com/lumidren/CyberPulse-SOC-Suite
-• Designed an extensible SecOps architecture prototype in Python modeling closed-loop Detection Engineering, Multi-Factor Risk Scoring, and Automated Containment.
-• Authored 10+ vendor-agnostic Sigma YAML and Wazuh XML detection rules following a Detection Engineering Lifecycle (DELC), covering Kerberoasting (T1558.001), DCSync (T1003.006), BYOVD driver load (T1068), and AWS AssumeRole abuse (T1548).
-• Engineered a multi-factor Risk & Policy Engine incorporating Asset Criticality, Account Privilege, ATT&CK Tactic Weights, and Threat Intelligence reputation into configurable containment policies.
-• Built a fault-tolerant SOAR containment engine with circuit breakers, idempotent actions, and one-click rollback capabilities for WinRM host isolation, pfSense firewall drops, and cloud token revocation.
-• Built an Interactive Attack Graph Visualizer, Pre-Containment DFIR Volatile Evidence Packager, 100% Offline AI SOC Analyst Copilot, BloodHound CE Schema Exporter, and RFC 5424 Syslog UDP Ingestion Gateway.
-• Hardened the REST layer for production: constant-time API key auth, per-client rate limiting, SSRF-guarded webhook dispatch, request caps, audit logging, and container healthchecks.
-• Maintained an automated GitHub Actions CI/CD pipeline executing 38 unit and integration test scenarios across Python 3.10–3.12 on every commit.
+• Built a single-process Python lab that replays synthetic Windows/cloud telemetry through
+  detection, multi-factor risk scoring and simulated containment (no live responders).
+• Wrote Sigma (status: experimental) and Wazuh XML rules for LSASS access, RDP brute force,
+  Kerberoasting, DCSync, BYOVD driver loads and AWS/Entra abuse; validated only on
+  self-authored synthetic events (counts in docs/VALIDATION_RESULTS.md).
+• Built a seeded benign-baseline generator and a validation script that publishes scripted
+  detection counts and false-positive counts, including the false positives it finds.
+• Implemented simulated containment with dry-run/approval modes, a circuit breaker and
+  rollback records for host isolation, firewall drops and token revocation.
+• Added a template-based (non-LLM) triage summary, attack-graph view, synthetic AD blast-radius
+  analysis and a BloodHound CE-format export of the synthetic topology.
+• Hardened the lab REST API (constant-time key auth, rate limiting, SSRF guard, body limits,
+  audit logging) and ran the test suite in GitHub Actions on Python 3.10-3.12.
 ```
