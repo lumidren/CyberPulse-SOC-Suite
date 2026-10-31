@@ -18,7 +18,12 @@ from simulator.lab_guard import lab_only
 
 @lab_only
 def simulate_t1003_lsass_dump():
-    """T1003.001 - OS Credential Dumping: LSASS Memory Access"""
+    """T1003.001 - OS Credential Dumping: LSASS Memory Access (SIMULATED TELEMETRY ONLY)
+
+    Returns the Sysmon Event ID 10 record such an attempt would leave behind. It
+    does not open lsass.exe, read any process memory, or touch credentials; the
+    "mimikatz.exe" path is just a string in the synthetic record.
+    """
     return {
         "event_id": 10,
         "event_source": "Microsoft-Windows-Sysmon/Operational",
