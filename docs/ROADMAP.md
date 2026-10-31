@@ -160,7 +160,7 @@ internal identifiers never go to external APIs.
 ## Phase 6 — Detection engineering (F1–F20)
 
 - [ ] **F1** ⭐ Expand to 40+ rules covering ATT&CK tactics end to end.
-- [ ] **F2** ⭐ Detection-as-code pipeline: rules in Git, CI lints and tests every rule.
+- [x] **F2** ⭐ Detection-as-code pipeline: rules in Git, CI lints and tests every rule. — **Done**: `soar/sigma_engine.py` + `rules/soar_mapping.yml`; orchestrator uses Sigma; rule lint in `tests/test_sigma_engine.py` (CI). FPs 319 → 119 / 600.
 - [ ] **F3** ⭐ Unit-test each rule with positive and negative log samples.
 - [ ] **F4** Validate Sigma syntax in CI with sigma-cli.
 - [ ] **F5** Convert Sigma to Wazuh, Splunk SPL, Elastic and KQL automatically.

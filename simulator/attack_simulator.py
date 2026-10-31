@@ -235,6 +235,7 @@ def simulate_cloud_entra_impossible_travel():
             "OperationName": "Sign-in activity",
             "RiskLevelDuringSignIn": "high",
             "RiskEventTypes": "impossibleTravel",
+            "ResultType": "0",
             "Location": "Bucharest, Romania",
             "PreviousLocation": "New York, USA"
         }

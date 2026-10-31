@@ -23,6 +23,7 @@ from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
+from soar.sigma_engine import SigmaEngine
 
 # SYNTHETIC lab threat-intel fixture. IPs are RFC 5737 documentation addresses
 # (198.51.100.0/24, 203.0.113.0/24) and providers are fictional, so no real
@@ -135,6 +136,9 @@ class SOAROrchestrator:
         self.syslog_receiver = SyslogReceiver(port=5514)
         self.webhook_ingest = WebhookIngestionHandler()
         self.identity_engine = IdentityBlastRadiusEngine()
+        # Detection logic lives in the Sigma rules (rules/sigma/*.yml), mapped to playbooks
+        # by rules/soar_mapping.yml
+        self.sigma = SigmaEngine()
         # Optional external enrichment (off unless EXTERNAL_ENRICHMENT_ENABLED=true + API keys)
         self.intel_client = ThreatIntelClient()
         # Circuit-breaker trips page a human through the configured notification channel
@@ -176,110 +180,8 @@ class SOAROrchestrator:
         return self.dfir_engine.incident_list
 
     def evaluate_detection(self, event):
-        """Match event telemetry against detection signature base"""
-        event_id = event.get("event_id")
-        details = event.get("details", {})
-
-        if event_id == 10 and details.get("TargetImage", "").endswith("lsass.exe"):
-            return {
-                "rule_id": "SOC-RULE-001",
-                "rule_name": "Possible LSASS Memory Dumping via Sysmon Event 10",
-                "severity": "CRITICAL",
-                "mitre_id": "T1003.001",
-                "action_recommended": "ISOLATE_HOST_AND_KILL_PROCESS"
-            }
-
-        elif event_id == 4625 and details.get("FailedAttemptsCount", 0) >= 10:
-            return {
-                "rule_id": "SOC-RULE-002",
-                "rule_name": "High Volume Brute Force Authentication Spike",
-                "severity": "HIGH",
-                "mitre_id": "T1110.001",
-                "action_recommended": "BLOCK_SOURCE_IP_FIREWALL"
-            }
-
-        elif event_id == 4698 and ("powershell" in details.get("TaskContent", "").lower() or "http" in details.get("TaskContent", "").lower()):
-            return {
-                "rule_id": "SOC-RULE-003",
-                "rule_name": "Suspicious Scheduled Task Creation for Persistence",
-                "severity": "HIGH",
-                "mitre_id": "T1053.005",
-                "action_recommended": "REMOVE_SCHEDULED_TASK"
-            }
-
-        elif event_id == 1 and ("-encodedcommand" in details.get("CommandLine", "").lower() or "-nop" in details.get("CommandLine", "").lower()):
-            return {
-                "rule_id": "SOC-RULE-004",
-                "rule_name": "Obfuscated PowerShell Execution Detected",
-                "severity": "HIGH",
-                "mitre_id": "T1059.001",
-                "action_recommended": "TERMINATE_PROCESS_TREE"
-            }
-
-        elif event_id == 1 and "set-mppreference" in details.get("CommandLine", "").lower() and "disablerealtime" in details.get("CommandLine", "").lower():
-            return {
-                "rule_id": "SOC-RULE-005",
-                "rule_name": "Windows Defender Real-Time Protection Disabled",
-                "severity": "CRITICAL",
-                "mitre_id": "T1562.001",
-                "action_recommended": "REVERT_DEFENDER_POLICY_AND_ISOLATE"
-            }
-
-        elif event_id == 11 and (".locked" in details.get("TargetFilename", "") or "HOW_TO_DECRYPT" in details.get("RansomNote", "")):
-            return {
-                "rule_id": "SOC-RULE-006",
-                "rule_name": "Rapid Ransomware Canary File Encryption Detected",
-                "severity": "CRITICAL",
-                "mitre_id": "T1486",
-                "action_recommended": "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS"
-            }
-
-        elif event_id == 4769 and details.get("TicketEncryptionType") == "0x17":
-            return {
-                "rule_id": "SOC-RULE-007",
-                "rule_name": "Kerberoasting TGS Ticket Request with RC4 Encryption",
-                "severity": "HIGH",
-                "mitre_id": "T1558.001",
-                "action_recommended": "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET"
-            }
-
-        elif event_id == 4662 and "1131f6aa-9c07-11d1-f79f-00c04fc2dcd2" in details.get("Properties", ""):
-            return {
-                "rule_id": "SOC-RULE-008",
-                "rule_name": "Active Directory Replication Abuse (DCSync) Detected",
-                "severity": "CRITICAL",
-                "mitre_id": "T1003.006",
-                "action_recommended": "ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES"
-            }
-
-        elif event_id == 9901 or (event.get("event_source") == "aws:cloudtrail" and details.get("eventName") == "AssumeRole"):
-            return {
-                "rule_id": "SOC-RULE-009",
-                "rule_name": "Suspicious Cross-Account AWS STS AssumeRole Abuse",
-                "severity": "HIGH",
-                "mitre_id": "T1548",
-                "action_recommended": "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY"
-            }
-
-        elif event_id == 9902 or (event.get("event_source") == "azure:signinlogs" and "impossibleTravel" in str(details)):
-            return {
-                "rule_id": "SOC-RULE-010",
-                "rule_name": "Microsoft Entra ID Impossible Travel Anomaly",
-                "severity": "HIGH",
-                "mitre_id": "T1078",
-                "action_recommended": "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA"
-            }
-
-        elif event_id == 6 and any(drv in details.get("ImageLoaded", "").lower() for drv in ["gdrv.sys", "mhyprot2.sys", "procexp.sys"]):
-            return {
-                "rule_id": "SOC-RULE-011",
-                "rule_name": "Vulnerable Kernel Driver Load (BYOVD Defense Evasion)",
-                "severity": "CRITICAL",
-                "mitre_id": "T1068",
-                "action_recommended": "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK"
-            }
-
-        return None
+        """Match an event against the Sigma rules in rules/sigma/ (detection-as-code)."""
+        return self.sigma.evaluate(event)
 
     def enrich_threat_intel(self, event):
         """Non-blocking Threat Intelligence & GeoIP enrichment with Circuit Breaker"""
