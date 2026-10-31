@@ -1,0 +1,27 @@
+title: SAM or SYSTEM Registry Hive Saved to Disk
+id: e97f1f74-f1bd-43ae-bac6-e4cf564a5bea
+status: experimental
+description: Detects reg.exe saving the SAM, SECURITY or SYSTEM hive (reg save), which lets an attacker extract
+    local password hashes offline.
+references:
+- https://attack.mitre.org/techniques/T1003/002/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.credential_access
+- attack.t1003.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\reg.exe'
+        CommandLine|contains:
+        - 'save hklm\sam'
+        - 'save hklm\system'
+        - 'save hklm\security'
+    condition: selection
+falsepositives:
+- Forensic collection by incident responders (expected during an investigation)
+level: critical

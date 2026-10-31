@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_sam_hive_export.yml (synthetic lab events)
+rule: win_sam_hive_export.yml
+positive:
+- name: SAM hive saved
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\reg.exe'
+      CommandLine: 'reg save HKLM\SAM C:\Windows\Temp\sam.hiv'
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: Software hive exported for backup
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\reg.exe'
+      CommandLine: 'reg export HKLM\Software\Vendor C:\backup\vendor.reg'
+      ParentImage: 'C:\Windows\System32\cmd.exe'

@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_ntds_extraction.yml (synthetic lab events)
+rule: win_ntds_extraction.yml
+positive:
+- name: IFM full copy to Temp
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\ntdsutil.exe'
+      CommandLine: 'ntdsutil "ac i ntds" "ifm" "create full C:\Windows\Temp\x" q q'
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: ntdsutil metadata cleanup help
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\ntdsutil.exe'
+      CommandLine: ntdsutil "metadata cleanup" help q
+      ParentImage: 'C:\Windows\System32\cmd.exe'

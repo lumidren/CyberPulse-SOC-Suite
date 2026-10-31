@@ -1,0 +1,26 @@
+title: NTDS.dit Extraction via ntdsutil IFM
+id: 3749483f-a3a9-4f3b-8029-345fd2d2a682
+status: experimental
+description: Detects ntdsutil.exe creating an Install-From-Media copy (ifm create full), which produces a copy of
+    NTDS.dit with every domain password hash.
+references:
+- https://attack.mitre.org/techniques/T1003/003/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.credential_access
+- attack.t1003.003
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection:
+        Image|endswith: '\ntdsutil.exe'
+        CommandLine|contains|all:
+        - ifm
+        - create
+    condition: selection
+falsepositives:
+- Promoting a new domain controller from media (planned, change-tracked)
+level: critical

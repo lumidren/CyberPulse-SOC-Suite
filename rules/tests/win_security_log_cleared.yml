@@ -1,0 +1,17 @@
+# Positive/negative samples for rules/sigma/win_security_log_cleared.yml (synthetic lab events)
+rule: win_security_log_cleared.yml
+positive:
+- name: Audit log cleared
+  event:
+    event_id: 1102
+    event_source: Security
+    details:
+      SubjectUserName: j.doe
+negative:
+- name: Ordinary logon
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 2
+      TargetUserName: j.doe
