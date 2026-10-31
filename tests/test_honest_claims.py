@@ -7,6 +7,7 @@ names the roadmap item that removed it.
 """
 
 import os
+os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")  # tests run in a declared lab
 import re
 import unittest
 

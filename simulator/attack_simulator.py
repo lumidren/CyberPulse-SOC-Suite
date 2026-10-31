@@ -14,6 +14,9 @@ import random
 import time
 from datetime import datetime, timezone
 
+from simulator.lab_guard import lab_only
+
+@lab_only
 def simulate_t1003_lsass_dump():
     """T1003.001 - OS Credential Dumping: LSASS Memory Access"""
     return {
@@ -37,6 +40,7 @@ def simulate_t1003_lsass_dump():
         }
     }
 
+@lab_only
 def simulate_t1110_brute_force():
     """T1110.001 - Brute Force: Password Guessing (RDP Authentication)"""
     return {
@@ -61,6 +65,7 @@ def simulate_t1110_brute_force():
         }
     }
 
+@lab_only
 def simulate_t1053_scheduled_task():
     """T1053.005 - Scheduled Task/Job: Scheduled Task Persistence"""
     return {
@@ -80,6 +85,7 @@ def simulate_t1053_scheduled_task():
         }
     }
 
+@lab_only
 def simulate_t1059_powershell_execution():
     """T1059.001 - Command and Scripting Interpreter: PowerShell Execution"""
     return {
@@ -101,6 +107,7 @@ def simulate_t1059_powershell_execution():
         }
     }
 
+@lab_only
 def simulate_t1562_defender_tamper():
     """T1562.001 - Impair Defenses: Disable Windows Defender Real-Time Protection"""
     return {
@@ -122,6 +129,7 @@ def simulate_t1562_defender_tamper():
         }
     }
 
+@lab_only
 def simulate_t1486_ransomware_canary():
     """T1486 - Data Encrypted for Impact: Rapid Canary File Encryption"""
     return {
@@ -143,6 +151,7 @@ def simulate_t1486_ransomware_canary():
         }
     }
 
+@lab_only
 def simulate_t1558_kerberoasting():
     """T1558.001 - Steal or Forge Kerberos Tickets: Kerberoasting TGS Request"""
     return {
@@ -163,6 +172,7 @@ def simulate_t1558_kerberoasting():
         }
     }
 
+@lab_only
 def simulate_t1003_dcsync():
     """T1003.006 - OS Credential Dumping: DCSync Replication Abuse"""
     return {
@@ -182,6 +192,7 @@ def simulate_t1003_dcsync():
         }
     }
 
+@lab_only
 def simulate_cloud_aws_assumerole():
     """T1548 / T1078.004: Cross-Account STS AssumeRole Abuse"""
     return {
@@ -201,6 +212,7 @@ def simulate_cloud_aws_assumerole():
         }
     }
 
+@lab_only
 def simulate_cloud_entra_impossible_travel():
     """T1078: Microsoft Entra ID Impossible Travel Anomaly"""
     return {

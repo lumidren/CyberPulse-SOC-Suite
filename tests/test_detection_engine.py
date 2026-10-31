@@ -6,6 +6,7 @@ Resilient Containment, Circuit Breakers, Rollback, DFIR, and Purple Team Replay.
 
 import unittest
 import os
+os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")  # tests run in a declared lab
 import sys
 import json
 import time

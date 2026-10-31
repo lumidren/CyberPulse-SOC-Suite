@@ -38,6 +38,7 @@ from soar.soar_engine import SOAROrchestrator
 from soar.bloodhound_exporter import BloodHoundExporter
 from soar.report_generator import IncidentReportGenerator
 from scripts.validate_detections import run_scripted, scripted_status
+from simulator.lab_guard import lab_mode_enabled
 
 __version__ = "2.5.0"
 
@@ -204,7 +205,7 @@ _SCRIPTED_VALIDATION_CACHE = {}
 
 def _scripted_validation():
     """Run the scripted validation once per process and cache the counts."""
-    if not _SCRIPTED_VALIDATION_CACHE:
+    if not _SCRIPTED_VALIDATION_CACHE and lab_mode_enabled():
         _SCRIPTED_VALIDATION_CACHE.update(run_scripted())
     return _SCRIPTED_VALIDATION_CACHE
 
@@ -542,6 +543,13 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 raise ValueError("JSON body must be an object")
         except (ValueError, json.JSONDecodeError):
             self._send_json(400, {"error": "Bad Request: body must be a valid JSON object."})
+            return
+
+        if path in ("/api/simulate", "/api/purple-team/run") and not lab_mode_enabled():
+            self._send_json(403, {
+                "error": "Simulation disabled: start the server with CYBERPULSE_LAB_MODE=true, "
+                         "and only in a lab you own or are authorised to test."
+            })
             return
 
         if path == "/api/simulate":

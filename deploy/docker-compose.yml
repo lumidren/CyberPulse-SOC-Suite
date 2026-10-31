@@ -60,6 +60,7 @@ services:
       - "5000:5000"
     environment:
       - CYBERPULSE_ENV=production
+      - CYBERPULSE_LAB_MODE=${CYBERPULSE_LAB_MODE:-false}
       - CYBERPULSE_API_KEY=${CYBERPULSE_API_KEY:?Set CYBERPULSE_API_KEY in your .env}
       - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN:-http://localhost:5000}
       - WAZUH_API_URL=https://wazuh-manager:55000

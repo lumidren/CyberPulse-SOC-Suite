@@ -127,6 +127,9 @@ def export_dossier():
 
 def main():
     print_banner()
+    from simulator.lab_guard import lab_mode_enabled
+    if not lab_mode_enabled():
+        print("\033[93m[!] CYBERPULSE_LAB_MODE is not set: attack simulation options will refuse to run.\033[0m\n")
     while True:
         menu()
         choice = input("Enter choice [0-7]: ").strip()

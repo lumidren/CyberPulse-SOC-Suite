@@ -10,6 +10,8 @@ jobs:
   validate-detections:
     name: Sigma & SOAR Validation (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    env:
+      CYBERPULSE_LAB_MODE: "true"  # CI is a declared lab: synthetic telemetry only
     strategy:
       fail-fast: false
       matrix:
