@@ -10,6 +10,7 @@ import time
 
 from soar.action_tiers import requires_approval, tier_for
 from soar.enrichment import enrichment_degraded
+from soar.reputation import consensus
 
 # Asset Criticality Dictionary (0.0 to 1.0)
 ASSET_CRITICALITY = {
@@ -103,10 +104,9 @@ class RiskAndPolicyEngine:
         rule_base_score = 98.0 if rule_severity == "CRITICAL" else (82.0 if rule_severity == "HIGH" else 55.0)
 
         # 5. Threat Intelligence Reputation Factor (0 - 100)
-        ip_intel = intel.get("ip_reputation", {})
-        vt_positives = ip_intel.get("virustotal_positives", 0)
-        abuse_score = ip_intel.get("abuse_score", 0)
-        intel_score = min(100.0, (vt_positives / 72.0 * 60.0) + (abuse_score * 0.4))
+        # Multi-source consensus: a single source counts at half weight (roadmap E63)
+        reputation = consensus(intel)
+        intel_score = reputation["score"]
 
         # 6. Historical Repeat Offender Weight (0 - 100)
         self.ip_frequency[source_ip] = self.ip_frequency.get(source_ip, 0) + 1
@@ -140,6 +140,7 @@ class RiskAndPolicyEngine:
             "final_score": final_score,
             "score_without_intel": score_without_intel,
             "enrichment_degraded": enrichment_degraded(intel.get("external")),
+            "reputation": reputation,
             "risk_level": risk_level,
             "factors": {
                 "rule_base_score": round(rule_base_score, 1),

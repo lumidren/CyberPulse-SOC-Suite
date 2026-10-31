@@ -71,3 +71,12 @@ synthetic lab fixture only.
   would stay below the containment threshold without the threat-intel factor
   (`score_without_intel`), an analyst must approve.
 
+## Corroboration
+
+No single reputation score triggers containment. `soar/reputation.py`
+combines all signals (live verdicts plus the lab fixture's two simulated
+signals); the threat-intel factor counts at full weight only when at least two
+independent sources flag the indicator, otherwise at half weight with
+`corroborated: false`. Together with the intel-alone rule above, one
+provider's opinion can never block an address by itself.
+
