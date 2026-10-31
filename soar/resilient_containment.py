@@ -113,8 +113,22 @@ class ResilientContainmentEngine:
             self.action_registry[action_id] = action_record
             return action_record
 
+        # Rate limit on automated execution: excess actions wait for an analyst instead
+        if self.safety.rate_limit_exceeded():
+            action_record["status"] = "PENDING_ANALYST_APPROVAL"
+            action_record["execution_intent"] = "PENDING_APPROVAL"
+            action_record["execution_protocol"] = "Containment Rate Limit"
+            action_record["execution_log"] = (
+                f"Hourly containment budget ({self.safety.max_actions_per_hour}) reached; "
+                f"{action_type} on {target_host} staged for analyst approval instead of running."
+            )
+            action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
+            self.action_registry[action_id] = action_record
+            return action_record
+
         # Execute Concrete Containment Playbooks
         self._apply_action(action_record)
+        self.safety.record_execution(action_record)
 
         # Measured in-process time only. Responders are simulated, so this is NOT
         # a network round-trip to WinRM/pfSense/AD and must not be presented as one.
@@ -257,6 +271,8 @@ class ResilientContainmentEngine:
         }
         record["execution_intent"] = "EXECUTE_AFTER_APPROVAL"
         self._apply_action(record)
+        # Approved actions count toward the hourly budget (they are not blocked by it)
+        self.safety.record_execution(record)
         record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
         return {"status": "SUCCESS", "action": record}
 
