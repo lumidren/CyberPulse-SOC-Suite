@@ -1,0 +1,15 @@
+# Reference-only manifest: NO executable test is shipped in this repository.
+#
+# Emits a pre-aggregated failed-logon record; no password is guessed or sent.
+attack_technique: T1110.001
+display_name: "Brute Force: Password Guessing"
+upstream_reference: "Atomic Red Team, atomics/T1110.001 (run only in your own authorised lab)"
+execution: none
+emulated_by: simulator/attack_simulator.py::simulate_t1110_brute_force
+expected_telemetry:
+  - source: Security
+    event_id: 4625
+    fields:
+      LogonType: 10
+      FailedAttemptsCount|gte: 10
+expected_rule: SOC-RULE-002

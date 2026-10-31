@@ -1,0 +1,14 @@
+# Reference-only manifest: NO executable test is shipped in this repository.
+#
+# Emits the task-creation audit record; no task is registered on any host.
+attack_technique: T1053.005
+display_name: "Scheduled Task/Job: Scheduled Task"
+upstream_reference: "Atomic Red Team, atomics/T1053.005 (run only in your own authorised lab)"
+execution: none
+emulated_by: simulator/attack_simulator.py::simulate_t1053_scheduled_task
+expected_telemetry:
+  - source: Security
+    event_id: 4698
+    fields:
+      TaskContent|contains: 'powershell'
+expected_rule: SOC-RULE-003

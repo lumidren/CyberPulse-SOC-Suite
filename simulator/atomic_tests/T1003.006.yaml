@@ -1,0 +1,14 @@
+# Reference-only manifest: NO executable test is shipped in this repository.
+#
+# Emits a directory-replication audit record; no replication request is made.
+attack_technique: T1003.006
+display_name: "OS Credential Dumping: DCSync"
+upstream_reference: "Atomic Red Team, atomics/T1003.006 (run only in your own authorised lab)"
+execution: none
+emulated_by: simulator/attack_simulator.py::simulate_t1003_dcsync
+expected_telemetry:
+  - source: Security
+    event_id: 4662
+    fields:
+      Properties|contains: '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'
+expected_rule: SOC-RULE-008
