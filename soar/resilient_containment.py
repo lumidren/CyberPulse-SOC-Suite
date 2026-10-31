@@ -10,6 +10,7 @@ import json
 import time
 from datetime import datetime, timezone
 
+from soar import command_builder as cmd
 from soar.evidence_collector import VolatileEvidenceCollector
 from soar.process_termination import RANSOMWARE_GRACE_SECONDS, termination_plan
 from soar.protected_assets import protected_account_match, protected_match
@@ -187,6 +188,16 @@ class ResilientContainmentEngine:
         return action_record
 
     def _apply_action(self, action_record):
+        """Run the playbook; values that fail command validation stop the action before it is built."""
+        try:
+            self._apply_action_unchecked(action_record)
+        except cmd.CommandValidationError as exc:
+            action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
+            action_record["execution_protocol"] = "Command Validation"
+            action_record["execution_log"] = f"Refused to build responder command: {exc}. No action taken."
+            action_record.pop("rollback_plan", None)
+
+    def _apply_action_unchecked(self, action_record):
         """Run the (simulated) playbook for an action record and fill in its execution fields."""
         action_type = action_record["action_type"]
         target_host = action_record["target_host"]
@@ -213,12 +224,13 @@ class ResilientContainmentEngine:
                 action_record["termination_plan"] = {"error": str(exc)}
 
         if action_type == "BLOCK_SOURCE_IP_FIREWALL":
+            action_record["execution_argv"] = cmd.iptables_drop(target_ip)
             action_record["execution_protocol"] = "pfSense REST API / iptables Netfilter"
             action_record["execution_log"] = f"[pfSense Gateway 10.0.0.1:8443] Injected packet drop rule: DROP INBOUND TCP/UDP from {target_ip}/32 on WAN."
             action_record["rollback_plan"] = {
                 "method": "REST_API_DELETE",
-                "endpoint": f"/api/v1/firewall/rule/{target_ip}",
-                "command": f"iptables -D INPUT -s {target_ip}/32 -j DROP"
+                "endpoint": cmd.pfsense_rule_path(target_ip),
+                "argv": cmd.iptables_undrop(target_ip)
             }
             self.blocked_ips.add(target_ip)
 
@@ -242,7 +254,8 @@ class ResilientContainmentEngine:
             action_record["task_export"] = {
                 "task_name": task_name,
                 "exported_at": datetime.now(timezone.utc).isoformat(),
-                "export_argv": ["schtasks.exe", "/Query", "/TN", task_name, "/XML"],
+                "export_argv": cmd.schtasks("export", task_name),
+                "disable_argv": cmd.schtasks("disable", task_name),
                 "xml": task_xml,
                 "sha256": hashlib.sha256(task_xml.encode("utf-8")).hexdigest(),
             }
@@ -253,7 +266,7 @@ class ResilientContainmentEngine:
             )
             action_record["rollback_plan"] = {
                 "method": "WINRM",
-                "argv": ["schtasks.exe", "/Change", "/TN", task_name, "/ENABLE"],
+                "argv": cmd.schtasks("enable", task_name),
                 "fallback": "Re-register from task_export.xml if the task was later deleted.",
             }
 
@@ -303,7 +316,7 @@ class ResilientContainmentEngine:
             action_record["execution_log"] = f"[AWS IAM -> {target_user}] Attached AWSRevokeOlderSessions inline policy and invalidated active STS tokens."
             action_record["rollback_plan"] = {
                 "method": "AWS_IAM_API",
-                "command": f"aws iam delete-user-policy --user-name '{target_user}' --policy-name AWSRevokeOlderSessions"
+                "argv": cmd.aws_delete_deny_policy(target_user)
             }
             self.disabled_users.add(target_user)
 
