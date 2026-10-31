@@ -68,7 +68,7 @@ internal identifiers never go to external APIs.
 - [x] **E38** Brute-force simulation targets only lab accounts with fake passwords. — **Done**: `validate_credential_attack` in `simulator/lab_guard.py`; scenario uses `lab.admin` with `CredentialMaterial: none`; tests.
 - [x] **E39** Rate-limit the brute-force simulation. — **Done**: `SimulationThrottle` in `simulator/lab_guard.py`, enforced on the simulate and purple-team endpoints; tests.
 - [x] **E40** Tag all simulated events with `simulation=true`. — **Done**: `tag_simulated` in `simulator/lab_guard.py`; baseline + ingest + incident `simulated` flag; tests.
-- [ ] **E41** Dashboard visibly shows when data is simulated.
+- [x] **E41** Dashboard visibly shows when data is simulated. — **Done**: `simulatedBadge()` in `web/app.js` on the incident table and dossier; test.
 - [ ] **E42** Test-mode banner in the UI.
 
 ## Phase 3 — Securing the tool itself (E65–E78)
