@@ -59,9 +59,18 @@ services:
     ports:
       - "5000:5000"
     environment:
+      - CYBERPULSE_ENV=production
+      - CYBERPULSE_API_KEY=${CYBERPULSE_API_KEY:?Set CYBERPULSE_API_KEY in your .env}
+      - CORS_ALLOWED_ORIGIN=${CORS_ALLOWED_ORIGIN:-http://localhost:5000}
       - WAZUH_API_URL=https://wazuh-manager:55000
       - THEHIVE_URL=http://thehive:9000
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5000/healthz', timeout=4).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     depends_on:
       - wazuh-manager
     networks:
