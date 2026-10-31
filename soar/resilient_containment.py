@@ -239,7 +239,7 @@ class ResilientContainmentEngine:
             action_record["execution_log"] = f"[WinRM TLS 5986 -> {target_host}] Injected WFP emergency isolation filter (allow only 10.0.1.10). Stopping PID {pid} ({process_name}) graceful-first (see termination_plan)."
             action_record["rollback_plan"] = {
                 "method": "WINRM_POWERSHELL",
-                "command": "Remove-NetFirewallRule -DisplayName 'SOC-Emergency-Isolation' -ErrorAction SilentlyContinue"
+                "invocation": cmd.ps_invocation("Remove-NetFirewallRule", DisplayName=cmd.ISOLATION_RULE)
             }
             self.host_isolation_registry.add(target_host)
 
@@ -275,7 +275,7 @@ class ResilientContainmentEngine:
             action_record["execution_log"] = f"[WinRM -> {target_host}] Stopping {process_name} (PID {pid}) graceful-first, children by PID (see termination_plan). Revoked session and locked account {target_user}."
             action_record["rollback_plan"] = {
                 "method": "ACTIVE_DIRECTORY_LDAP",
-                "command": f"Set-ADUser -Identity '{target_user}' -Enabled $true"
+                "invocation": cmd.ps_invocation("Enable-ADAccount", Identity=target_user)
             }
             self.disabled_users.add(target_user)
 
@@ -284,7 +284,7 @@ class ResilientContainmentEngine:
             action_record["execution_log"] = f"[WinRM TLS 5986 -> {target_host}] Re-enabled Windows Defender Real-Time Protection via Set-MpPreference. Host isolated."
             action_record["rollback_plan"] = {
                 "method": "WINRM_POWERSHELL",
-                "command": "Remove-NetFirewallRule -DisplayName 'SOC-Emergency-Isolation'"
+                "invocation": cmd.ps_invocation("Remove-NetFirewallRule", DisplayName=cmd.ISOLATION_RULE)
             }
             self.host_isolation_registry.add(target_host)
 
@@ -298,7 +298,7 @@ class ResilientContainmentEngine:
             action_record["execution_log"] = f"[AD KDC -> {target_host}] Purged compromised TGS ticket. Enforced immediate password reset for targeted SPN service account."
             action_record["rollback_plan"] = {
                 "method": "ACTIVE_DIRECTORY_LDAP",
-                "command": f"Set-ADUser -Identity '{target_user}' -ChangePasswordAtLogon $false"
+                "invocation": cmd.ps_invocation("Set-ADUser", Identity=target_user, ChangePasswordAtLogon=False)
             }
             self.disabled_users.add(target_user)
 
@@ -307,7 +307,7 @@ class ResilientContainmentEngine:
             action_record["execution_log"] = f"[AD DS -> {target_host}] Revoked DS-Replication-Get-Changes extended rights from {target_user} and locked account."
             action_record["rollback_plan"] = {
                 "method": "ACTIVE_DIRECTORY_LDAP",
-                "command": f"Set-ADUser -Identity '{target_user}' -Enabled $true"
+                "invocation": cmd.ps_invocation("Enable-ADAccount", Identity=target_user)
             }
             self.disabled_users.add(target_user)
 
@@ -325,7 +325,9 @@ class ResilientContainmentEngine:
             action_record["execution_log"] = f"[MS Graph -> {target_user}] Revoked all OAuth refresh tokens via RevokeSignInSessions API and enforced immediate MFA re-challenge."
             action_record["rollback_plan"] = {
                 "method": "MS_GRAPH_API",
-                "command": f"POST https://graph.microsoft.com/v1.0/users/{target_user}/reprocessLicenseAssignment"
+                "note": "Revoked sessions cannot be restored; the user signs in again. Remove any forced-MFA "
+                        "conditional-access assignment manually.",
+                "revocation_request": cmd.graph_revoke_sessions(target_user)
             }
             self.disabled_users.add(target_user)
 
@@ -334,7 +336,7 @@ class ResilientContainmentEngine:
             action_record["execution_log"] = f"[WinRM -> {target_host}] Unloaded vulnerable kernel driver and refreshed WDAC CI Policy to enforce blocklist."
             action_record["rollback_plan"] = {
                 "method": "WINRM_POWERSHELL",
-                "command": "CiTool.exe -r"
+                "argv": cmd.citool_refresh()
             }
 
         elif action_type == "ESCALATE_TO_ANALYST":

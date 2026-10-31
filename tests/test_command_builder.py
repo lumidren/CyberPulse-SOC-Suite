@@ -35,6 +35,32 @@ class TestValidators(unittest.TestCase):
         self.assertEqual(cmd.schtasks("disable", "\\Vendor\\Update")[-1], "/DISABLE")
 
 
+class TestPowerShellInvocations(unittest.TestCase):
+
+    def test_structured_invocation_validates_parameters(self):
+        inv = cmd.ps_invocation("Set-ADUser", Identity="CORP\\j.doe", ChangePasswordAtLogon=False)
+        self.assertEqual(inv, {"transport": "winrm-https", "cmdlet": "Set-ADUser",
+                               "parameters": {"Identity": "CORP\\j.doe", "ChangePasswordAtLogon": False}})
+        with self.assertRaises(cmd.CommandValidationError):
+            cmd.ps_invocation("Invoke-Expression", Command="whoami")          # not allowlisted
+        with self.assertRaises(cmd.CommandValidationError):
+            cmd.ps_invocation("Set-ADUser", Identity="x'; Remove-ADUser y; '")  # hostile identity
+        with self.assertRaises(cmd.CommandValidationError):
+            cmd.ps_invocation("Set-ADUser", Identity="CORP\\j.doe", Enabled="$true")  # string, not bool
+        with self.assertRaises(cmd.CommandValidationError):
+            cmd.ps_invocation("Remove-NetFirewallRule", DisplayName="*")      # only the SOC rule
+
+    def test_graph_url_is_encoded_and_validated(self):
+        self.assertTrue(cmd.graph_revoke_sessions("finance_admin@lab.local")["url"].endswith("/revokeSignInSessions"))
+        with self.assertRaises(cmd.CommandValidationError):
+            cmd.graph_revoke_sessions("../../me/drive")
+
+    def test_no_string_commands_left_in_engine(self):
+        import inspect
+        from soar import resilient_containment
+        self.assertNotIn('"command":', inspect.getsource(resilient_containment))
+
+
 class TestEngineRefusesInvalidTargets(unittest.TestCase):
 
     def test_hostile_ip_flags_action_instead_of_building_command(self):
