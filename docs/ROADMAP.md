@@ -183,7 +183,7 @@ internal identifiers never go to external APIs.
 ## Phase 7 — Adversary emulation & validation (F21–F30)
 
 - [x] **F21** ⭐ Integrate Atomic Red Team for standardized test execution. — **Done (reference-only)**: `scripts/atomic_coverage.py` (maps, never executes or copies commands), 8 manifests in `simulator/atomic_tests/`, `docs/ATOMIC_RED_TEAM.md`. Executing atomics is the user's manual lab step (hard rule: no attack tooling). Not run against a real atomics checkout here; tested on a fixture.
-- [ ] **F22** Integrate MITRE Caldera for automated campaigns.
+- [x] **F22** Integrate MITRE Caldera for automated campaigns. — **Stub**: `soar/caldera.py`, `scripts/caldera_compare.py`, `docs/CALDERA.md`. Needs the user's Caldera server (`CALDERA_URL`/`CALDERA_API_KEY`, off by default). Tested on a hand-written fixture only; report layout unverified against a live server.
 - [ ] **F23** ⭐ Automated purple-team report: what ran, what fired, what missed.
 - [ ] **F24** Detection-latency histogram per technique.
 - [ ] **F25** True/false-positive confusion matrix with real counts.
