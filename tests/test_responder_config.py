@@ -6,7 +6,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from soar.responder_config import validate_winrm  # noqa: E402
+from soar.responder_config import validate_identity, validate_winrm  # noqa: E402
 
 
 class TestWinRMTransport(unittest.TestCase):
@@ -29,6 +29,23 @@ class TestWinRMTransport(unittest.TestCase):
         result = validate_winrm({})
         self.assertFalse(result["configured"])
         self.assertTrue(result["ok"])
+
+
+class TestLeastPrivilegeIdentity(unittest.TestCase):
+
+    def test_privileged_identities_refused(self):
+        for user in ["CORP\\Administrator", "administrator", "CORP\\krbtgt", "root", "CORP\\Domain Admins"]:
+            self.assertFalse(validate_identity(user)["ok"], user)
+
+    def test_dedicated_service_account_accepted(self):
+        result = validate_identity("CORP\\svc_cyberpulse_soar")
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["warnings"], [])
+        self.assertTrue(validate_identity("CORP\\gmsa_soar$")["ok"])
+
+    def test_admin_user_fails_full_winrm_check(self):
+        result = validate_winrm({"WINRM_ENDPOINT": "https://10.0.0.10:5986/wsman", "WINRM_USER": "CORP\\Administrator"})
+        self.assertFalse(result["ok"])
 
 
 if __name__ == "__main__":
