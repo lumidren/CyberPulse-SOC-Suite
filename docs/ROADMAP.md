@@ -166,7 +166,7 @@ internal identifiers never go to external APIs.
 - [x] **F5** Convert Sigma to Wazuh, Splunk SPL, Elastic and KQL automatically. — **Done** (not validated against live SIEMs): `soar/sigma_convert.py` + `scripts/convert_rules.py` → `rules/converted/{splunk,elastic,kql,wazuh}`; `tests/test_sigma_convert.py`.
 - [x] **F6** Rule metadata standard: author, date, severity, FP notes, references. — **Done**: `rules/METADATA_STANDARD.md`; `modified` on every rule; `tests/test_rule_metadata_standard.py`.
 - [x] **F7** Rule versioning and a changelog per rule. — **Done**: `version` + `detection_sha256` in `rules/soar_mapping.yml`; `rules/RULE_CHANGELOG.md`; `soar/rule_versioning.py`; `tests/test_rule_versioning.py`.
-- [ ] **F8** Rule-quality score (coverage, FP risk, data-source dependency).
+- [x] **F8** Rule-quality score (coverage, FP risk, data-source dependency). — **Done**: `docs/coverage/QUALITY.md` (generated; documented weights; baseline FPs counted per rule with `match_all`).
 - [x] **F9** ⭐ Coverage heatmap exported as an ATT&CK Navigator layer. — **Done**: `scripts/export_navigator.py` → `docs/coverage/attack_navigator_layer.json`; README section; `tests/test_navigator_layer.py`.
 - [x] **F10** Data-source coverage analysis. — **Done**: `scripts/coverage_report.py` → `docs/coverage/DATA_SOURCES.md`; `tests/test_coverage_reports.py`.
 - [x] **F11** Detection gap report: techniques with no rule. — **Done**: `rules/coverage_targets.yml` → `docs/coverage/GAPS.md` (24/35 targets covered, 11 accepted gaps with blockers, 0 open).

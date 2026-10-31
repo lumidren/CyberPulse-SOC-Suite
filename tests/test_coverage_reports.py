@@ -7,7 +7,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from scripts.coverage_report import OUT, REPORTS, data_sources, gaps, load_targets, simulated_techniques  # noqa: E402
+from scripts.coverage_report import OUT, REPORTS, data_sources, gaps, load_targets, rule_quality, simulated_techniques  # noqa: E402
 from soar.sigma_engine import SigmaEngine  # noqa: E402
 
 
@@ -37,6 +37,18 @@ class TestCoverageReports(unittest.TestCase):
         for tid, entry in load_targets().items():
             self.assertRegex(tid, r"^T\d{4}(\.\d{3})?$")
             self.assertTrue(entry.get("name") and entry.get("tactic") and entry.get("why"), tid)
+
+    def test_quality_scores_are_bounded_and_explained(self):
+        rows = rule_quality()
+        self.assertEqual(len(rows), len(SigmaEngine().rules))
+        for row in rows:
+            self.assertEqual(row["score"], sum(row["parts"].values()))
+            self.assertTrue(0 <= row["score"] <= 100, row)
+
+    def test_noisy_rule_loses_fp_points(self):
+        by_rule = {r["rule"]: r for r in rule_quality()}
+        self.assertGreater(by_rule["SOC-RULE-004"]["baseline_fp"], 5)
+        self.assertEqual(by_rule["SOC-RULE-004"]["parts"]["baseline_fp"], 0)
 
 
 if __name__ == "__main__":
