@@ -115,9 +115,11 @@ Read this before drawing conclusions from anything else in the README.
   marked `status: experimental` for that reason; expect false positives on a
   real network until you tune them on your own baseline.
 * **Detection runs the Sigma rules in this repo** (`soar/sigma_engine.py`, a documented
-  subset of Sigma 2.0). The rules still produce false positives on the synthetic benign
-  baseline (see [`docs/VALIDATION_RESULTS.md`](docs/VALIDATION_RESULTS.md)); those are
-  real rule weaknesses, published rather than hidden.
+  subset of Sigma 2.0). Two rules (SOC-RULE-003, SOC-RULE-004) still match 119 benign
+  baseline events; those matches are suppressed by two expiring, documented exceptions
+  in [`rules/exceptions.yml`](rules/exceptions.yml) and the suppression counts are published in
+  [`docs/VALIDATION_RESULTS.md`](docs/VALIDATION_RESULTS.md). The exceptions were tuned on the
+  same synthetic data they are measured on, so "0 false positives" there is not an efficacy claim.
 * **Threat intelligence is a local, synthetic cache.** No live VirusTotal or
   AbuseIPDB lookups are made by the pipeline; reputation values are invented
   lab data.

@@ -8,7 +8,7 @@
 | Positive samples | 10 | `rules/tests/` has at least one event the rule must match |
 | Negative samples | 10 | `rules/tests/` has at least one near-miss the rule must ignore |
 | Scripted generator | 10 | The attack simulator has a generator for the rule |
-| Baseline FP risk | 30 | Full for 0 matches on the 600-event benign baseline, half for 1-5 |
+| Baseline FP risk | 30 | Full for 0 matches on the 600-event benign baseline (before exceptions), half for 1-5 |
 | Metadata | 20 | Falsepositives, references, ATT&CK tag, level (a quarter each) |
 | Shared data source | 20 | Another rule uses the same telemetry, so collecting it is already justified |
 

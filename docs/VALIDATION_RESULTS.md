@@ -27,14 +27,17 @@ were written together, this is a regression check, not an efficacy measurement.
 
 ## False positives on the benign baseline
 
-**119 false positives in 600 baseline events** (seed 1337; see [BASELINE_TRAFFIC.md](BASELINE_TRAFFIC.md)).
+**0 false positives in 600 baseline events** (seed 1337; see [BASELINE_TRAFFIC.md](BASELINE_TRAFFIC.md)), **after 119 matches were suppressed by 2 exception(s)** (below).
 
-| Rule | False positives |
-| :--- | ---: |
-| `SOC-RULE-003` | 19 |
-| `SOC-RULE-004` | 100 |
+No baseline event raised an alert.
 
-| Baseline category | False positives |
+### Suppressed by exceptions
+
+Matches allowlisted in [`rules/exceptions.yml`](../rules/exceptions.yml), evaluated as of 2026-11-01. These are not counted above but are not hidden: the exceptions
+were written for this synthetic baseline by the rule author, so the drop in false positives is
+tuning against known data, not an independent measurement.
+
+| Exception | Suppressed matches |
 | :--- | ---: |
-| `admin_scripts` | 100 |
-| `patching` | 19 |
+| `EXC-0001` | 100 |
+| `EXC-0002` | 19 |
