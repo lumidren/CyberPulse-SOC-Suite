@@ -450,6 +450,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "full_auto_allowed": ALLOW_FULL_AUTO
             })
 
+        elif path == "/api/safety":
+            self._send_json(200, orchestrator.containment_engine.safety.status())
+
         elif path == "/api/version":
             self._send_json(200, {
                 "service": "cyberpulse-soc",
@@ -608,6 +611,23 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             )
             self._send_json(200, {"status": "SUCCESS", "decision": decision, "incident_id": inc["incident_id"] if inc else None,
                                   "action": result["action"]})
+
+        elif path == "/api/safety/kill-switch":
+            actor = str(data.get("actor", "")).strip()
+            reason = str(data.get("reason", "")).strip()
+            if not actor:
+                self._send_json(400, {"error": "An 'actor' is required to change the kill switch."})
+                return
+            safety = orchestrator.containment_engine.safety
+            if bool(data.get("engaged", True)):
+                state = safety.engage_kill_switch(actor, reason)
+            else:
+                state = safety.release_kill_switch(actor, reason)
+            audit_logger.warning(
+                "KILL_SWITCH client=%s engaged=%s actor=%s reason=%s",
+                self._client_ip(), state["engaged"], actor, reason
+            )
+            self._send_json(200, {"status": "SUCCESS", "kill_switch": state})
 
         elif path.startswith("/api/incidents/") and path.endswith("/rollback"):
             inc_id = path.split("/")[3]

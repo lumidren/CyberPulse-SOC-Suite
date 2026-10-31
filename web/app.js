@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadHealthStatus();
     loadSyslogStats();
     loadPolicyMode();
+    loadSafetyStatus();
     
     // Poll metrics & health periodically
     setInterval(loadMetrics, 15000);
@@ -513,6 +514,40 @@ async function loadPolicyMode() {
         if (select && data.active_policy_mode) select.value = data.active_policy_mode;
     } catch (err) {
         console.error("Load policy mode error:", err);
+    }
+}
+
+// Global kill switch: halts every containment action until released
+let killSwitchEngaged = false;
+function renderKillSwitch(state) {
+    killSwitchEngaged = !!state?.engaged;
+    const label = document.getElementById("killSwitchLabel");
+    if (label) label.innerText = killSwitchEngaged ? "AUTOMATION HALTED — RELEASE" : "KILL SWITCH";
+}
+async function loadSafetyStatus() {
+    try {
+        const res = await fetch("/api/safety");
+        const data = await res.json();
+        renderKillSwitch(data.kill_switch);
+    } catch (err) {
+        console.error("Load safety status error:", err);
+    }
+}
+async function toggleKillSwitch() {
+    const engage = !killSwitchEngaged;
+    const actor = prompt(engage ? "Your name to HALT all containment:" : "Your name to RELEASE the kill switch:");
+    if (!actor) return;
+    const reason = prompt("Reason:") || "";
+    try {
+        const res = await fetch("/api/safety/kill-switch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ engaged: engage, actor: actor, reason: reason })
+        });
+        const data = await res.json();
+        renderKillSwitch(data.kill_switch);
+    } catch (err) {
+        console.error("Kill switch error:", err);
     }
 }
 

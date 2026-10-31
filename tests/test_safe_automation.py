@@ -102,5 +102,31 @@ class TestBlastRadiusTiers(unittest.TestCase):
         self.assertEqual(lockdown["policy_decision"]["blast_radius_tier"], "TIER_3_IDENTITY")
 
 
+class TestKillSwitch(unittest.TestCase):
+
+    def test_kill_switch_halts_execution_and_approvals(self):
+        engine = ResilientContainmentEngine()
+        staged = stage(engine)
+        engine.safety.engage_kill_switch("lead_analyst", "suspected bad rule push")
+
+        direct = engine.execute_containment(
+            action_type="BLOCK_SOURCE_IP_FIREWALL", target_host="CORP-RDP-GW01", target_ip="203.0.113.7",
+            target_user="admin", pid=None, process_name=None)
+        self.assertEqual(direct["status"], "HALTED_BY_KILL_SWITCH")
+        self.assertEqual(engine.blocked_ips, set())
+        self.assertEqual(engine.approve_action(staged["action_id"], approver="analyst_a")["status"], "ERROR")
+
+        engine.safety.release_kill_switch("lead_analyst", "rule reverted")
+        self.assertEqual(engine.approve_action(staged["action_id"], approver="analyst_a")["status"], "SUCCESS")
+
+    def test_kill_switch_applies_to_automatic_mode(self):
+        from simulator.attack_simulator import simulate_t1110_brute_force
+        orch = SOAROrchestrator(policy_mode="AUTOMATIC")
+        orch.containment_engine.safety.engage_kill_switch("lead_analyst", "drill")
+        incident = orch.process_event(simulate_t1110_brute_force())
+        self.assertEqual(incident["containment_action"]["status"], "HALTED_BY_KILL_SWITCH")
+        self.assertEqual(incident["status"], "HALTED_BY_KILL_SWITCH")
+
+
 if __name__ == "__main__":
     unittest.main()
