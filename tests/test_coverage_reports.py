@@ -7,7 +7,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from scripts.coverage_report import OUT, REPORTS, data_sources, gaps, load_targets, rule_quality, simulated_techniques  # noqa: E402
+from scripts.coverage_report import OUT, REPORTS, data_sources, detection_rules, gaps, load_targets, rule_quality, simulated_techniques  # noqa: E402
 from soar.sigma_engine import SigmaEngine  # noqa: E402
 
 
@@ -20,7 +20,7 @@ class TestCoverageReports(unittest.TestCase):
 
     def test_every_rule_has_a_known_data_source(self):
         table = data_sources()
-        self.assertEqual(sum(len(e["rules"]) for e in table.values()), len(SigmaEngine().rules))
+        self.assertEqual(sum(len(e["rules"]) for e in table.values()), len(detection_rules()))
         self.assertFalse(any("/" in source and "(" not in source for source in table), "unmapped logsource")
 
     def test_gap_report_has_no_open_gaps(self):

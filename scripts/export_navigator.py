@@ -19,6 +19,7 @@ from collections import defaultdict
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
+from soar.sigma_correlation import CorrelationEngine  # noqa: E402
 from soar.sigma_engine import SigmaEngine  # noqa: E402
 
 LAYER_PATH = os.path.join(ROOT, "docs", "coverage", "attack_navigator_layer.json")
@@ -26,7 +27,7 @@ LAYER_PATH = os.path.join(ROOT, "docs", "coverage", "attack_navigator_layer.json
 
 def build_layer():
     by_technique = defaultdict(list)
-    for rule in SigmaEngine().rules:
+    for rule in SigmaEngine().rules + CorrelationEngine().rules:
         for technique in rule.technique_ids:
             by_technique[technique].append(rule.soar.get("soc_rule_id", rule.id))
     techniques = [

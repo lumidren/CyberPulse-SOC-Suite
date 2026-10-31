@@ -33,3 +33,8 @@ When a rule is adapted from one in future, it must:
 
 `tests/test_sigma_metadata.py` checks that every rule has an `author` and at
 least one `references` URL.
+
+## Correlation rules
+
+Multi-event rules (brute force on raw 4625s, password spraying, mass file writes) live in
+[`correlations/`](correlations/README.md) and are evaluated by `soar/sigma_correlation.py`.

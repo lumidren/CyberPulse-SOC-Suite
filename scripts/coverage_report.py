@@ -25,6 +25,7 @@ sys.path.insert(0, ROOT)
 
 import yaml  # noqa: E402
 
+from soar.sigma_correlation import CorrelationEngine  # noqa: E402
 from soar.sigma_engine import SigmaEngine  # noqa: E402
 
 OUT = os.path.join(ROOT, "docs", "coverage")
@@ -55,9 +56,14 @@ def data_source_of(rule):
     return DATA_SOURCE_NAMES.get(key, f"{key[0]}/{key[1]}")
 
 
+def detection_rules():
+    """Single-event rules plus correlation rules: everything that can raise an alert."""
+    return SigmaEngine().rules + CorrelationEngine().rules
+
+
 def data_sources():
     table = defaultdict(lambda: {"rules": [], "techniques": set()})
-    for rule in SigmaEngine().rules:
+    for rule in detection_rules():
         entry = table[data_source_of(rule)]
         entry["rules"].append(rule.soar.get("soc_rule_id", rule.id))
         entry["techniques"].update(rule.technique_ids)
@@ -89,7 +95,7 @@ def render_data_sources():
 
 
 def covered_techniques():
-    return {tid for rule in SigmaEngine().rules for tid in rule.technique_ids}
+    return {tid for rule in detection_rules() for tid in rule.technique_ids}
 
 
 def simulated_techniques():
