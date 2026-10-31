@@ -158,7 +158,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         act = containment.execute_containment(
             action_type="ISOLATE_HOST_AND_KILL_PROCESS",
             target_host="WIN-WORKSTATION09",
-            target_ip="185.220.101.33",
+            target_ip="198.51.100.33",
             target_user="CORP\\Administrator",
             pid=4812,
             process_name="mimikatz.exe"
@@ -301,7 +301,7 @@ class TestSOCLabPlatform(unittest.TestCase):
         valid_event = {
             "event_id": 10,
             "computer_name": "WIN-DC01.corp.local",
-            "source_ip": "185.220.101.33",
+            "source_ip": "198.51.100.33",
             "user": "CORP\\Administrator",
             "details": {
                 "SourceImage": "C:\\Windows\\Temp\\mimikatz.exe",
@@ -372,7 +372,7 @@ class TestSOCLabPlatform(unittest.TestCase):
             "timestamp": "2026-09-09T12:00:00Z",
             "computer_name": "WIN-DC01.corp.local",
             "user": "CORP\\Administrator",
-            "source_ip": "185.220.101.5",
+            "source_ip": "198.51.100.5",
             "details": {
                 "ImageLoaded": "C:\\Windows\\Temp\\gdrv.sys",
                 "Hashes": "SHA256=2C6E80EE7732E904B469D5F09B0E44E6A7A382D420A1017EE9758EF4FF55716D"

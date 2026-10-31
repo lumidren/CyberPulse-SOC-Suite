@@ -30,8 +30,8 @@ At **03:41:15 UTC on Sunday**, the SIEM triggered a CRITICAL alert on workstatio
 * **Finding**: Classic macro-enabled phishing document execution. Non-technical marketing employee opened an attachment named `Invoice_Q3_Review.docm`.
 
 ### Pivot 2: Ingress Network Connections & Stager Download
-* Sysmon Event ID 3 (Network Connection) revealed `powershell.exe` established an outbound HTTPS connection to `91.240.118.172:443` (Ukraine - Hostlife C2 infrastructure) immediately prior to invoking `Set-MpPreference`.
-* Threat Intel enrichment scored `91.240.118.172` with an **88% Abuse Confidence Score** and 33 security vendor detections on VirusTotal.
+* Sysmon Event ID 3 (Network Connection) revealed `powershell.exe` established an outbound HTTPS connection to `198.51.100.172:443` (Ukraine - Hostlife C2 infrastructure) immediately prior to invoking `Set-MpPreference`.
+* Threat Intel enrichment scored `198.51.100.172` with an **88% Abuse Confidence Score** and 33 security vendor detections on VirusTotal.
 
 ---
 

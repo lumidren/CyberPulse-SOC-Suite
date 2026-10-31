@@ -23,9 +23,11 @@ from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
 
-# Curated Threat Intelligence & GeoIP Database
+# SYNTHETIC lab threat-intel fixture. IPs are RFC 5737 documentation addresses
+# (198.51.100.0/24, 203.0.113.0/24) and providers are fictional, so no real
+# network or company is labelled malicious. Not derived from any provider's data.
 THREAT_INTEL_CACHE = {
-    "185.220.101.5": {
+    "198.51.100.5": {
         "reputation": "MALICIOUS",
         "abuse_score": 98,
         "country": "Germany",
@@ -33,11 +35,11 @@ THREAT_INTEL_CACHE = {
         "flag": "🇩🇪",
         "lat": 52.5200,
         "lon": 13.4050,
-        "isp": "TOR Exit Node / Hostinger",
+        "isp": "Fictional Exit Relay (lab data)",
         "category": "SSH/RDP Brute Force, Scanner",
         "virustotal_positives": 42
     },
-    "185.220.101.33": {
+    "198.51.100.33": {
         "reputation": "MALICIOUS",
         "abuse_score": 95,
         "country": "Russia",
@@ -45,11 +47,11 @@ THREAT_INTEL_CACHE = {
         "flag": "🇷🇺",
         "lat": 55.7558,
         "lon": 37.6173,
-        "isp": "BadHost Ltd",
+        "isp": "Fictional BadHost Ltd (lab data)",
         "category": "C2 Server, Credential Harvester",
         "virustotal_positives": 38
     },
-    "45.142.214.12": {
+    "203.0.113.12": {
         "reputation": "SUSPICIOUS",
         "abuse_score": 76,
         "country": "Netherlands",
@@ -57,11 +59,11 @@ THREAT_INTEL_CACHE = {
         "flag": "🇳🇱",
         "lat": 52.3676,
         "lon": 4.9041,
-        "isp": "Datacenter VPN",
+        "isp": "Fictional VPN Provider (lab data)",
         "category": "Port Scanning, Exploit Probe",
         "virustotal_positives": 14
     },
-    "193.142.146.210": {
+    "203.0.113.210": {
         "reputation": "MALICIOUS",
         "abuse_score": 92,
         "country": "Romania",
@@ -69,11 +71,11 @@ THREAT_INTEL_CACHE = {
         "flag": "🇷🇴",
         "lat": 44.4268,
         "lon": 26.1025,
-        "isp": "M247 Europe",
+        "isp": "Fictional Hosting SRL (lab data)",
         "category": "Ransomware Distribution, Cobalt Strike C2",
         "virustotal_positives": 49
     },
-    "91.240.118.172": {
+    "198.51.100.172": {
         "reputation": "MALICIOUS",
         "abuse_score": 88,
         "country": "Ukraine",
@@ -81,11 +83,11 @@ THREAT_INTEL_CACHE = {
         "flag": "🇺🇦",
         "lat": 50.4501,
         "lon": 30.5234,
-        "isp": "Hostlife LLC",
+        "isp": "Fictional Hostlife LLC (lab data)",
         "category": "Malware Stager C2",
         "virustotal_positives": 33
     },
-    "194.26.29.112": {
+    "203.0.113.112": {
         "reputation": "MALICIOUS",
         "abuse_score": 91,
         "country": "Sweden",
@@ -93,7 +95,7 @@ THREAT_INTEL_CACHE = {
         "flag": "🇸🇪",
         "lat": 59.3293,
         "lon": 18.0686,
-        "isp": "Glesys AB",
+        "isp": "Fictional Cloud AB (lab data)",
         "category": "Brute Force, Exploit Botnet",
         "virustotal_positives": 27
     },
