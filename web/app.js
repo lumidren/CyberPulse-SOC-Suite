@@ -287,6 +287,11 @@ async function loadIncidentDetails() {
         renderEvidencePackage(inc.evidence_package);
         renderIdentityAnalysis(inc.identity_blast_radius);
 
+        // Approval Button State: only staged actions can be approved or rejected
+        const pending = inc.containment_action?.status === "PENDING_ANALYST_APPROVAL";
+        document.getElementById("approveBtn").style.display = pending ? "inline-flex" : "none";
+        document.getElementById("rejectBtn").style.display = pending ? "inline-flex" : "none";
+
         // Rollback Button State
         const rollbackBtn = document.getElementById("rollbackBtn");
         if (inc.status === "ROLLED_BACK") {
@@ -331,6 +336,29 @@ async function rollbackActiveIncident() {
         }
     } catch (err) {
         console.error("Rollback error:", err);
+    }
+}
+
+// Approve or reject a staged containment action (analyst decision)
+async function decideActiveIncident(decision) {
+    const inc = incidentsData.find(i => i.incident_id === activeIncidentId);
+    const actionId = inc?.containment_action?.action_id;
+    if (!actionId) return;
+    const approver = prompt(`Your analyst name to ${decision} ${inc.containment_action.action_type}:`);
+    if (!approver) return;
+    const comment = prompt(decision === "approve" ? "Justification (optional):" : "Reason for rejection:") || "";
+    try {
+        const res = await fetch(`/api/approvals/${actionId}/${decision}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ approver: approver, comment: comment })
+        });
+        const data = await res.json();
+        if (data.status !== "SUCCESS") alert(`[!] ${data.message || data.error}`);
+        loadIncidents();
+        loadIncidentDetails();
+    } catch (err) {
+        console.error("Approval error:", err);
     }
 }
 

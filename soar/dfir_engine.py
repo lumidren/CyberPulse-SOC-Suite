@@ -9,6 +9,22 @@ import time
 import random
 from datetime import datetime, timezone
 
+# Containment action status -> incident status
+INCIDENT_STATUS_BY_ACTION = {
+    "SUCCESS": "CONTAINED",
+    "PENDING_ANALYST_APPROVAL": "PENDING_APPROVAL",
+    "SIMULATED_NO_DISRUPTION": "DRY_RUN_LOGGED",
+    "REJECTED_BY_ANALYST": "CONTAINMENT_REJECTED",
+    "FLAGGED_FOR_MANUAL_REVIEW": "NEEDS_ANALYST_REVIEW",
+    "ROLLED_BACK": "ROLLED_BACK",
+}
+
+
+def incident_status_for(containment_action):
+    """Map a containment action record to the incident's lifecycle status."""
+    return INCIDENT_STATUS_BY_ACTION.get(containment_action.get("status"), "NEEDS_ANALYST_REVIEW")
+
+
 class DFIREngine:
     def __init__(self):
         self.incidents = {} # incident_id -> Incident object
@@ -129,15 +145,28 @@ class DFIREngine:
                 {
                     "timestamp": utc_now,
                     "author": "SOAR_AUTOMATION_SYSTEM",
-                    "note": f"Automated closed-loop containment recorded in {timing_breakdown.get('total_pipeline_sec', 0.0)}s (lab-measured, simulated responder)."
+                    "note": f"Pipeline recorded {containment_action.get('action_type')} as {containment_action.get('status')} "
+                            f"in {timing_breakdown.get('total_pipeline_sec', 0.0)}s (lab-measured, simulated responder)."
                 }
             ],
-            "status": "CONTAINED_AUTOMATICALLY"
+            "status": incident_status_for(containment_action)
         }
 
         self.incidents[incident_id] = incident_record
         self.incident_list.insert(0, incident_record)
         return incident_record
+
+    def find_by_action_id(self, action_id):
+        """Return the incident whose containment action has `action_id`, if any."""
+        for inc in self.incident_list:
+            if inc.get("containment_action", {}).get("action_id") == action_id:
+                return inc
+        return None
+
+    def refresh_status(self, incident):
+        """Re-derive the incident status after its containment action changed."""
+        incident["status"] = incident_status_for(incident.get("containment_action", {}))
+        return incident["status"]
 
     def add_analyst_note(self, incident_id, note_text, author="analyst_lumidren"):
         """Adds a verified analyst triage note to an active incident record"""

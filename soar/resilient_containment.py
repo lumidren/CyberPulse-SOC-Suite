@@ -81,13 +81,31 @@ class ResilientContainmentEngine:
         # Handle PENDING APPROVAL Mode
         if execution_intent == "PENDING_APPROVAL":
             action_record["status"] = "PENDING_ANALYST_APPROVAL"
-            action_record["execution_protocol"] = "Human-in-the-Loop SOAR Gate"
-            action_record["execution_log"] = f"Action {action_type} for {target_host} staged for Tier-2 analyst review & sign-off token."
+            action_record["execution_protocol"] = "Analyst Approval Gate"
+            action_record["execution_log"] = f"Action {action_type} for {target_host} staged; nothing runs until an analyst approves it."
             action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
             self.action_registry[action_id] = action_record
             return action_record
 
         # Execute Concrete Containment Playbooks
+        self._apply_action(action_record)
+
+        # Measured in-process time only. Responders are simulated, so this is NOT
+        # a network round-trip to WinRM/pfSense/AD and must not be presented as one.
+        action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
+        self.action_registry[action_id] = action_record
+        return action_record
+
+    def _apply_action(self, action_record):
+        """Run the (simulated) playbook for an action record and fill in its execution fields."""
+        action_type = action_record["action_type"]
+        target_host = action_record["target_host"]
+        target_ip = action_record["target_ip"]
+        target_user = action_record["target_user"]
+        pid = action_record["pid"]
+        process_name = action_record["process_name"]
+        action_record["status"] = "SUCCESS"
+
         if action_type == "BLOCK_SOURCE_IP_FIREWALL":
             action_record["execution_protocol"] = "pfSense REST API / iptables Netfilter"
             action_record["execution_log"] = f"[pfSense Gateway 10.0.0.1:8443] Injected packet drop rule: DROP INBOUND TCP/UDP from {target_ip}/32 on WAN."
@@ -183,11 +201,51 @@ class ResilientContainmentEngine:
             action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
             action_record["execution_log"] = "No disruptive containment policy matched. Staged for analyst review."
 
-        # Measured in-process time only. Responders are simulated, so this is NOT
-        # a network round-trip to WinRM/pfSense/AD and must not be presented as one.
-        action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
-        self.action_registry[action_id] = action_record
-        return action_record
+    def pending_approvals(self):
+        """Actions staged for analyst sign-off, oldest first."""
+        return [r for r in self.action_registry.values() if r["status"] == "PENDING_ANALYST_APPROVAL"]
+
+    def approve_action(self, action_id, approver, comment=""):
+        """Analyst approves a staged action; only then is the playbook applied."""
+        record = self.action_registry.get(action_id)
+        if not record:
+            return {"status": "ERROR", "message": f"Action ID {action_id} not found."}
+        if record["status"] != "PENDING_ANALYST_APPROVAL":
+            return {"status": "ERROR", "message": f"Action {action_id} is {record['status']}, not pending approval."}
+        if not approver:
+            return {"status": "ERROR", "message": "An approver identity is required."}
+
+        t_start = time.perf_counter()
+        record["approval"] = {
+            "decision": "APPROVED",
+            "approver": approver,
+            "comment": comment,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        record["execution_intent"] = "EXECUTE_AFTER_APPROVAL"
+        self._apply_action(record)
+        record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
+        return {"status": "SUCCESS", "action": record}
+
+    def reject_action(self, action_id, approver, reason=""):
+        """Analyst rejects a staged action; nothing is executed."""
+        record = self.action_registry.get(action_id)
+        if not record:
+            return {"status": "ERROR", "message": f"Action ID {action_id} not found."}
+        if record["status"] != "PENDING_ANALYST_APPROVAL":
+            return {"status": "ERROR", "message": f"Action {action_id} is {record['status']}, not pending approval."}
+        if not approver:
+            return {"status": "ERROR", "message": "An approver identity is required."}
+        record["status"] = "REJECTED_BY_ANALYST"
+        record["approval"] = {
+            "decision": "REJECTED",
+            "approver": approver,
+            "comment": reason,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        record["execution_log"] = f"Analyst {approver} rejected {record['action_type']}; no action executed."
+        return {"status": "SUCCESS", "action": record}
+
 
     def rollback_containment(self, action_id, actor="analyst_lumidren"):
         """
