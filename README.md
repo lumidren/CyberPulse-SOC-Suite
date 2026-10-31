@@ -145,13 +145,20 @@ $$\text{Risk Score} = (S_{\text{rule}} \times 0.35) + (W_{\text{tactic}} \times 
 
 ---
 
-## 🔐 API Security & Authentication
+## 🔐 API Security & Hardening
 
 All REST endpoints under `/api/*` require authentication to prevent unauthorized containment or simulation triggers:
 
-* **Header Authentication**: Provide `X-API-Key: <token>` or `Authorization: Bearer <token>`.
-* **Configurable Secret**: Set via the `CYBERPULSE_API_KEY` environment variable (defaults to a documented local development key: `cyberpulse-dev-secret-key-2026`).
+* **Header Authentication**: Provide `X-API-Key: <token>` or `Authorization: Bearer <token>` (validated with a constant-time comparison).
+* **Configurable Secret**: Set via the `CYBERPULSE_API_KEY` environment variable. In development it falls back to a documented local key (`cyberpulse-dev-secret-key-2026`); with `CYBERPULSE_ENV=production` the server **refuses to start** without an explicit key.
 * **CORS Restrictions**: `Access-Control-Allow-Origin` is restricted to authorized origins (configurable via `CORS_ALLOWED_ORIGIN`, defaulting to `http://localhost:5000`).
+* **Rate Limiting**: Sliding-window per-client limits — `RATE_LIMIT_PER_MINUTE` (default 240) for all API traffic plus `AUTH_FAILURE_LIMIT_PER_MINUTE` (default 10) for failed authentication attempts, returning `429` when saturated.
+* **Request Hardening**: JSON bodies are strictly validated (`400` on malformed payloads) and capped at `MAX_BODY_BYTES` (default 1 MiB → `413`); every response carries `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy` headers.
+* **SSRF Guard**: Analyst-supplied webhook URLs must be `http(s)` and may not target loopback/private/link-local addresses unless `ALLOW_INTERNAL_WEBHOOKS=true`.
+* **Observability**: Structured logs plus a dedicated audit trail for state-changing actions (simulations, rollbacks, policy changes); an unauthenticated `/healthz` liveness probe and `GET /api/version` support load balancers and container healthchecks.
+* **Concurrency & Lifecycle**: Threaded HTTP server (slow clients cannot stall the console), graceful SIGINT/SIGTERM shutdown, and pagination (`?limit=&offset=`) on `GET /api/incidents`.
+
+See [SECURITY.md](SECURITY.md) for the full hardening baseline and deployment guidance, and [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ---
 
@@ -174,7 +181,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Run the Automated Test Suite (22 Unit & Integration Tests):
+### 2. Run the Automated Test Suite (35+ Unit & Integration Tests):
 ```bash
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
@@ -204,5 +211,6 @@ GitHub: https://github.com/lumidren/CyberPulse-SOC-Suite
 • Engineered a multi-factor Risk & Policy Engine incorporating Asset Criticality, Account Privilege, ATT&CK Tactic Weights, and Threat Intelligence reputation into configurable containment policies.
 • Built a fault-tolerant SOAR containment engine with circuit breakers, idempotent actions, and one-click rollback capabilities for WinRM host isolation, pfSense firewall drops, and cloud token revocation.
 • Built an Interactive Attack Graph Visualizer, Pre-Containment DFIR Volatile Evidence Packager, 100% Offline AI SOC Analyst Copilot, BloodHound CE Schema Exporter, and RFC 5424 Syslog UDP Ingestion Gateway.
-• Maintained an automated GitHub Actions CI/CD pipeline executing 22 unit and integration test scenarios on every commit.
+• Hardened the REST layer for production: constant-time API key auth, per-client rate limiting, SSRF-guarded webhook dispatch, request caps, audit logging, and container healthchecks.
+• Maintained an automated GitHub Actions CI/CD pipeline executing 38 unit and integration test scenarios across Python 3.10–3.12 on every commit.
 ```
