@@ -7,6 +7,11 @@ This document details the exact detection posture of **CyberPulse SOC Suite**, e
 
 ---
 
+> **Current, generated numbers:** this page is a narrative overview of the original six rules.
+> The full, always-current lists are generated from the rules: [coverage/GAPS.md](coverage/GAPS.md)
+> (gap report), [coverage/DATA_SOURCES.md](coverage/DATA_SOURCES.md) and the
+> [ATT&CK Navigator layer](coverage/attack_navigator_layer.json).
+
 ## 2. Active Detections (Lab Rulebase — untested against real-world noise)
 
 | Technique ID | Technique Name | Tactic | Primary Telemetry | Rule ID & Format | Expected Fidelity (design intent, untested vs real noise) | Automated Containment Action |
@@ -25,7 +30,7 @@ This document details the exact detection posture of **CyberPulse SOC Suite**, e
 | Uncovered Technique | Tactic | Why It Is Currently Uncovered (Root Cause) | Required Telemetry / Architecture | Planned Roadmap Mitigation |
 | :--- | :--- | :--- | :--- | :--- |
 | **`T1055.003` (Thread Execution Hijacking)** | Privilege Escalation / Evasion | Sysmon user-mode event 10 logs open handles, but does not track thread context manipulation (`SetThreadContext`) without deep kernel ETW. | Microsoft-Windows-Threat-Intelligence (EtwTI) kernel provider. | Deploy specialized ETW kernel subscriber agent in Phase 3. |
-| **`T1068` (Exploitation for Privilege Escalation - BYOVD)** | Privilege Escalation | Vulnerable signed kernel drivers (Bring Your Own Vulnerable Driver) bypass OS user-mode APIs entirely. | Driver blocklist auditing (`WDAC` / Hypervisor-Protected Code Integrity). | Enforce Microsoft Recommended Driver Block Rules via GPO. |
+| **`T1068` (Exploitation for Privilege Escalation - BYOVD)** — *partially covered since by a driver-load rule (`Vulnerable Signed Driver Load`); kernel-level exploitation itself remains a gap* | Privilege Escalation | Vulnerable signed kernel drivers (Bring Your Own Vulnerable Driver) bypass OS user-mode APIs entirely. | Driver blocklist auditing (`WDAC` / Hypervisor-Protected Code Integrity). | Enforce Microsoft Recommended Driver Block Rules via GPO. |
 | **`T1078` (Valid Accounts - Low-and-Slow Spraying)** | Initial Access | Single password guesses dispersed across 200+ users over days fall below deterministic threshold rules. | UEBA (User and Entity Behavior Analytics) statistical anomaly model. | Route low-frequency authentication feeds to GUARDIAN anomaly model. |
 | **`T1048` (Exfiltration Over Alternative Protocol - DNS Tunneling)** | Exfiltration | Standard endpoint event logs do not capture DNS payload entropy and TXT record volume. | Core DNS Gateway query logs / Zeek Network Security Monitoring. | Integrate CoreDNS / Zeek passive DNS log parser into Wazuh indexer. |
 
