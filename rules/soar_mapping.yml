@@ -9,43 +9,65 @@ rules:
     soc_rule_id: SOC-RULE-001
     name: Possible LSASS Memory Dumping via Sysmon Event 10
     action_recommended: ISOLATE_HOST_AND_KILL_PROCESS
+    version: 1.0.1
+    detection_sha256: 1acf92011768f3c3515eac6fe97fdc4148abb7dd4f068c4613ced1a8f83c4930
   9a8d420f-21b4-4e12-b91c-223405fae38e:
     soc_rule_id: SOC-RULE-002
     name: High Volume Brute Force Authentication Spike
     action_recommended: BLOCK_SOURCE_IP_FIREWALL
+    version: 2.0.0
+    detection_sha256: 25cac109e52faff5768f4a348f8924e3ecbbb1ccceee2f174d4ff49daadfecfa
   5e61234a-9c2b-4781-a901-d85712ef9100:
     soc_rule_id: SOC-RULE-003
     name: Suspicious Scheduled Task Creation for Persistence
     action_recommended: REMOVE_SCHEDULED_TASK
+    version: 1.0.1
+    detection_sha256: 7c402c91c7b739e805b678069b860b8306d23af035d8a62d0cb595020b0a81b2
   7d4b9e21-63fa-4c8e-9b1d-5a2e0f8c3d47:
     soc_rule_id: SOC-RULE-004
     name: Obfuscated PowerShell Execution Detected
     action_recommended: TERMINATE_PROCESS_TREE
+    version: 1.0.1
+    detection_sha256: 50a1b9ee06fc0a11ce3087c16c5f274fb9a99a6db18134063f44c479421fb4af
   c382910a-814d-4b92-962a-8921df0102aa:
     soc_rule_id: SOC-RULE-005
     name: Windows Defender Real-Time Protection Disabled
     action_recommended: REVERT_DEFENDER_POLICY_AND_ISOLATE
+    version: 1.0.1
+    detection_sha256: a29b4f6edef7572079e4e3920f34453f1f98847ba8ac78c036202037f538119b
   a74198c2-3e21-4f12-a892-38472910cdee:
     soc_rule_id: SOC-RULE-006
     name: Rapid Ransomware Canary File Encryption Detected
     action_recommended: KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS
+    version: 1.0.1
+    detection_sha256: 0cf4a9dfc93f1bfd4861a1263af2b7b7527883c23c31c885db5b9ba60c3de95d
   9a38df41-6c23-4e89-a112-984712019481:
     soc_rule_id: SOC-RULE-007
     name: Kerberoasting TGS Ticket Request with RC4 Encryption
     action_recommended: RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET
+    version: 1.0.1
+    detection_sha256: cfc95fb95f160a4c00f910919736ed570f0e7a165d12ff0b52307a1d7cde8a99
   b41289cf-1123-4482-9912-781290341829:
     soc_rule_id: SOC-RULE-008
     name: Active Directory Replication Abuse (DCSync) Detected
     action_recommended: ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES
+    version: 1.0.1
+    detection_sha256: 9685dab54aaff60684b95c14403da242d60144635811453e8aaf9743ae1efd27
   d7e8f9a0-b1c2-4345-a678-9abcdef01234:
     soc_rule_id: SOC-RULE-009
     name: Suspicious Cross-Account AWS STS AssumeRole Abuse
     action_recommended: REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY
+    version: 1.0.1
+    detection_sha256: 037ce776247821878f0842b1c26256b305e338b6496b04ec4150f96c53c377aa
   e8f9a0b1-c2d3-4456-b789-0abcdef12345:
     soc_rule_id: SOC-RULE-010
     name: Microsoft Entra ID Impossible Travel Anomaly
     action_recommended: REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA
+    version: 1.0.1
+    detection_sha256: 841148dafda94cafc94517f551bbe84e5e4579e4c0df8325c084646f14a0be39
   f1a2b3c4-d5e6-4789-a012-3456789abcde:
     soc_rule_id: SOC-RULE-011
     name: Vulnerable Kernel Driver Load (BYOVD Defense Evasion)
     action_recommended: UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK
+    version: 1.0.1
+    detection_sha256: b8692a0413ac118021e8272e5598cf7acf1656fd8cb9427f1cd437d8e7a66a00

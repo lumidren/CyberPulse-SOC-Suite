@@ -165,7 +165,7 @@ internal identifiers never go to external APIs.
 - [x] **F4** Validate Sigma syntax in CI with sigma-cli. — **Done** (sigma-cli step unverified locally: pySigma's `jq` dependency does not build on 32-bit Windows): CI `sigma check rules/sigma`; local spec test in `tests/test_sigma_metadata.py`; ISO dates.
 - [ ] **F5** Convert Sigma to Wazuh, Splunk SPL, Elastic and KQL automatically.
 - [x] **F6** Rule metadata standard: author, date, severity, FP notes, references. — **Done**: `rules/METADATA_STANDARD.md`; `modified` on every rule; `tests/test_rule_metadata_standard.py`.
-- [ ] **F7** Rule versioning and a changelog per rule.
+- [x] **F7** Rule versioning and a changelog per rule. — **Done**: `version` + `detection_sha256` in `rules/soar_mapping.yml`; `rules/RULE_CHANGELOG.md`; `soar/rule_versioning.py`; `tests/test_rule_versioning.py`.
 - [ ] **F8** Rule-quality score (coverage, FP risk, data-source dependency).
 - [ ] **F9** ⭐ Coverage heatmap exported as an ATT&CK Navigator layer.
 - [ ] **F10** Data-source coverage analysis.
