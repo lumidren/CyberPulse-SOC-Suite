@@ -8,6 +8,8 @@ import json
 import os
 import time
 
+from soar.action_tiers import requires_approval, tier_for
+
 # Asset Criticality Dictionary (0.0 to 1.0)
 ASSET_CRITICALITY = {
     "WIN-DC01.corp.local": 1.0,    # Domain Controller (Tier 0)
@@ -122,6 +124,21 @@ class RiskAndPolicyEngine:
         }
         return breakdown
 
+    def _containment_intent(self, action, decision):
+        """Decide how a containment action may proceed given mode and blast-radius tier.
+
+        DRY_RUN only logs. Anything else is staged for approval, except that in
+        opt-in AUTOMATIC mode a TIER_1 (narrow, reversible) action may run.
+        """
+        if self.policy_mode == "DRY_RUN":
+            return "DRY_RUN_SIMULATION"
+        if self.policy_mode == "AUTOMATIC" and not requires_approval(action):
+            return "EXECUTE_IMMEDIATE"
+        decision["approval_token"] = f"APPR-{int(time.time())}"
+        if self.policy_mode == "AUTOMATIC":
+            decision["approval_reason"] = f"{tier_for(action)} actions always require analyst approval."
+        return "PENDING_APPROVAL"
+
     def evaluate_policy(self, risk_assessment, matched_rule):
         """
         Determines the automated response action based on risk level and policy mode.
@@ -138,28 +155,17 @@ class RiskAndPolicyEngine:
             "action": action_recommended,
             "execution_intent": "EXECUTE",
             "approval_token": None,
+            "blast_radius_tier": tier_for(action_recommended),
             "rationale": ""
         }
 
         if score >= 80.0 or matched_rule.get("severity") == "CRITICAL":
             decision["rationale"] = f"Critical risk score ({score}/100) or Critical rule trigger. Proposing containment for analyst review."
-            if self.policy_mode == "DRY_RUN":
-                decision["execution_intent"] = "DRY_RUN_SIMULATION"
-            elif self.policy_mode == "APPROVAL_REQUIRED":
-                decision["execution_intent"] = "PENDING_APPROVAL"
-                decision["approval_token"] = f"APPR-{int(time.time())}"
-            else:
-                decision["execution_intent"] = "EXECUTE_IMMEDIATE"
+            decision["execution_intent"] = self._containment_intent(action_recommended, decision)
 
         elif score >= 65.0:
-            decision["rationale"] = f"High risk score ({score}/100). Executing targeted mitigation and opening high-priority incident."
-            if self.policy_mode == "DRY_RUN":
-                decision["execution_intent"] = "DRY_RUN_SIMULATION"
-            elif self.policy_mode == "APPROVAL_REQUIRED":
-                decision["execution_intent"] = "PENDING_APPROVAL"
-                decision["approval_token"] = f"APPR-{int(time.time())}"
-            else:
-                decision["execution_intent"] = "EXECUTE_IMMEDIATE"
+            decision["rationale"] = f"High risk score ({score}/100). Proposing targeted mitigation and opening a high-priority incident."
+            decision["execution_intent"] = self._containment_intent(action_recommended, decision)
 
         elif score >= 40.0:
             decision["action"] = "ENRICH_AND_ALERT_ANALYST"

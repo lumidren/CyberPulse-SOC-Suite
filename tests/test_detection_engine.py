@@ -78,7 +78,11 @@ class TestSOCLabPlatform(unittest.TestCase):
         self.assertEqual(incident["risk_assessment"]["risk_level"], "CRITICAL")
         self.assertGreaterEqual(incident["risk_assessment"]["final_score"], 80.0)
         self.assertEqual(incident["containment_action"]["action_type"], "ISOLATE_HOST_AND_KILL_PROCESS")
-        self.assertEqual(incident["containment_action"]["status"], "SUCCESS")
+        # Host isolation is a TIER_2 action: even AUTOMATIC mode stages it for an analyst
+        self.assertEqual(incident["containment_action"]["status"], "PENDING_ANALYST_APPROVAL")
+        approval = self.orchestrator.containment_engine.approve_action(
+            incident["containment_action"]["action_id"], approver="analyst_test")
+        self.assertEqual(approval["action"]["status"], "SUCCESS")
         self.assertIn("CYBERPULSE-SOC", incident["thehive_case"]["title"])
         self.assertGreaterEqual(len(incident["timeline"]), 5)
 

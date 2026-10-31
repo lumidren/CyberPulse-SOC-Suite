@@ -455,6 +455,18 @@
                         </tbody>
                     </table>
                 </div>
+                <h4 style="margin-top:18px;">Blast-Radius Tiers</h4>
+                <p class="section-desc">Even in opt-in AUTOMATIC mode, only Tier 1 actions may run without an analyst.</p>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead><tr><th>Tier</th><th>Example Actions</th><th>Autonomy</th></tr></thead>
+                        <tbody>
+                            <tr><td><span class="badge-green">Tier 1</span></td><td>Block one external IP at the perimeter</td><td>Auto-eligible (AUTOMATIC mode only)</td></tr>
+                            <tr><td><span class="badge-orange">Tier 2 — Host</span></td><td>Host isolation, process kill, task/driver removal</td><td>Always requires approval</td></tr>
+                            <tr><td><span class="badge-red">Tier 3 — Identity</span></td><td>Account lockdown, password reset, token/session revocation</td><td>Always requires approval</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
