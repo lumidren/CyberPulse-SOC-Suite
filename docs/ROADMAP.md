@@ -161,7 +161,7 @@ internal identifiers never go to external APIs.
 
 - [ ] **F1** ⭐ Expand to 40+ rules covering ATT&CK tactics end to end.
 - [x] **F2** ⭐ Detection-as-code pipeline: rules in Git, CI lints and tests every rule. — **Done**: `soar/sigma_engine.py` + `rules/soar_mapping.yml`; orchestrator uses Sigma; rule lint in `tests/test_sigma_engine.py` (CI). FPs 319 → 119 / 600.
-- [ ] **F3** ⭐ Unit-test each rule with positive and negative log samples.
+- [x] **F3** ⭐ Unit-test each rule with positive and negative log samples. — **Done**: `rules/tests/*.yml` (2+ samples per rule, incl. exclusions); `tests/test_rule_samples.py` enforces coverage for every rule.
 - [ ] **F4** Validate Sigma syntax in CI with sigma-cli.
 - [ ] **F5** Convert Sigma to Wazuh, Splunk SPL, Elastic and KQL automatically.
 - [ ] **F6** Rule metadata standard: author, date, severity, FP notes, references.

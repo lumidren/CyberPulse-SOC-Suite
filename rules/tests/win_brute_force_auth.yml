@@ -1,0 +1,25 @@
+# Positive/negative samples for rules/sigma/win_brute_force_auth.yml (synthetic lab events)
+rule: win_brute_force_auth.yml
+positive:
+- name: 18 RDP failures from one source
+  event:
+    event_id: 4625
+    event_source: Security
+    details:
+      LogonType: 10
+      FailedAttemptsCount: 18
+negative:
+- name: Two typos at the console
+  event:
+    event_id: 4625
+    event_source: Security
+    details:
+      LogonType: 2
+      FailedAttemptsCount: 2
+- name: Nine network failures (below threshold)
+  event:
+    event_id: 4625
+    event_source: Security
+    details:
+      LogonType: 3
+      FailedAttemptsCount: 9

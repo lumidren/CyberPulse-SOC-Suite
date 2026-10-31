@@ -1,0 +1,25 @@
+# Positive/negative samples for rules/sigma/win_powershell_obfuscation.yml (synthetic lab events)
+rule: win_powershell_obfuscation.yml
+positive:
+- name: Encoded hidden download cradle
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      CommandLine: powershell.exe -nop -w hidden -encodedcommand JABjAGwA
+negative:
+- name: Plain interactive PowerShell
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      CommandLine: powershell.exe Get-Service
+- name: cmd.exe with similar words
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\cmd.exe
+      CommandLine: cmd /c echo -nop

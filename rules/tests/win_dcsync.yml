@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_dcsync.yml (synthetic lab events)
+rule: win_dcsync.yml
+positive:
+- name: Replication rights used by a user
+  event:
+    event_id: 4662
+    event_source: Security
+    details:
+      AccessMask: '0x100'
+      SubjectUserName: compromised_admin
+      Properties: '{1131f6aa-9c07-11d1-f79f-00c04fc2dcd2}'
+negative:
+- name: Domain controller replicating (machine account)
+  event:
+    event_id: 4662
+    event_source: Security
+    details:
+      AccessMask: '0x100'
+      SubjectUserName: DC02$
+      Properties: '{1131f6aa-9c07-11d1-f79f-00c04fc2dcd2}'
