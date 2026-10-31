@@ -242,8 +242,9 @@ python -m venv venv
 # On Linux / macOS:
 source venv/bin/activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (hash-pinned; dev tools are only needed for tests/lint)
+pip install --require-hashes -r requirements.txt
+pip install --require-hashes -r requirements-dev.txt
 ```
 
 ### 2. Run the Automated Test Suite (35+ Unit & Integration Tests):

@@ -1,0 +1,4 @@
+# Development / CI tools (compile with: pip-compile --generate-hashes requirements-dev.in)
+flake8>=7.0.0
+ruff>=0.6
+pytest>=8.0.0

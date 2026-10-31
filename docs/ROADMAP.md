@@ -85,7 +85,7 @@ internal identifiers never go to external APIs.
 - [x] **E74** Scan repo history for leaked keys (gitleaks/trufflehog). — **Done**: `scripts/scan_history_secrets.py` run over 81 commits (2 known placeholders, no real secrets) → `docs/SECRET_SCAN.md`; gitleaks CI job (first run not yet observed).
 - [x] **E75** WinRM over HTTPS with certificate validation, not skip-verify. — **Done**: `validate_winrm` in `soar/responder_config.py`, surfaced in `/api/health`; tests. Not exercised against a real WinRM host.
 - [x] **E76** Least privilege: dedicated SOAR service account, not Domain Admin. — **Done**: `docs/SERVICE_ACCOUNT.md`; `validate_identity` in `soar/responder_config.py`; tests.
-- [ ] **E77** Pin dependencies in a requirements file with hashes.
+- [x] **E77** Pin dependencies in a requirements file with hashes. — **Done**: `requirements.txt` (pyyaml==6.0.3, 73 hashes) + `requirements-dev.txt` (pip-compile); `--require-hashes` in CI/Docker/README; `requests` dropped (unused).
 - [ ] **E78** Dependabot and a CI security scan.
 
 ## Phase 4 — Privacy & data handling (E43–E56)
