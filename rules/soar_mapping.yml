@@ -221,3 +221,27 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: fb859e619634782aae27745c745d98a962ca0bb26b341b834fb266fa8257b99e
+  5bf9140c-2ccd-46e7-9739-c3792f641191:
+    soc_rule_id: SOC-RULE-037
+    name: Remote Access Tool Started from a User-Writable Path
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: bdb3a1937a79851b0958d5541ef8ef5603f44ed031a4a7ed730518a38d68c935
+  11940016-c3a0-48c4-9684-8791939b2632:
+    soc_rule_id: SOC-RULE-038
+    name: Password-Protected Archive Created with 7-Zip or WinRAR
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: cac48b4dc63670e24b6efb128d02fc100dac37a957b335289016598f4c49ffb3
+  5e81be5a-af5b-4b4e-ac3d-d13dda1f1636:
+    soc_rule_id: SOC-RULE-039
+    name: Rclone Copying Data to Cloud Storage
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 423552cff81b8ccb2c0b9dc3652fba178f0f4b00b523d8cca35992078b7dc64d
+  fdfb543f-1750-4e58-8ef4-0151294b75d3:
+    soc_rule_id: SOC-RULE-040
+    name: Backup or Security Service Stopped via net or sc
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: f05e4ba433f85014014a8ddf80b0463199ab2b2d55560a604db78a802072da48

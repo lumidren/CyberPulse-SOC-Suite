@@ -1,0 +1,40 @@
+title: Rclone Copying Data to Cloud Storage
+id: 5e81be5a-af5b-4b4e-ac3d-d13dda1f1636
+status: experimental
+description: Detects rclone (including renamed copies identified by its flags) copying or syncing data to remote
+    cloud storage, a favourite exfiltration tool of ransomware operators.
+references:
+- https://attack.mitre.org/techniques/T1567/002/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.exfiltration
+- attack.t1567.002
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith: '\rclone.exe'
+        CommandLine|contains:
+        - ' copy '
+        - ' sync '
+        - ' move '
+    selection_flags:
+        CommandLine|contains|all:
+        - --config
+        - --no-check-certificate
+    selection_remote:
+        CommandLine|contains:
+        - 'mega:'
+        - 's3:'
+        - 'drive:'
+        - 'dropbox:'
+        - 'ftp:'
+        CommandLine|contains|all:
+        - ' copy '
+    condition: 1 of selection_*
+falsepositives:
+- IT teams using rclone for sanctioned cloud backups (allowlist their remotes and hosts)
+level: high
