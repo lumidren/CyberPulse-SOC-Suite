@@ -176,6 +176,20 @@ class TestRestApiIntegration(unittest.TestCase):
         finally:
             os.environ["CYBERPULSE_LAB_MODE"] = previous or "true"
 
+    def test_brute_force_simulation_is_throttled(self):
+        original = dict(server.simulation_throttle.limits)
+        server.simulation_throttle.limits["brute_force"] = 1
+        server.simulation_throttle._windows["brute_force"].clear()
+        try:
+            first, _ = _request(self.base_url, "/api/simulate", method="POST", body={"type": "t1110"})
+            second, body = _request(self.base_url, "/api/simulate", method="POST", body={"type": "t1110"})
+            self.assertEqual(first, 200)
+            self.assertEqual(second, 429)
+            self.assertIn("brute_force", body["error"])
+        finally:
+            server.simulation_throttle.limits.update(original)
+            server.simulation_throttle._windows["brute_force"].clear()
+
     def test_incident_list_pagination(self):
         """Incident list honors limit/offset and reports totals"""
         for _ in range(3):
