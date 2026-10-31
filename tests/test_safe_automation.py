@@ -281,5 +281,47 @@ class TestProtectedAccounts(unittest.TestCase):
         self.assertEqual(act["status"], "PENDING_ANALYST_APPROVAL")
 
 
+class TestContainmentTTL(unittest.TestCase):
+
+    def test_isolation_expires_and_rolls_back(self):
+        now = [10_000.0]
+        engine = ResilientContainmentEngine()
+        engine.safety.clock = lambda: now[0]
+        act = stage(engine)
+        engine.approve_action(act["action_id"], approver="analyst_a")
+        self.assertEqual(act["expires_at_epoch"], 10_000.0 + 240 * 60)
+        self.assertEqual(engine.expire_actions(), [])
+
+        now[0] += 240 * 60
+        expired = engine.expire_actions()
+        self.assertEqual(len(expired), 1)
+        self.assertEqual(expired[0]["actor"], "ttl-expiry")
+        self.assertEqual(act["status"], "ROLLED_BACK")
+        self.assertNotIn("WIN-WORKSTATION09", engine.host_isolation_registry)
+
+    def test_extend_renews_ttl(self):
+        now = [0.0]
+        engine = ResilientContainmentEngine()
+        engine.safety.clock = lambda: now[0]
+        act = stage(engine)
+        engine.approve_action(act["action_id"], approver="analyst_a")
+        now[0] += 200 * 60
+        self.assertEqual(engine.extend_action(act["action_id"], 120, actor="analyst_a")["status"], "SUCCESS")
+        now[0] += 60 * 60  # past the original TTL, inside the extension
+        self.assertEqual(engine.expire_actions(), [])
+        self.assertEqual(act["status"], "SUCCESS")
+
+    def test_orchestrator_notes_expiry_on_incident(self):
+        now = [0.0]
+        from simulator.attack_simulator import simulate_t1110_brute_force
+        orch = SOAROrchestrator(policy_mode="AUTOMATIC")
+        orch.containment_engine.safety.clock = lambda: now[0]
+        incident = orch.process_event(simulate_t1110_brute_force())
+        now[0] += 1440 * 60
+        orch.expire_containment()
+        self.assertEqual(incident["status"], "ROLLED_BACK")
+        self.assertEqual(incident["analyst_notes"][-1]["author"], "ttl-expiry")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -49,7 +49,7 @@ internal identifiers never go to external APIs.
 - [x] **E22** Allowlist of assets that can never be auto-isolated (DCs, SOC hosts, jump boxes). — **Done**: `soar/protected_assets.py` defaults (DC, SOC subnet, JUMP-*/PAW-*) + `PROTECTED_ASSETS`; enforced in the engine and on approval; tests.
 - [x] **E23** Protected-accounts list that can never be auto-locked. — **Done**: `protected_account_match` in `soar/protected_assets.py`; enforced in the engine and on approval; tests.
 - [x] **E24** Protect the DC specifically: never auto-isolate 10.0.0.10. — 🔀 **Merged into E22**: `10.0.0.10` (and `WIN-DC01*` via the lab inventory) is a default protected asset; test `test_dc_is_never_isolated_even_with_approval`.
-- [ ] **E25** Auto-expiry (TTL) on isolation rules.
+- [x] **E25** Auto-expiry (TTL) on isolation rules. — **Done**: TTL stamping + `expire_actions`/`extend_action` in the engine, sweeper thread in `server.py`, `/api/actions/<id>/extend`; tests.
 - [ ] **E26** One-click rollback for every action.
 - [ ] **E27** Store pre-action state so rollback restores it.
 - [ ] **E28** Replace `taskkill /F /T` with graceful-first termination, or document the data-loss risk.

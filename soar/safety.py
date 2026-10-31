@@ -38,6 +38,13 @@ class AutomationSafety:
         self._isolations = deque()  # (timestamp, host)
         self.breaker_trips = []
         self.pager = None  # callable(message) set by the orchestrator to reach a human
+
+        # TTLs: isolation and perimeter blocks expire (and are rolled back) unless renewed
+        self.ttl_minutes = {
+            "ISOLATE_HOST_AND_KILL_PROCESS": int(os.environ.get("ISOLATION_TTL_MIN", "240")),
+            "REVERT_DEFENDER_POLICY_AND_ISOLATE": int(os.environ.get("ISOLATION_TTL_MIN", "240")),
+            "BLOCK_SOURCE_IP_FIREWALL": int(os.environ.get("IP_BLOCK_TTL_MIN", "1440")),
+        }
         self.kill_switch = {
             "engaged": _env_flag("CYBERPULSE_KILL_SWITCH"),
             "actor": "environment" if _env_flag("CYBERPULSE_KILL_SWITCH") else None,
@@ -116,8 +123,13 @@ class AutomationSafety:
                 trip["page_error"] = str(exc)
         self.breaker_trips.append(trip)
 
+    def ttl_for(self, action_type):
+        """TTL in minutes for an action type, or None if it does not expire."""
+        return self.ttl_minutes.get(action_type)
+
     def status(self):
         return {
+            "ttl_minutes": dict(self.ttl_minutes),
             "kill_switch": dict(self.kill_switch),
             "rate_limit": {
                 "max_actions_per_hour": self.max_actions_per_hour,
