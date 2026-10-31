@@ -93,7 +93,7 @@ internal identifiers never go to external APIs.
 - [x] **E43** Privacy section explaining what data is stored. — **Done**: `docs/PRIVACY.md` + README '🔏 Privacy' section; test.
 - [x] **E44** Redact secrets in logged command lines. — **Done**: `soar/redaction.py` applied at ingest, incident storage, evidence and logging; `tests/test_redaction.py`.
 - [x] **E45** Mask usernames in demo data and screenshots. — **Done**: `soar/privacy.py`, masking in `_send_json` for incident endpoints and in reports (default on); `tests/test_privacy.py`.
-- [ ] **E46** Don't commit real telemetry or logs.
+- [x] **E46** Don't commit real telemetry or logs. — **Done**: verified 0 tracked telemetry files; `.gitignore` patterns; `tests/test_no_real_telemetry.py`; PRIVACY.md rule.
 - [ ] **E47** Set and enforce a log retention period.
 - [ ] **E48** Data minimization: ingest only the fields detections need.
 - [ ] **E49** Document that IPs sent to VirusTotal/AbuseIPDB leave your environment.

@@ -25,6 +25,14 @@ There is no database: restarting the server erases incident data.
   and command lines. Treat the server as holding personal data: restrict who
   can sign in, keep it on loopback or behind TLS, and limit retention.
 
+## Never commit real telemetry
+
+Only synthetic data belongs in this repository. Real event logs (`.evtx`,
+`.etl`), packet captures (`.pcap`/`.pcapng`), memory dumps (`.dmp`), server
+logs and exported dossiers are git-ignored, and `tests/test_no_real_telemetry.py`
+fails CI if one is ever tracked. If you need a sample, generate it with
+`simulator/` or anonymise it fully first.
+
 ## Masking
 
 Account names are **masked by default** in the console, in API responses that
