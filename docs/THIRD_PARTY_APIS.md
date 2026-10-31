@@ -20,3 +20,9 @@ bound by each provider's terms, and you supply your own API keys.
   `CYBERPULSE_COMMERCIAL_USE=true`, the client refuses every VirusTotal lookup.
   Set `VIRUSTOTAL_API_TIER=premium` only if you hold a Premium licence.
 * Lookups only: CyberPulse never uploads files or URLs to VirusTotal.
+* **Rate limit: 4 requests per minute** on the Public API, plus daily and
+  monthly quotas. The client enforces `VT_RATE_LIMIT_PER_MIN=4` and
+  `VT_DAILY_QUOTA` (default 500) *before* sending, so the limits are never
+  exceeded by CyberPulse. Over-limit lookups return `RATE_LIMITED` with a
+  `retry_after_sec` instead of a request. After an HTTP 429 or 5xx the client
+  backs off exponentially (60 s, 120 s, ... capped at 15 min).

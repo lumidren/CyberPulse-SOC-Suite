@@ -183,5 +183,32 @@ class TestVirusTotalTerms(unittest.TestCase):
             self._restore(previous)
 
 
+class TestVirusTotalRateLimit(unittest.TestCase):
+
+    def test_four_per_minute_then_rate_limited(self):
+        now = [1000.0]
+        transport = RecordingTransport()
+        c = ThreatIntelClient(vt_key="vt", abuse_key="", transport=transport, enabled=True, clock=lambda: now[0])
+        statuses = [c.lookup(f"8.8.4.{i}")["verdicts"][0].get("status", "OK") for i in range(6)]
+        self.assertEqual(statuses, ["OK"] * 4 + ["RATE_LIMITED"] * 2)
+        self.assertEqual(len(transport.calls), 4)
+        now[0] += 61
+        self.assertEqual(c.lookup("8.8.4.99")["verdicts"][0].get("status", "OK"), "OK")
+
+    def test_backoff_after_429(self):
+        from soar.enrichment import ProviderLimiter
+        now = [0.0]
+        limiter = ProviderLimiter(per_minute=100, per_day=1000, clock=lambda: now[0])
+        self.assertTrue(limiter.try_acquire()[0])
+        limiter.record(429)
+        allowed, retry = limiter.try_acquire()
+        self.assertFalse(allowed)
+        self.assertEqual(retry, 60)
+        now[0] += 61
+        self.assertTrue(limiter.try_acquire()[0])
+        limiter.record(429)                       # second consecutive failure doubles the wait
+        self.assertEqual(limiter.try_acquire()[1], 120)
+
+
 if __name__ == "__main__":
     unittest.main()

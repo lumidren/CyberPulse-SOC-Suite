@@ -82,6 +82,54 @@ def _default_transport(url, headers, timeout=8):
         return resp.status, json.loads(resp.read().decode("utf-8"))
 
 
+class ProviderLimiter:
+    """Client-side quota guard for one provider: per-minute rate, daily quota, backoff.
+
+    Requests that would exceed the provider's published limits are never sent.
+    After a 429 or 5xx, further requests wait an exponentially growing backoff
+    (base 60 s, doubling, capped at 15 min); a success resets it.
+    """
+
+    def __init__(self, per_minute, per_day, clock=time.time, base_backoff=60, max_backoff=900):
+        self.per_minute = per_minute
+        self.per_day = per_day
+        self.clock = clock
+        self.base_backoff = base_backoff
+        self.max_backoff = max_backoff
+        self._minute = []
+        self._day = []
+        self._failures = 0
+        self.blocked_until = 0.0
+        self._lock = threading.Lock()
+
+    def try_acquire(self):
+        """(allowed, retry_after_sec)."""
+        now = self.clock()
+        with self._lock:
+            if now < self.blocked_until:
+                return False, round(self.blocked_until - now, 1)
+            self._minute = [t for t in self._minute if now - t < 60]
+            self._day = [t for t in self._day if now - t < 86400]
+            if len(self._minute) >= self.per_minute:
+                return False, round(60 - (now - self._minute[0]), 1)
+            if len(self._day) >= self.per_day:
+                return False, round(86400 - (now - self._day[0]), 1)
+            self._minute.append(now)
+            self._day.append(now)
+            return True, 0
+
+    def record(self, http_status, retry_after=None):
+        with self._lock:
+            if http_status == 429 or (http_status is not None and http_status >= 500):
+                self._failures += 1
+                backoff = min(self.max_backoff, self.base_backoff * 2 ** (self._failures - 1))
+                if retry_after:
+                    backoff = max(backoff, float(retry_after))
+                self.blocked_until = self.clock() + backoff
+            else:
+                self._failures = 0
+
+
 class IocCache:
     """In-memory LRU cache with TTL for enrichment results (indicator -> verdicts).
 
@@ -127,12 +175,15 @@ class IocCache:
 
 
 class ThreatIntelClient:
-    def __init__(self, vt_key=None, abuse_key=None, transport=None, enabled=None, cache=None):
+    def __init__(self, vt_key=None, abuse_key=None, transport=None, enabled=None, cache=None, clock=time.time):
         self.vt_key = vt_key if vt_key is not None else os.environ.get("VIRUSTOTAL_API_KEY", "")
         self.abuse_key = abuse_key if abuse_key is not None else os.environ.get("ABUSEIPDB_API_KEY", "")
         self.transport = transport or _default_transport
         self.enabled = external_enrichment_enabled() if enabled is None else enabled
         self.cache = cache or IocCache()
+        # VirusTotal Public API: 4 requests/minute and a daily quota (docs/THIRD_PARTY_APIS.md)
+        self.vt_limiter = ProviderLimiter(int(os.environ.get("VT_RATE_LIMIT_PER_MIN", "4")),
+                                          int(os.environ.get("VT_DAILY_QUOTA", "500")), clock=clock)
 
     def _cached(self, key, fetch):
         hit = self.cache.get(key)
@@ -166,10 +217,11 @@ class ThreatIntelClient:
         return self._cached(f"hash:{digest}", lambda: self._fetch_hash(digest))
 
     def _fetch_hash(self, digest):
-        blocked = self._vt_terms_block(digest)
+        blocked = self._vt_terms_block(digest) or self._vt_rate_block(digest)
         if blocked:
-            return {"status": "REFUSED_BY_TERMS", "verdicts": [blocked]}
+            return {"status": blocked["status"], "verdicts": [blocked]}
         status, body = self.transport(VT_FILE_URL.format(digest), {"x-apikey": self.vt_key})
+        self.vt_limiter.record(status)
         stats = body.get("data", {}).get("attributes", {}).get("last_analysis_stats", {}) if status == 200 else {}
         return {"status": "OK", "verdicts": [{"source": "VirusTotal", "indicator": digest, "http_status": status,
                                               "malicious": stats.get("malicious"),
@@ -200,11 +252,19 @@ class ThreatIntelClient:
                 "status": "REFUSED_BY_TERMS", "reason": reason,
                 "fetched_at": datetime.now(timezone.utc).isoformat()}
 
+    def _vt_rate_block(self, indicator):
+        allowed, retry_after = self.vt_limiter.try_acquire()
+        if allowed:
+            return None
+        return {"source": "VirusTotal", "indicator": indicator, "http_status": None, "status": "RATE_LIMITED",
+                "retry_after_sec": retry_after, "fetched_at": datetime.now(timezone.utc).isoformat()}
+
     def _virustotal_ip(self, ip):
-        blocked = self._vt_terms_block(ip)
+        blocked = self._vt_terms_block(ip) or self._vt_rate_block(ip)
         if blocked:
             return blocked
         status, body = self.transport(VT_IP_URL.format(urllib.parse.quote(ip)), {"x-apikey": self.vt_key})
+        self.vt_limiter.record(status)
         stats = body.get("data", {}).get("attributes", {}).get("last_analysis_stats", {}) if status == 200 else {}
         return {"source": "VirusTotal", "indicator": ip, "http_status": status,
                 "malicious": stats.get("malicious"), "fetched_at": datetime.now(timezone.utc).isoformat()}
