@@ -64,3 +64,7 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-012: Pass-the-Hash Logon Patterns (NTLM and seclogo) (`win_pass_the_hash.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-013: Possible Golden Ticket Use via Kerberos Logon Domain Anomaly (`win_golden_ticket_domain_anomaly.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

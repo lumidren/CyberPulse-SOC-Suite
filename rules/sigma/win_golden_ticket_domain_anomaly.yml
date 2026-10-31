@@ -1,0 +1,30 @@
+title: Possible Golden Ticket Use via Kerberos Logon Domain Anomaly
+id: 99f1358f-06a1-467b-9f5e-820afec7e049
+status: experimental
+description: 'Heuristic for forged Kerberos TGTs (golden tickets): a Kerberos network logon (4624) whose TargetDomainName
+    is not one of the domain''s expected NetBIOS names. Ticket-forging tools often fill the domain field with an
+    FQDN, lowercase or arbitrary value. The filter lists the lab''s expected domains and must be tuned per environment.'
+references:
+- https://attack.mitre.org/techniques/T1558/001/
+- https://learn.microsoft.com/windows/security/threat-protection/auditing/event-4624
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.credential_access
+- attack.t1558.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4624
+        LogonType: 3
+        AuthenticationPackageName: Kerberos
+    filter_expected_domain:
+        TargetDomainName|re: ^(CORP|NT AUTHORITY)$
+    condition: selection and not filter_expected_domain
+falsepositives:
+- Logons from trusted domains or forests not listed in the filter (add their NetBIOS names)
+- Applications that report the FQDN instead of the NetBIOS domain name
+level: medium

@@ -1,0 +1,40 @@
+# Positive/negative samples for rules/sigma/win_golden_ticket_domain_anomaly.yml (synthetic lab events)
+rule: win_golden_ticket_domain_anomaly.yml
+positive:
+- name: Kerberos logon with FQDN domain field
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 3
+      AuthenticationPackageName: Kerberos
+      TargetUserName: Administrator
+      TargetDomainName: corp.local
+- name: Kerberos logon with a made-up domain
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 3
+      AuthenticationPackageName: Kerberos
+      TargetUserName: fakeadmin
+      TargetDomainName: EVIL
+negative:
+- name: Normal Kerberos logon in the lab domain
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 3
+      AuthenticationPackageName: Kerberos
+      TargetUserName: j.doe
+      TargetDomainName: CORP
+- name: Lowercase domain is still an anomaly only for Kerberos
+  event:
+    event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 3
+      AuthenticationPackageName: NTLM
+      TargetUserName: j.doe
+      TargetDomainName: corp.local
