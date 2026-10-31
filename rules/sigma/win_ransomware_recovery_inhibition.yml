@@ -1,0 +1,31 @@
+title: Backup Catalog Deletion or Boot Recovery Disabled
+id: cea87ac4-f070-4380-9648-8ebf74b74717
+status: experimental
+description: Detects deletion of the Windows backup catalog (wbadmin delete catalog) or disabling of boot recovery
+    (bcdedit recoveryenabled no / ignoreallfailures), typical ransomware preparation.
+references:
+- https://attack.mitre.org/techniques/T1490/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.impact
+- attack.t1490
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_wbadmin:
+        Image|endswith: '\wbadmin.exe'
+        CommandLine|contains:
+        - delete catalog
+        - delete systemstatebackup
+    selection_bcdedit:
+        Image|endswith: '\bcdedit.exe'
+        CommandLine|contains:
+        - recoveryenabled no
+        - bootstatuspolicy ignoreallfailures
+    condition: 1 of selection_*
+falsepositives:
+- Deliberate decommissioning of a server's local backups by administrators
+level: critical
