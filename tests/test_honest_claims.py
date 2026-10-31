@@ -31,6 +31,8 @@ BANNED_CLAIMS = [
      "State FP results as 'N false positives in M baseline events' (docs/VALIDATION_RESULTS.md)."),
     ("E4", re.compile(r"100% True-Positive|VALIDATED_100%", re.I),
      "Self-authored attack runs are a regression check; report 'X/Y scripted runs detected'."),
+    ("E6", re.compile(r"15\s?[-–]\s?25\s?min", re.I),
+     "Uncited manual-analyst benchmark; remove it or cite a source."),
 ]
 
 
