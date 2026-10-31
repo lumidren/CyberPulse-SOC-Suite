@@ -146,10 +146,17 @@ def require_lab_mode():
         )
 
 
+def tag_simulated(event):
+    """Mark an event as synthetic so no consumer can mistake it for real telemetry."""
+    event["simulation"] = True
+    event.setdefault("details", {})["simulation"] = True
+    return event
+
+
 def lab_only(generator):
-    """Decorator: refuse to emit attack telemetry outside lab mode."""
+    """Decorator: refuse to emit attack telemetry outside lab mode; tag what is emitted."""
     @functools.wraps(generator)
     def wrapper(*args, **kwargs):
         require_lab_mode()
-        return validate_credential_attack(validate_target(generator(*args, **kwargs)))
+        return tag_simulated(validate_credential_attack(validate_target(generator(*args, **kwargs))))
     return wrapper

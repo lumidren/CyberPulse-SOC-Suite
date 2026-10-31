@@ -67,7 +67,7 @@ internal identifiers never go to external APIs.
 - [x] **E37** Don't ship working credential-theft tooling; emulate the telemetry instead. — **Done**: `simulator/atomic_tests/*.yaml` now reference-only (`execution: none`); test `TestNoShippedAttackTooling`.
 - [x] **E38** Brute-force simulation targets only lab accounts with fake passwords. — **Done**: `validate_credential_attack` in `simulator/lab_guard.py`; scenario uses `lab.admin` with `CredentialMaterial: none`; tests.
 - [x] **E39** Rate-limit the brute-force simulation. — **Done**: `SimulationThrottle` in `simulator/lab_guard.py`, enforced on the simulate and purple-team endpoints; tests.
-- [ ] **E40** Tag all simulated events with `simulation=true`.
+- [x] **E40** Tag all simulated events with `simulation=true`. — **Done**: `tag_simulated` in `simulator/lab_guard.py`; baseline + ingest + incident `simulated` flag; tests.
 - [ ] **E41** Dashboard visibly shows when data is simulated.
 - [ ] **E42** Test-mode banner in the UI.
 
