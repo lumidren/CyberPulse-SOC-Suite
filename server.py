@@ -5,6 +5,7 @@ Performance Metrics, Integration Health, Detection Catalogue, and Purple Team Sc
 """
 
 import hmac
+import secrets
 import http.cookies
 import http.server
 import json
@@ -229,11 +230,12 @@ def _resolve_api_key():
             "Refusing to start with the development default key."
         )
         sys.exit(1)
-    logger.warning(
-        "CYBERPULSE_API_KEY not set - using the development default key. "
-        "Set CYBERPULSE_ENV=production and a strong key before exposing this service."
-    )
-    return "cyberpulse-dev-secret-key-2026"
+    # No hardcoded fallback: generate a random key for this process only and show it
+    # once on the console (not in the log files) so the developer can sign in.
+    key = secrets.token_urlsafe(24)
+    logger.warning("CYBERPULSE_API_KEY not set - generated a random key for this process only.")
+    print(f"[*] Development API key for this run (sign in with it): {key}", file=sys.stderr)
+    return key
 
 API_KEY = _resolve_api_key()
 ALLOWED_ORIGIN = os.environ.get("CORS_ALLOWED_ORIGIN", "http://localhost:5000")

@@ -215,7 +215,7 @@ round-trips and responder execution, none of which this lab measures yet
 All REST endpoints under `/api/*` require authentication to prevent unauthorized containment or simulation triggers:
 
 * **Header Authentication**: Provide `X-API-Key: <token>` or `Authorization: Bearer <token>` (validated with a constant-time comparison).
-* **Configurable Secret**: Set via the `CYBERPULSE_API_KEY` environment variable. In development it falls back to a documented local key (`cyberpulse-dev-secret-key-2026`); with `CYBERPULSE_ENV=production` the server **refuses to start** without an explicit key.
+* **Configurable Secret**: Set via the `CYBERPULSE_API_KEY` environment variable. In development, if it is unset, the server generates a random key for that run and prints it once on the console (there is no hardcoded fallback); with `CYBERPULSE_ENV=production` the server **refuses to start** without an explicit key. Keep real keys in `.env` (git-ignored) or a secrets manager.
 * **CORS Restrictions**: `Access-Control-Allow-Origin` is restricted to authorized origins (configurable via `CORS_ALLOWED_ORIGIN`, defaulting to `http://localhost:5000`).
 * **Rate Limiting**: Sliding-window per-client limits — `RATE_LIMIT_PER_MINUTE` (default 240) for all API traffic plus `AUTH_FAILURE_LIMIT_PER_MINUTE` (default 10) for failed authentication attempts, returning `429` when saturated.
 * **Request Hardening**: JSON bodies are strictly validated (`400` on malformed payloads) and capped at `MAX_BODY_BYTES` (default 1 MiB → `413`); every response carries `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy` headers.

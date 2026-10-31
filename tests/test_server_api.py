@@ -262,14 +262,13 @@ class TestRestApiIntegration(unittest.TestCase):
 class TestBindDefaults(unittest.TestCase):
 
     def test_defaults_bind_loopback(self):
-        import importlib
-        previous = os.environ.pop("HOST", None)
-        try:
-            self.assertEqual(importlib.reload(server).HOST, "127.0.0.1")
-        finally:
-            if previous is not None:
-                os.environ["HOST"] = previous
-            importlib.reload(server)
+        # Fresh interpreter: reloading the module here would rotate the per-run dev key
+        import subprocess
+        env = {k: v for k, v in os.environ.items() if k != "HOST"}
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        out = subprocess.run([sys.executable, "-c", "import server; print(server.HOST)"],
+                             cwd=root, env=env, capture_output=True, text=True, timeout=60)
+        self.assertEqual(out.stdout.strip().splitlines()[-1], "127.0.0.1")
 
     def test_syslog_receiver_defaults_to_loopback(self):
         from soar.syslog_receiver import SyslogReceiver
