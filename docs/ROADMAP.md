@@ -51,7 +51,7 @@ internal identifiers never go to external APIs.
 - [x] **E24** Protect the DC specifically: never auto-isolate 10.0.0.10. — 🔀 **Merged into E22**: `10.0.0.10` (and `WIN-DC01*` via the lab inventory) is a default protected asset; test `test_dc_is_never_isolated_even_with_approval`.
 - [x] **E25** Auto-expiry (TTL) on isolation rules. — **Done**: TTL stamping + `expire_actions`/`extend_action` in the engine, sweeper thread in `server.py`, `/api/actions/<id>/extend`; tests.
 - [x] **E26** One-click rollback for every action. — **Done**: `ROLLBACK_PLAYBOOKS` covers every action in `ACTION_TIERS` with FULL/PARTIAL reversibility; endpoint/UI updated; tests.
-- [ ] **E27** Store pre-action state so rollback restores it.
+- [x] **E27** Store pre-action state so rollback restores it. — **Done**: `pre_action_state` snapshot in `_apply_action`; state-aware `_release_state`; tests.
 - [ ] **E28** Replace `taskkill /F /T` with graceful-first termination, or document the data-loss risk.
 - [ ] **E29** Snapshot memory/process info before killing a process.
 - [ ] **E30** Export scheduled-task XML before removing a task.

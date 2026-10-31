@@ -353,5 +353,40 @@ class TestRollbackEveryAction(unittest.TestCase):
         self.assertEqual(act["status"], "PENDING_ANALYST_APPROVAL")
 
 
+class TestPreActionState(unittest.TestCase):
+
+    def _lock(self, engine, user="CORP\\j.doe"):
+        return engine.execute_containment(
+            action_type="ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES", target_host="WIN-WORKSTATION09",
+            target_ip="10.0.0.45", target_user=user, pid=None, process_name=None)
+
+    def test_pre_action_state_is_captured(self):
+        engine = ResilientContainmentEngine()
+        act = self._lock(engine)
+        self.assertEqual(act["pre_action_state"]["user_disabled"], False)
+        self.assertIn("captured_at", act["pre_action_state"])
+
+    def test_rollback_keeps_state_that_existed_before(self):
+        engine = ResilientContainmentEngine()
+        engine.disabled_users.add("CORP\\j.doe")  # disabled by HR before the incident
+        act = self._lock(engine)
+        rb = engine.rollback_containment(act["action_id"], actor="analyst_a")
+        self.assertIn("kept", rb["restored_state"]["user_disabled"])
+        self.assertIn("CORP\\j.doe", engine.disabled_users)
+
+    def test_rollback_does_not_release_effect_held_by_another_action(self):
+        engine = ResilientContainmentEngine()
+        first = engine.execute_containment(
+            action_type="ISOLATE_HOST_AND_KILL_PROCESS", target_host="WKS-22", target_ip="10.0.0.80",
+            target_user="CORP\\j.doe", pid=1, process_name="a.exe")
+        second = engine.execute_containment(
+            action_type="REVERT_DEFENDER_POLICY_AND_ISOLATE", target_host="WKS-22", target_ip="10.0.0.80",
+            target_user="CORP\\j.doe", pid=2, process_name="b.exe")
+        engine.rollback_containment(first["action_id"], actor="analyst_a")
+        self.assertIn("WKS-22", engine.host_isolation_registry)   # second still holds it
+        engine.rollback_containment(second["action_id"], actor="analyst_a")
+        self.assertNotIn("WKS-22", engine.host_isolation_registry)
+
+
 if __name__ == "__main__":
     unittest.main()
