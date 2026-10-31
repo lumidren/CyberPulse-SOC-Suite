@@ -160,3 +160,19 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-036: Shell Spawned by WinRM Remote Session Host (`win_winrm_remote_shell.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-037: Remote Access Tool Started from a User-Writable Path (`win_remote_access_tool.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-038: Password-Protected Archive Created with 7-Zip or WinRAR (`win_archive_with_password.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-039: Rclone Copying Data to Cloud Storage (`win_rclone_exfiltration.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-040: Backup or Security Service Stopped via net or sc (`win_service_stop_backup_security.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

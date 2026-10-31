@@ -1,0 +1,40 @@
+title: Backup or Security Service Stopped via net or sc
+id: fdfb543f-1750-4e58-8ef4-0151294b75d3
+status: experimental
+description: Detects net stop / sc stop against backup, database, shadow-copy or security services, which ransomware
+    runs before encryption to release file locks and blind defenders.
+references:
+- https://attack.mitre.org/techniques/T1489/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.impact
+- attack.t1489
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_img:
+        Image|endswith:
+        - '\net.exe'
+        - '\net1.exe'
+        - '\sc.exe'
+    selection_stop:
+        CommandLine|contains:
+        - stop
+        - config
+    selection_target:
+        CommandLine|contains:
+        - veeam
+        - backup
+        - vss
+        - sql
+        - WinDefend
+        - sophos
+        - MsMpSvc
+        - wbengine
+    condition: all of selection_*
+falsepositives:
+- Maintenance windows stopping database services for patching
+level: high
