@@ -155,6 +155,13 @@ async function triggerSimulation(attackType) {
     }
 }
 
+// Every incident built from simulator output is labelled so it can never pass as real
+function simulatedBadge(inc) {
+    return inc.simulated
+        ? `<span class="badge-yellow" title="Built from synthetic simulator telemetry">SIMULATED</span>`
+        : `<span class="badge-blue" title="Ingested from an external source">INGESTED</span>`;
+}
+
 // Load Incidents Table
 async function loadIncidents() {
     try {
@@ -173,6 +180,7 @@ async function loadIncidents() {
         }
 
         tbody.innerHTML = incidentsData.map(inc => {
+            const simBadge = simulatedBadge(inc);
             const sev = inc.rule?.severity || "HIGH";
             const sevClass = sev === "CRITICAL" ? "badge-red" : "badge-orange";
             const score = inc.risk_assessment?.final_score || 0;
@@ -180,7 +188,7 @@ async function loadIncidents() {
 
             return `
                 <tr>
-                    <td><strong>${inc.incident_id}</strong></td>
+                    <td><strong>${inc.incident_id}</strong> ${simBadge}</td>
                     <td>${new Date(inc.created_at).toLocaleTimeString()} UTC</td>
                     <td><code>${inc.telemetry?.computer_name || 'N/A'}</code></td>
                     <td>${inc.threat_intel?.ip_reputation?.flag || '🌐'} ${inc.telemetry?.source_ip || 'N/A'}</td>
@@ -228,7 +236,7 @@ async function loadIncidentDetails() {
         activeIncidentId = incId;
 
         // Dossier Card
-        document.getElementById("dossierTitle").innerHTML = `<i class="fa-solid fa-folder-open"></i> Incident ${inc.incident_id}`;
+        document.getElementById("dossierTitle").innerHTML = `<i class="fa-solid fa-folder-open"></i> Incident ${inc.incident_id} ${simulatedBadge(inc)}`;
         document.getElementById("dosIncId").innerText = inc.incident_id;
         document.getElementById("dosCorrId").innerText = inc.correlation_id || "N/A";
         document.getElementById("dosHost").innerText = inc.telemetry?.computer_name || "N/A";

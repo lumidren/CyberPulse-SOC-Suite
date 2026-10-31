@@ -31,6 +31,16 @@ class TestReadmeSections(unittest.TestCase):
         self.assertIn("not to replace them", text)
 
 
+class TestDashboardLabelsSimulatedData(unittest.TestCase):
+
+    def test_incident_views_render_simulated_badge(self):
+        with open(os.path.join(ROOT, "web", "app.js"), encoding="utf-8") as fh:
+            js = fh.read()
+        self.assertIn("function simulatedBadge(inc)", js)
+        self.assertIn("inc.simulated", js)
+        self.assertGreaterEqual(js.count("simulatedBadge("), 3)  # definition + table row + dossier
+
+
 class TestSimulatedIncidentLabels(unittest.TestCase):
 
     def test_incident_and_triage_docs_are_marked_simulated(self):
