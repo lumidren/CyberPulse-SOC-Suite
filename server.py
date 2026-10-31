@@ -5,6 +5,7 @@ Performance Metrics, Integration Health, Detection Catalogue, and Purple Team Sc
 """
 
 import hmac
+import http.cookies
 import http.server
 import json
 import logging
@@ -37,6 +38,7 @@ from simulator.purple_team_runner import PurpleTeamRunner, SCENARIOS
 from soar.soar_engine import SOAROrchestrator
 from soar.bloodhound_exporter import BloodHoundExporter
 from soar.report_generator import IncidentReportGenerator
+from soar.auth import SessionStore
 from scripts.validate_detections import run_scripted, scripted_status
 from simulator.lab_guard import SimulationThrottle, lab_mode_enabled
 
@@ -263,6 +265,14 @@ class SlidingWindowRateLimiter:
                 window.popleft()
             return len(window) >= self.max_events
 
+# Dashboard sessions: the API key is exchanged once for an HttpOnly cookie
+SESSION_COOKIE = "cp_session"
+SESSION_TTL_MIN = int(os.environ.get("SESSION_TTL_MIN", "480"))
+COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true" if ENV == "production" else "false").lower() == "true"
+session_store = SessionStore(ttl_sec=SESSION_TTL_MIN * 60)
+# Static files reachable without a session (everything else in web/ needs login)
+PUBLIC_STATIC_PATHS = {"/login.html", "/login.js", "/styles.css", "/favicon.ico"}
+
 api_rate_limiter = SlidingWindowRateLimiter(RATE_LIMIT_PER_MINUTE)
 simulation_throttle = SimulationThrottle()
 auth_failure_limiter = SlidingWindowRateLimiter(AUTH_FAILURE_LIMIT_PER_MINUTE)
@@ -287,8 +297,25 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
     def _client_ip(self):
         return self.client_address[0] if self.client_address else "unknown"
 
+    def _session_token(self):
+        cookie = http.cookies.SimpleCookie()
+        try:
+            cookie.load(self.headers.get("Cookie", ""))
+        except http.cookies.CookieError:
+            return None
+        morsel = cookie.get(SESSION_COOKIE)
+        return morsel.value if morsel else None
+
+    def _session(self):
+        return session_store.get(self._session_token())
+
+    def _key_matches(self, token):
+        return hmac.compare_digest((token or "").encode("utf-8"), API_KEY.encode("utf-8"))
+
     def _is_authenticated(self):
-        """Validates API Key or Bearer token for API endpoints (timing-safe)."""
+        """Valid dashboard session cookie, or API key / Bearer token (timing-safe)."""
+        if self._session():
+            return True
         auth_header = self.headers.get("Authorization", "")
         api_key_header = self.headers.get("X-API-Key", "")
 
@@ -298,7 +325,47 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif api_key_header:
             token = api_key_header.strip()
 
-        return hmac.compare_digest(token.encode("utf-8"), API_KEY.encode("utf-8"))
+        return self._key_matches(token)
+
+    def _set_session_cookie(self, token, max_age):
+        attrs = [f"{SESSION_COOKIE}={token}", "HttpOnly", "SameSite=Strict", "Path=/", f"Max-Age={max_age}"]
+        if COOKIE_SECURE:
+            attrs.append("Secure")
+        self.send_header("Set-Cookie", "; ".join(attrs))
+
+    def _handle_login(self, data):
+        """POST /api/session: exchange the API key for a session cookie."""
+        client_ip = self._client_ip()
+        if auth_failure_limiter.hit_without_recording(client_ip):
+            self._send_json(429, {"error": "Too many failed sign-ins. Wait a minute and retry."})
+            return
+        if not self._key_matches(str(data.get("api_key", ""))):
+            auth_failure_limiter.allow(client_ip)
+            audit_logger.warning("LOGIN_FAILED client=%s", client_ip)
+            self._send_json(401, {"error": "Invalid API key."})
+            return
+        token, csrf = session_store.create(principal="api-key-holder")
+        audit_logger.info("LOGIN client=%s", client_ip)
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self._set_session_cookie(token, SESSION_TTL_MIN * 60)
+        self.end_headers()
+        self.wfile.write(json.dumps({"status": "SUCCESS", "csrf_token": csrf,
+                                     "expires_in_sec": SESSION_TTL_MIN * 60}).encode("utf-8"))
+
+    def _handle_logout(self):
+        session_store.destroy(self._session_token())
+        audit_logger.info("LOGOUT client=%s", self._client_ip())
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self._set_session_cookie("", 0)
+        self.end_headers()
+        self.wfile.write(json.dumps({"status": "SUCCESS"}).encode("utf-8"))
+
+    def _redirect(self, location):
+        self.send_response(302)
+        self.send_header("Location", location)
+        self.end_headers()
 
     def _check_api_access(self):
         """Rate limiting + authentication gate for /api/* endpoints.
@@ -407,10 +474,21 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json(200, {"status": "ok", "service": "cyberpulse-soc", "version": __version__})
             return
 
+        # Session status is readable without auth (it says whether you are logged in)
+        if path == "/api/session":
+            session = self._session()
+            self._send_json(200, {"authenticated": bool(session),
+                                  "csrf_token": session["csrf_token"] if session else None})
+            return
+
         # Enforce rate limiting + API key authentication on all /api/* endpoints
         if path.startswith("/api/"):
             if not self._check_api_access():
                 return
+        elif path not in PUBLIC_STATIC_PATHS and not self._session():
+            # Console pages and scripts require a dashboard session
+            self._redirect("/login.html")
+            return
 
         segments = [s for s in path.split("/") if s]
 
@@ -513,8 +591,14 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
 
+        # Login is the one API call that does not need prior authentication
+        login_request = path == "/api/session"
+        if path == "/api/session/logout":
+            self._handle_logout()
+            return
+
         # Enforce rate limiting + API key authentication on all /api/* endpoints
-        if path.startswith("/api/"):
+        if path.startswith("/api/") and not login_request:
             if not self._check_api_access():
                 return
 
@@ -545,6 +629,10 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 raise ValueError("JSON body must be an object")
         except (ValueError, json.JSONDecodeError):
             self._send_json(400, {"error": "Bad Request: body must be a valid JSON object."})
+            return
+
+        if login_request:
+            self._handle_login(data)
             return
 
         if path in ("/api/simulate", "/api/purple-team/run") and not lab_mode_enabled():

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberPulse SOC Lab | Sign in</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="lab-mode-banner" role="status">LAB / TEST MODE — synthetic data, simulated responders. Not for production use.</div>
+    <main class="login-container">
+        <div class="card login-card">
+            <h1>CyberPulse SOC Lab</h1>
+            <p class="section-desc">Sign in with the server's API key (<code>CYBERPULSE_API_KEY</code>). The key is
+                exchanged for an HttpOnly session cookie and is not stored in the browser.</p>
+            <form id="loginForm">
+                <label for="apiKeyInput">API key</label>
+                <input type="password" id="apiKeyInput" autocomplete="current-password" required>
+                <button type="submit" class="btn-primary">Sign in</button>
+            </form>
+            <p id="loginError" class="login-error" role="alert"></p>
+        </div>
+    </main>
+    <script src="login.js"></script>
+</body>
+</html>

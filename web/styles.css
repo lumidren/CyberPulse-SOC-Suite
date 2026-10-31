@@ -28,6 +28,12 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
+.login-container { display: flex; justify-content: center; padding: 80px 16px; }
+.login-card { max-width: 420px; width: 100%; }
+.login-card form { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.login-card input { padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #f8fafc; }
+.login-error { color: #f87171; min-height: 18px; font-size: 13px; }
+
 .lab-mode-banner {
     position: sticky;
     top: 0;
