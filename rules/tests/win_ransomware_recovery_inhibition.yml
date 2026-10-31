@@ -1,0 +1,36 @@
+# Positive/negative samples for rules/sigma/win_ransomware_recovery_inhibition.yml (synthetic lab events)
+rule: win_ransomware_recovery_inhibition.yml
+positive:
+- name: wbadmin delete catalog
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\wbadmin.exe'
+      CommandLine: wbadmin delete catalog -quiet
+      ParentImage: 'C:\Users\Public\locker.exe'
+- name: bcdedit disables recovery
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\bcdedit.exe'
+      CommandLine: bcdedit /set {default} recoveryenabled no
+      ParentImage: 'C:\Users\Public\locker.exe'
+negative:
+- name: Nightly wbadmin backup
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\wbadmin.exe'
+      CommandLine: 'wbadmin.exe start backup -backupTarget:E: -include:C: -quiet'
+      ParentImage: 'C:\Users\Public\locker.exe'
+- name: bcdedit enumerate
+  event:
+    event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: 'C:\Windows\System32\bcdedit.exe'
+      CommandLine: bcdedit /enum
+      ParentImage: 'C:\Users\Public\locker.exe'

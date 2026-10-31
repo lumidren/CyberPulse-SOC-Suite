@@ -88,3 +88,11 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-018: BITSAdmin Download or Job Creation (`win_lolbas_bitsadmin_transfer.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-019: Volume Shadow Copy Deletion or Resizing (`win_ransomware_shadow_copy_deletion.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-020: Backup Catalog Deletion or Boot Recovery Disabled (`win_ransomware_recovery_inhibition.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

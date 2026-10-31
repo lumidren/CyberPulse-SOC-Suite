@@ -113,3 +113,15 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: a3f37f4a4a40685f8325150f2607833b5a5c3600212dbd7ddaf45f810b571217
+  5b6a633a-0b54-4b1e-b9c6-02274372614f:
+    soc_rule_id: SOC-RULE-019
+    name: 'Ransomware Precursor: Shadow Copy Deletion'
+    action_recommended: KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS
+    version: 1.0.0
+    detection_sha256: 8529eb7a6ff32cb8317c888b9caea8a70434a524c41934956e6ba47e375ab5fb
+  cea87ac4-f070-4380-9648-8ebf74b74717:
+    soc_rule_id: SOC-RULE-020
+    name: 'Ransomware Precursor: Recovery Inhibition'
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: b6f78382f0d58069ca473d6412956d7cb39ccc370788991acaa0e0a0f70e4a1a
