@@ -39,6 +39,7 @@ from soar.soar_engine import SOAROrchestrator
 from soar.bloodhound_exporter import BloodHoundExporter
 from soar.report_generator import IncidentReportGenerator
 from soar.auth import SessionStore
+from soar.ingest_auth import SIGNATURE_HEADER, TIMESTAMP_HEADER, IngestVerifier
 from scripts.validate_detections import run_scripted, scripted_status
 from simulator.lab_guard import SimulationThrottle, lab_mode_enabled
 
@@ -279,6 +280,9 @@ COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true" if ENV == "production" el
 session_store = SessionStore(ttl_sec=SESSION_TTL_MIN * 60)
 # Static files reachable without a session (everything else in web/ needs login)
 PUBLIC_STATIC_PATHS = {"/login.html", "/login.js", "/styles.css", "/favicon.ico"}
+
+# Machine webhook receiver (/api/ingest) authenticates with an HMAC signature
+ingest_verifier = IngestVerifier(os.environ.get("INGEST_HMAC_SECRET", ""))
 
 api_rate_limiter = SlidingWindowRateLimiter(RATE_LIMIT_PER_MINUTE)
 simulation_throttle = SimulationThrottle()
@@ -624,8 +628,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
 
-        # Login is the one API call that does not need prior authentication
+        # Login and the HMAC-signed webhook receiver do not use the API key / session gate
         login_request = path == "/api/session"
+        signed_ingest = path == "/api/ingest"
         if path == "/api/session/logout":
             if not self._csrf_ok():
                 self._send_json(403, {"error": "CSRF check failed."})
@@ -634,7 +639,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         # Enforce rate limiting + API key authentication on all /api/* endpoints
-        if path.startswith("/api/") and not login_request:
+        if path.startswith("/api/") and not login_request and not signed_ingest:
             if not self._check_api_access():
                 return
             if not self._csrf_ok():
@@ -662,7 +667,21 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             })
             return
 
-        body = self.rfile.read(content_length).decode('utf-8', errors='replace') if content_length > 0 else "{}"
+        raw_body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+        body = raw_body.decode('utf-8', errors='replace')
+
+        if signed_ingest:
+            if not api_rate_limiter.allow(self._client_ip()):
+                self._send_json(429, {"error": "Too Many Requests"})
+                return
+            if not ingest_verifier.enabled:
+                self._send_json(503, {"error": "Webhook receiver disabled: set INGEST_HMAC_SECRET on the server."})
+                return
+            ok, reason = ingest_verifier.verify(self.headers.get(TIMESTAMP_HEADER), self.headers.get(SIGNATURE_HEADER), raw_body)
+            if not ok:
+                audit_logger.warning("INGEST_REJECTED client=%s reason=%s", self._client_ip(), reason)
+                self._send_json(401, {"error": f"Unauthorized: {reason}"})
+                return
         try:
             data = json.loads(body)
             if not isinstance(data, dict):
@@ -843,7 +862,10 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             else:
                 self._send_json(400, {"error": "Invalid mode. Choose APPROVAL_REQUIRED, DRY_RUN, or AUTOMATIC."})
 
-        elif path == "/api/ingest":
+        elif path in ("/api/ingest", "/api/ingest/manual"):
+            # /api/ingest: HMAC-signed machine webhook. /api/ingest/manual: analyst paste-in
+            # from the console (session + CSRF, or API key). Both audit-logged.
+            audit_logger.info("INGEST client=%s via=%s", self._client_ip(), "hmac" if signed_ingest else "manual")
             result = orchestrator.webhook_ingest.handle_ingest(data)
             if result.get("status") == "SUCCESS" and result.get("normalized_event"):
                 incident = orchestrator.process_event(result["normalized_event"])

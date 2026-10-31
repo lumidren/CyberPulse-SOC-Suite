@@ -860,7 +860,7 @@ async function sendCustomIngest() {
         const payload = JSON.parse(payloadText);
         badge.innerHTML = `<span style="color: var(--color-blue);"><i class="fa-solid fa-spinner fa-spin"></i> Ingesting event...</span>`;
 
-        const res = await fetch("/api/ingest", {
+        const res = await fetch("/api/ingest/manual", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
