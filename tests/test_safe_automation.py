@@ -128,5 +128,27 @@ class TestKillSwitch(unittest.TestCase):
         self.assertEqual(incident["status"], "HALTED_BY_KILL_SWITCH")
 
 
+class TestConfidenceThreshold(unittest.TestCase):
+
+    def test_low_confidence_rule_escalates_instead_of_acting(self):
+        from simulator.attack_simulator import simulate_t1059_powershell_execution
+        orch = SOAROrchestrator(policy_mode="AUTOMATIC")
+        incident = orch.process_event(simulate_t1059_powershell_execution())  # SOC-RULE-004, confidence 0.60
+        decision = incident["policy_decision"]
+        self.assertEqual(decision["action"], "ESCALATE_TO_ANALYST")
+        self.assertEqual(decision["execution_intent"], "ESCALATE")
+        self.assertLess(decision["rule_confidence"], decision["confidence_threshold"])
+        self.assertEqual(incident["containment_action"]["status"], "FLAGGED_FOR_MANUAL_REVIEW")
+        self.assertEqual(incident["status"], "NEEDS_ANALYST_REVIEW")
+        self.assertEqual(orch.containment_engine.disabled_users, set())
+
+    def test_threshold_is_tunable(self):
+        from simulator.attack_simulator import simulate_t1059_powershell_execution
+        orch = SOAROrchestrator(policy_mode="APPROVAL_REQUIRED")
+        orch.risk_engine.confidence_threshold = 0.5
+        incident = orch.process_event(simulate_t1059_powershell_execution())
+        self.assertEqual(incident["policy_decision"]["execution_intent"], "PENDING_APPROVAL")
+
+
 if __name__ == "__main__":
     unittest.main()
