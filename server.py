@@ -676,25 +676,8 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
 
-        # Login and the HMAC-signed webhook receiver do not use the API key / session gate
-        login_request = path == "/api/session"
-        signed_ingest = path == "/api/ingest"
-        if path == "/api/session/logout":
-            if not self._csrf_ok():
-                self._send_json(403, {"error": "CSRF check failed."})
-                return
-            self._handle_logout()
-            return
-
-        # Enforce rate limiting + API key authentication on all /api/* endpoints
-        if path.startswith("/api/") and not login_request and not signed_ingest:
-            if not self._check_api_access():
-                return
-            if not self._csrf_ok():
-                audit_logger.warning("CSRF_REJECTED client=%s path=%s", self._client_ip(), path)
-                self._send_json(403, {"error": "CSRF check failed: missing/invalid X-CSRF-Token or cross-origin request."})
-                return
-
+        # Read the (bounded) request body before any rejection: replying before the body
+        # is consumed makes clients see a connection reset instead of the status code.
         try:
             content_length = int(self.headers.get('Content-Length', 0))
         except (TypeError, ValueError):
@@ -717,6 +700,26 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         raw_body = self.rfile.read(content_length) if content_length > 0 else b"{}"
         body = raw_body.decode('utf-8', errors='replace')
+
+
+        # Login and the HMAC-signed webhook receiver do not use the API key / session gate
+        login_request = path == "/api/session"
+        signed_ingest = path == "/api/ingest"
+        if path == "/api/session/logout":
+            if not self._csrf_ok():
+                self._send_json(403, {"error": "CSRF check failed."})
+                return
+            self._handle_logout()
+            return
+
+        # Enforce rate limiting + API key authentication on all /api/* endpoints
+        if path.startswith("/api/") and not login_request and not signed_ingest:
+            if not self._check_api_access():
+                return
+            if not self._csrf_ok():
+                audit_logger.warning("CSRF_REJECTED client=%s path=%s", self._client_ip(), path)
+                self._send_json(403, {"error": "CSRF check failed: missing/invalid X-CSRF-Token or cross-origin request."})
+                return
 
         if signed_ingest:
             if not api_rate_limiter.allow(self._client_ip()):
