@@ -1,0 +1,14 @@
+# Reference-only manifest: NO executable test is shipped in this repository.
+#
+# Emits a service-ticket audit record; no ticket is requested or cracked.
+attack_technique: T1558.003
+display_name: "Steal or Forge Kerberos Tickets: Kerberoasting"
+upstream_reference: "Atomic Red Team, atomics/T1558.003 (run only in your own authorised lab)"
+execution: none
+emulated_by: simulator/attack_simulator.py::simulate_t1558_kerberoasting
+expected_telemetry:
+  - source: Security
+    event_id: 4769
+    fields:
+      TicketEncryptionType: '0x17'
+expected_rule: SOC-RULE-007
