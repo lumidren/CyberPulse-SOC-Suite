@@ -1,0 +1,55 @@
+title: Failed Network or RDP Logon (base rule)
+name: failed_network_logon
+id: 2f3c3b1e-7d0a-4a51-9a5e-0b6f1c9d4e21
+status: experimental
+description: >-
+    Single raw EventID 4625 for a network or RDP logon. Not an alert on its own; feeds the
+    brute-force and password-spraying correlations. Pre-aggregated events that already
+    carry FailedAttemptsCount are left to SOC-RULE-002 so they are not counted twice.
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-11-01
+tags:
+    - attack.credential_access
+    - attack.t1110
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4625
+        LogonType:
+            - 3
+            - 10
+    aggregated:
+        FailedAttemptsCount: null
+    condition: selection and aggregated
+level: informational
+---
+title: Brute Force From One Source Against One Account (raw 4625 correlation)
+id: c0b83687-14cb-437f-8d4e-66c73d3411ce
+status: experimental
+description: >-
+    Ten or more failed network/RDP logons for the same account from the same source IP
+    within five minutes. Works on raw, unaggregated Security events, unlike SOC-RULE-002
+    which needs a collector-side count.
+references:
+    - https://attack.mitre.org/techniques/T1110/001/
+    - https://github.com/SigmaHQ/sigma-specification/blob/main/specification/sigma-correlation-rules-specification.md
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-11-01
+tags:
+    - attack.credential_access
+    - attack.t1110.001
+correlation:
+    type: event_count
+    rules:
+        - failed_network_logon
+    group-by:
+        - IpAddress
+        - TargetUserName
+    timespan: 5m
+    condition:
+        gte: 10
+falsepositives:
+    - A service or scheduled task retrying with an expired password (same source, same account).
+level: high

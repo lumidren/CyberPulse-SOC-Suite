@@ -184,3 +184,7 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-042: Entra ID Admin Consent Granted to an Application (`cloud_entra_admin_consent.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-043: Brute Force From One Source Against One Account (raw 4625 correlation) (`correlations/win_brute_force_raw_logons.yml`)
+
+* **1.0.0** (2026-11-01): Initial correlation rule.
