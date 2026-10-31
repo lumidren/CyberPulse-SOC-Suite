@@ -29,7 +29,7 @@ internal identifiers never go to external APIs.
 - [x] **E5** Document how the baseline traffic for the FP test is generated. — **Done**: `simulator/benign_baseline.py`, `docs/BASELINE_TRAFFIC.md`, `tests/test_benign_baseline.py`.
 - [x] **E6** Remove the "15–25 min manual analyst benchmark" or cite a source. — **Done**: phrase verified absent (introduced in d0342e0, since removed); guard pattern in `tests/test_honest_claims.py`.
 - [x] **E7** Stop comparing a 20 min manual MTTR to automated pipeline seconds. — **Done**: removed `analyst_baseline_sec` and the 'Manual Baseline: 20m' KPI caption; guard pattern.
-- [ ] **E8** Add a Limitations section to the README.
+- [x] **E8** Add a Limitations section to the README. — **Done**: README '⚠️ Limitations' section; `tests/test_readme_sections.py`.
 - [ ] **E9** State that the rules are untested against real-world noise.
 - [ ] **E10** Mark INC-2026-0815-01 and -02 as simulated incidents.
 - [ ] **E11** Remove "Formal" from incident report headings, or label them exercises.

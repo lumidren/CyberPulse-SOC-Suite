@@ -40,6 +40,36 @@ To maintain engineering transparency, the repository separates **production conf
 
 ---
 
+## ⚠️ Limitations
+
+Read this before drawing conclusions from anything else in the README.
+
+* **It is a lab.** One Python process, in-memory state, no high availability.
+  Restarting the server discards every incident.
+* **Responders are simulated.** Containment actions (host isolation, firewall
+  drops, account lockouts, token revocation) produce realistic action records
+  but make **no** WinRM, pfSense, Active Directory, AWS or Microsoft Graph
+  calls.
+* **Telemetry is synthetic.** Attack events come from `simulator/`, benign
+  traffic from `simulator/benign_baseline.py`. Both were written by the same
+  author as the rules, so detection counts are regression checks, not efficacy
+  measurements (see [`docs/VALIDATION_RESULTS.md`](docs/VALIDATION_RESULTS.md)).
+* **The Python detection engine is simpler than the Sigma rules.** The
+  in-process matcher in `soar/soar_engine.py` does not yet apply the
+  exclusions documented in `rules/sigma/`, which is why the benign baseline
+  currently produces false positives.
+* **Threat intelligence is a local, synthetic cache.** No live VirusTotal or
+  AbuseIPDB lookups are made by the pipeline; reputation values are invented
+  lab data.
+* **Latency figures are in-process microseconds** on emulated traffic and say
+  nothing about production SOC timing.
+* **The "AI copilot" is template-based.** It fills text templates from
+  incident fields; no language model is involved.
+* **The identity graph and BloodHound export use a synthetic AD topology**,
+  not a real directory.
+
+---
+
 ## 🏛️ Closed-Loop Pipeline Architecture
 
 ```mermaid
