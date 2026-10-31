@@ -148,7 +148,7 @@ internal identifiers never go to external APIs.
 
 - [x] **F86** ⭐ Docker Compose for a one-command lab start. — **Done** (container run unverified: Docker daemon not running here; `docker compose config` validates): root `compose.yaml`; README quickstart; `tests/test_compose.py`.
 - [x] **F87** ⭐ GitHub Actions CI: lint, test, security scan. — **Done**: lint/test/security jobs (earlier commits + E74/E78) plus least-privilege `permissions`, concurrency and timeouts; `tests/test_ci_workflow.py`. CI not yet observed on GitHub.
-- [ ] **F88** Unit and integration tests with coverage badges.
+- [x] **F88** Unit and integration tests with coverage badges. — **Done**: `.coveragerc` (floor 75%), CI coverage + job summary, dated README badge (79%, measured 2026-11-01).
 - [ ] **F89** Terraform or Vagrant for lab provisioning.
 - [ ] **F90** Ansible roles to deploy Sysmon and Wazuh agents.
 - [ ] **F91** Structured logging and metrics (Prometheus, Grafana).
