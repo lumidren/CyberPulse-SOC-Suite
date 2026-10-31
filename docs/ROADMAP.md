@@ -151,7 +151,7 @@ internal identifiers never go to external APIs.
 - [x] **F88** Unit and integration tests with coverage badges. — **Done**: `.coveragerc` (floor 75%), CI coverage + job summary, dated README badge (79%, measured 2026-11-01).
 - [x] **F89** Terraform or Vagrant for lab provisioning. — **Done** (not executed: Vagrant not installed here): `deploy/vagrant/Vagrantfile` provisions DC + workstation (Sysmon, WinRM HTTPS) + Wazuh host; `tests/test_vagrant.py` static checks.
 - [x] **F90** Ansible roles to deploy Sysmon and Wazuh agents. — **Done** (not executed: Ansible not installed here): `deploy/ansible/` playbook + `sysmon`/`wazuh_agent` roles; `tests/test_ansible.py` static checks.
-- [ ] **F91** Structured logging and metrics (Prometheus, Grafana).
+- [x] **F91** Structured logging and metrics (Prometheus, Grafana). — **Done**: `soar/observability.py`, `LOG_FORMAT=json`, `/metrics`; `deploy/monitoring/` Prometheus + Grafana examples (statically tested only); tests.
 - [ ] **F92** Plugin architecture for new enrichers and responders.
 - [ ] **F93** Config file with schema validation.
 - [ ] **F94** Type hints and static analysis (mypy, ruff).
