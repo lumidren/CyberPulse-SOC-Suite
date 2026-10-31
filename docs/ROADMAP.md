@@ -127,7 +127,7 @@ internal identifiers never go to external APIs.
 - [x] **E85** "Not affiliated with" statement. — **Done**: 'Not affiliated' in `docs/LEGAL.md` + README; test.
 - [x] **E86** Disclaimer of warranty and liability for the automation. — **Done**: 'No warranty; no liability for automated actions' in `docs/LEGAL.md` + README; test.
 - [x] **E87** Notice that users need authorization before deploying on any network. — **Done**: 'Authorisation required before deployment' in `docs/LEGAL.md` + README; test.
-- [ ] **E88** Clarify no real client data was used.
+- [x] **E88** Clarify no real client data was used. — **Done**: verified no client/internship data (search 2026-11-01); 'No real client or employer data' in `docs/LEGAL.md` + README; test.
 
 ## Phase 4d — Documentation, transparency & accountability (E89–E100)
 

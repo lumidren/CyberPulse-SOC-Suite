@@ -40,5 +40,10 @@ class TestLegalNotices(unittest.TestCase):
         self.assertIn("Authorisation required", read("README.md"))
 
 
+    def test_no_real_client_data_statement(self):
+        self.assertIn("No data from any real organisation, client, employer or internship", read("docs/LEGAL.md"))
+        self.assertIn("No real client data", read("README.md"))
+
+
 if __name__ == "__main__":
     unittest.main()

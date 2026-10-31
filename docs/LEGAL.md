@@ -59,3 +59,18 @@ service agreements, even when no harm is intended.
 If you are unsure whether you are authorised, you are not. Use the bundled
 synthetic lab, or an isolated environment you control.
 
+## No real client or employer data
+
+All data in this repository is **synthetic**: simulated events, the benign
+baseline, the AD topology (`corp.local` / `cyberpulse.local` accounts),
+threat-intel fixtures (RFC 5737 documentation IPs, fictional providers),
+incident reports and triage write-ups. No data from any real organisation,
+client, employer or internship was used to build, test or document this lab.
+
+This was checked on 2026-11-01 by searching the working tree and commit
+messages for internship, client, customer and employer references (none found
+beyond this statement and the privacy page), and is enforced going forward by
+`tests/test_synthetic_demo_data.py` (no real public IPs in demo data) and
+`tests/test_no_real_telemetry.py` (no event logs, captures or dumps tracked).
+If you believe any real data slipped in, open an issue and it will be removed.
+
