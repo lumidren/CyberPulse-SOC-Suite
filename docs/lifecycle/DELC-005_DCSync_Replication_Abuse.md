@@ -2,7 +2,7 @@
 
 | Lifecycle Stage | Status | Author | Target Technique | Threat Actor Alignment |
 | :--- | :--- | :--- | :--- | :--- |
-| **Production (v2.0)** | **Active & Enforced** | lumidren | **MITRE ATT&CK T1003.006** | APT32, APT41, LockBit, Lapsus$ |
+| **Lab (v2.0)** | **Lab-validated on synthetic data; untested against real-world noise** | lumidren | **MITRE ATT&CK T1003.006** | APT32, APT41, LockBit, Lapsus$ |
 
 ---
 

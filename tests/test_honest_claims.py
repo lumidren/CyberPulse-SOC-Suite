@@ -35,6 +35,8 @@ BANNED_CLAIMS = [
      "Uncited manual-analyst benchmark; remove it or cite a source."),
     ("E7", re.compile(r"analyst_baseline|Manual Baseline", re.I),
      "Automated in-process seconds are not comparable to a human triage cycle."),
+    ("E9", re.compile(r"production[- ]ready|^status:\s*production\b|Final Production Rule", re.I),
+     "Rules are only tested on synthetic events; don't call them production-ready."),
 ]
 
 

@@ -2,7 +2,7 @@
 
 | Lifecycle Stage | Status | Author | Target Technique | Threat Actor Alignment |
 | :--- | :--- | :--- | :--- | :--- |
-| **Production (v2.0)** | **Active & Enforced** | lumidren | **MITRE ATT&CK T1562.001** | Conti, DarkSide, Qakbot, BlackByte |
+| **Lab (v2.0)** | **Lab-validated on synthetic data; untested against real-world noise** | lumidren | **MITRE ATT&CK T1562.001** | Conti, DarkSide, Qakbot, BlackByte |
 
 ---
 
@@ -37,7 +37,7 @@ Captured via **Sysmon Event ID 1 (Process Creation)** or **Windows Security Even
 * The rule strictly alerts on interactive invocation of `Set-MpPreference` containing disabling flags.
 
 ```yaml
-# Final Production Rule (rules/sigma/win_defender_tamper.yml)
+# Current Lab Rule (rules/sigma/win_defender_tamper.yml)
 detection:
     selection:
         Image|endswith:

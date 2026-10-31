@@ -1,6 +1,6 @@
 title: Kerberoasting TGS Ticket Request with RC4 Encryption
 id: 9a38df41-6c23-4e89-a112-984712019481
-status: production
+status: experimental
 description: Detects suspicious Kerberos Service Ticket (TGS) requests with RC4-HMAC (0x17) encryption targeting Service Principal Names (SPNs), characteristic of Kerberoasting attacks.
 references:
     - https://attack.mitre.org/techniques/T1558/001/

@@ -2,7 +2,7 @@
 
 | Lifecycle Stage | Status | Author | Target Technique | Threat Actor Alignment |
 | :--- | :--- | :--- | :--- | :--- |
-| **Production (v2.0)** | **Active & Calibrated** | lumidren | **MITRE ATT&CK T1110.001** | Initial Access Brokers, LockBit, BlackCat |
+| **Lab (v2.0)** | **Lab-validated on synthetic data; untested against real-world noise** | lumidren | **MITRE ATT&CK T1110.001** | Initial Access Brokers, LockBit, BlackCat |
 
 ---
 
@@ -52,12 +52,12 @@ detection:
 * **User Password Fatigue**: Setting a 1-minute threshold of 5 failures caused false alerts when legitimate employees forgot newly rotated Active Directory passwords or multiple network drives reconnected with expired cached credentials.
 * **Internal Service Accounts (LogonType 3/5)**: Automated batch jobs failing repeatedly on expired service tokens triggered noisy internal alerts.
 
-### Tuning Iteration (Production v2.0):
+### Tuning Iteration (Lab v2.0):
 1. Restricted detection strictly to **`LogonType: 10` (Remote Interactive / RDP)** or external boundary IPs.
 2. Expanded sliding aggregation window to **5 minutes (`300s`)** and raised threshold to **>10 failed attempts** originating from the same source IP.
 
 ```yaml
-# Final Production Rule (rules/sigma/win_brute_force_auth.yml)
+# Current Lab Rule (rules/sigma/win_brute_force_auth.yml)
 detection:
     selection:
         EventID: 4625

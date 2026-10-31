@@ -1,6 +1,6 @@
 title: Windows Defender Real-Time Protection Disabled via PowerShell
 id: c382910a-814d-4b92-962a-8921df0102aa
-status: production
+status: experimental
 description: Detects attempts to impair host defenses by disabling Windows Defender real-time monitoring and script scanning via Set-MpPreference or registry modification.
 references:
     - https://attack.mitre.org/techniques/T1562/001/
