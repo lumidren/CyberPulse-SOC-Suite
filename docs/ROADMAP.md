@@ -22,7 +22,7 @@ internal identifiers never go to external APIs.
 
 ## Phase 1 — Honest claims & README (E1–E12)
 
-- [ ] **E1** Drop "enterprise-grade"; describe the project as a lab.
+- [x] **E1** Drop "enterprise-grade"; describe the project as a lab. — **Done**: lab wording across UI/CLI/docs; guard in `tests/test_honest_claims.py`.
 - [ ] **E2** Label every metric as lab-measured on emulated traffic.
 - [ ] **E3** Replace "0% false positives" with "0 false positives in N baseline runs", stating N.
 - [ ] **E4** Replace "100% true-positive" with an "X/Y scripted runs detected" count.

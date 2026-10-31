@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CyberPulse SOC Suite - Enterprise CLI Operations & Management Suite
+CyberPulse SOC Suite - Lab CLI Operations Menu
 Author: lumidren (https://github.com/lumidren/CyberPulse-SOC-Suite)
 """
 
@@ -28,7 +28,7 @@ BANNER = r"""
 | $$__/  /  $$$$\ | $$| $$|  $$$$$$$ $$__| $$ $$     | |_| | $$ _\$$$$$$\ $$$$$$$$
  \$$    $$  \$$\$$\$$$| $$ \$$    $$\$$    $$ $$      \$$$$$| $$|       $$ \$$     \
   \$$$$$$    \$$ \$$   \$$  \$$$$$$$ \$$$$$$$ \$$            \$$ \$$$$$$$   \$$$$$$$
-                    CYBERPULSE ENTERPRISE SOC PLATFORM v2.5
+                      CYBERPULSE SOC DETECTION LAB v2.5
 """
 
 def print_banner():
@@ -41,8 +41,8 @@ def print_banner():
     print()
 
 def menu():
-    print("\033[93m[ENTERPRISE SOC OPERATIONS MENU]\033[0m")
-    print("  \033[92m[1]\033[0m Launch Enterprise Web Console (http://localhost:5000)")
+    print("\033[93m[SOC LAB OPERATIONS MENU]\033[0m")
+    print("  \033[92m[1]\033[0m Launch Lab Web Console (http://localhost:5000)")
     print("  \033[92m[2]\033[0m Run Detection & SOAR Automated Test Suite (38 Test Scenarios)")
     print("  \033[92m[3]\033[0m Execute APT29 / Cozy Bear Purple Team Validation Campaign")
     print("  \033[92m[4]\033[0m Execute LockBit 3.0 Ransomware Attack & Recovery Lifecycle")
@@ -53,7 +53,7 @@ def menu():
     print()
 
 def run_tests():
-    print("\n[*] Running Enterprise Test Suite...")
+    print("\n[*] Running Lab Test Suite...")
     loader = unittest.TestLoader()
     suite = loader.discover(start_dir='tests', pattern='test_*.py')
     runner = unittest.TextTestRunner(verbosity=2)
@@ -129,7 +129,7 @@ def main():
         menu()
         choice = input("Enter choice [0-7]: ").strip()
         if choice == "1":
-            print("\n[*] Starting Enterprise Web Console on http://localhost:5000 ...")
+            print("\n[*] Starting Lab Web Console on http://localhost:5000 ...")
             run_server(5000)
             break
         elif choice == "2":

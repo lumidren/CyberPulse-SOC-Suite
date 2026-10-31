@@ -41,5 +41,5 @@ At **03:41:15 UTC on Sunday**, the SIEM triggered a CRITICAL alert on workstatio
 
 ### Analyst Post-Containment Actions:
 1. **Quarantine Confirmation**: Verified host network isolation via ping/connectivity tests from SOC management subnet.
-2. **Credential Invalidation**: Reset Kerberos TGT and enterprise passwords for `CORP\j.doe`.
+2. **Credential Invalidation**: Reset Kerberos TGT and domain passwords for `CORP\j.doe`.
 3. **Phishing Ingress Sweep**: Queried Microsoft 365 Exchange mail logs for subject line `"Invoice_Q3_Review.docm"` and purged 14 identical unread phishing emails across the organization.

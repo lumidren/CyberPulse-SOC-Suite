@@ -1,5 +1,5 @@
 // ==============================================================================
-// CyberPulse SOC Suite: Enterprise Operations Console JavaScript Controller
+// CyberPulse SOC Suite: Lab Console JavaScript Controller
 // Author: lumidren (https://github.com/lumidren/CyberPulse-SOC-Suite)
 // ==============================================================================
 
@@ -82,7 +82,7 @@ function initLeafletMap() {
         maxZoom: 19
     }).addTo(map);
 
-    // Enterprise Datacenter Marker (New York)
+    // Lab Datacenter Marker (New York, illustrative)
     const dcIcon = L.divIcon({
         className: 'dc-marker-icon',
         html: '<div style="background:#38bdf8;width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 0 12px #38bdf8;"></div>',
@@ -281,7 +281,7 @@ async function loadIncidentDetails() {
             </div>
         `).join("");
 
-        // Render 5 New Enterprise Modules
+        // Render incident detail modules
         renderAttackGraph(inc.attack_graph);
         renderCopilotAnalysis(inc.ai_analysis);
         renderEvidencePackage(inc.evidence_package);
@@ -507,7 +507,7 @@ function saveWebhook() {
 }
 
 // ==============================================================================
-// 5 NEW ENTERPRISE MODULES JAVASCRIPT CONTROLLERS
+// INCIDENT DETAIL MODULE CONTROLLERS
 // ==============================================================================
 
 // 1. Attack Graph Renderer

@@ -16,7 +16,7 @@ class DFIREngine:
 
     def create_incident(self, event, matched_rule, intel, risk_assessment, policy_decision, containment_action, timing_breakdown):
         """
-        Synthesizes all pipeline telemetry into a single, unified enterprise Incident Record.
+        Synthesizes all pipeline telemetry into a single, unified lab Incident Record.
         """
         incident_seq = len(self.incident_list) + 1
         incident_id = f"INC-2026-{incident_seq:04d}"

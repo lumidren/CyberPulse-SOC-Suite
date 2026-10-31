@@ -7,8 +7,8 @@ import json
 from collections import deque
 from datetime import datetime, timezone
 
-# 1. Simulated enterprise AD topology
-ENTERPRISE_AD_TOPOLOGY = {
+# 1. Simulated lab AD topology (synthetic accounts, no real directory data)
+LAB_AD_TOPOLOGY = {
     "Administrator": {
         "display_name": "Domain Administrator",
         "groups": ["Domain Admins"],
@@ -111,7 +111,7 @@ GROUP_NESTING = {
 
 
 class IdentityBlastRadiusEngine:
-    def __init__(self, topology=ENTERPRISE_AD_TOPOLOGY, group_nesting=GROUP_NESTING):
+    def __init__(self, topology=LAB_AD_TOPOLOGY, group_nesting=GROUP_NESTING):
         self.topology = topology
         self.group_nesting = group_nesting
 

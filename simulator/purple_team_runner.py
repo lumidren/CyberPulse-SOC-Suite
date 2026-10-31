@@ -24,7 +24,7 @@ from simulator.attack_simulator import (
 SCENARIOS = {
     "APT29_COZY_BEAR": {
         "campaign_id": "PT-SCENARIO-APT29",
-        "name": "APT29 / Cozy Bear Enterprise Intrusion Campaign",
+        "name": "APT29-Style Intrusion Emulation (Lab)",
         "description": "Multi-stage nation-state intrusion simulating initial PowerShell staging, defense impairment, and LSASS credential harvesting.",
         "threat_actor": "APT29 (Nobelium / Cozy Bear)",
         "stages": [
