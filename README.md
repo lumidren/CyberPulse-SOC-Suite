@@ -251,15 +251,15 @@ and is counted when it suppresses an alert (`GET /api/exceptions`).
 
 Reproduce with `CYBERPULSE_LAB_MODE=true python scripts/benchmark_pipeline.py --runs 20` (DRY_RUN mode,
 10 generators × 20 runs = 200 events). Measured on 2026-10-31, Windows 11,
-Python 3.12.2, after detection moved to the Sigma engine (single-event and
-correlation rules); expect different numbers on other machines:
+Python 3.12.2, with the Sigma engine (single-event and correlation rules, compiled
+patterns cached); expect different numbers on other machines:
 
 | Pipeline Stage | p50 | p95 | What is actually measured |
 | :--- | :---: | :---: | :--- |
-| **Detection & Matching** | 187 µs | 1,285 µs | Sigma evaluation of 45 rules + 3 correlations over one synthetic event, plus exception checks. |
-| **Threat Intel Enrichment** | 21 µs | 67 µs | Dictionary lookup in the local IoC cache (no external API). |
-| **Containment (simulated)** | 52 µs | 287 µs | Building the simulated action record; no network I/O. |
-| **Total In-Process Pipeline** | 321 µs | 1,554 µs | The three stages above plus pipeline bookkeeping. |
+| **Detection & Matching** | 125 µs | 315 µs | Sigma evaluation of 45 rules + 3 correlations over one synthetic event, plus exception checks. |
+| **Threat Intel Enrichment** | 12 µs | 27 µs | Dictionary lookup in the local IoC cache (no external API). |
+| **Containment (simulated)** | 29 µs | 152 µs | Building the simulated action record; no network I/O. |
+| **Total In-Process Pipeline** | 208 µs | 437 µs | The three stages above plus pipeline bookkeeping. |
 
 Per-technique detection latency (histogram buckets, p50/p95) is in
 [`docs/LATENCY_HISTOGRAM.md`](docs/LATENCY_HISTOGRAM.md) (`--histogram`).
