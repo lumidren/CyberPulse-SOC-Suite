@@ -297,6 +297,12 @@ async function loadIncidentDetails() {
             <div>• Threat Intel Score: <strong>${factors.threat_intel_score || 0}/100</strong></div>
         `;
 
+        // Third-party attribution for external enrichment verdicts (VirusTotal / AbuseIPDB)
+        const ext = inc.threat_intel?.external || {};
+        const attributions = [...new Set(Object.values(ext).flatMap(p => (p?.verdicts || []).map(v => v.attribution)).filter(Boolean))];
+        const attrEl = document.getElementById("intelAttribution");
+        if (attrEl) attrEl.innerHTML = attributions.length ? attributions.join("<br>") : "Lab fixture only (synthetic); no third-party data.";
+
         // Observables
         const observables = inc.observables || [];
         document.getElementById("observablesList").innerHTML = observables.map(o => `

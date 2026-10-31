@@ -34,6 +34,17 @@ HASH_LENGTHS = {32: "md5", 40: "sha1", 64: "sha256"}
 _HEX_RE = re.compile(r"^[0-9a-fA-F]+$")
 ABUSEIPDB_CHECK_URL = "https://api.abuseipdb.com/api/v2/check?{}"
 
+# Shown next to every verdict that came from a provider (roadmap E60)
+ATTRIBUTION = {
+    "VirusTotal": "Reputation data from VirusTotal (https://www.virustotal.com), used under its terms.",
+    "AbuseIPDB": "Reputation data from AbuseIPDB (https://www.abuseipdb.com), used under its terms.",
+}
+
+
+def attributed(verdict):
+    verdict["attribution"] = ATTRIBUTION.get(verdict.get("source"), "")
+    return verdict
+
 
 def virustotal_allowed():
     """VirusTotal's Public API is non-commercial only (see docs/THIRD_PARTY_APIS.md)."""
@@ -227,9 +238,9 @@ class ThreatIntelClient:
         status, body = self.transport(VT_FILE_URL.format(digest), {"x-apikey": self.vt_key})
         self.vt_limiter.record(status)
         stats = body.get("data", {}).get("attributes", {}).get("last_analysis_stats", {}) if status == 200 else {}
-        return {"status": "OK", "verdicts": [{"source": "VirusTotal", "indicator": digest, "http_status": status,
-                                              "malicious": stats.get("malicious"),
-                                              "fetched_at": datetime.now(timezone.utc).isoformat()}]}
+        return {"status": "OK", "verdicts": [attributed({"source": "VirusTotal", "indicator": digest, "http_status": status,
+                                                         "malicious": stats.get("malicious"),
+                                                         "fetched_at": datetime.now(timezone.utc).isoformat()})]}
 
     def lookup_ip(self, ip):
         """Query configured providers for one IP. Internal addresses are refused before any I/O."""
@@ -252,16 +263,16 @@ class ThreatIntelClient:
         allowed, reason = virustotal_allowed()
         if allowed:
             return None
-        return {"source": "VirusTotal", "indicator": indicator, "http_status": None,
+        return attributed({"source": "VirusTotal", "indicator": indicator, "http_status": None,
                 "status": "REFUSED_BY_TERMS", "reason": reason,
-                "fetched_at": datetime.now(timezone.utc).isoformat()}
+                "fetched_at": datetime.now(timezone.utc).isoformat()})
 
     def _vt_rate_block(self, indicator):
         allowed, retry_after = self.vt_limiter.try_acquire()
         if allowed:
             return None
-        return {"source": "VirusTotal", "indicator": indicator, "http_status": None, "status": "RATE_LIMITED",
-                "retry_after_sec": retry_after, "fetched_at": datetime.now(timezone.utc).isoformat()}
+        return attributed({"source": "VirusTotal", "indicator": indicator, "http_status": None, "status": "RATE_LIMITED",
+                "retry_after_sec": retry_after, "fetched_at": datetime.now(timezone.utc).isoformat()})
 
     def _virustotal_ip(self, ip):
         blocked = self._vt_terms_block(ip) or self._vt_rate_block(ip)
@@ -270,18 +281,18 @@ class ThreatIntelClient:
         status, body = self.transport(VT_IP_URL.format(urllib.parse.quote(ip)), {"x-apikey": self.vt_key})
         self.vt_limiter.record(status)
         stats = body.get("data", {}).get("attributes", {}).get("last_analysis_stats", {}) if status == 200 else {}
-        return {"source": "VirusTotal", "indicator": ip, "http_status": status,
-                "malicious": stats.get("malicious"), "fetched_at": datetime.now(timezone.utc).isoformat()}
+        return attributed({"source": "VirusTotal", "indicator": ip, "http_status": status,
+                "malicious": stats.get("malicious"), "fetched_at": datetime.now(timezone.utc).isoformat()})
 
     def _abuseipdb_ip(self, ip):
         allowed, retry_after = self.abuse_limiter.try_acquire()
         if not allowed:
-            return {"source": "AbuseIPDB", "indicator": ip, "http_status": None, "status": "RATE_LIMITED",
-                    "retry_after_sec": retry_after, "fetched_at": datetime.now(timezone.utc).isoformat()}
+            return attributed({"source": "AbuseIPDB", "indicator": ip, "http_status": None, "status": "RATE_LIMITED",
+                    "retry_after_sec": retry_after, "fetched_at": datetime.now(timezone.utc).isoformat()})
         query = urllib.parse.urlencode({"ipAddress": ip, "maxAgeInDays": 90})
         status, body = self.transport(ABUSEIPDB_CHECK_URL.format(query),
                                       {"Key": self.abuse_key, "Accept": "application/json"})
         self.abuse_limiter.record(status)
         score = body.get("data", {}).get("abuseConfidenceScore") if status == 200 else None
-        return {"source": "AbuseIPDB", "indicator": ip, "http_status": status,
-                "abuse_confidence": score, "fetched_at": datetime.now(timezone.utc).isoformat()}
+        return attributed({"source": "AbuseIPDB", "indicator": ip, "http_status": status,
+                "abuse_confidence": score, "fetched_at": datetime.now(timezone.utc).isoformat()})

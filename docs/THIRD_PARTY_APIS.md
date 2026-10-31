@@ -40,3 +40,11 @@ bound by each provider's terms, and you supply your own API keys.
 * Check AbuseIPDB's terms for attribution and redistribution rules.
   CyberPulse attributes every AbuseIPDB verdict it displays and does not
   redistribute their data (see the sections below).
+
+## Attribution
+
+Every verdict from a provider carries an `attribution` string naming the
+source and linking to it. The console shows these under the incident's
+observables, and the NIST-style report lists them under *Threat-intel
+sources*. When no external lookup was made, both say the result came from the
+synthetic lab fixture only.
