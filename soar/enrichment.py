@@ -35,6 +35,15 @@ _HEX_RE = re.compile(r"^[0-9a-fA-F]+$")
 ABUSEIPDB_CHECK_URL = "https://api.abuseipdb.com/api/v2/check?{}"
 
 
+def virustotal_allowed():
+    """VirusTotal's Public API is non-commercial only (see docs/THIRD_PARTY_APIS.md)."""
+    tier = os.environ.get("VIRUSTOTAL_API_TIER", "public").strip().lower()
+    commercial = os.environ.get("CYBERPULSE_COMMERCIAL_USE", "false").strip().lower() == "true"
+    if tier == "public" and commercial:
+        return False, "VirusTotal Public API is non-commercial only; set VIRUSTOTAL_API_TIER=premium with a Premium licence."
+    return True, ""
+
+
 def external_enrichment_enabled():
     return os.environ.get("EXTERNAL_ENRICHMENT_ENABLED", "false").strip().lower() == "true"
 
@@ -157,6 +166,9 @@ class ThreatIntelClient:
         return self._cached(f"hash:{digest}", lambda: self._fetch_hash(digest))
 
     def _fetch_hash(self, digest):
+        blocked = self._vt_terms_block(digest)
+        if blocked:
+            return {"status": "REFUSED_BY_TERMS", "verdicts": [blocked]}
         status, body = self.transport(VT_FILE_URL.format(digest), {"x-apikey": self.vt_key})
         stats = body.get("data", {}).get("attributes", {}).get("last_analysis_stats", {}) if status == 200 else {}
         return {"status": "OK", "verdicts": [{"source": "VirusTotal", "indicator": digest, "http_status": status,
@@ -180,7 +192,18 @@ class ThreatIntelClient:
             verdicts.append(self._abuseipdb_ip(ip))
         return {"status": "OK" if verdicts else "NO_PROVIDERS", "verdicts": verdicts}
 
+    def _vt_terms_block(self, indicator):
+        allowed, reason = virustotal_allowed()
+        if allowed:
+            return None
+        return {"source": "VirusTotal", "indicator": indicator, "http_status": None,
+                "status": "REFUSED_BY_TERMS", "reason": reason,
+                "fetched_at": datetime.now(timezone.utc).isoformat()}
+
     def _virustotal_ip(self, ip):
+        blocked = self._vt_terms_block(ip)
+        if blocked:
+            return blocked
         status, body = self.transport(VT_IP_URL.format(urllib.parse.quote(ip)), {"x-apikey": self.vt_key})
         stats = body.get("data", {}).get("attributes", {}).get("last_analysis_stats", {}) if status == 200 else {}
         return {"source": "VirusTotal", "indicator": ip, "http_status": status,
