@@ -450,5 +450,38 @@ class TestEvidenceBeforeKill(unittest.TestCase):
         self.assertLessEqual(collected, acted)
 
 
+class TestScheduledTaskExport(unittest.TestCase):
+
+    def test_task_is_exported_then_disabled_not_deleted(self):
+        engine = ResilientContainmentEngine()
+        act = engine.execute_containment(
+            action_type="REMOVE_SCHEDULED_TASK", target_host="WIN-WORKSTATION09", target_ip="10.0.2.15",
+            target_user="CORP\\j.doe", pid=None, process_name=None,
+            context={"task_name": "\\Microsoft\\Windows\\SystemHealthUpdate", "task_xml": "<Task>x</Task>"})
+        export = act["task_export"]
+        self.assertEqual(export["export_argv"][:2], ["schtasks.exe", "/Query"])
+        self.assertEqual(len(export["sha256"]), 64)
+        self.assertIn("disabled", act["execution_log"])
+        self.assertIn("Not deleted", act["execution_log"])
+        rb = engine.rollback_containment(act["action_id"], actor="analyst_a")
+        self.assertEqual(rb["reversibility"], "FULL")
+
+    def test_task_without_name_is_left_alone(self):
+        engine = ResilientContainmentEngine()
+        act = engine.execute_containment(
+            action_type="REMOVE_SCHEDULED_TASK", target_host="WIN-WORKSTATION09", target_ip="10.0.2.15",
+            target_user="CORP\\j.doe", pid=None, process_name=None)
+        self.assertEqual(act["status"], "FLAGGED_FOR_MANUAL_REVIEW")
+        self.assertNotIn("task_export", act)
+
+    def test_pipeline_passes_task_details(self):
+        from simulator.attack_simulator import simulate_t1053_scheduled_task
+        orch = SOAROrchestrator(policy_mode="APPROVAL_REQUIRED")
+        inc = orch.process_event(simulate_t1053_scheduled_task())
+        context = inc["containment_action"]["context"]
+        self.assertEqual(context["task_name"], "\Microsoft\Windows\SystemHealthUpdate")
+        self.assertIn("<Exec>", context["task_xml"])
+
+
 if __name__ == "__main__":
     unittest.main()

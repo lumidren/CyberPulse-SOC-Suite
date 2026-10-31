@@ -335,7 +335,11 @@ class SOAROrchestrator:
             pid=pid,
             process_name=process_name,
             execution_intent=policy_decision["execution_intent"],
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
+            context={
+                "task_name": event.get("details", {}).get("TaskName"),
+                "task_xml": event.get("details", {}).get("TaskContent"),
+            },
         )
 
         total_ms = round(detection_ms + intel_ms + containment_action["latency_ms"], 3)
