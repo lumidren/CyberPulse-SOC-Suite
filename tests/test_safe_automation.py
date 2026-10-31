@@ -7,6 +7,7 @@ TTLs and rollback.
 """
 
 import os
+os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")  # tests run in a declared lab
 import sys
 import unittest
 
@@ -481,6 +482,22 @@ class TestScheduledTaskExport(unittest.TestCase):
         context = inc["containment_action"]["context"]
         self.assertEqual(context["task_name"], "\Microsoft\Windows\SystemHealthUpdate")
         self.assertIn("<Exec>", context["task_xml"])
+
+
+class TestLabModeGate(unittest.TestCase):
+
+    def test_simulator_refuses_without_lab_flag(self):
+        from simulator.lab_guard import LabModeRequired
+        previous = os.environ.pop("CYBERPULSE_LAB_MODE", None)
+        try:
+            with self.assertRaises(LabModeRequired):
+                simulate_t1003_lsass_dump()
+        finally:
+            if previous is not None:
+                os.environ["CYBERPULSE_LAB_MODE"] = previous
+
+    def test_simulator_runs_with_lab_flag(self):
+        self.assertEqual(simulate_t1003_lsass_dump()["event_id"], 10)
 
 
 if __name__ == "__main__":

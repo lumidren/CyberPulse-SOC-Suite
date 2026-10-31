@@ -7,6 +7,7 @@ pagination, payload limits, and the SSRF webhook guard.
 
 import json
 import os
+os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")  # tests run in a declared lab
 import sys
 import unittest
 import urllib.error
@@ -165,6 +166,15 @@ class TestRestApiIntegration(unittest.TestCase):
             self.assertNotEqual(server.orchestrator.risk_engine.policy_mode, "AUTOMATIC")
         finally:
             server.ALLOW_FULL_AUTO = original
+
+    def test_simulation_refused_outside_lab_mode(self):
+        previous = os.environ.pop("CYBERPULSE_LAB_MODE", None)
+        try:
+            status, body = _request(self.base_url, "/api/simulate", method="POST", body={"type": "t1003"})
+            self.assertEqual(status, 403)
+            self.assertIn("CYBERPULSE_LAB_MODE", body["error"])
+        finally:
+            os.environ["CYBERPULSE_LAB_MODE"] = previous or "true"
 
     def test_incident_list_pagination(self):
         """Incident list honors limit/offset and reports totals"""

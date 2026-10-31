@@ -136,6 +136,9 @@ def build_report():
 
 
 def main():
+    from simulator.lab_guard import lab_mode_enabled
+    if not lab_mode_enabled():
+        sys.exit("Refusing to run: set CYBERPULSE_LAB_MODE=true (lab use only).")
     parser = argparse.ArgumentParser(description="Replay synthetic traffic and count detections.")
     parser.add_argument("--write", action="store_true", help=f"write {os.path.relpath(RESULTS_PATH, ROOT)}")
     args = parser.parse_args()

@@ -5,6 +5,7 @@ If a rule or generator changes, the published counts must be regenerated
 """
 
 import os
+os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")  # tests run in a declared lab
 import sys
 import unittest
 

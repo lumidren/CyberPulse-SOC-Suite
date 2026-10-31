@@ -67,6 +67,9 @@ def run_benchmark(runs):
 
 
 def main():
+    from simulator.lab_guard import lab_mode_enabled
+    if not lab_mode_enabled():
+        sys.exit("Refusing to run: set CYBERPULSE_LAB_MODE=true (lab use only).")
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     parser.add_argument("--runs", type=int, default=20, help="runs per attack generator")
     parser.add_argument("--json", action="store_true", help="print raw JSON")

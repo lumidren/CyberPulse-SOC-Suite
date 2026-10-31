@@ -110,4 +110,8 @@ def run_adversary_kill_chain(delay_between_phases=1.5, webhook_url=None):
     return results
 
 if __name__ == "__main__":
-    run_adversary_kill_chain(delay_between_phases=1)
+    from simulator.lab_guard import LabModeRequired
+    try:
+        run_adversary_kill_chain(delay_between_phases=1)
+    except LabModeRequired as exc:
+        sys.exit(str(exc))
