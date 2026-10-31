@@ -43,7 +43,7 @@ internal identifiers never go to external APIs.
 - [x] **E16** Tier actions by blast radius (auto IP block; approval for host isolation and account lockdown). — **Done**: `soar/action_tiers.py`; enforced in `RiskAndPolicyEngine._containment_intent`; SOAR tab tier table; tests.
 - [x] **E17** Add a global kill switch that halts all automation. — **Done**: `soar/safety.py` kill switch enforced in `ResilientContainmentEngine`; `/api/safety/kill-switch`; console button; tests.
 - [x] **E18** Add a dry-run mode that logs what it would do. — **Done earlier**: DRY_RUN policy mode records `SIMULATED_NO_DISRUPTION` actions (`soar/resilient_containment.py`, test `test_dry_run_policy_mode`).
-- [ ] **E19** Add a confidence threshold; below it, escalate instead of acting.
+- [x] **E19** Add a confidence threshold; below it, escalate instead of acting. — **Done**: `RULE_CONFIDENCE` + `CONFIDENCE_THRESHOLD` in `soar/risk_engine.py`; escalation path; tests.
 - [ ] **E20** Rate-limit containment actions per hour.
 - [ ] **E21** Circuit breaker: if N hosts are isolated in M minutes, stop and page a human.
 - [ ] **E22** Allowlist of assets that can never be auto-isolated (DCs, SOC hosts, jump boxes).

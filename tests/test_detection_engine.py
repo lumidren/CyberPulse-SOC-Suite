@@ -399,14 +399,17 @@ class TestSOCLabPlatform(unittest.TestCase):
         aws_inc = self.orchestrator.process_event(aws_evt)
         self.assertIsNotNone(aws_inc)
         self.assertEqual(aws_inc["rule"]["rule_id"], "SOC-RULE-009")
-        self.assertEqual(aws_inc["containment_action"]["action_type"], "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY")
+        self.assertEqual(aws_inc["rule"]["action_recommended"], "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY")
+        # AssumeRole is routine for CI/CD, so the rule's confidence is below threshold: escalate, don't revoke
+        self.assertEqual(aws_inc["containment_action"]["action_type"], "ESCALATE_TO_ANALYST")
 
         # Entra ID Impossible Travel
         entra_evt = simulate_cloud_entra_impossible_travel()
         entra_inc = self.orchestrator.process_event(entra_evt)
         self.assertIsNotNone(entra_inc)
         self.assertEqual(entra_inc["rule"]["rule_id"], "SOC-RULE-010")
-        self.assertEqual(entra_inc["containment_action"]["action_type"], "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA")
+        self.assertEqual(entra_inc["rule"]["action_recommended"], "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA")
+        self.assertEqual(entra_inc["containment_action"]["action_type"], "ESCALATE_TO_ANALYST")
 
     def test_api_key_authentication_enforcement(self):
         """Verify API key authentication and header validation logic"""

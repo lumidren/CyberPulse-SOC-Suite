@@ -44,6 +44,26 @@ TACTIC_WEIGHTS = {
     "DEFAULT": 0.70
 }
 
+# Author-assigned rule confidence (0-1): how likely a match is a true positive,
+# judged from rule specificity and the FP results in docs/VALIDATION_RESULTS.md.
+# These are design estimates, not measured precision.
+RULE_CONFIDENCE = {
+    "SOC-RULE-001": 0.85,  # LSASS access - specific, but AV/backup tools also touch LSASS
+    "SOC-RULE-002": 0.85,  # RDP brute force threshold
+    "SOC-RULE-003": 0.75,  # scheduled task keywords - admin tasks use powershell too
+    "SOC-RULE-004": 0.60,  # PowerShell flags - very common in benign admin scripts
+    "SOC-RULE-005": 0.90,  # Defender real-time disable
+    "SOC-RULE-006": 0.90,  # canary file encryption
+    "SOC-RULE-007": 0.80,  # RC4 TGS request
+    "SOC-RULE-008": 0.90,  # DCSync replication rights from non-DC
+    "SOC-RULE-009": 0.55,  # AssumeRole - routine for CI/CD pipelines
+    "SOC-RULE-010": 0.70,  # impossible travel - VPNs cause noise
+    "SOC-RULE-011": 0.90,  # known vulnerable driver load
+}
+DEFAULT_RULE_CONFIDENCE = 0.5
+DEFAULT_CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", "0.8"))
+
+
 class RiskAndPolicyEngine:
     def __init__(self, policy_mode="APPROVAL_REQUIRED"):
         """
@@ -53,6 +73,8 @@ class RiskAndPolicyEngine:
         - 'DRY_RUN': Simulate and log containment with zero network/host disruption.
         """
         self.policy_mode = policy_mode
+        # Below this rule confidence the engine escalates to an analyst instead of proposing containment
+        self.confidence_threshold = DEFAULT_CONFIDENCE_THRESHOLD
         self.incident_history = []
         self.ip_frequency = {}
 
@@ -124,6 +146,13 @@ class RiskAndPolicyEngine:
         }
         return breakdown
 
+    @staticmethod
+    def rule_confidence(matched_rule):
+        """Confidence for a matched rule: explicit value, catalogue estimate, or a cautious default."""
+        if "confidence" in matched_rule:
+            return float(matched_rule["confidence"])
+        return RULE_CONFIDENCE.get(matched_rule.get("rule_id"), DEFAULT_RULE_CONFIDENCE)
+
     def _containment_intent(self, action, decision):
         """Decide how a containment action may proceed given mode and blast-radius tier.
 
@@ -156,8 +185,22 @@ class RiskAndPolicyEngine:
             "execution_intent": "EXECUTE",
             "approval_token": None,
             "blast_radius_tier": tier_for(action_recommended),
+            "rule_confidence": self.rule_confidence(matched_rule),
+            "confidence_threshold": self.confidence_threshold,
             "rationale": ""
         }
+
+        # Low-confidence matches are escalated to a human; no containment is proposed.
+        if score >= 65.0 and decision["rule_confidence"] < self.confidence_threshold:
+            decision["action"] = "ESCALATE_TO_ANALYST"
+            decision["execution_intent"] = "ESCALATE"
+            decision["blast_radius_tier"] = None
+            decision["rationale"] = (
+                f"Rule confidence {decision['rule_confidence']:.2f} is below the "
+                f"{self.confidence_threshold:.2f} threshold; escalating to an analyst instead of "
+                f"proposing {action_recommended}."
+            )
+            return decision
 
         if score >= 80.0 or matched_rule.get("severity") == "CRITICAL":
             decision["rationale"] = f"Critical risk score ({score}/100) or Critical rule trigger. Proposing containment for analyst review."

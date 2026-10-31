@@ -223,6 +223,11 @@ class ResilientContainmentEngine:
                 "command": "CiTool.exe -r"
             }
 
+        elif action_type == "ESCALATE_TO_ANALYST":
+            action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
+            action_record["execution_protocol"] = "Analyst Escalation"
+            action_record["execution_log"] = "Rule confidence below threshold; escalated to an analyst. No containment proposed."
+
         else:
             action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
             action_record["execution_log"] = "No disruptive containment policy matched. Staged for analyst review."
