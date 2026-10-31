@@ -184,7 +184,7 @@ internal identifiers never go to external APIs.
 
 - [x] **F21** ⭐ Integrate Atomic Red Team for standardized test execution. — **Done (reference-only)**: `scripts/atomic_coverage.py` (maps, never executes or copies commands), 8 manifests in `simulator/atomic_tests/`, `docs/ATOMIC_RED_TEAM.md`. Executing atomics is the user's manual lab step (hard rule: no attack tooling). Not run against a real atomics checkout here; tested on a fixture.
 - [x] **F22** Integrate MITRE Caldera for automated campaigns. — **Stub**: `soar/caldera.py`, `scripts/caldera_compare.py`, `docs/CALDERA.md`. Needs the user's Caldera server (`CALDERA_URL`/`CALDERA_API_KEY`, off by default). Tested on a hand-written fixture only; report layout unverified against a live server.
-- [ ] **F23** ⭐ Automated purple-team report: what ran, what fired, what missed.
+- [x] **F23** ⭐ Automated purple-team report: what ran, what fired, what missed. — **Done**: `scripts/purple_team_report.py` → `docs/PURPLE_TEAM_REPORT.md` (16/16 synthetic steps; default policy proposes, never executes). Real-lab runs go through `caldera_compare.py`.
 - [ ] **F24** Detection-latency histogram per technique.
 - [ ] **F25** True/false-positive confusion matrix with real counts.
 - [x] **F26** Benign-activity generators (admin scripts, backups, patching). — 🔀 **Merged into E5**: `simulator/benign_baseline.py` already covers admin scripts, backups, patching, AV scanning, auth and cloud ops.

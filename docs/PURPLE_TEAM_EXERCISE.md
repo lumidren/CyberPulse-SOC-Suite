@@ -3,6 +3,8 @@
 > **Exercise, not an engagement.** The "red team" actions below were emulated as
 > synthetic telemetry by `simulator/`; no offensive tool was executed and no real
 > network was tested. Blindspots and fixes describe the lab's design reasoning.
+>
+> The current, generated results of every scenario are in [PURPLE_TEAM_REPORT.md](PURPLE_TEAM_REPORT.md).
 
 | Exercise ID | Date | Lead Evaluator | Scope | Objective |
 | :--- | :--- | :--- | :--- | :--- |
