@@ -1,0 +1,2 @@
+// SOC-RULE-033: AS-REP Roasting: TGT Without Pre-Authentication over RC4 (generated from rules/sigma/win_asrep_roasting.yml; review before use)
+((event.code:4768 AND winlog.event_data.PreAuthType:0 AND winlog.event_data.TicketEncryptionType:0x17))

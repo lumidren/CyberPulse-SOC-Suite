@@ -1,0 +1,2 @@
+// SOC-RULE-041: AWS CloudTrail Logging Stopped or Deleted (generated from rules/sigma/cloud_aws_cloudtrail_disabled.yml; review before use)
+((event.provider:cloudtrail.amazonaws.com AND (event.action:StopLogging OR event.action:DeleteTrail)))

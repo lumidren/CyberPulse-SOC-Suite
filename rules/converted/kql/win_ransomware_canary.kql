@@ -1,0 +1,3 @@
+// SOC-RULE-006: Rapid File Encryption and Ransomware Canary Modification (generated from rules/sigma/win_ransomware_canary.yml; review before use)
+DeviceFileEvents
+| where (((FolderPath endswith ".locked" or FolderPath endswith ".encrypted" or FolderPath endswith ".crypted" or FolderPath endswith "HOW_TO_DECRYPT.txt" or FolderPath endswith "README_RESTORE.txt")))

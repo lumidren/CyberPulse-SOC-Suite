@@ -1,0 +1,2 @@
+``` SOC-RULE-024: Run Key Persistence Added via reg.exe (generated from rules/sigma/win_registry_run_key_persistence.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\reg\\.exe$") AND (match('CommandLine', "(?i)\\ add\\ ") AND match('CommandLine', "(?i)\\\\CurrentVersion\\\\Run"))))

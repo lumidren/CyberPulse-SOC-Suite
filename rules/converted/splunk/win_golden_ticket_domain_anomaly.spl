@@ -1,0 +1,2 @@
+``` SOC-RULE-013: Possible Golden Ticket Use via Kerberos Logon Domain Anomaly (generated from rules/sigma/win_golden_ticket_domain_anomaly.yml; review before use) ```
+index=* (source="*Security*") | where ((match('EventCode', "(?i)^4624$") AND match('LogonType', "(?i)^3$") AND match('AuthenticationPackageName', "(?i)^Kerberos$")) AND NOT (match('TargetDomainName', "(?i)^(CORP|NT AUTHORITY)$")))

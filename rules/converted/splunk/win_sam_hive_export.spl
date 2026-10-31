@@ -1,0 +1,2 @@
+``` SOC-RULE-031: SAM or SYSTEM Registry Hive Saved to Disk (generated from rules/sigma/win_sam_hive_export.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\reg\\.exe$") AND (match('CommandLine', "(?i)save\\ hklm\\\\sam") OR match('CommandLine', "(?i)save\\ hklm\\\\system") OR match('CommandLine', "(?i)save\\ hklm\\\\security"))))

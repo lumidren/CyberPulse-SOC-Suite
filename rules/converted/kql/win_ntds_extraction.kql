@@ -1,0 +1,3 @@
+// SOC-RULE-032: NTDS.dit Extraction via ntdsutil IFM (generated from rules/sigma/win_ntds_extraction.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\ntdsutil.exe" and (ProcessCommandLine contains "ifm" and ProcessCommandLine contains "create")))

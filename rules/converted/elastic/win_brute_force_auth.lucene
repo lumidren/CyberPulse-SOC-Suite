@@ -1,0 +1,2 @@
+// SOC-RULE-002: Password Brute Force Authentication Failure Spike (generated from rules/sigma/win_brute_force_auth.yml; review before use)
+((event.code:4625 AND (winlog.event_data.LogonType:3 OR winlog.event_data.LogonType:10) AND winlog.event_data.FailedAttemptsCount:>=10))

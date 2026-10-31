@@ -1,0 +1,2 @@
+``` SOC-RULE-007: Kerberoasting TGS Ticket Request with RC4 Encryption (generated from rules/sigma/win_kerberoasting.yml; review before use) ```
+index=* (source="*Security*") | where ((match('EventCode', "(?i)^4769$") AND match('TicketOptions', "(?i)^0x40810000$") AND match('TicketEncryptionType', "(?i)^0x17$")) AND NOT (match('ServiceName', "(?i)\\$$")))

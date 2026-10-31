@@ -1,0 +1,2 @@
+``` SOC-RULE-014: Certutil Used to Download or Decode a Payload (generated from rules/sigma/win_lolbas_certutil_download.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\certutil\\.exe$")) AND ((match('CommandLine', "(?i)urlcache") OR match('CommandLine', "(?i)\\-decode") OR match('CommandLine', "(?i)/decode") OR match('CommandLine', "(?i)\\-decodehex"))))

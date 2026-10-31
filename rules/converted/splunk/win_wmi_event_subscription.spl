@@ -1,0 +1,2 @@
+``` SOC-RULE-027: WMI Event Subscription Persistence (generated from rules/sigma/win_wmi_event_subscription.yml; review before use) ```
+index=* (EventCode=19 OR EventCode=20 OR EventCode=21) | where ((match('EventCode', "(?i)^20$") AND (match('Type', "(?i)^Command\\ Line$") OR match('Type', "(?i)^Script$")))) OR ((match('EventCode', "(?i)^21$")))

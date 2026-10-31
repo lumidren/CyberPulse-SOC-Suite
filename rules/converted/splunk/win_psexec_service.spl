@@ -1,0 +1,2 @@
+``` SOC-RULE-035: PsExec-Style Remote Service Execution (generated from rules/sigma/win_psexec_service.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\PSEXESVC\\.exe$"))) OR ((match('ParentImage', "(?i)\\\\PSEXESVC\\.exe$")))

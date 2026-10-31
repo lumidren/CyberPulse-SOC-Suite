@@ -1,0 +1,2 @@
+// SOC-RULE-008: Active Directory Replication Abuse (DCSync) via Non-DC Account (generated from rules/sigma/win_dcsync.yml; review before use)
+((event.code:4662 AND winlog.event_data.AccessMask:0x100 AND (winlog.event_data.Properties:*1131f6aa\-9c07\-11d1\-f79f\-00c04fc2dcd2* OR winlog.event_data.Properties:*1131f6ad\-9c07\-11d1\-f79f\-00c04fc2dcd2*)) AND NOT (winlog.event_data.SubjectUserName:*$))

@@ -1,0 +1,3 @@
+// SOC-RULE-030: Windows Firewall Disabled via netsh or PowerShell (generated from rules/sigma/win_firewall_disabled.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\netsh.exe" and (ProcessCommandLine contains "advfirewall" and ProcessCommandLine contains "state off"))) or (((ProcessCommandLine contains "Set-NetFirewallProfile" and ProcessCommandLine contains "-Enabled" and ProcessCommandLine contains "False")))

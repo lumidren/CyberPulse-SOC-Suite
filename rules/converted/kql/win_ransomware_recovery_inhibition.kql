@@ -1,0 +1,3 @@
+// SOC-RULE-020: Backup Catalog Deletion or Boot Recovery Disabled (generated from rules/sigma/win_ransomware_recovery_inhibition.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\wbadmin.exe" and (ProcessCommandLine contains "delete catalog" or ProcessCommandLine contains "delete systemstatebackup"))) or ((FolderPath endswith "\\bcdedit.exe" and (ProcessCommandLine contains "recoveryenabled no" or ProcessCommandLine contains "bootstatuspolicy ignoreallfailures")))

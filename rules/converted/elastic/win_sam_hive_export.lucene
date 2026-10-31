@@ -1,0 +1,2 @@
+// SOC-RULE-031: SAM or SYSTEM Registry Hive Saved to Disk (generated from rules/sigma/win_sam_hive_export.yml; review before use)
+(event.code:1 OR event.code:4688) AND ((process.executable:*\\reg.exe AND (process.command_line:*save\ hklm\\sam* OR process.command_line:*save\ hklm\\system* OR process.command_line:*save\ hklm\\security*)))

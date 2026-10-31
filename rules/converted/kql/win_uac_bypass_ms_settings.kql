@@ -1,0 +1,3 @@
+// SOC-RULE-028: UAC Bypass via ms-settings Shell Open Command (generated from rules/sigma/win_uac_bypass_ms_settings.yml; review before use)
+DeviceRegistryEvents
+| where ((TargetObject contains "\\ms-settings\\shell\\open\\command"))

@@ -1,0 +1,3 @@
+// SOC-RULE-004: Obfuscated PowerShell Execution Cradle (generated from rules/sigma/win_powershell_obfuscation.yml; review before use)
+DeviceProcessEvents
+| where (((FolderPath endswith "\\powershell.exe" or FolderPath endswith "\\pwsh.exe")) and ((ProcessCommandLine contains "-EncodedCommand" or ProcessCommandLine contains "-enc " or ProcessCommandLine contains "-nop" or ProcessCommandLine contains "-NoProfile" or ProcessCommandLine contains "-WindowStyle Hidden" or ProcessCommandLine contains "IEX(" or ProcessCommandLine contains "Invoke-Expression" or ProcessCommandLine contains "DownloadString")))

@@ -1,0 +1,3 @@
+// SOC-RULE-034: Active Directory Reconnaissance Commands (generated from rules/sigma/win_ad_reconnaissance.yml; review before use)
+DeviceProcessEvents
+| where (((FolderPath endswith "\\net.exe" or FolderPath endswith "\\net1.exe") and (ProcessCommandLine contains "group \"domain admins\"" or ProcessCommandLine contains "group \"enterprise admins\"" or ProcessCommandLine contains "group domain admins"))) or ((FolderPath endswith "\\nltest.exe" and (ProcessCommandLine contains "/domain_trusts" or ProcessCommandLine contains "/dclist"))) or (((ProcessCommandLine contains "adfind" or ProcessCommandLine contains "-sc trustdmp" or ProcessCommandLine contains "objectcategory=person")))

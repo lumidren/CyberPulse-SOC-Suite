@@ -1,0 +1,2 @@
+// SOC-RULE-010: Microsoft Entra ID Impossible Travel Anomaly (generated from rules/sigma/cloud_entra_impossible_travel.yml; review before use)
+((winlog.event_data.Category:SignInLogs AND winlog.event_data.OperationName:Sign\-in\ activity AND winlog.event_data.ResultType:0) AND (winlog.event_data.RiskLevelDuringSignIn:high AND winlog.event_data.RiskEventTypes:*impossibleTravel*))

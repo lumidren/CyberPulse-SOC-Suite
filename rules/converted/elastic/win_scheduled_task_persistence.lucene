@@ -1,0 +1,2 @@
+// SOC-RULE-003: Suspicious Scheduled Task Creation for Persistence (generated from rules/sigma/win_scheduled_task_persistence.yml; review before use)
+((event.code:4698) AND ((winlog.event_data.TaskContent:*powershell* OR winlog.event_data.TaskContent:*cmd.exe* OR winlog.event_data.TaskContent:*http\:* OR winlog.event_data.TaskContent:*https\:* OR winlog.event_data.TaskContent:*wscript* OR winlog.event_data.TaskContent:*cscript*)))

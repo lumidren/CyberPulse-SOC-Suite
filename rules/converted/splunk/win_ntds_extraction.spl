@@ -1,0 +1,2 @@
+``` SOC-RULE-032: NTDS.dit Extraction via ntdsutil IFM (generated from rules/sigma/win_ntds_extraction.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('Image', "(?i)\\\\ntdsutil\\.exe$") AND (match('CommandLine', "(?i)ifm") AND match('CommandLine', "(?i)create"))))

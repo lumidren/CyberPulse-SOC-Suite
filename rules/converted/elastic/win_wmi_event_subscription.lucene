@@ -1,0 +1,2 @@
+// SOC-RULE-027: WMI Event Subscription Persistence (generated from rules/sigma/win_wmi_event_subscription.yml; review before use)
+(event.code:19 OR event.code:20 OR event.code:21) AND ((event.code:20 AND (winlog.event_data.Type:Command\ Line OR winlog.event_data.Type:Script))) OR ((event.code:21))

@@ -1,0 +1,2 @@
+``` SOC-RULE-036: Shell Spawned by WinRM Remote Session Host (generated from rules/sigma/win_winrm_remote_shell.yml; review before use) ```
+index=* (EventCode=1 OR EventCode=4688) | where ((match('ParentImage', "(?i)\\\\wsmprovhost\\.exe$") AND (match('Image', "(?i)\\\\cmd\\.exe$") OR match('Image', "(?i)\\\\powershell\\.exe$") OR match('Image', "(?i)\\\\whoami\\.exe$") OR match('Image', "(?i)\\\\net\\.exe$"))))

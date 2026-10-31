@@ -1,0 +1,2 @@
+// SOC-RULE-042: Entra ID Admin Consent Granted to an Application (generated from rules/sigma/cloud_entra_admin_consent.yml; review before use)
+((winlog.event_data.OperationName:Consent\ to\ application AND winlog.event_data.ConsentType:*AllPrincipals*))

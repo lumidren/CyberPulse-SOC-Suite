@@ -1,0 +1,2 @@
+// SOC-RULE-009: Suspicious AWS STS AssumeRole Abuse Across External Account (generated from rules/sigma/cloud_aws_assumerole_abuse.yml; review before use)
+((event.action:AssumeRole AND event.provider:sts.amazonaws.com) AND ((winlog.event_data.requestParameters.roleArn:*OrganizationAccountAccessRole* OR winlog.event_data.requestParameters.roleArn:*AdministratorAccess* OR winlog.event_data.requestParameters.roleArn:*SecurityAudit*)) AND NOT ((source.ip:10.* OR source.ip:172.16.* OR source.ip:192.168.*)))

@@ -1,0 +1,3 @@
+// SOC-RULE-031: SAM or SYSTEM Registry Hive Saved to Disk (generated from rules/sigma/win_sam_hive_export.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\reg.exe" and (ProcessCommandLine contains "save hklm\\sam" or ProcessCommandLine contains "save hklm\\system" or ProcessCommandLine contains "save hklm\\security")))

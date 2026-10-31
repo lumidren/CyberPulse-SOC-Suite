@@ -1,0 +1,3 @@
+// SOC-RULE-003: Suspicious Scheduled Task Creation for Persistence (generated from rules/sigma/win_scheduled_task_persistence.yml; review before use)
+SecurityEvent
+| where ((EventID =~ "4698") and ((TaskContent contains "powershell" or TaskContent contains "cmd.exe" or TaskContent contains "http:" or TaskContent contains "https:" or TaskContent contains "wscript" or TaskContent contains "cscript")))

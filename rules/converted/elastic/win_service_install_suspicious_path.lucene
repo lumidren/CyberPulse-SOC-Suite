@@ -1,0 +1,2 @@
+// SOC-RULE-025: Service Installed from a Suspicious Path or Command (generated from rules/sigma/win_service_install_suspicious_path.yml; review before use)
+((event.code:7045) AND ((winlog.event_data.ImagePath:*\\Temp\\* OR winlog.event_data.ImagePath:*\\Users\\Public\\* OR winlog.event_data.ImagePath:*\\AppData\\* OR winlog.event_data.ImagePath:*powershell* OR winlog.event_data.ImagePath:*cmd.exe\ \/c* OR winlog.event_data.ImagePath:*mshta*)))

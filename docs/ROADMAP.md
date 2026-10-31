@@ -163,7 +163,7 @@ internal identifiers never go to external APIs.
 - [x] **F2** ⭐ Detection-as-code pipeline: rules in Git, CI lints and tests every rule. — **Done**: `soar/sigma_engine.py` + `rules/soar_mapping.yml`; orchestrator uses Sigma; rule lint in `tests/test_sigma_engine.py` (CI). FPs 319 → 119 / 600.
 - [x] **F3** ⭐ Unit-test each rule with positive and negative log samples. — **Done**: `rules/tests/*.yml` (2+ samples per rule, incl. exclusions); `tests/test_rule_samples.py` enforces coverage for every rule.
 - [x] **F4** Validate Sigma syntax in CI with sigma-cli. — **Done** (sigma-cli step unverified locally: pySigma's `jq` dependency does not build on 32-bit Windows): CI `sigma check rules/sigma`; local spec test in `tests/test_sigma_metadata.py`; ISO dates.
-- [ ] **F5** Convert Sigma to Wazuh, Splunk SPL, Elastic and KQL automatically.
+- [x] **F5** Convert Sigma to Wazuh, Splunk SPL, Elastic and KQL automatically. — **Done** (not validated against live SIEMs): `soar/sigma_convert.py` + `scripts/convert_rules.py` → `rules/converted/{splunk,elastic,kql,wazuh}`; `tests/test_sigma_convert.py`.
 - [x] **F6** Rule metadata standard: author, date, severity, FP notes, references. — **Done**: `rules/METADATA_STANDARD.md`; `modified` on every rule; `tests/test_rule_metadata_standard.py`.
 - [x] **F7** Rule versioning and a changelog per rule. — **Done**: `version` + `detection_sha256` in `rules/soar_mapping.yml`; `rules/RULE_CHANGELOG.md`; `soar/rule_versioning.py`; `tests/test_rule_versioning.py`.
 - [ ] **F8** Rule-quality score (coverage, FP risk, data-source dependency).

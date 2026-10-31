@@ -1,0 +1,2 @@
+// SOC-RULE-017: Rundll32 Executing Script or Remote Content (generated from rules/sigma/win_lolbas_rundll32_script.yml; review before use)
+(event.code:1 OR event.code:4688) AND ((process.executable:*\\rundll32.exe) AND ((process.command_line:*javascript\:* OR process.command_line:*RunHTMLApplication* OR process.command_line:*http\:\/\/* OR process.command_line:*https\:\/\/*)))

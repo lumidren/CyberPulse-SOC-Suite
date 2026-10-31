@@ -1,0 +1,2 @@
+// SOC-RULE-029: Security Event Log Cleared (generated from rules/sigma/win_security_log_cleared.yml; review before use)
+((event.code:1102))

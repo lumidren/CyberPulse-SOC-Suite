@@ -1,0 +1,3 @@
+// SOC-RULE-024: Run Key Persistence Added via reg.exe (generated from rules/sigma/win_registry_run_key_persistence.yml; review before use)
+DeviceProcessEvents
+| where ((FolderPath endswith "\\reg.exe" and (ProcessCommandLine contains " add " and ProcessCommandLine contains "\\CurrentVersion\\Run")))

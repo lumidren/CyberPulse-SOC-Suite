@@ -1,0 +1,2 @@
+// SOC-RULE-016: Regsvr32 Loading a Remote Scriptlet (Squiblydoo) (generated from rules/sigma/win_lolbas_regsvr32_squiblydoo.yml; review before use)
+(event.code:1 OR event.code:4688) AND ((process.executable:*\\regsvr32.exe) AND ((process.command_line:*\/i\:http* OR process.command_line:*\-i\:http* OR process.command_line:*\/i\:ftp*)) AND (process.command_line:*scrobj*))
