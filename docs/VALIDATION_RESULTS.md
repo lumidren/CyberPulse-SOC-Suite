@@ -7,6 +7,24 @@
 > These counts show the rules match the scripted events; they are **not**
 > evidence of real-world detection efficacy or real-world false-positive rates.
 
+## Scripted attack runs
+
+**60/60 scripted runs detected by the expected rule.** Because the attack events and the rules
+were written together, this is a regression check, not an efficacy measurement.
+
+| Rule | Generator | Detected |
+| :--- | :--- | ---: |
+| `SOC-RULE-001` | `t1003` | 6/6 |
+| `SOC-RULE-002` | `t1110` | 6/6 |
+| `SOC-RULE-003` | `t1053` | 6/6 |
+| `SOC-RULE-004` | `t1059` | 6/6 |
+| `SOC-RULE-005` | `t1562` | 6/6 |
+| `SOC-RULE-006` | `t1486` | 6/6 |
+| `SOC-RULE-007` | `t1558` | 6/6 |
+| `SOC-RULE-008` | `t1003_dcsync` | 6/6 |
+| `SOC-RULE-009` | `cloud_aws` | 6/6 |
+| `SOC-RULE-010` | `cloud_entra` | 6/6 |
+
 ## False positives on the benign baseline
 
 **319 false positives in 600 baseline events** (seed 1337; see [BASELINE_TRAFFIC.md](BASELINE_TRAFFIC.md)).

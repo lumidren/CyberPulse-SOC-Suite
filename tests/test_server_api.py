@@ -88,6 +88,14 @@ class TestRestApiIntegration(unittest.TestCase):
         )
         self.assertEqual(status, 200)
 
+    def test_detection_catalogue_reports_scripted_counts(self):
+        """Catalogue validation status is computed from scripted runs, never asserted"""
+        status, body = _request(self.base_url, "/api/detections")
+        self.assertEqual(status, 200)
+        self.assertIn("validation_note", body)
+        for rule in body["rules"]:
+            self.assertRegex(rule["validation_status"], r"^\d+/\d+ scripted runs detected|^No scripted test yet")
+
     def test_incident_subresource_routing(self):
         """GET /api/incidents/<id>/<sub> routes resolve (regression for shadowed routes)"""
         status, body = _request(self.base_url, "/api/simulate", method="POST", body={"type": "t1003"})

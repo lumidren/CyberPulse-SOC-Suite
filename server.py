@@ -37,6 +37,7 @@ from simulator.purple_team_runner import PurpleTeamRunner, SCENARIOS
 from soar.soar_engine import SOAROrchestrator
 from soar.bloodhound_exporter import BloodHoundExporter
 from soar.report_generator import IncidentReportGenerator
+from scripts.validate_detections import run_scripted, scripted_status
 
 __version__ = "2.5.0"
 
@@ -86,7 +87,7 @@ DETECTION_CATALOGUE = [
         "wazuh_rule_id": 100010,
         "automated_response": "WinRM Emergency WFP Host Isolation + PID Termination",
         "delc_document": "docs/lifecycle/DELC-001_LSASS_Memory_Access.md",
-        "validation_status": "PASS (100% True-Positive)"
+        "validation_status": "pending"
     },
     {
         "detection_id": "SOC-RULE-002",
@@ -100,7 +101,7 @@ DETECTION_CATALOGUE = [
         "wazuh_rule_id": 100011,
         "automated_response": "pfSense REST API Perimeter IP Drop",
         "delc_document": "docs/lifecycle/DELC-002_RDP_Authentication_Spraying.md",
-        "validation_status": "PASS (100% True-Positive)"
+        "validation_status": "pending"
     },
     {
         "detection_id": "SOC-RULE-003",
@@ -114,7 +115,7 @@ DETECTION_CATALOGUE = [
         "wazuh_rule_id": 100012,
         "automated_response": "Remote Scheduled Task De-registration",
         "delc_document": "docs/MITRE_COVERAGE_AND_GAPS.md",
-        "validation_status": "PASS (100% True-Positive)"
+        "validation_status": "pending"
     },
     {
         "detection_id": "SOC-RULE-004",
@@ -128,7 +129,7 @@ DETECTION_CATALOGUE = [
         "wazuh_rule_id": 100015,
         "automated_response": "Process Tree Kill + AD Account Lockout",
         "delc_document": "docs/MITRE_COVERAGE_AND_GAPS.md",
-        "validation_status": "PASS (100% True-Positive)"
+        "validation_status": "pending"
     },
     {
         "detection_id": "SOC-RULE-005",
@@ -142,7 +143,7 @@ DETECTION_CATALOGUE = [
         "wazuh_rule_id": 100013,
         "automated_response": "Revert Defender Policy + Host Isolation",
         "delc_document": "docs/lifecycle/DELC-003_Windows_Defender_Tampering.md",
-        "validation_status": "PASS (100% True-Positive)"
+        "validation_status": "pending"
     },
     {
         "detection_id": "SOC-RULE-006",
@@ -156,7 +157,7 @@ DETECTION_CATALOGUE = [
         "wazuh_rule_id": 100014,
         "automated_response": "PID Kill + Volume Shadow Copy (VSS) Recovery",
         "delc_document": "docs/MITRE_COVERAGE_AND_GAPS.md",
-        "validation_status": "PASS (100% True-Positive)"
+        "validation_status": "pending"
     },
     {
         "detection_id": "SOC-RULE-007",
@@ -170,7 +171,7 @@ DETECTION_CATALOGUE = [
         "wazuh_rule_id": 100016,
         "automated_response": "Reset Service Account & Revoke Kerberos Ticket",
         "delc_document": "docs/lifecycle/DELC-004_Kerberoasting_TGS.md",
-        "validation_status": "PASS (100% True-Positive)"
+        "validation_status": "pending"
     },
     {
         "detection_id": "SOC-RULE-008",
@@ -184,9 +185,17 @@ DETECTION_CATALOGUE = [
         "wazuh_rule_id": 100017,
         "automated_response": "Isolate Account & Revoke Replication Rights",
         "delc_document": "docs/lifecycle/DELC-005_DCSync_Replication_Abuse.md",
-        "validation_status": "PASS (100% True-Positive)"
+        "validation_status": "pending"
     }
 ]
+
+_SCRIPTED_VALIDATION_CACHE = {}
+
+def _scripted_validation():
+    """Run the scripted validation once per process and cache the counts."""
+    if not _SCRIPTED_VALIDATION_CACHE:
+        _SCRIPTED_VALIDATION_CACHE.update(run_scripted())
+    return _SCRIPTED_VALIDATION_CACHE
 
 def _resolve_api_key():
     """Resolve the API key from the environment.
@@ -432,9 +441,12 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json(200, health)
 
         elif path == "/api/detections":
+            scripted = _scripted_validation()
+            rules = [dict(r, validation_status=scripted_status(r["detection_id"], scripted)) for r in DETECTION_CATALOGUE]
             self._send_json(200, {
-                "total_rules": len(DETECTION_CATALOGUE),
-                "rules": DETECTION_CATALOGUE
+                "total_rules": len(rules),
+                "validation_note": "Counts come from scripts/validate_detections.py on self-authored synthetic events; not real-world efficacy.",
+                "rules": rules
             })
 
         elif path == "/api/purple-team/scenarios":
