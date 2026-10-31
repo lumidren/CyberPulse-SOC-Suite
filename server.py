@@ -424,6 +424,14 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif len(segments) == 4 and segments[0] == "api" and segments[1] == "incidents":
             self._handle_incident_subresource(segments[2], segments[3])
 
+        elif path == "/api/approvals":
+            pending = orchestrator.containment_engine.pending_approvals()
+            items = []
+            for action in pending:
+                inc = orchestrator.dfir_engine.find_by_action_id(action["action_id"])
+                items.append({"incident_id": inc["incident_id"] if inc else None, "action": action})
+            self._send_json(200, {"total": len(items), "pending": items})
+
         elif path == "/api/version":
             self._send_json(200, {
                 "service": "cyberpulse-soc",
@@ -555,6 +563,33 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             webhook_url = data.get("webhook_url", None)
             res = purple_runner.run_scenario(scenario_key, custom_webhook_url=webhook_url)
             self._send_json(200, res)
+
+        elif path.startswith("/api/approvals/") and (path.endswith("/approve") or path.endswith("/reject")):
+            parts = [s for s in path.split("/") if s]
+            if len(parts) != 4:
+                self._send_json(404, {"error": "Endpoint Not Found"})
+                return
+            action_id, decision = parts[2], parts[3]
+            approver = str(data.get("approver", "")).strip()
+            note = str(data.get("comment", data.get("reason", ""))).strip()
+            engine = orchestrator.containment_engine
+            result = engine.approve_action(action_id, approver, note) if decision == "approve" \
+                else engine.reject_action(action_id, approver, note)
+            if result["status"] != "SUCCESS":
+                self._send_json(409 if "not pending" in result["message"] else 400, result)
+                return
+            inc = orchestrator.dfir_engine.find_by_action_id(action_id)
+            if inc:
+                orchestrator.dfir_engine.refresh_status(inc)
+                orchestrator.dfir_engine.add_analyst_note(
+                    inc["incident_id"], f"{decision.upper()}D containment {action_id}. {note}".strip(), author=approver
+                )
+            audit_logger.info(
+                "APPROVAL client=%s action=%s decision=%s approver=%s",
+                self._client_ip(), action_id, decision, approver
+            )
+            self._send_json(200, {"status": "SUCCESS", "decision": decision, "incident_id": inc["incident_id"] if inc else None,
+                                  "action": result["action"]})
 
         elif path.startswith("/api/incidents/") and path.endswith("/rollback"):
             inc_id = path.split("/")[3]

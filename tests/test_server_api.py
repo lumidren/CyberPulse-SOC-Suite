@@ -121,6 +121,37 @@ class TestRestApiIntegration(unittest.TestCase):
         status, _ = _request(self.base_url, "/api/incidents/INC-DOES-NOT-EXIST/evidence")
         self.assertEqual(status, 404)
 
+    def test_approval_endpoints_gate_containment(self):
+        """APPROVAL_REQUIRED stages actions; approve/reject endpoints decide them"""
+        original_mode = server.orchestrator.risk_engine.policy_mode
+        server.orchestrator.risk_engine.policy_mode = "APPROVAL_REQUIRED"
+        try:
+            _, body = _request(self.base_url, "/api/simulate", method="POST", body={"type": "t1003"})
+            inc = body["incident"]
+            self.assertEqual(inc["status"], "PENDING_APPROVAL")
+            action_id = inc["containment_action"]["action_id"]
+
+            status, pending = _request(self.base_url, "/api/approvals")
+            self.assertEqual(status, 200)
+            self.assertIn(action_id, [p["action"]["action_id"] for p in pending["pending"]])
+
+            status, _ = _request(self.base_url, f"/api/approvals/{action_id}/approve", method="POST", body={})
+            self.assertEqual(status, 400)  # approver identity is mandatory
+
+            status, res = _request(self.base_url, f"/api/approvals/{action_id}/approve", method="POST",
+                                   body={"approver": "analyst_test", "comment": "verified"})
+            self.assertEqual(status, 200)
+            self.assertEqual(res["action"]["status"], "SUCCESS")
+
+            _, detail = _request(self.base_url, f"/api/incidents/{inc['incident_id']}")
+            self.assertEqual(detail["incident"]["status"], "CONTAINED")
+
+            status, _ = _request(self.base_url, f"/api/approvals/{action_id}/reject", method="POST",
+                                 body={"approver": "analyst_test"})
+            self.assertEqual(status, 409)  # already decided
+        finally:
+            server.orchestrator.risk_engine.policy_mode = original_mode
+
     def test_incident_list_pagination(self):
         """Incident list honors limit/offset and reports totals"""
         for _ in range(3):
