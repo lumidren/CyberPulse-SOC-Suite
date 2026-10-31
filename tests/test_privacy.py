@@ -51,6 +51,32 @@ class TestMasking(unittest.TestCase):
             httpd.server_close()
 
 
+class TestNoRealEmployeeData(unittest.TestCase):
+
+    def test_identity_endpoints_are_labelled_synthetic(self):
+        import json
+        import threading
+        import urllib.request
+        import server
+        httpd = server.create_server(host="127.0.0.1", port=0)
+        threading.Thread(target=httpd.serve_forever, daemon=True).start()
+        try:
+            base = f"http://127.0.0.1:{httpd.server_address[1]}"
+            for path in ["/api/identity/graph", "/api/identity/delegation-risks", "/api/identity/bloodhound-export"]:
+                req = urllib.request.Request(base + path, headers={"X-API-Key": server.API_KEY})
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    self.assertIn("SYNTHETIC", json.loads(resp.read())["data_source"], path)
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+
+    def test_directory_contains_only_lab_domains(self):
+        from soar.identity_graph import LAB_AD_TOPOLOGY
+        for name, user in LAB_AD_TOPOLOGY.items():
+            for spn in user.get("spn", []):
+                self.assertRegex(spn.lower(), r"\.(cyberpulse|corp)\.local", f"{name}: {spn}")
+
+
 class TestDataMinimisation(unittest.TestCase):
 
     def test_unneeded_fields_dropped_at_ingest(self):

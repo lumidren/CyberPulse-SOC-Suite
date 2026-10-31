@@ -22,6 +22,10 @@ There is no database: restarting the server erases incident data.
 * The demo directory (`soar/identity_graph.py`) and all simulated events use
   **invented** accounts and hosts. No real employee, client or internship data
   is included anywhere in this repository.
+* The identity graph, blast-radius analysis and BloodHound export always run
+  on that synthetic directory; their API responses carry a `data_source`
+  field saying so and the console labels the card **SYNTHETIC DIRECTORY**.
+  Ingested telemetry never populates the directory.
 * If you ingest real telemetry, events will contain real usernames, hostnames
   and command lines. Treat the server as holding personal data: restrict who
   can sign in, keep it on loopback or behind TLS, and limit retention.
