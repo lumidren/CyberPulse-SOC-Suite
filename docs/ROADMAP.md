@@ -126,7 +126,7 @@ internal identifiers never go to external APIs.
 - [x] **E84** Trademark disclaimer (Microsoft, Fortinet, pfSense, VirusTotal). — *(Process note: a flaky test aborted this item's own commit and its changes landed in the E85 commit 2572b4a; history was not rewritten.)* **Done**: 'Trademarks' section in `docs/LEGAL.md`; test.
 - [x] **E85** "Not affiliated with" statement. — **Done**: 'Not affiliated' in `docs/LEGAL.md` + README; test.
 - [x] **E86** Disclaimer of warranty and liability for the automation. — **Done**: 'No warranty; no liability for automated actions' in `docs/LEGAL.md` + README; test.
-- [ ] **E87** Notice that users need authorization before deploying on any network.
+- [x] **E87** Notice that users need authorization before deploying on any network. — **Done**: 'Authorisation required before deployment' in `docs/LEGAL.md` + README; test.
 - [ ] **E88** Clarify no real client data was used.
 
 ## Phase 4d — Documentation, transparency & accountability (E89–E100)

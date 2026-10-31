@@ -46,3 +46,16 @@ the MIT [LICENSE](../LICENSE). In particular, and in plain words:
   of this software. If you wire the responders to real systems, you do so at
   your own risk and are responsible for testing, change control and approval.
 
+## Authorisation required before deployment
+
+Do **not** deploy any part of CyberPulse (simulator, agents, Sysmon/Wazuh
+configurations, playbooks, responders or ingestion) on a network, host,
+cloud account or tenant unless you **own it or have explicit written
+authorisation** from its owner to do so. Unauthorised monitoring, simulated
+attacks or containment actions can be illegal (for example under computer
+misuse, wiretapping or data-protection laws) and can breach employment or
+service agreements, even when no harm is intended.
+
+If you are unsure whether you are authorised, you are not. Use the bundled
+synthetic lab, or an isolated environment you control.
+

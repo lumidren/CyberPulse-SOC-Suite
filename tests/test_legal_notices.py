@@ -35,5 +35,10 @@ class TestLegalNotices(unittest.TestCase):
         self.assertIn("No warranty, no liability", read("README.md"))
 
 
+    def test_authorisation_notice(self):
+        self.assertIn("explicit written authorisation", read("docs/LEGAL.md"))
+        self.assertIn("Authorisation required", read("README.md"))
+
+
 if __name__ == "__main__":
     unittest.main()
