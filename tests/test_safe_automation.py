@@ -518,5 +518,27 @@ class TestLabTargetAllowlist(unittest.TestCase):
         self.assertTrue(validate_target({"computer_name": "x", "target_ip": "10.0.3.3", "event_source": "Security"}))
 
 
+class TestPublicTargetBlock(unittest.TestCase):
+
+    def test_public_target_ip_refused(self):
+        from simulator.lab_guard import TargetNotAllowed, validate_target
+        with self.assertRaises(TargetNotAllowed) as ctx:
+            validate_target({"computer_name": "x", "target_ip": "8.8.8.8", "event_source": "Security"})
+        self.assertIn("public IP", str(ctx.exception))
+
+    def test_public_cidr_in_config_refused(self):
+        from simulator.lab_guard import TargetNotAllowed, validate_target
+        previous = os.environ.get("CYBERPULSE_LAB_CIDRS")
+        os.environ["CYBERPULSE_LAB_CIDRS"] = "10.0.0.0/16,8.8.8.0/24"
+        try:
+            with self.assertRaises(TargetNotAllowed):
+                validate_target({"computer_name": "x", "target_ip": "10.0.0.5", "event_source": "Security"})
+        finally:
+            if previous is None:
+                os.environ.pop("CYBERPULSE_LAB_CIDRS", None)
+            else:
+                os.environ["CYBERPULSE_LAB_CIDRS"] = previous
+
+
 if __name__ == "__main__":
     unittest.main()
