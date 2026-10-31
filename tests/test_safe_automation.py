@@ -253,5 +253,33 @@ class TestProtectedAssets(unittest.TestCase):
         self.assertEqual(incident["status"], "NEEDS_ANALYST_REVIEW")
 
 
+class TestProtectedAccounts(unittest.TestCase):
+
+    def test_account_matching_ignores_domain_and_case(self):
+        from soar.protected_assets import protected_account_match
+        self.assertEqual(protected_account_match("CORP\\krbtgt"), "krbtgt")
+        self.assertEqual(protected_account_match("ADMINISTRATOR@corp.local"), "Administrator")
+        self.assertEqual(protected_account_match("CORP\\breakglass-01"), "breakglass*")
+        self.assertIsNone(protected_account_match("CORP\\j.doe"))
+
+    def test_protected_account_is_never_locked(self):
+        engine = ResilientContainmentEngine()
+        act = engine.execute_containment(
+            action_type="ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES", target_host="WIN-WORKSTATION09",
+            target_ip="10.0.0.45", target_user="CORP\\Administrator", pid=None, process_name=None,
+            execution_intent="PENDING_APPROVAL")
+        self.assertEqual(act["status"], "BLOCKED_PROTECTED_ACCOUNT")
+        self.assertEqual(engine.pending_approvals(), [])
+        self.assertEqual(engine.disabled_users, set())
+
+    def test_unprotected_account_still_flows_to_approval(self):
+        engine = ResilientContainmentEngine()
+        act = engine.execute_containment(
+            action_type="RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET", target_host="WIN-DC01.corp.local",
+            target_ip="10.0.0.45", target_user="CORP\\j.doe", pid=None, process_name=None,
+            execution_intent="PENDING_APPROVAL")
+        self.assertEqual(act["status"], "PENDING_ANALYST_APPROVAL")
+
+
 if __name__ == "__main__":
     unittest.main()

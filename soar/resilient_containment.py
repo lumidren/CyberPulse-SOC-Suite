@@ -9,7 +9,7 @@ import json
 import time
 from datetime import datetime, timezone
 
-from soar.protected_assets import protected_match
+from soar.protected_assets import protected_account_match, protected_match
 from soar.safety import AutomationSafety
 
 # Actions that disrupt the target host, and the perimeter block that must never
@@ -17,6 +17,12 @@ from soar.safety import AutomationSafety
 HOST_DISRUPTING_ACTIONS = {
     "ISOLATE_HOST_AND_KILL_PROCESS", "REVERT_DEFENDER_POLICY_AND_ISOLATE", "REMOVE_SCHEDULED_TASK",
     "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS", "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK", "TERMINATE_PROCESS_TREE",
+}
+# Actions that lock, disable, reset or revoke the target account
+ACCOUNT_DISRUPTING_ACTIONS = {
+    "TERMINATE_PROCESS_TREE", "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET",
+    "ISOLATE_ACCOUNT_AND_REVOKE_REPLICATION_PRIVILEGES", "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY",
+    "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA",
 }
 
 # Monotonic per-process sequence: IDs must never collide, even within one millisecond.
@@ -89,6 +95,19 @@ class ResilientContainmentEngine:
             "rollback_plan": {},
             "latency_ms": 0
         }
+
+        # Protected accounts are never locked, reset or revoked through SOAR
+        account_protection = self._protected_account_for(action_record)
+        if account_protection:
+            action_record["status"] = "BLOCKED_PROTECTED_ACCOUNT"
+            action_record["execution_protocol"] = "Protected Account List"
+            action_record["execution_log"] = (
+                f"{action_type} refused: account {target_user} is protected ({account_protection}). "
+                "Handle it manually through the identity team."
+            )
+            action_record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
+            self.action_registry[action_id] = action_record
+            return action_record
 
         # Protected assets are never isolated or blocked through SOAR (any mode, any approval)
         protection = self._protected_asset_for(action_record)
@@ -276,6 +295,13 @@ class ResilientContainmentEngine:
             return protected_match(ip=record.get("target_ip"))
         return None
 
+    @staticmethod
+    def _protected_account_for(record):
+        """Protection entry blocking an identity action on this account, if any."""
+        if record["action_type"] in ACCOUNT_DISRUPTING_ACTIONS:
+            return protected_account_match(record.get("target_user"))
+        return None
+
     def pending_approvals(self):
         """Actions staged for analyst sign-off, oldest first."""
         return [r for r in self.action_registry.values() if r["status"] == "PENDING_ANALYST_APPROVAL"]
@@ -294,6 +320,9 @@ class ResilientContainmentEngine:
         protection = self._protected_asset_for(record)
         if protection:
             return {"status": "ERROR", "message": f"{record['target_host']} is a protected asset ({protection}); contain it manually."}
+        account_protection = self._protected_account_for(record)
+        if account_protection:
+            return {"status": "ERROR", "message": f"{record['target_user']} is a protected account ({account_protection}); handle it manually."}
 
         t_start = time.perf_counter()
         record["approval"] = {
