@@ -562,7 +562,7 @@
                         </div>
                         <div style="margin-top: 14px; font-size: 12px; color: var(--text-muted); line-height: 1.6;">
                             <strong>External VM Syslog Forwarding Command:</strong><br>
-                            <code>echo '&lt;165&gt;1 2026-09-09T12:00:00Z WIN-DC01 Security - - {"event_id": 10, "source_ip": "194.26.29.112", "computer_name": "WIN-DC01.corp.local", "user": "CORP\\Administrator", "details": {"TargetImage": "C:\\Windows\\System32\\lsass.exe"}}' | ncat -u localhost 5514</code>
+                            <code>echo '&lt;165&gt;1 2026-09-09T12:00:00Z WIN-DC01 Security - - {"event_id": 10, "source_ip": "203.0.113.112", "computer_name": "WIN-DC01.corp.local", "user": "CORP\\Administrator", "details": {"TargetImage": "C:\\Windows\\System32\\lsass.exe"}}' | ncat -u localhost 5514</code>
                         </div>
                     </div>
 
@@ -575,7 +575,7 @@
                         <textarea class="payload-textarea" id="customIngestPayload">{
   "event_id": 10,
   "computer_name": "WIN-DC01.corp.local",
-  "source_ip": "185.220.101.33",
+  "source_ip": "198.51.100.33",
   "user": "CORP\\Administrator",
   "details": {
     "SourceProcessId": 4812,

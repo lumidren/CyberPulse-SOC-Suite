@@ -33,7 +33,7 @@ def simulate_t1003_lsass_dump():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "computer_name": "WIN-WORKSTATION09",
         "user": "CORP\\Administrator",
-        "source_ip": "185.220.101.33",
+        "source_ip": "198.51.100.33",
         "details": {
             "SourceProcessId": 4812,
             "SourceImage": "C:\\Windows\\Temp\\mimikatz.exe",
@@ -57,7 +57,7 @@ def simulate_t1110_brute_force():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "computer_name": "CORP-RDP-GW01",
         "user": "lab.admin",
-        "source_ip": "185.220.101.5",
+        "source_ip": "198.51.100.5",
         "details": {
             "LogonType": 10,
             "FailedAttemptsCount": 18,
@@ -126,7 +126,7 @@ def simulate_t1562_defender_tamper():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "computer_name": "WIN-WORKSTATION09",
         "user": "CORP\\j.doe",
-        "source_ip": "91.240.118.172",
+        "source_ip": "198.51.100.172",
         "details": {
             "ProcessId": 5120,
             "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
@@ -148,7 +148,7 @@ def simulate_t1486_ransomware_canary():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "computer_name": "CORP-FINANCE-02",
         "user": "CORP\\finance_admin",
-        "source_ip": "193.142.146.210",
+        "source_ip": "203.0.113.210",
         "details": {
             "ProcessId": 6104,
             "Image": "C:\\Users\\finance_admin\\AppData\\Local\\Temp\\locker.exe",
@@ -191,7 +191,7 @@ def simulate_t1003_dcsync():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "computer_name": "WIN-DC01.corp.local",
         "user": "CORP\\compromised_admin",
-        "source_ip": "194.26.29.112",
+        "source_ip": "203.0.113.112",
         "details": {
             "AccessMask": "0x100",
             "Properties": "{1131f6aa-9c07-11d1-f79f-00c04fc2dcd2}\n{1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}",
@@ -210,7 +210,7 @@ def simulate_cloud_aws_assumerole():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "computer_name": "aws-lab-account-000000000000",
         "user": "contractor_temp",
-        "source_ip": "185.220.101.33",
+        "source_ip": "198.51.100.33",
         "details": {
             "eventName": "AssumeRole",
             "eventSource": "sts.amazonaws.com",
@@ -230,7 +230,7 @@ def simulate_cloud_entra_impossible_travel():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "computer_name": "cyberpulse-lab.onmicrosoft.com",
         "user": "finance_admin",
-        "source_ip": "193.142.146.210",
+        "source_ip": "203.0.113.210",
         "details": {
             "Category": "SignInLogs",
             "OperationName": "Sign-in activity",

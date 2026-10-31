@@ -101,7 +101,7 @@ internal identifiers never go to external APIs.
 - [x] **E51** Never send hostnames, usernames or file contents to enrichment APIs. — **Done**: `classify_indicator`/`lookup` in `soar/enrichment.py`; pipeline sends only IP + hash; spy test over all scenarios.
 - [x] **E52** Option to disable external enrichment. — **Done**: health probes gated on enrichment; `/api/enrichment` + `/api/enrichment/config`; PRIVACY.md updated; tests.
 - [x] **E53** Document the local LRU IoC cache and how to clear it. — **Done**: `IocCache` in `soar/enrichment.py`; `/api/enrichment/cache/clear`; PRIVACY.md row; tests.
-- [ ] **E54** Use synthetic data in the public demo.
+- [x] **E54** Use synthetic data in the public demo. — **Done**: RFC 5737 IPs + 'Fictional ... (lab data)' providers everywhere; `tests/test_synthetic_demo_data.py`.
 - [ ] **E55** Audit-log note on who can view the Sysmon streams.
 - [ ] **E56** Dashboard doesn't expose real employee data.
 

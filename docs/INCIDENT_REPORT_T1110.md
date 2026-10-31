@@ -12,7 +12,7 @@
 ---
 
 ## 1. Executive Summary
-The lab's simulated SIEM pipeline detected a brute-force password guessing campaign targeting the external RDP gateway server (`CORP-RDP-GW01`). Over 65 failed authentication attempts were recorded within 180 seconds originating from external IP `185.220.101.5`. The SOAR playbook automatically triggered a dynamic firewall rule on the perimeter gateway, blocking all traffic from the threat source.
+The lab's simulated SIEM pipeline detected a brute-force password guessing campaign targeting the external RDP gateway server (`CORP-RDP-GW01`). Over 65 failed authentication attempts were recorded within 180 seconds originating from external IP `198.51.100.5`. The SOAR playbook automatically triggered a dynamic firewall rule on the perimeter gateway, blocking all traffic from the threat source.
 
 ---
 
@@ -24,7 +24,7 @@ The lab's simulated SIEM pipeline detected a brute-force password guessing campa
 * **Target Accounts**: `admin`, `administrator`, `j.smith`, `service_acct`
 
 ### Indicators of Compromise (IoCs)
-* **Attacker IP**: `185.220.101.5` (Germany / Hostinger Scanner)
+* **Attacker IP**: `198.51.100.5` (Fictional Scanner Network (lab data))
 * **AbuseIPDB Abuse Score**: 98% Confidence of Abuse
 * **Failed Attempt Count**: 65 Attempts
 * **SubStatus Code**: `0xc000006a` (Bad Password)
@@ -38,8 +38,8 @@ The lab's simulated SIEM pipeline detected a brute-force password guessing campa
 | **15:07:30** | Attacker | Initiated automated RDP brute-force dictionary attack against public gateway. |
 | **15:09:45** | Windows Audit (Event 4625) | Accumulated 65 failed logon entries for multiple domain accounts. |
 | **15:10:00** | Wazuh SIEM | Rule `100011` matched (Threshold exceeded: >10 failures in 5 mins). |
-| **15:10:01** | SOAR Engine | Queried AbuseIPDB API. Flagged IP `185.220.101.5` with 98% abuse rating. |
-| **15:10:02** | SOAR Playbook | Executed playbook `PB-FIREWALL-BLOCK`: Added drop rule for `185.220.101.5/32`. |
+| **15:10:01** | SOAR Engine | Queried AbuseIPDB API. Flagged IP `198.51.100.5` with 98% abuse rating. |
+| **15:10:02** | SOAR Playbook | Executed playbook `PB-FIREWALL-BLOCK`: Added drop rule for `198.51.100.5/32`. |
 
 ---
 

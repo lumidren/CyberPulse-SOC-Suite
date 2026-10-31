@@ -15,14 +15,14 @@
       {
         "category": "Network activity",
         "type": "ip-src",
-        "value": "185.220.101.5",
+        "value": "198.51.100.5",
         "to_ids": true,
-        "comment": "RDP Brute Force Threat Source (Hostinger / TOR Exit Node)"
+        "comment": "RDP Brute Force Threat Source (fictional hosting provider / TOR Exit Node)"
       },
       {
         "category": "Network activity",
         "type": "ip-src",
-        "value": "185.220.101.33",
+        "value": "198.51.100.33",
         "to_ids": true,
         "comment": "C2 Server / Mimikatz Stager Infrastructure"
       },
