@@ -152,7 +152,9 @@ class DFIREngine:
                             f"in {timing_breakdown.get('total_pipeline_sec', 0.0)}s (lab-measured, simulated responder)."
                 }
             ],
-            "status": incident_status_for(containment_action)
+            "status": incident_status_for(containment_action),
+            # True when the triggering event came from the simulator (never real telemetry)
+            "simulated": bool(event.get("simulation"))
         }
 
         self.incidents[incident_id] = incident_record

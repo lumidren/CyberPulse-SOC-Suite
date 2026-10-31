@@ -572,5 +572,26 @@ class TestSimulationThrottle(unittest.TestCase):
         self.assertTrue(throttle.allow(["T1110.001"])[0])
 
 
+class TestSimulationTagging(unittest.TestCase):
+
+    def test_every_generated_event_is_tagged(self):
+        from simulator.attack_simulator import SCRIPTED_GENERATORS
+        from simulator.benign_baseline import generate_baseline
+        for _name, gen in SCRIPTED_GENERATORS:
+            event = gen()
+            self.assertIs(event["simulation"], True)
+            self.assertIs(event["details"]["simulation"], True)
+        self.assertTrue(all(e["simulation"] for e in generate_baseline(12)))
+
+    def test_incident_inherits_simulated_flag(self):
+        orch = SOAROrchestrator()
+        self.assertTrue(orch.process_event(simulate_t1003_lsass_dump())["simulated"])
+
+    def test_ingested_event_defaults_to_real(self):
+        from soar.syslog_receiver import WebhookIngestionHandler
+        res = WebhookIngestionHandler().handle_ingest({"event_id": 1, "computer_name": "h", "source_ip": "10.0.0.5"})
+        self.assertFalse(res["normalized_event"]["simulation"])
+
+
 if __name__ == "__main__":
     unittest.main()

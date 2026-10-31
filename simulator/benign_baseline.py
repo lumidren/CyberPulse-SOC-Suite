@@ -40,6 +40,7 @@ def _base(rng, event_id, source, category, technique_hint=None):
         "user": rng.choice(LAB_USERS),
         "source_ip": rng.choice(LAB_INTERNAL_IPS),
         "baseline_category": category,
+        "simulation": True,
         "details": {},
     }
 

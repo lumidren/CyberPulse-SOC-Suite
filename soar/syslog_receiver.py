@@ -167,7 +167,9 @@ class WebhookIngestionHandler:
             "computer_name": json_body.get("computer_name"),
             "user": json_body.get("user", "Unknown"),
             "source_ip": json_body.get("source_ip"),
-            "details": json_body.get("details", {})
+            "details": json_body.get("details", {}),
+            # Externally ingested events are real unless the sender says otherwise
+            "simulation": bool(json_body.get("simulation", False))
         }
         
         return {
