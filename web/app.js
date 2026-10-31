@@ -465,9 +465,11 @@ async function loadMetrics() {
         const kpis = data.operational_kpis || {};
         const p = data.latency_percentiles_sec || {};
 
-        if (document.getElementById("kpiMttd")) document.getElementById("kpiMttd").innerText = `${kpis.mttd_sec || 1.40}s`;
-        if (document.getElementById("kpiMttc")) document.getElementById("kpiMttc").innerText = `${kpis.mttc_sec || 1.15}s`;
-        if (document.getElementById("kpiP95")) document.getElementById("kpiP95").innerText = `${p.p95 || 3.28}s`;
+        // Metrics are lab-measured on emulated traffic; never show placeholder numbers.
+        const fmt = v => (typeof v === "number") ? `${(v * 1000).toFixed(2)} ms` : "not yet measured";
+        if (document.getElementById("kpiMttd")) document.getElementById("kpiMttd").innerText = fmt(kpis.mttd_sec);
+        if (document.getElementById("kpiMttc")) document.getElementById("kpiMttc").innerText = fmt(kpis.mttc_sec);
+        if (document.getElementById("kpiP95")) document.getElementById("kpiP95").innerText = fmt(p.p95);
     } catch (err) {
         console.error("Load metrics error:", err);
     }

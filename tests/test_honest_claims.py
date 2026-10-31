@@ -25,6 +25,8 @@ BANNED_CLAIMS = [
     ("E1", re.compile(r"enterprise[- ]grade", re.I), "It's a lab, not an enterprise-grade product."),
     ("E1", re.compile(r"\bENTERPRISE SOC\b|Enterprise (SOC|Operations) Platform", re.I),
      "Lab console must not be branded as an enterprise platform."),
+    ("E2", re.compile(r"~3\.2s|3\.18 seconds|1\.40s|3\.28s|Simulated Benchmark"),
+     "Latency figures must come from scripts/benchmark_pipeline.py, not hardcoded values."),
 ]
 
 
@@ -52,6 +54,19 @@ class TestHonestClaims(unittest.TestCase):
                         if pattern.search(line):
                             violations.append(f"{rel}:{lineno} [{item_id}] {why} -> {line.strip()[:100]}")
         self.assertEqual(violations, [], "Banned claims found:\n" + "\n".join(violations))
+
+
+class TestBenchmarkScript(unittest.TestCase):
+
+    def test_benchmark_runs_and_labels_results(self):
+        """The benchmark backing README latency numbers must run and label its basis"""
+        import sys
+        sys.path.insert(0, ROOT)
+        from scripts.benchmark_pipeline import run_benchmark
+        result = run_benchmark(runs=1)
+        self.assertIn("Lab-measured", result["basis"])
+        self.assertEqual(result["events_attempted"], result["events_detected"])
+        self.assertIn("total_us", result["latency_us"])
 
 
 if __name__ == "__main__":

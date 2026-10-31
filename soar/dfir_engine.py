@@ -66,7 +66,7 @@ class DFIREngine:
         }
 
         # Build Microsecond-Timestamped Chronological Timeline
-        t_base = time.time() - (timing_breakdown.get("total_pipeline_sec", 3.2))
+        t_base = time.time() - (timing_breakdown.get("total_pipeline_sec", 0.0))
         timeline = [
             {
                 "timestamp": datetime.fromtimestamp(t_base, timezone.utc).isoformat(),
@@ -76,28 +76,28 @@ class DFIREngine:
                 "status": "TELEMETRY_EMITTED"
             },
             {
-                "timestamp": datetime.fromtimestamp(t_base + (timing_breakdown.get("stage1_detection_ms", 1400)/1000.0), timezone.utc).isoformat(),
+                "timestamp": datetime.fromtimestamp(t_base + (timing_breakdown.get("stage1_detection_ms", 0.0)/1000.0), timezone.utc).isoformat(),
                 "stage": "2. DETECTION_ENGINE",
                 "title": f"Sigma & Wazuh rule matched: {matched_rule.get('rule_name')}",
                 "detail": f"Rule ID: {matched_rule.get('rule_id')} | Severity: {matched_rule.get('severity')} | LogSource: {event.get('event_source')}",
                 "status": "ALERT_TRIGGERED"
             },
             {
-                "timestamp": datetime.fromtimestamp(t_base + ((timing_breakdown.get("stage1_detection_ms", 1400) + timing_breakdown.get("stage2_threat_intel_ms", 650))/1000.0), timezone.utc).isoformat(),
+                "timestamp": datetime.fromtimestamp(t_base + ((timing_breakdown.get("stage1_detection_ms", 0.0) + timing_breakdown.get("stage2_threat_intel_ms", 0.0))/1000.0), timezone.utc).isoformat(),
                 "stage": "3. THREAT_INTELLIGENCE",
                 "title": f"IoC Enrichment completed via VirusTotal v3 & AbuseIPDB v2",
                 "detail": f"VT Detections: {intel.get('ip_reputation', {}).get('virustotal_positives', 0)}/72 | Abuse Score: {intel.get('ip_reputation', {}).get('abuse_score', 0)}% | Origin: {intel.get('ip_reputation', {}).get('country', 'Unknown')}",
                 "status": "ENRICHED"
             },
             {
-                "timestamp": datetime.fromtimestamp(t_base + ((timing_breakdown.get("stage1_detection_ms", 1400) + timing_breakdown.get("stage2_threat_intel_ms", 650) + 150)/1000.0), timezone.utc).isoformat(),
+                "timestamp": datetime.fromtimestamp(t_base + ((timing_breakdown.get("stage1_detection_ms", 0.0) + timing_breakdown.get("stage2_threat_intel_ms", 0.0))/1000.0), timezone.utc).isoformat(),
                 "stage": "4. RISK_AND_POLICY",
                 "title": f"Calculated composite risk score: {risk_assessment['final_score']}/100 ({risk_assessment['risk_level']})",
                 "detail": f"Policy evaluated: {policy_decision['action']} (Execution Intent: {policy_decision['execution_intent']})",
                 "status": "POLICY_APPROVED"
             },
             {
-                "timestamp": datetime.fromtimestamp(t_base + (timing_breakdown.get("total_pipeline_sec", 3.2)), timezone.utc).isoformat(),
+                "timestamp": datetime.fromtimestamp(t_base + (timing_breakdown.get("total_pipeline_sec", 0.0)), timezone.utc).isoformat(),
                 "stage": "5. AUTOMATED_CONTAINMENT",
                 "title": f"SOAR executed {containment_action.get('action_type')}",
                 "detail": f"Protocol: {containment_action.get('execution_protocol')} | Log: {containment_action.get('execution_log')}",
@@ -129,7 +129,7 @@ class DFIREngine:
                 {
                     "timestamp": utc_now,
                     "author": "SOAR_AUTOMATION_SYSTEM",
-                    "note": f"Automated closed-loop containment executed in {timing_breakdown.get('total_pipeline_sec', 3.2)}s. Host isolated from enterprise subnet."
+                    "note": f"Automated closed-loop containment recorded in {timing_breakdown.get('total_pipeline_sec', 0.0)}s (lab-measured, simulated responder)."
                 }
             ],
             "status": "CONTAINED_AUTOMATICALLY"
