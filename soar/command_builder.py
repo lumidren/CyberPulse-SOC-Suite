@@ -10,6 +10,7 @@ extra arguments or a second command.
 
 import ipaddress
 import re
+from urllib.parse import quote
 
 
 class CommandValidationError(ValueError):
@@ -19,6 +20,7 @@ class CommandValidationError(ValueError):
 _HOSTNAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.-]{0,252}$")
 _ACCOUNT_RE = re.compile(r"^(?:[A-Za-z0-9][A-Za-z0-9-]{0,14}\\)?[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 _TASK_NAME_RE = re.compile(r"^\\[A-Za-z0-9 _.\\-]{1,200}$")
+_UPN_RE = re.compile(r"^[A-Za-z0-9._-]{1,64}(@[A-Za-z0-9.-]{1,190})?$")
 
 
 def valid_ip(value):
@@ -55,6 +57,61 @@ def valid_pid(value):
     if not 4 < pid < 4_194_304:
         raise CommandValidationError(f"PID out of range: {pid}")
     return pid
+
+
+def valid_upn(value):
+    if not isinstance(value, str) or not _UPN_RE.match(value):
+        raise CommandValidationError(f"not a valid user principal name: {str(value)[:60]!r}")
+    return value
+
+
+# ------------------------------------------------------- PowerShell over WinRM (E71)
+# Only these cmdlets, with these named parameters and value checks, can be built.
+# The responder must pass `parameters` as a splatted hashtable to a fixed wrapper
+# (param($Cmdlet, $Params) & $Cmdlet @Params) - never interpolate into script text.
+ISOLATION_RULE = "SOC-Emergency-Isolation"
+PS_CMDLETS = {
+    "Set-ADUser": {"Identity": valid_account, "Enabled": bool, "ChangePasswordAtLogon": bool},
+    "Disable-ADAccount": {"Identity": valid_account},
+    "Enable-ADAccount": {"Identity": valid_account},
+    "New-NetFirewallRule": {"DisplayName": {ISOLATION_RULE}, "Direction": {"Inbound", "Outbound"},
+                            "Action": {"Block", "Allow"}, "RemoteAddress": valid_ip},
+    "Remove-NetFirewallRule": {"DisplayName": {ISOLATION_RULE}},
+    "Set-MpPreference": {"DisableRealtimeMonitoring": bool},
+}
+
+
+def ps_invocation(cmdlet, **params):
+    """Structured, validated PowerShell invocation for WinRM-over-HTTPS transport."""
+    schema = PS_CMDLETS.get(cmdlet)
+    if schema is None:
+        raise CommandValidationError(f"cmdlet not allowlisted: {cmdlet!r}")
+    clean = {}
+    for name, value in params.items():
+        rule = schema.get(name)
+        if rule is None:
+            raise CommandValidationError(f"{cmdlet}: parameter not allowed: {name}")
+        if rule is bool:
+            if not isinstance(value, bool):
+                raise CommandValidationError(f"{cmdlet} -{name} must be a boolean")
+            clean[name] = value
+        elif isinstance(rule, set):
+            if value not in rule:
+                raise CommandValidationError(f"{cmdlet} -{name} must be one of {sorted(rule)}")
+            clean[name] = value
+        else:
+            clean[name] = rule(value)
+    return {"transport": "winrm-https", "cmdlet": cmdlet, "parameters": clean}
+
+
+def graph_revoke_sessions(upn):
+    """Microsoft Graph request with the UPN validated and URL-encoded."""
+    return {"method": "POST",
+            "url": f"https://graph.microsoft.com/v1.0/users/{quote(valid_upn(upn), safe='@.')}/revokeSignInSessions"}
+
+
+def citool_refresh():
+    return ["CiTool.exe", "--refresh"]
 
 
 # --------------------------------------------------------------------- argv builders
