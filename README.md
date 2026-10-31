@@ -65,6 +65,15 @@ and others; none of their binaries are redistributed here. See
 
 ---
 
+## ⚖️ Legal
+
+* MITRE ATT&CK® is a registered trademark of The MITRE Corporation; ATT&CK content is used
+  under the ATT&CK Terms of Use. © The MITRE Corporation, reproduced with permission.
+
+Full notices: [`docs/LEGAL.md`](docs/LEGAL.md).
+
+---
+
 ## 🔏 Privacy
 
 The lab stores incidents, action records and ingested events **in memory only**;
