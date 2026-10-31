@@ -51,5 +51,33 @@ class TestMasking(unittest.TestCase):
             httpd.server_close()
 
 
+class TestRetention(unittest.TestCase):
+
+    def test_old_incidents_and_actions_are_purged(self):
+        from datetime import datetime, timedelta, timezone
+        from simulator.attack_simulator import simulate_t1110_brute_force
+        from soar.soar_engine import SOAROrchestrator
+        orch = SOAROrchestrator()
+        old = orch.process_event(simulate_t1110_brute_force())
+        new = orch.process_event(simulate_t1110_brute_force())
+        old["created_at"] = (datetime.now(timezone.utc) - timedelta(days=45)).isoformat()
+
+        result = orch.apply_retention(days=30)
+        self.assertEqual(result["incidents_purged"], 1)
+        self.assertEqual(result["actions_purged"], 1)
+        self.assertNotIn(old["incident_id"], orch.dfir_engine.incidents)
+        self.assertIn(new["incident_id"], orch.dfir_engine.incidents)
+        self.assertNotIn(old["containment_action"]["action_id"], orch.containment_engine.action_registry)
+
+    def test_syslog_buffer_is_bounded_and_purged(self):
+        import time
+        from soar.syslog_receiver import SyslogReceiver
+        rx = SyslogReceiver()
+        rx.events.extend([{"received_at": time.time() - 90 * 86400}, {"received_at": time.time()}])
+        self.assertEqual(rx.purge_older_than(time.time() - 30 * 86400), 1)
+        self.assertEqual(len(rx.events), 1)
+        self.assertIsNotNone(rx.events.maxlen)
+
+
 if __name__ == "__main__":
     unittest.main()

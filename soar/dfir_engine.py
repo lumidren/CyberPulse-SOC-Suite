@@ -163,6 +163,20 @@ class DFIREngine:
         self.incident_list.insert(0, incident_record)
         return incident_record
 
+    def purge_older_than(self, cutoff):
+        """Remove incidents created before `cutoff` (aware datetime). Returns the removed incidents."""
+        removed = []
+        for inc in list(self.incident_list):
+            try:
+                created = datetime.fromisoformat(inc["created_at"])
+            except (KeyError, ValueError):
+                continue
+            if created < cutoff:
+                removed.append(inc)
+                self.incident_list.remove(inc)
+                self.incidents.pop(inc["incident_id"], None)
+        return removed
+
     def find_by_action_id(self, action_id):
         """Return the incident whose containment action has `action_id`, if any."""
         for inc in self.incident_list:

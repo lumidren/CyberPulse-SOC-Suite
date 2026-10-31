@@ -8,11 +8,11 @@ long, and what changes if you feed it real telemetry.
 
 | Data | Where | Lifetime | Contents |
 | :--- | :--- | :--- | :--- |
-| Incidents (alert, telemetry, risk, actions, notes) | Server process memory | Until the server restarts | Hostnames, usernames, IPs, process paths and command lines from the triggering event |
-| Containment action records | Server process memory | Until restart | Targets, approvals (approver name, comment), rollback records |
-| Syslog / webhook events | Server process memory | Until restart | Normalised event fields |
+| Incidents (alert, telemetry, risk, actions, notes) | Server process memory | Until restart, or `RETENTION_DAYS` (default 30), whichever is first | Hostnames, usernames, IPs, process paths and command lines from the triggering event |
+| Containment action records | Server process memory | Deleted with their incident (`RETENTION_DAYS`) | Targets, approvals (approver name, comment), rollback records |
+| Syslog / webhook events | Server process memory, capped at `SYSLOG_MAX_EVENTS` (10,000) | `RETENTION_DAYS`, or earlier when the cap is reached | Normalised event fields |
 | Dashboard sessions | Server process memory | `SESSION_TTL_MIN` (default 8 h) | Random session token, CSRF token, timestamps (no personal data) |
-| Operational + audit log | stderr (your process manager / container runtime decides retention) | Outside the app | Client IPs, actions, approver names, incident IDs |
+| Operational + audit log | stderr, plus `LOG_FILE` if set | stderr: your log pipeline decides. `LOG_FILE`: rotated daily, `RETENTION_DAYS` files kept | Client IPs, actions, approver names, incident IDs |
 
 There is no database: restarting the server erases incident data.
 

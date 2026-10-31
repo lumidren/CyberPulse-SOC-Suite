@@ -22,7 +22,10 @@ class SyslogReceiver:
         self.running = False
         self.thread = None
         
-        self.events = []
+        # Bounded buffer: the oldest events drop off once SYSLOG_MAX_EVENTS is reached
+        import collections
+        import os
+        self.events = collections.deque(maxlen=int(os.environ.get("SYSLOG_MAX_EVENTS", "10000")))
         self.total_received = 0
         self.total_parsed = 0
         self.total_errors = 0
@@ -108,6 +111,7 @@ class SyslogReceiver:
                     if not event.get("source_ip"):
                         event["source_ip"] = addr[0]
                     event = validate_event(event)  # same validation as the webhook receiver
+                    event["received_at"] = time.time()
                     self.events.append(event)
                     self.total_parsed += 1
                 except Exception:
@@ -134,6 +138,14 @@ class SyslogReceiver:
         self.running = False
         if self.thread and self.thread.is_alive():
             self.thread.join(timeout=2.0)
+
+    def purge_older_than(self, cutoff_epoch):
+        """Drop buffered events received before `cutoff_epoch`; returns how many were removed."""
+        before = len(self.events)
+        kept = [e for e in self.events if e.get("received_at", cutoff_epoch) >= cutoff_epoch]
+        self.events.clear()
+        self.events.extend(kept)
+        return before - len(kept)
 
     def get_received_events(self) -> list:
         """Return a copy of all events received so far."""
