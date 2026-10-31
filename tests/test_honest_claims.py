@@ -27,6 +27,8 @@ BANNED_CLAIMS = [
      "Lab console must not be branded as an enterprise platform."),
     ("E2", re.compile(r"~3\.2s|3\.18 seconds|1\.40s|3\.28s|Simulated Benchmark"),
      "Latency figures must come from scripts/benchmark_pipeline.py, not hardcoded values."),
+    ("E3", re.compile(r"0\s?% false[- ]positive|zero false[- ]positive", re.I),
+     "State FP results as 'N false positives in M baseline events' (docs/VALIDATION_RESULTS.md)."),
 ]
 
 
