@@ -4,6 +4,7 @@ Calculates real-time MTTD, MTTA, MTTC, p50/p95/p99 latency distributions,
 and automation reliability metrics across all incident executions.
 """
 
+import json
 import math
 import time
 from datetime import datetime, timezone
