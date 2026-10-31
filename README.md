@@ -264,6 +264,16 @@ See [SECURITY.md](SECURITY.md) for the full hardening baseline and deployment gu
 
 ## 🚀 Quickstart & Setup Guide
 
+### 0. One-command lab start (Docker)
+```bash
+docker compose up --build
+```
+Then open **http://127.0.0.1:5000** and sign in with the key printed in the log
+(`docker compose logs cyberpulse | grep "Development API key"`). The container is a
+declared lab (`CYBERPULSE_LAB_MODE=true`), runs read-only without capabilities, defaults
+to approval-required containment and is published on loopback only. The full Wazuh /
+OpenSearch / TheHive stack is in `deploy/docker-compose.yml`.
+
 ### 1. Prerequisites & Installation:
 ```bash
 # Clone the repository

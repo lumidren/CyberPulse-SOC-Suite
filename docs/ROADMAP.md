@@ -146,7 +146,7 @@ internal identifiers never go to external APIs.
 
 ## Phase 5 — Engineering quality (F86–F95)
 
-- [ ] **F86** ⭐ Docker Compose for a one-command lab start.
+- [x] **F86** ⭐ Docker Compose for a one-command lab start. — **Done** (container run unverified: Docker daemon not running here; `docker compose config` validates): root `compose.yaml`; README quickstart; `tests/test_compose.py`.
 - [ ] **F87** ⭐ GitHub Actions CI: lint, test, security scan.
 - [ ] **F88** Unit and integration tests with coverage badges.
 - [ ] **F89** Terraform or Vagrant for lab provisioning.

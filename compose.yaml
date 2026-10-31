@@ -1,0 +1,32 @@
+# One-command lab start:   docker compose up --build
+#
+# Starts only the CyberPulse lab (console + API + simulator) on
+# http://127.0.0.1:5000, published on loopback only. With no CYBERPULSE_API_KEY
+# set, the server generates a random key for this run and prints it in the
+# container log:  docker compose logs cyberpulse | grep "Development API key"
+#
+# The full SIEM stack (Wazuh manager, OpenSearch, TheHive) lives in
+# deploy/docker-compose.yml and needs credentials in .env.
+services:
+  cyberpulse:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.soar
+    image: cyberpulse-soc-lab:local
+    container_name: cyberpulse-lab
+    environment:
+      CYBERPULSE_ENV: development          # random per-run key unless one is provided
+      CYBERPULSE_API_KEY: ${CYBERPULSE_API_KEY:-}
+      CYBERPULSE_LAB_MODE: "true"           # this compose file is a declared lab
+      HOST: 0.0.0.0                         # inside the container; published on loopback below
+      POLICY_MODE: APPROVAL_REQUIRED
+    ports:
+      - "127.0.0.1:5000:5000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
