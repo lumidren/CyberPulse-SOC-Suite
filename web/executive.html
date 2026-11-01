@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Summary | CyberPulse SOC Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="theme.js"></script>
+</head>
+<body class="ex-body">
+    <header class="ex-header">
+        <div>
+            <h1>Security operations summary</h1>
+            <p id="exHeadline" class="ex-headline">Loading...</p>
+        </div>
+        <div class="ex-actions">
+            <button class="btn-secondary" type="button" onclick="window.print()">Print</button>
+            <a class="btn-secondary" href="/index.html">Console</a>
+        </div>
+    </header>
+    <main class="ex-grid">
+        <section class="ex-card"><h2>Incidents</h2><dl id="exIncidents"></dl></section>
+        <section class="ex-card"><h2>Response</h2><dl id="exResponse"></dl></section>
+        <section class="ex-card"><h2>Cases</h2><dl id="exCases"></dl></section>
+        <section class="ex-card"><h2>Speed</h2><dl id="exSpeed"></dl></section>
+        <section class="ex-card ex-wide"><h2>What attackers tried (by tactic)</h2><dl id="exTactics"></dl></section>
+        <section class="ex-card ex-wide"><h2>How to read this</h2><ul id="exCaveats"></ul></section>
+    </main>
+    <script src="session.js"></script>
+    <script src="executive.js"></script>
+</body>
+</html>

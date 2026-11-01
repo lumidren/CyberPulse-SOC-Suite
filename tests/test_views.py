@@ -165,3 +165,14 @@ class TestStatusSummary(ViewsTestBase):
             self.assertIn('name="viewport"', fh.read())
         with open(os.path.join(ROOT, "web", "status.js"), encoding="utf-8") as fh:
             self.assertIsNone(re.search(r"innerHTML|outerHTML|insertAdjacentHTML|document\.write", fh.read()))
+
+
+class TestExecutiveSummary(ViewsTestBase):
+
+    def test_summary_is_consistent_and_honest(self):
+        s = views.executive_summary(self.orchestrator)
+        self.assertEqual(s["incidents"]["total"], s["incidents"]["real"] + s["incidents"]["simulated"])
+        self.assertEqual(s["incidents"]["real"], 0, "the chain is simulated")
+        self.assertIn("simulated", s["headline"])
+        self.assertIsNone(s["speed"]["mean_time_to_resolve_sec"], "nothing resolved: not measured, not zero")
+        self.assertTrue(s["caveats"])

@@ -264,3 +264,40 @@ def status_summary(orchestrator):
                     "severity": (i.get("rule") or {}).get("severity"), "at": i.get("created_at"),
                     "simulated": bool(i.get("simulated"))} for i in reversed(recent)],
     }
+
+
+# ----------------------------------------------------------------- F64 executive summary
+def executive_summary(orchestrator):
+    """Plain-language posture summary for non-specialists, computed only from recorded data."""
+    from collections import Counter
+    incidents = list(orchestrator.dfir_engine.incident_list)
+    real = [i for i in incidents if not i.get("simulated")]
+    severity = Counter((i.get("rule") or {}).get("severity") for i in incidents)
+    tactics = Counter((i.get("telemetry") or {}).get("tactic") or "Unknown" for i in incidents)
+    statuses = Counter((i.get("containment_action") or {}).get("status") for i in incidents)
+    cases = list(orchestrator.case_manager.cases.values())
+    trend = mttd_mttr_trend(orchestrator)["points"]
+    mttd = [p["mttd_sec"] for p in trend if p["mttd_sec"] is not None]
+    mttr = [p["mttr_sec"] for p in trend if p["mttr_sec"] is not None]
+    headline = (f"{len(incidents)} incidents ({len(real)} from real telemetry, {len(incidents) - len(real)} simulated), "
+                f"{sum(1 for c in cases if c['status'] not in ('Resolved', 'Closed'))} cases open.")
+    return {
+        "headline": headline,
+        "incidents": {"total": len(incidents), "real": len(real), "simulated": len(incidents) - len(real),
+                      "by_severity": {k: v for k, v in severity.items() if k}},
+        "response": {"contained": statuses.get("SUCCESS", 0), "awaiting_approval": statuses.get("PENDING_ANALYST_APPROVAL", 0),
+                     "rejected": statuses.get("REJECTED_BY_ANALYST", 0),
+                     "alert_only": sum(v for k, v in statuses.items() if k == "FLAGGED_FOR_MANUAL_REVIEW"),
+                     "halted_by_kill_switch": statuses.get("HALTED_BY_KILL_SWITCH", 0)},
+        "cases": {"total": len(cases), "open": sum(1 for c in cases if c["status"] in ("New", "Investigating")),
+                  "resolved": sum(1 for c in cases if c["status"] in ("Resolved", "Closed")),
+                  "unassigned": sum(1 for c in cases if not c["assignee"] and c["status"] != "Closed")},
+        "speed": {"mean_time_to_detect_sec": round(sum(mttd) / len(mttd), 3) if mttd else None,
+                  "mean_time_to_resolve_sec": round(sum(mttr) / len(mttr), 3) if mttr else None},
+        "top_tactics": [{"tactic": t, "count": c} for t, c in tactics.most_common(5)],
+        "caveats": [
+            "Simulated incidents come from the lab's attack simulator and say nothing about real threats.",
+            "Times are measured inside this lab; real detection time also includes log shipping and SIEM delay.",
+            "A value shown as 'not yet measured' has no recorded data behind it.",
+        ],
+    }

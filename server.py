@@ -682,6 +682,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif len(segments) == 4 and segments[0] == "api" and segments[1] == "incidents":
             self._handle_incident_subresource(segments[2], segments[3])
 
+        elif path == "/api/summary/executive":
+            self._send_json(200, views.executive_summary(orchestrator))
+
         elif path == "/api/status/summary":
             self._send_json(200, views.status_summary(orchestrator))
 
