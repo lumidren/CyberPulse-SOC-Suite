@@ -148,3 +148,20 @@ class TestShortcuts(unittest.TestCase):
             self.assertRegex(script, rf'\n    {key}: \["')
         with open(os.path.join(ROOT, "web", "triage.html"), encoding="utf-8") as fh:
             self.assertIn('id="shortcutHelp"', fh.read())
+
+
+class TestStatusSummary(ViewsTestBase):
+
+    def test_summary_counts(self):
+        s = views.status_summary(self.orchestrator)
+        self.assertFalse(s["kill_switch_engaged"])
+        self.assertEqual(s["open_cases"], len(self.case_ids))
+        self.assertEqual(sum(s["open_by_severity"].values()), s["open_cases"])
+        self.assertEqual(len(s["recent"]), 5)
+        self.assertGreaterEqual(s["pending_approvals"], 1)
+
+    def test_status_page_is_mobile_ready_and_text_only(self):
+        with open(os.path.join(ROOT, "web", "status.html"), encoding="utf-8") as fh:
+            self.assertIn('name="viewport"', fh.read())
+        with open(os.path.join(ROOT, "web", "status.js"), encoding="utf-8") as fh:
+            self.assertIsNone(re.search(r"innerHTML|outerHTML|insertAdjacentHTML|document\.write", fh.read()))

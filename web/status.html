@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0e17">
+    <title>Status | CyberPulse SOC Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="theme.js"></script>
+</head>
+<body class="st-body">
+    <header class="st-header">
+        <strong>CyberPulse status</strong>
+        <span id="stUpdated" class="tw-muted">loading...</span>
+    </header>
+    <main class="st-main">
+        <section id="stKill" class="st-card st-ok" role="status">Automation running</section>
+        <section class="st-grid">
+            <a class="st-card" href="/index.html"><span id="stApprovals" class="st-num">-</span><span>awaiting approval</span></a>
+            <a class="st-card" href="/triage.html"><span id="stOpen" class="st-num">-</span><span>open cases</span></a>
+            <a class="st-card" href="/triage.html"><span id="stUnassigned" class="st-num">-</span><span>unassigned</span></a>
+            <div class="st-card"><span id="stMode" class="st-num st-small">-</span><span>policy mode</span></div>
+        </section>
+        <section class="st-card">
+            <h2>Open cases by severity</h2>
+            <div id="stSeverity" class="st-sev"></div>
+        </section>
+        <section class="st-card">
+            <h2>Latest incidents</h2>
+            <ol id="stRecent" class="st-recent"></ol>
+        </section>
+        <p class="tw-muted st-foot">Read-only. Approvals and changes need the full console. Refreshes every 30 s.</p>
+    </main>
+    <script src="session.js"></script>
+    <script src="status.js"></script>
+</body>
+</html>

@@ -242,3 +242,25 @@ def search(orchestrator, query, limit=50):
             results.append({"type": "case", "id": case["case_id"], "case_id": case["case_id"], "title": case["title"],
                             "host": ", ".join(case["hosts"]), "matched": ["case"]})
     return {"query": query, "total": len(results), "results": results[:limit], "truncated": len(results) > limit}
+
+
+# ----------------------------------------------------------------- F63 mobile status
+def status_summary(orchestrator):
+    """The few numbers an on-call phone needs: is automation halted, what waits on me, what is open."""
+    safety = orchestrator.containment_engine.safety.status()
+    queue = triage_queue(orchestrator)
+    by_severity = {}
+    for case in queue:
+        by_severity[case["severity"]] = by_severity.get(case["severity"], 0) + 1
+    recent = list(orchestrator.dfir_engine.incident_list)[-5:]
+    return {
+        "kill_switch_engaged": bool(safety["kill_switch"].get("engaged")),
+        "pending_approvals": len(orchestrator.containment_engine.pending_approvals()),
+        "open_cases": len(queue),
+        "unassigned_cases": sum(1 for c in queue if not c["assignee"]),
+        "open_by_severity": by_severity,
+        "policy_mode": orchestrator.risk_engine.policy_mode,
+        "recent": [{"incident_id": i.get("incident_id"), "rule": (i.get("rule") or {}).get("rule_name"),
+                    "severity": (i.get("rule") or {}).get("severity"), "at": i.get("created_at"),
+                    "simulated": bool(i.get("simulated"))} for i in reversed(recent)],
+    }
