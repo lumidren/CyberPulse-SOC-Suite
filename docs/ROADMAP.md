@@ -205,7 +205,7 @@ internal identifiers never go to external APIs.
 - [x] **F38** Integrate the CIPHER project's feeds live. — **Stub (needs CIPHER's feed)**: `soar/threat_feeds.py` (JSON + STIX 2.1, local matching, ETag refresh), `GET /api/feeds`, `docs/THREAT_FEEDS.md`. CIPHER's real format not checked.
 - [x] **F39** Consume GUARDIAN anomaly alerts as an ingest source. — **Stub (needs GUARDIAN)**: `soar/guardian.py`, `POST /api/ingest/guardian` (HMAC), SOC-RULE-049 (alert-only), `docs/GUARDIAN.md`. GUARDIAN's real schema not checked.
 - [x] **F40** Shuffle or n8n integration as an alternative orchestrator. — **Done (needs your Shuffle/n8n)**: `soar/orchestrator_hook.py`, `docs/SHUFFLE_N8N.md`. Signed POST; full payload only to lab addresses; approvals via the normal API. Stubbed HTTP only.
-- [ ] **F41** Enrichment from OTX, URLhaus, Shodan, GreyNoise and Censys.
+- [x] **F41** Enrichment from OTX, URLhaus, Shodan, GreyNoise and Censys. — **Done (needs your keys)**: `soar/intel_providers.py` (OTX, URLhaus, GreyNoise score; Shodan, Censys context only), per-provider limits, `docs/THIRD_PARTY_APIS.md`. Never called with real keys.
 - [ ] **F42** Multi-source reputation scoring with weighted consensus.
 - [ ] **F43** Automatic user notification for suspicious logins.
 - [ ] **F44** MFA step-up or session revocation for Entra ID.

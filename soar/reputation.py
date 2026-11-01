@@ -50,6 +50,11 @@ def _signals(intel: Dict[str, Any]) -> List[Dict[str, Any]]:
                 signals.append({"source": "AbuseIPDB", "score": float(v["abuse_confidence"]),
                                 "flags": v["abuse_confidence"] >= ABUSE_FLAG_CONFIDENCE, "observed_at": v.get("fetched_at"),
                                 "cached": part.get("cached", False), "attribution": v.get("attribution")})
+            elif v.get("score") is not None and "flags" in v:
+                # OTX, URLhaus, GreyNoise (soar/intel_providers.py); context-only providers carry no score
+                signals.append({"source": v["source"], "score": float(v["score"]), "flags": bool(v["flags"]),
+                                "observed_at": v.get("fetched_at"), "cached": part.get("cached", False),
+                                "attribution": v.get("attribution")})
     return signals
 
 
