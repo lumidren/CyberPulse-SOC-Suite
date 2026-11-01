@@ -10,15 +10,47 @@ marked uncorroborated.
 Signals:
 * lab fixture (synthetic): its two simulated provider fields are treated as two
   separate simulated signals, mirroring how the fixture models two providers.
-* live VirusTotal / AbuseIPDB verdicts, when external enrichment is enabled.
+* live VirusTotal / AbuseIPDB / OTX / URLhaus / GreyNoise verdicts, when external
+  enrichment is enabled.
+
+Weighted consensus (roadmap F42): each source has a weight (how much its verdict is
+trusted; REPUTATION_WEIGHTS overrides the defaults, e.g. "AlienVault OTX=0.4"). The raw
+score is the weighted mean of the flagging sources. ``agreement`` is the share of the
+total weight of all reporting sources that flags the indicator, so one flag among several
+"clean" answers is diluted. A corroborated result scores raw x agreement; an
+uncorroborated one (fewer than two flagging sources) scores raw x UNCORROBORATED_WEIGHT.
+When every reporting source flags (as with the lab fixture), agreement is 1 and the score
+equals the unweighted result.
 """
 
+import os
 from typing import Any, Dict, List, Optional
 
 
 FIXTURE_TIMESTAMP = "static lab fixture (synthetic, no lookup time)"
 MIN_CORROBORATING_SOURCES = 2
 UNCORROBORATED_WEIGHT = 0.5
+
+DEFAULT_WEIGHTS = {
+    "VirusTotal": 1.0, "AbuseIPDB": 1.0, "URLhaus": 1.0,
+    "GreyNoise": 0.8,       # strong on scanners, silent on targeted infrastructure
+    "AlienVault OTX": 0.6,  # community pulses: broad, noisier
+}
+FIXTURE_WEIGHT = 1.0
+
+
+def weights() -> Dict[str, float]:
+    """Source weights, with REPUTATION_WEIGHTS="Name=0.5,Other=1" overriding the defaults."""
+    out = dict(DEFAULT_WEIGHTS)
+    for item in os.environ.get("REPUTATION_WEIGHTS", "").split(","):
+        name, sep, value = item.partition("=")
+        if sep:
+            try:
+                out[name.strip()] = max(0.0, float(value))
+            except ValueError:
+                continue
+    return out
+
 
 # A source "flags" an indicator at or above these levels
 VT_FLAG_ENGINES = 3
@@ -61,14 +93,20 @@ def _signals(intel: Dict[str, Any]) -> List[Dict[str, Any]]:
 def consensus(intel: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     """Return {'score', 'raw_score', 'sources', 'flagging_sources', 'corroborated'}."""
     signals = _signals(intel or {})
-    flagging = [s for s in signals if s["flags"]]
-    # Mean of the sources that flag the indicator (F42 extends this to weighted consensus)
-    raw = sum(s["score"] for s in flagging) / len(flagging) if flagging else 0.0
+    table = weights()
+    for s in signals:
+        s["weight"] = FIXTURE_WEIGHT if s["source"].startswith("lab-fixture") else table.get(s["source"], 1.0)
+    flagging = [s for s in signals if s["flags"] and s["weight"] > 0]
+    flag_weight = sum(s["weight"] for s in flagging)
+    total_weight = sum(s["weight"] for s in signals)
+    raw = sum(s["score"] * s["weight"] for s in flagging) / flag_weight if flag_weight else 0.0
+    agreement = flag_weight / total_weight if total_weight else 0.0
     corroborated = len(flagging) >= MIN_CORROBORATING_SOURCES
-    score = raw if corroborated else raw * UNCORROBORATED_WEIGHT
+    score = raw * agreement if corroborated else raw * UNCORROBORATED_WEIGHT
     return {
         "score": round(score, 1),
         "raw_score": round(raw, 1),
+        "agreement": round(agreement, 3),
         "sources": signals,
         "flagging_sources": [s["source"] for s in flagging],
         "corroborated": corroborated,
