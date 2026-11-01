@@ -192,3 +192,20 @@ def mttd_mttr_trend(orchestrator):
         "points": [{"day": d, "mttd_sec": _mean(detect.get(d, [])), "mttr_sec": _mean(resolve.get(d, [])),
                     "incidents": len(detect.get(d, [])), "resolved_cases": len(resolve.get(d, []))} for d in days],
     }
+
+
+# ----------------------------------------------------------------- F56 top talkers / top rules
+def top_stats(orchestrator, n=5):
+    """Most frequent source IPs, hosts, users and rules across all incidents."""
+    from collections import Counter
+    counters = {k: Counter() for k in ("source_ips", "hosts", "users", "rules")}
+    for inc in orchestrator.dfir_engine.incident_list:
+        telemetry = inc.get("telemetry") or {}
+        rule = inc.get("rule") or {}
+        for key, value in (("source_ips", telemetry.get("source_ip")), ("hosts", telemetry.get("computer_name")),
+                           ("users", telemetry.get("user")),
+                           ("rules", f"{rule.get('rule_id')} {rule.get('rule_name')}" if rule.get("rule_id") else None)):
+            if value:
+                counters[key][value] += 1
+    return {"incidents": len(orchestrator.dfir_engine.incident_list),
+            **{k: [{"value": v, "count": c} for v, c in counter.most_common(n)] for k, counter in counters.items()}}

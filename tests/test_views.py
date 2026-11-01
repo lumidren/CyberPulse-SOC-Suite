@@ -110,3 +110,15 @@ class TestTrend(ViewsTestBase):
         self.orchestrator.case_manager.update(self.case_ids[0], "alice", status="Resolved")
         trend = views.mttd_mttr_trend(self.orchestrator)
         self.assertEqual(sum(p["resolved_cases"] for p in trend["points"]), 1)
+
+
+class TestTopStats(ViewsTestBase):
+
+    def test_counts_match_incidents(self):
+        top = views.top_stats(self.orchestrator)
+        self.assertEqual(top["incidents"], len(self.orchestrator.dfir_engine.incident_list))
+        from collections import Counter
+        hosts = Counter(i["telemetry"]["computer_name"] for i in self.orchestrator.dfir_engine.incident_list)
+        self.assertEqual(top["hosts"][0]["count"], max(hosts.values()))
+        counts = [h["count"] for h in top["rules"]]
+        self.assertEqual(counts, sorted(counts, reverse=True))

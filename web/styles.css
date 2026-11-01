@@ -1019,3 +1019,9 @@ body {
 .tw-line-mttd { stroke: var(--color-blue); fill: var(--color-blue); }
 .tw-line-mttr { stroke: var(--color-green); fill: var(--color-green); }
 polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
+.tw-top { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.tw-top-widget h4 { margin-bottom: 6px; color: var(--text-secondary); }
+.tw-bar-row { display: grid; grid-template-columns: 1fr 90px 28px; gap: 6px; align-items: center; font-size: 0.8rem; margin: 3px 0; }
+.tw-bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; }
+.tw-bar { height: 8px; border-radius: 4px; background: var(--color-blue); justify-self: start; }
+.tw-bar-count { text-align: right; color: var(--text-secondary); }
