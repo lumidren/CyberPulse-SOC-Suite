@@ -200,7 +200,7 @@ internal identifiers never go to external APIs.
 - [x] **F33** Visual playbook editor in the UI. — **Done**: `web/playbooks.html`/`playbooks.js`, `GET /api/playbooks`, `POST /api/playbooks/validate` (no writes; changes via review). Checked in the browser against a local server.
 - [x] **F34** Playbook versioning and testing. — **Done**: fingerprints in `playbooks/meta/versions.yml`, `playbooks/CHANGELOG.md`, 8 behaviour cases in `playbooks/tests/cases.yml` (`python -m soar.playbooks --test`).
 - [x] **F35** Case management: auto-open tickets with full context. — **Done**: `soar/case_manager.py`, `GET/POST /api/cases`, `docs/CASE_MANAGEMENT.md`. In-memory like incidents.
-- [ ] **F36** Integrate TheHive and Cortex.
+- [x] **F36** Integrate TheHive and Cortex. — **Done (needs your TheHive/Cortex)**: `soar/thehive.py` (`THEHIVE_ENABLED`, lab URLs only, PAP:RED on internal observables), `docs/THEHIVE_CORTEX.md`. Fixed the misleading "TheHive case created" timeline entry. Tested with a stubbed HTTP layer only.
 - [ ] **F37** Integrate MISP for IoC sharing.
 - [ ] **F38** Integrate the CIPHER project's feeds live.
 - [ ] **F39** Consume GUARDIAN anomaly alerts as an ingest source.
