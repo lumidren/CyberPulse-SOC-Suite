@@ -42,6 +42,7 @@ class TestCaseManager(unittest.TestCase):
         self.assertEqual({"SOC-RULE-005", "SOC-RULE-001"}, set(case["rules"]))
         self.assertTrue(case["responses"] and case["tasks"])
         self.assertTrue(case["simulated"])
+        self.assertTrue(case["title"].endswith("WIN-WORKSTATION09"), "title keeps the host's real spelling")
 
     def test_other_host_or_later_activity_opens_a_new_case(self):
         a = self.orchestrator.process_event(simulate_t1003_lsass_dump())

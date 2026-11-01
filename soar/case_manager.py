@@ -70,7 +70,8 @@ class CaseManager:
             if case is None:
                 case_id = next_id("CASE")
                 case = {
-                    "case_id": case_id, "title": f"{rule.get('rule_name', 'Alert')} on {key[1]}",
+                    "case_id": case_id,
+                    "title": f"{rule.get('rule_name', 'Alert')} on {telemetry.get('computer_name') or telemetry.get('source_ip') or key[1]}",
                     "status": "New", "assignee": None, "severity": rule.get("severity", "MEDIUM"),
                     "grouping_key": list(key), "created_at": now.isoformat(), "updated_at": now.isoformat(),
                     "incidents": [], "rules": [], "techniques": [], "hosts": [], "source_ips": [],
