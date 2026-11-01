@@ -988,3 +988,17 @@ body {
 .tw-timeline li::before { content: ""; position: absolute; left: -21px; top: 10px; width: 10px; height: 10px; border-radius: 50%; background: var(--color-orange); }
 .tw-timeline time { color: var(--color-blue); font-size: 0.8rem; font-family: monospace; }
 .tw-badge { margin-left: 8px; font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: var(--color-purple); color: #fff; }
+.tw-field, .tw-check { display: flex; flex-direction: column; gap: 4px; color: var(--text-secondary); font-size: 0.8rem; margin: 6px 0; }
+.tw-check { flex-direction: row; align-items: center; gap: 6px; }
+.tw-field input, .tw-note input, .tw-controls select { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 8px; }
+.tw-case-top { display: flex; gap: 6px; align-items: center; }
+.tw-sev, .tw-status { font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: var(--bg-secondary); }
+.tw-sev-critical { background: var(--color-red); color: #fff; }
+.tw-sev-high { background: var(--color-orange); color: #fff; }
+.tw-sev-medium { background: var(--color-yellow); color: #111; }
+.tw-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 8px; color: var(--text-secondary); }
+.tw-controls label { display: flex; gap: 6px; align-items: center; }
+.tw-tasks { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
+.tw-task { display: flex; gap: 8px; align-items: center; color: var(--text-primary); font-size: 0.85rem; }
+.tw-note { display: flex; gap: 6px; margin-bottom: 10px; }
+.tw-note input { flex: 1; }

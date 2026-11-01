@@ -4,7 +4,14 @@
 // ==============================================================================
 
 const $ = (id) => document.getElementById(id);
-const state = { cases: [], selected: null };
+const state = { queue: [], selected: null, case: null };
+
+function analystName() {
+    try { return localStorage.getItem("cp.analyst") || ""; } catch (e) { return ""; }
+}
+function setAnalystName(v) {
+    try { localStorage.setItem("cp.analyst", v); } catch (e) { /* private mode: keep in memory only */ }
+}
 
 function fmtDelay(sec) {
     if (sec === null || sec === undefined) return "detection delay unknown";
@@ -13,27 +20,65 @@ function fmtDelay(sec) {
     return `detected after ${(sec / 60).toFixed(1)} min`;
 }
 
-async function loadCases() {
-    const data = await CP.api("/api/cases");
+// ------------------------------------------------------------------ F52 queue
+async function loadQueue() {
+    const mine = $("onlyMine").checked ? `?assignee=${encodeURIComponent(analystName())}` : "";
+    const data = await CP.api(`/api/triage/queue${mine}`);
     if (!data) return;
-    state.cases = data.cases || [];
+    state.queue = data.queue || [];
     const list = $("caseList");
     list.replaceChildren();
-    if (!state.cases.length) list.appendChild(CP.el("p", "No cases yet. Run a simulation from the console.", "section-desc"));
-    for (const c of state.cases) {
+    if (!state.queue.length) list.appendChild(CP.el("p", "Queue is empty.", "section-desc"));
+    state.queue.forEach((c, i) => {
         const b = CP.el("button", null, "tw-case" + (c.case_id === state.selected ? " active" : ""));
+        b.dataset.index = i;
+        const top = CP.el("div", null, "tw-case-top");
+        top.appendChild(CP.el("span", c.severity, `tw-sev tw-sev-${c.severity.toLowerCase()}`));
+        top.appendChild(CP.el("span", c.status, "tw-status"));
+        if (c.simulated) top.appendChild(CP.el("span", "SIMULATED", "tw-badge"));
+        b.appendChild(top);
         b.appendChild(CP.el("strong", c.title));
-        b.appendChild(CP.el("span", `${c.severity} · ${c.status} · ${c.incidents.length} incident(s)`));
+        b.appendChild(CP.el("span", `${c.assignee ? "assigned to " + c.assignee : "unassigned"} · ${c.incidents} incident(s)` +
+                                     ` · ${c.open_tasks} open task(s)` + (c.pending_responses ? ` · ${c.pending_responses} awaiting approval` : "")));
         b.addEventListener("click", () => selectCase(c.case_id));
         list.appendChild(b);
+    });
+    if ((!state.selected || !state.queue.some((c) => c.case_id === state.selected)) && state.queue.length) {
+        selectCase(state.queue[0].case_id);
     }
-    if (!state.selected && state.cases.length) selectCase(state.cases[0].case_id);
 }
 
 async function selectCase(caseId) {
     state.selected = caseId;
-    document.querySelectorAll(".tw-case").forEach((b, i) => b.classList.toggle("active", state.cases[i]?.case_id === caseId));
-    const data = await CP.api(`/api/cases/${encodeURIComponent(caseId)}/timeline`);
+    document.querySelectorAll(".tw-case").forEach((b) => b.classList.toggle("active", state.queue[b.dataset.index]?.case_id === caseId));
+    const [detail, timeline] = await Promise.all([
+        CP.api(`/api/cases/${encodeURIComponent(caseId)}`),
+        CP.api(`/api/cases/${encodeURIComponent(caseId)}/timeline`),
+    ]);
+    if (!detail || detail.error) return;
+    state.case = detail.case;
+    renderControls(detail.case);
+    renderTimeline(timeline);
+}
+
+function renderControls(c) {
+    $("caseStatus").value = c.status;
+    $("caseAssignee").textContent = c.assignee || "unassigned";
+    const tasks = $("caseTasks");
+    tasks.replaceChildren();
+    for (const t of c.tasks) {
+        const label = CP.el("label", null, "tw-task");
+        const box = document.createElement("input");
+        box.type = "checkbox";
+        box.checked = t.status === "Done";
+        box.addEventListener("change", () => update({ task: t.title, task_status: box.checked ? "Done" : "Open" }));
+        label.appendChild(box);
+        label.appendChild(CP.el("span", t.title));
+        tasks.appendChild(label);
+    }
+}
+
+function renderTimeline(data) {
     if (!data || data.error) return;
     $("caseTitle").textContent = `Attack timeline: ${data.title}`;
     const list = $("timeline");
@@ -51,4 +96,29 @@ async function selectCase(caseId) {
     }
 }
 
-loadCases();
+async function update(change) {
+    if (!state.selected) return;
+    const analyst = analystName();
+    if (!analyst) { $("caseMessage").textContent = "Enter your name first."; $("analystName").focus(); return; }
+    const res = await CP.api(`/api/cases/${encodeURIComponent(state.selected)}`, {
+        method: "POST", body: JSON.stringify(Object.assign({ analyst }, change)),
+    });
+    $("caseMessage").textContent = res && res.error ? res.error : "Saved.";
+    await loadQueue();
+    await selectCase(state.selected);
+}
+
+function init() {
+    $("analystName").value = analystName();
+    $("analystName").addEventListener("change", (e) => setAnalystName(e.target.value.trim()));
+    $("onlyMine").addEventListener("change", loadQueue);
+    $("caseStatus").addEventListener("change", (e) => update({ status: e.target.value }));
+    $("assignMe").addEventListener("click", () => update({ assignee: analystName() }));
+    $("addNote").addEventListener("click", () => {
+        const note = $("caseNote").value.trim();
+        if (note) { update({ note }); $("caseNote").value = ""; }
+    });
+    loadQueue();
+}
+
+init();

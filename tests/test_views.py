@@ -17,11 +17,11 @@ from soar.soar_engine import SOAROrchestrator  # noqa: E402
 
 class ViewsTestBase(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.orchestrator = SOAROrchestrator(policy_mode="APPROVAL_REQUIRED")
-        run_chain(cls.orchestrator, start=datetime(2026, 11, 1, 9, 0, tzinfo=timezone.utc))
-        cls.case_ids = list(cls.orchestrator.case_manager.cases)
+    def setUp(self):
+        # Fresh per test: some tests change case status or assignees
+        self.orchestrator = SOAROrchestrator(policy_mode="APPROVAL_REQUIRED")
+        run_chain(self.orchestrator, start=datetime(2026, 11, 1, 9, 0, tzinfo=timezone.utc))
+        self.case_ids = list(self.orchestrator.case_manager.cases)
 
 
 class TestTimeline(ViewsTestBase):
@@ -46,3 +46,21 @@ class TestConsolePages(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestQueue(ViewsTestBase):
+
+    def test_queue_orders_open_work_by_severity(self):
+        queue = views.triage_queue(self.orchestrator)
+        self.assertEqual(len(queue), len(self.case_ids))
+        ranks = [(views.STATUS_ORDER[c["status"]], views.SEVERITY_ORDER[c["severity"]]) for c in queue]
+        self.assertEqual(ranks, sorted(ranks))
+
+    def test_closed_cases_and_assignee_filter(self):
+        cases = self.orchestrator.case_manager
+        first, second = self.case_ids[0], self.case_ids[-1]
+        cases.update(first, "alice", assignee="alice")
+        cases.update(second, "bob", status="Closed")
+        self.assertEqual([c["case_id"] for c in views.triage_queue(self.orchestrator, assignee="alice")], [first])
+        self.assertNotIn(second, [c["case_id"] for c in views.triage_queue(self.orchestrator)])
+        self.assertIn(second, [c["case_id"] for c in views.triage_queue(self.orchestrator, include_closed=True)])
