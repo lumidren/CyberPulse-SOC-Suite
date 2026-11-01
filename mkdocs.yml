@@ -75,4 +75,11 @@ nav:
       - Recording a demo: DEMO_RECORDING.md
       - Service account: SERVICE_ACCOUNT.md
       - Secret scanning: SECRET_SCAN.md
+  - Blog:
+      - Series index: blog/README.md
+      - 1. Sigma engine: blog/01-sigma-engine.md
+      - 2. Correlations: blog/02-correlations.md
+      - 3. Evasion: blog/03-evasion.md
+      - 4. Deception: blog/04-deception.md
+      - 5. Network: blog/05-network.md
   - Roadmap: ROADMAP.md
