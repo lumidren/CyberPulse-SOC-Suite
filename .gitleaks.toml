@@ -9,4 +9,5 @@ regexes = [
   '''cyberpulse-dev-secret-key-2026''',
   '''SecretPassword123!''',
   '''SecretWinRMPassword!''',
+  '''aB3dE5gH7jK9mN1p''',  # invented non-placeholder value in tests/test_secret_hygiene.py
 ]

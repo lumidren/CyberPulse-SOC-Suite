@@ -53,7 +53,7 @@ only listed in `also_matched`.
 
 - Container images: `compose.yaml` and `deploy/docker-compose.yml` pass `docker compose config`, but no image has been built or run here (Docker daemon unavailable).
 - Vagrant and Ansible lab provisioning (`deploy/vagrant`, `deploy/ansible`): neither tool was installed.
-- `sigma check` (sigma-cli) on the rules, including the correlation files: runs in CI only; the local install failed.
+- `sigma check` passes with 0 rule and 0 condition errors under sigma-cli 1.x / pySigma 0.11 (CI, and locally on 2026-11-01), but reports 55 advisory issues, 52 of them ATT&CK tactic tags in the old underscore form. Not checked with sigma-cli 2 or later.
 - GitHub Actions: workflows are written and linted locally; whether CI is green on GitHub is unknown here.
 - Live VirusTotal / AbuseIPDB enrichment: implemented and opt-in, never called with a real key.
 - OTX, URLhaus, GreyNoise, Shodan and Censys lookups: built to each API's documentation, tested with stubs, never called with a real key.
