@@ -57,6 +57,7 @@ def render_false_positives():
         "",
         "Scenarios are what the rule author expects in real environments; none has been observed on real",
         "traffic here. *Baseline matches* are real counts on the synthetic benign traffic, before exceptions.",
+        "How to tune each one: [TUNING.md](TUNING.md).",
         "",
     ]
     for rule in all_rules():

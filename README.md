@@ -262,6 +262,8 @@ Related generated reports: [gap report](docs/coverage/GAPS.md), [data-source dep
 mis-ranked alert and unverified component in one generated page; [`docs/EVASION.md`](docs/EVASION.md) and
 [`docs/PURPLE_TEAM_REPORT.md`](docs/PURPLE_TEAM_REPORT.md) have the detail.
 
+**Tuning.** [`docs/TUNING.md`](docs/TUNING.md) explains when to use an exception, a rule change or threshold tuning; [`docs/FALSE_POSITIVES.md`](docs/FALSE_POSITIVES.md) lists known false positives per rule.
+
 **Tuning exceptions.** Known-benign matches are allowlisted per rule in [`rules/exceptions.yml`](rules/exceptions.yml):
 every entry has an owner, a reason and an expiry (at most 180 days), cannot match a rule's own attack samples,
 and is counted when it suppresses an alert (`GET /api/exceptions`).
