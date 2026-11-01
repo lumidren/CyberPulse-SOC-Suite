@@ -53,6 +53,8 @@ from soar.auth import SessionStore
 from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar.chatops import ChatOpsApprovals
+from soar.misp import MispClient, SharingDisabled
+from soar.misp import build_event as build_misp_event
 from soar.playbooks import ALLOWED_ACTIONS, validate_draft
 from soar.ingest_auth import SIGNATURE_HEADER, TIMESTAMP_HEADER, IngestVerifier
 from scripts.validate_detections import run_scripted, scripted_status
@@ -638,6 +640,16 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             else:
                 self._send_json(404, {"error": "Case not found"})
 
+        elif len(segments) == 4 and segments[:2] == ["api", "cases"] and segments[3] == "misp":
+            # Preview of what would be shared: public IPs and hashes only, never pushed from here
+            case = orchestrator.case_manager.cases.get(segments[2])
+            if not case:
+                self._send_json(404, {"error": "Case not found"})
+                return
+            incidents = [orchestrator.dfir_engine.incidents[i] for i in case["incidents"] if i in orchestrator.dfir_engine.incidents]
+            event, skipped = build_misp_event(incidents, f"CyberPulse {case['case_id']}: {case['title']}")
+            self._send_json(200, {"event": event, "skipped_simulated_incidents": skipped})
+
         elif path == "/api/approvals":
             pending = orchestrator.containment_engine.pending_approvals()
             items = []
@@ -839,6 +851,26 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         case_segments = [s for s in path.split("/") if s]
+        if case_segments[:2] == ["api", "cases"] and case_segments[3:] == ["misp", "push"]:
+            # Sharing is outward-facing: only on an explicit analyst request, never automatically
+            case = orchestrator.case_manager.cases.get(case_segments[2])
+            if not case:
+                self._send_json(404, {"error": "Case not found"})
+                return
+            incidents = [orchestrator.dfir_engine.incidents[i] for i in case["incidents"] if i in orchestrator.dfir_engine.incidents]
+            event, skipped = build_misp_event(incidents, f"CyberPulse {case['case_id']}: {case['title']}")
+            try:
+                result = MispClient().push_event(event)
+            except SharingDisabled as exc:
+                self._send_json(503, {"error": str(exc)})
+                return
+            except Exception as exc:
+                self._send_json(502, {"error": f"MISP push failed: {type(exc).__name__}"})
+                return
+            audit_logger.info("MISP_PUSH client=%s principal=%s case=%s attributes=%d result=%s", self._client_ip(),
+                              self._principal(), case["case_id"], len(event["Event"]["Attribute"]), result["status"])
+            self._send_json(200, dict(result, skipped_simulated_incidents=skipped))
+            return
         if len(case_segments) == 3 and case_segments[:2] == ["api", "cases"]:
             analyst = str(data.get("analyst", "")).strip()[:64]
             actor = f"{analyst} ({self._principal()})" if analyst else self._principal()
