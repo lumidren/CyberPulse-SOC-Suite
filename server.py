@@ -790,6 +790,12 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/feeds":
             self._send_json(200, {"configured": orchestrator.feed_client.configured, "status": orchestrator.feeds.status})
 
+        elif path == "/api/audit/actions":
+            ledger = orchestrator.containment_engine.ledger
+            limit = min(int(parse_qs(parsed.query).get("limit", ["200"])[0] or 200), 1000)
+            self._send_json(200, {"verification": ledger.verify(), "total": len(ledger.entries),
+                                  "entries": ledger.entries[-limit:]})
+
         elif path == "/api/exceptions":
             self._send_json(200, orchestrator.exceptions.status())
 

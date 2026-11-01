@@ -126,7 +126,12 @@ def render():
               "- Command validation fails (malformed host, user or path): nothing is built or sent; flagged for manual review.",
               "- Too many actions: the hourly budget stages the rest for approval; mass isolation trips the circuit breaker,",
               "  which engages the kill switch and pages a human.",
-              "- Kill switch engaged: every new action and every approval is refused until a lead releases it.", ""]
+              "- Kill switch engaged: every new action and every approval is refused until a lead releases it.", "",
+              "## Audit trail", "",
+              "Every containment decision (staged, executed, approved, rejected, rolled back, extended, expired) and every",
+              "kill-switch change is appended to a hash-chained ledger with who, what, why and when (`soar/action_ledger.py`,",
+              "`GET /api/audit/actions`, optional `ACTION_LEDGER_FILE`). Editing, deleting or reordering an entry breaks the",
+              "chain; verify a file with `python -m soar.action_ledger --verify FILE`.", ""]
     return "\n".join(lines)
 
 

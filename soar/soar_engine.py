@@ -349,6 +349,7 @@ class SOAROrchestrator:
                 "task_name": event.get("details", {}).get("TaskName"),
                 "task_xml": event.get("details", {}).get("TaskContent"),
                 "message_id": event.get("details", {}).get("NetworkMessageId"),
+                "reason": f"{matched_rule.get('rule_id')}: {policy_decision.get('rationale', '')}",
             },
         )
 

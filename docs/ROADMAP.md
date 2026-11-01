@@ -139,7 +139,7 @@ internal identifiers never go to external APIs.
 - [x] **E94** Known false-positive scenarios per rule. — **Done**: `scripts/rule_docs.py` → `docs/FALSE_POSITIVES.md` (all 50 rules and correlations), test-enforced.
 - [x] **E95** Rule exclusions and tuning guidance. — **Done**: `docs/TUNING.md`, linked from README and `FALSE_POSITIVES.md`.
 - [x] **E96** Rules of Engagement doc for the lab. — **Done**: `docs/RULES_OF_ENGAGEMENT.md` (fill-in template matching the code's allowlists), linked from README.
-- [ ] **E97** Log every automated action (who/what/why/when) in tamper-evident form.
+- [x] **E97** Log every automated action (who/what/why/when) in tamper-evident form. — **Done**: `soar/action_ledger.py` (hash-chained who/what/why/when), hooked into every containment entry point and the kill switch, `GET /api/audit/actions`, `--verify` CLI. Tamper-evident, not tamper-proof (documented).
 - [ ] **E98** Appeals/review flow: analysts mark containment wrong, the rule gets tuned.
 - [ ] **E99** Ethics and risk register (outage, wrongful lockout, missed detections).
 - [ ] **E100** Changelog records every change in automation behavior.
