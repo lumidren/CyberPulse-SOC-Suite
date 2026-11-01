@@ -250,7 +250,7 @@ internal identifiers never go to external APIs.
 ## Phase 10b — Reporting & documentation (F76–F85)
 
 - [x] **F76** ⭐ Auto-generate NIST 800-61 incident reports from case data. — **Done earlier** (eb1755d): `soar/report_generator.py` builds NIST SP 800-61 HTML/JSON reports from case data.
-- [ ] **F77** Post-incident review templates.
+- [x] **F77** Post-incident review templates. — **Done**: `docs/templates/POST_INCIDENT_REVIEW.md`, `soar/post_incident.py`, `GET /api/cases/<id>/review` (Markdown), triage button.
 - [ ] **F78** Runbooks for each detection.
 - [ ] **F79** ⭐ Short demo video or GIF at the top of the README.
 - [ ] **F80** Architecture diagram in the README that renders properly.
