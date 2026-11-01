@@ -1,0 +1,28 @@
+title: DNS Query with an Unusually Long Label (possible tunnelling)
+id: a762a31a-d1ab-4385-85e3-4e22ba8c72f2
+status: experimental
+description: A DNS name containing a label of 40 or more characters made only of letters, digits and hyphens, or
+    a TXT lookup of a name with a 30+ character label. Encoded data in DNS names looks like this; ordinary host
+    names rarely do.
+references:
+- https://attack.mitre.org/techniques/T1071/004/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.command_and_control
+- attack.t1071.004
+logsource:
+    product: zeek
+    service: dns
+detection:
+    selection_long:
+        query|re: '(^|\.)[A-Za-z0-9-]{40,}\.'
+    selection_txt:
+        qtype_name: TXT
+        query|re: '(^|\.)[A-Za-z0-9-]{30,}\.'
+    condition: 1 of selection_*
+falsepositives:
+- DKIM and domain-verification TXT records with long tokens
+- Some CDNs and anti-virus cloud lookups encode hashes in names
+level: medium

@@ -35,8 +35,9 @@ without a new entry here.
 - **Action ledger**: every containment decision and kill-switch change is recorded in a
   hash-chained ledger.
 - **Network detections** (SOC-RULE-051 Suricata severity-1 alerts, SOC-RULE-052 executables over HTTP from script clients or raw IPs) raise alert-only incidents from signed Zeek/Suricata batches.
+- **DNS tunnelling detections** (SOC-RULE-053 many unique subdomains per source and domain, SOC-RULE-054 very long DNS labels) raise alert-only incidents; beaconing is a hunting analytic, never an alert.
 
-Automation fingerprint: `f87517ccf5c6e668`
+Automation fingerprint: `cb2072ff117846d6`
 
 ## [2.5.0] - 2026-10-31
 

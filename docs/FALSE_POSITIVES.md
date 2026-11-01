@@ -377,3 +377,18 @@ How to tune each one: [TUNING.md](TUNING.md).
 - Software updaters that download installers over HTTP from IP-addressed mirrors
 - Admin scripts pulling tools from an internal web server by IP
 - Baseline matches before exceptions: **0**
+
+## SOC-RULE-053: Many Unique Subdomains of One Domain from One Host (DNS tunnelling)
+
+`rules/sigma/correlations/net_dns_tunnel_unique_subdomains.yml` (correlation, level high)
+
+- CDNs and anti-virus or telemetry services that use per-request subdomains
+- DNS-based service discovery in some enterprise software
+
+## SOC-RULE-054: DNS Query with an Unusually Long Label (possible tunnelling)
+
+`rules/sigma/net_zeek_dns_long_label.yml` (rule, level medium)
+
+- DKIM and domain-verification TXT records with long tokens
+- Some CDNs and anti-virus cloud lookups encode hashes in names
+- Baseline matches before exceptions: **0**

@@ -181,6 +181,26 @@
   ],
   "top": "SOC-RULE-051"
  },
+ "net_zeek_dns_long_label.yml::negative::Long but normal multi-label name": {
+  "all": [],
+  "top": null
+ },
+ "net_zeek_dns_long_label.yml::negative::Normal host name": {
+  "all": [],
+  "top": null
+ },
+ "net_zeek_dns_long_label.yml::positive::Base32 chunk in a label": {
+  "all": [
+   "SOC-RULE-054"
+  ],
+  "top": "SOC-RULE-054"
+ },
+ "net_zeek_dns_long_label.yml::positive::TXT lookup with an encoded label": {
+  "all": [
+   "SOC-RULE-054"
+  ],
+  "top": "SOC-RULE-054"
+ },
  "net_zeek_http_executable_from_script_client.yml::negative::Browser fetches exe from a named host": {
   "all": [],
   "top": null

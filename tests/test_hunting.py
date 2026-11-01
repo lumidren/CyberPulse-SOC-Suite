@@ -84,6 +84,24 @@ class TestTemplates(HuntBase):
         self.assertTrue(validate({"name": "x", "attack": ["X1"], "steps": [{"type": "delete"}]}))
 
 
+class TestBeaconing(unittest.TestCase):
+
+    def conn(self, t, dst="203.0.113.80", src="10.0.2.15"):
+        return {"event_source": "zeek:conn", "source_ip": src,
+                "timestamp": datetime.fromtimestamp(1793500000 + t, timezone.utc).isoformat(),
+                "details": {"id.resp_h": dst, "id.resp_p": 443}}
+
+    def test_regular_series_flagged_irregular_not(self):
+        from soar.beaconing import find_beacons
+        regular = [self.conn(60 * i + (i % 3)) for i in range(12)]
+        irregular = [self.conn(t, dst="198.51.100.9") for t in (0, 5, 90, 91, 400, 1200, 1210, 3000, 3500, 7000)]
+        few = [self.conn(60 * i, dst="192.0.2.1") for i in range(4)]
+        found = find_beacons(regular + irregular + few)
+        self.assertEqual([b["destination"] for b in found], ["203.0.113.80"])
+        self.assertAlmostEqual(found[0]["mean_interval_sec"], 60, delta=1)
+        self.assertEqual(find_beacons(regular, allow_destinations=("203.0.113.80",)), [])
+
+
 class TestHuntPages(unittest.TestCase):
 
     def test_hunt_page_text_only(self):

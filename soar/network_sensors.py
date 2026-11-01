@@ -46,6 +46,9 @@ def zeek_to_event(log, record):
     if not isinstance(record, dict) or not record.get("id.orig_h"):
         raise SensorFormatError("Zeek record needs id.orig_h (JSON log output)")
     details = {k: record[k] for k in ZEEK_FIELDS[log] if k in record}
+    if log == "dns" and record.get("query"):
+        # Parent domain (last two labels) so many unique subdomains of one domain can be counted
+        details["query_parent"] = ".".join(str(record["query"]).rstrip(".").split(".")[-2:])
     details["id.resp_h"] = record.get("id.resp_h")
     details["uid"] = record.get("uid")
     return {

@@ -88,6 +88,21 @@
     <group>cyberpulse,sigma_generated,</group>
 </rule>
 
+<!-- SOC-RULE-054: DNS Query with an Unusually Long Label (possible tunnelling) (generated from rules/sigma/net_zeek_dns_long_label.yml; review before use) -->
+<rule id="110540" level="8">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.query" type="pcre2">(?i)(?:(^|\.)[A-Za-z0-9-]{40,}\.)</field>
+    <description>SOC-RULE-054: DNS Query with an Unusually Long Label (possible tunnelling)</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+<rule id="110541" level="8">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.qtype_name" type="pcre2">(?i)(?:^TXT$)</field>
+    <field name="win.eventdata.query" type="pcre2">(?i)(?:(^|\.)[A-Za-z0-9-]{30,}\.)</field>
+    <description>SOC-RULE-054: DNS Query with an Unusually Long Label (possible tunnelling)</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+
 <!-- SOC-RULE-052: Executable Downloaded over HTTP by a Script Client or to a Raw IP (generated from rules/sigma/net_zeek_http_executable_from_script_client.yml; review before use) -->
 <rule id="110520" level="12">
     <if_group>windows</if_group>

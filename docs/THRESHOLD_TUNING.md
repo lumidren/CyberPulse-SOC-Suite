@@ -43,6 +43,27 @@ Parameter `selection.FailedAttemptsCount|gte` (gte), current **10**, suggested *
 | 100 | 0 |
 | 200 | 0 |
 
+## SOC-RULE-053: Many Unique Subdomains of One Domain from One Host (DNS tunnelling)
+
+Parameter `correlation value_count (300s window)` (gte), current **50**, suggested **none (no usable signal in this data)**.
+
+| Threshold | Benign firings |
+| ---: | ---: |
+| 1 | 0 |
+| 2 | 0 |
+| 3 | 0 |
+| 5 | 0 |
+| 10 | 0 |
+| 15 | 0 |
+| 20 | 0 |
+| 25 | 0 |
+| 30 | 0 |
+| 50 (current) | 0 |
+| 100 | 0 |
+| 200 | 0 |
+
+No benign event reaches this rule at any candidate threshold, so this data cannot tune it.
+
 ## SOC-RULE-043: Brute Force From One Source Against One Account (raw 4625 correlation)
 
 Parameter `correlation event_count (300s window)` (gte), current **10**, suggested **none (no usable signal in this data)**.

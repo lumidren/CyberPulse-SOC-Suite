@@ -11,6 +11,7 @@ those techniques lose all coverage.
 | Sysmon Event 1 (process creation) / Security 4688 with command line | 23 | 27 | T1003.002, T1003.003, T1021.002, T1021.006, T1047, T1059.001, T1059.005, T1059.007, T1087.002, T1140, T1197, T1204.002, T1218.005, T1218.010, T1218.011, T1219, T1482, T1489, T1490, T1547.001, T1560.001, T1562.001, T1562.004, T1567.002, T1569.002 |
 | Windows Security log (Advanced Audit Policy) | 13 | 15 | T1003.006, T1005, T1053.005, T1070.001, T1078.002, T1083, T1098, T1110, T1110.001, T1110.003, T1136.001, T1550.002, T1558.001, T1558.003, T1558.004 |
 | AWS CloudTrail (management events) | 3 | 4 | T1078.004, T1548, T1552.001, T1562.008 |
+| Zeek dns.log (network sensor) | 2 | 1 | T1071.004 |
 | Sysmon Event 11 (file create) | 2 | 1 | T1486 |
 | Entra ID audit logs | 1 | 1 | T1528 |
 | Entra ID sign-in logs | 1 | 1 | - |
@@ -24,4 +25,4 @@ those techniques lose all coverage.
 | Sysmon Event 13 (registry value set) | 1 | 1 | T1548.002 |
 | Sysmon Events 19-21 (WMI activity) | 1 | 1 | T1546.003 |
 
-**56 techniques** across **52 rules** and **15 data sources**.
+**57 techniques** across **54 rules** and **16 data sources**.

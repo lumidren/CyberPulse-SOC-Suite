@@ -56,6 +56,12 @@
             <p id="stackSummary" class="tw-muted"></p>
             <div class="table-responsive"><table class="data-table"><thead><tr><th>Value</th><th>Count</th><th>Share</th><th>Long tail</th><th>Alerted</th></tr></thead><tbody id="stackRows"></tbody></table></div>
         </section>
+        <section class="card tw-wide">
+            <div class="card-header"><h3><i class="fa-solid fa-satellite"></i> Beaconing (Zeek conn)</h3></div>
+            <p class="section-desc">Host-to-destination pairs with near-constant connection intervals. Leads, not alerts.</p>
+            <button class="btn-secondary" id="findBeacons" type="button">Find beacons</button>
+            <div class="table-responsive"><table class="data-table"><thead><tr><th>Source</th><th>Destination</th><th>Port</th><th>Connections</th><th>Mean gap</th><th>Jitter (CV)</th></tr></thead><tbody id="beaconRows"></tbody></table></div>
+        </section>
     </main>
     <script src="session.js"></script>
     <script src="hunt.js"></script>

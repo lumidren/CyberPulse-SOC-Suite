@@ -37,8 +37,7 @@ targets:
   T1087.002: {name: "Account Discovery: Domain Account", tactic: discovery, why: "Early AD reconnaissance"}
   T1018: {name: "Remote System Discovery", tactic: discovery, why: "Host enumeration before lateral movement",
           blocker: "High benign volume from admin tooling; not yet tuned"}
-  T1071.004: {name: "Application Layer Protocol: DNS", tactic: command-and-control, why: "DNS tunnelling and beaconing (F73)",
-              blocker: "Needs DNS query logs; no resolver logging in the lab"}
+  T1071.004: {name: "Application Layer Protocol: DNS", tactic: command-and-control, why: "DNS tunnelling and beaconing (F73)"}
   T1105: {name: "Ingress Tool Transfer", tactic: command-and-control, why: "Tool download via LOLBins"}
   T1048: {name: "Exfiltration Over Alternative Protocol", tactic: exfiltration, why: "DNS/ICMP exfiltration",
           blocker: "Zeek ingest exists (F72); volume-based exfiltration needs per-host byte baselines not built yet"}

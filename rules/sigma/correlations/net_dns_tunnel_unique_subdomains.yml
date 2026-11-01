@@ -1,0 +1,54 @@
+title: DNS Query to Any Domain (base rule)
+name: dns_query_any
+id: 4c1f2b7e-0d6a-4e58-9a0f-6b2c8d1e7a45
+status: experimental
+description: Every Zeek DNS query with a parent domain. Not an alert on its own; feeds the tunnelling correlation.
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-11-01
+tags:
+    - attack.command_and_control
+    - attack.t1071.004
+logsource:
+    product: zeek
+    service: dns
+detection:
+    selection:
+        query_parent|exists: true
+    filter_reverse:
+        query_parent|endswith:
+            - 'in-addr.arpa'
+            - 'ip6.arpa'
+    condition: selection and not filter_reverse
+level: informational
+---
+title: Many Unique Subdomains of One Domain from One Host (DNS tunnelling)
+id: 7e2d9c41-5b8a-4f3e-a1c6-2f4b9e8d0c13
+status: experimental
+description: >-
+    One source asks for 50 or more different subdomains of the same parent domain within
+    five minutes, the shape of data being encoded into DNS names (iodine, dnscat2, DNS C2).
+    Content-delivery and telemetry domains can do the same; allowlist them with an exception.
+references:
+    - https://attack.mitre.org/techniques/T1071/004/
+    - https://attack.mitre.org/techniques/T1048/
+author: lumidren (CyberPulse SOC Suite)
+date: 2026-11-01
+tags:
+    - attack.command_and_control
+    - attack.exfiltration
+    - attack.t1071.004
+correlation:
+    type: value_count
+    rules:
+        - dns_query_any
+    group-by:
+        - IpAddress
+        - query_parent
+    timespan: 5m
+    condition:
+        gte: 50
+        field: query
+falsepositives:
+    - CDNs and anti-virus or telemetry services that use per-request subdomains
+    - DNS-based service discovery in some enterprise software
+level: high

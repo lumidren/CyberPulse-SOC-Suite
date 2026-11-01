@@ -1,0 +1,2 @@
+// SOC-RULE-054: DNS Query with an Unusually Long Label (possible tunnelling) (generated from rules/sigma/net_zeek_dns_long_label.yml; review before use)
+((winlog.event_data.query:/(^|\.)[A-Za-z0-9-]{40,}\./)) OR ((winlog.event_data.qtype_name:TXT AND winlog.event_data.query:/(^|\.)[A-Za-z0-9-]{30,}\./))

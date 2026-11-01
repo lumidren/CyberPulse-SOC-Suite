@@ -224,3 +224,11 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-052: Executable Downloaded over HTTP by a Script Client or to a Raw IP (`net_zeek_http_executable_from_script_client.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-054: DNS Query with an Unusually Long Label (possible tunnelling) (`net_zeek_dns_long_label.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-053: Many Unique Subdomains of One Domain from One Host (DNS tunnelling) (`correlations/net_dns_tunnel_unique_subdomains.yml`)
+
+* **1.0.0** (2026-11-01): Initial correlation rule.
