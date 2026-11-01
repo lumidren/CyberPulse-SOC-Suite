@@ -224,6 +224,7 @@
                 </div>
                 <div id="incidentActionsBar" class="incident-actions" style="display:flex; gap:8px;">
                     <button class="btn-primary" id="exportReportBtn" onclick="exportNistReport()"><i class="fa-solid fa-file-invoice"></i> Export NIST Report (HTML)</button>
+                    <button class="btn-secondary" id="exportPdfBtn" onclick="exportPdfReport()"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                     <button class="btn-primary" id="approveBtn" data-requires="lead" style="display:none;" onclick="decideActiveIncident('approve')"><i class="fa-solid fa-check"></i> Approve Containment</button>
                     <button class="btn-secondary" id="rejectBtn" data-requires="lead" style="display:none;" onclick="decideActiveIncident('reject')"><i class="fa-solid fa-xmark"></i> Reject</button>
                     <button class="btn-danger" id="rollbackBtn" data-requires="write" onclick="rollbackActiveIncident()"><i class="fa-solid fa-rotate-left"></i> Rollback Containment</button>

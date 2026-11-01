@@ -397,6 +397,15 @@ function exportNistReport() {
     window.open(`/api/incidents/${incId}/report`, "_blank");
 }
 
+function exportPdfReport() {
+    const incId = document.getElementById("incidentSelect")?.value || activeIncidentId;
+    if (!incId) {
+        alert("Please select an incident first.");
+        return;
+    }
+    window.open(`/api/incidents/${encodeURIComponent(incId)}/report.pdf`, "_blank");
+}
+
 // Rollback Active Incident Containment
 async function rollbackActiveIncident() {
     if (!activeIncidentId) return;

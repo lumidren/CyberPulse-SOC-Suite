@@ -232,7 +232,7 @@ internal identifiers never go to external APIs.
 - [x] **F62** Keyboard shortcuts for triage. — **Done**: shortcuts j/k / a i r n ? in `web/triage.js` with a help panel; disabled in text fields.
 - [x] **F63** Mobile-friendly status view. — **Done**: `web/status.html` + `status.js`, `GET /api/status/summary`; checked at 375 px.
 - [x] **F64** Executive summary view. — **Done**: `views.executive_summary`, `GET /api/summary/executive`, printable `web/executive.html`.
-- [ ] **F65** PDF export for incident reports.
+- [x] **F65** PDF export for incident reports. — **Done**: `soar/pdf_report.py` (no dependency), `GET /api/incidents/<id>/report.pdf`, console PDF button. Structure tested; parsed by pypdf.
 
 ## Phase 10 — Threat hunting (F66–F75)
 
