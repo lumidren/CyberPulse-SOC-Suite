@@ -8,6 +8,7 @@
     <!-- Leaflet CSS for Dark Threat Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="styles.css">
+    <script src="theme.js"></script>
 </head>
 <body>
     <!-- Test-mode banner: always visible; text reflects whether the simulator is enabled -->
@@ -52,6 +53,7 @@
                     <option value="AUTOMATIC">🔴 AUTOMATIC (opt-in)</option>
                 </select>
             </div>
+            <button class="btn-secondary theme-toggle" id="themeToggle" type="button">Light mode</button>
             <button class="btn-secondary" onclick="logout()" title="End this dashboard session"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
             <button id="killSwitchBtn" class="btn-danger" onclick="toggleKillSwitch()" title="Halt all containment immediately">
                 <i class="fa-solid fa-power-off"></i> <span id="killSwitchLabel">KILL SWITCH</span>

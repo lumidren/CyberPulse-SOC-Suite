@@ -324,7 +324,7 @@ SYNTHETIC_DIRECTORY_NOTE = ("SYNTHETIC lab directory (soar/identity_graph.py): i
 # Endpoints whose responses contain telemetry; every read is audit-logged (E55)
 TELEMETRY_VIEW_PREFIXES = ("/api/incidents", "/api/alerts", "/api/approvals", "/api/syslog")
 # Static files reachable without a session (everything else in web/ needs login)
-PUBLIC_STATIC_PATHS = {"/login.html", "/login.js", "/styles.css", "/favicon.ico"}
+PUBLIC_STATIC_PATHS = {"/login.html", "/login.js", "/styles.css", "/theme.js", "/favicon.ico"}
 
 # Machine webhook receiver (/api/ingest) authenticates with an HMAC signature
 ingest_verifier = IngestVerifier(os.environ.get("INGEST_HMAC_SECRET", ""))
