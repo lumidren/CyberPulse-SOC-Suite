@@ -67,7 +67,12 @@ you need full names for a real investigation. Take screenshots with masking on.
 
 ## What leaves the machine
 
-* Notification webhooks (Discord/Slack), only if you configure a URL; SSRF-guarded.
+* Notification webhooks (Discord/Slack/custom), only if you configure a URL; SSRF-guarded.
+  Messages carry the incident id, rule, severity, technique, a host **pseudonym**
+  (`host-1a2b3c4d`, keyed HMAC; set `CYBERPULSE_PSEUDONYM_KEY` for stable labels across
+  restarts), a public or documentation source IP (internal IPs are withheld) and the
+  response status. No hostnames, usernames, internal IPs or execution logs; circuit-breaker
+  pages give the host count, not the host list.
 * External threat-intel enrichment and the related health-check probes are
   **off by default** (`EXTERNAL_ENRICHMENT_ENABLED=false`, or toggle at runtime
   with `POST /api/enrichment/config`). While off, nothing is sent to
