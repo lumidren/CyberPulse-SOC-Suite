@@ -35,6 +35,7 @@ nav:
       - Coverage gaps: coverage/GAPS.md
       - Data sources: coverage/DATA_SOURCES.md
       - Rule quality: coverage/QUALITY.md
+      - Quality leaderboard: coverage/LEADERBOARD.md
       - Threshold tuning: THRESHOLD_TUNING.md
       - Behavioural baseline: BEHAVIORAL_BASELINE.md
       - Canaries and honeypots: CANARIES.md
