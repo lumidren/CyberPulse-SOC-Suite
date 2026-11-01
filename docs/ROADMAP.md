@@ -238,7 +238,7 @@ internal identifiers never go to external APIs.
 
 - [x] **F66** Hunting workbench with pivot queries. — **Done**: `soar/event_store.py`, `views.pivot`, `GET /api/hunt/pivot`, `web/hunt.html` with click-to-pivot and breadcrumbs.
 - [x] **F67** Hypothesis-driven hunt templates mapped to ATT&CK. — **Done**: 5 templates in `hunts/templates/`, `soar/hunt_templates.py` (validated, read-only), `/api/hunt/templates` + run, cards in `web/hunt.html`.
-- [ ] **F68** Jupyter notebook set for hunts.
+- [x] **F68** Jupyter notebook set for hunts. — **Done**: 3 notebooks in `notebooks/` + README; `tests/test_notebooks.py` executes every cell (no stored outputs). Jupyter itself not run here; cells run via the test.
 - [x] **F69** Stack counting and long-tail analysis. — **Done**: `views.stack`, `GET /api/hunt/stack`, stack panel with pivots in `web/hunt.html`.
 - [ ] **F70** YARA scanning integration.
 - [ ] **F71** Velociraptor or osquery integration for live endpoint queries.
