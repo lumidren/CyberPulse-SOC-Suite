@@ -52,6 +52,7 @@ from soar.report_generator import IncidentReportGenerator
 from soar.auth import SessionStore
 from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
+from soar.chatops import ChatOpsApprovals
 from soar.ingest_auth import SIGNATURE_HEADER, TIMESTAMP_HEADER, IngestVerifier
 from scripts.validate_detections import run_scripted, scripted_status
 from simulator.lab_guard import SimulationThrottle, lab_mode_enabled
@@ -321,6 +322,7 @@ PUBLIC_STATIC_PATHS = {"/login.html", "/login.js", "/styles.css", "/favicon.ico"
 
 # Machine webhook receiver (/api/ingest) authenticates with an HMAC signature
 ingest_verifier = IngestVerifier(os.environ.get("INGEST_HMAC_SECRET", ""))
+chatops = ChatOpsApprovals(orchestrator.containment_engine)
 
 api_rate_limiter = SlidingWindowRateLimiter(RATE_LIMIT_PER_MINUTE)
 simulation_throttle = SimulationThrottle()
@@ -705,6 +707,31 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+    def _handle_chatops(self, path, raw_body):
+        if not api_rate_limiter.allow(self._client_ip()):
+            self._send_json(429, {"error": "Too Many Requests"})
+            return
+        if path.endswith("/slack"):
+            ok, reason = chatops.verify_slack(self.headers.get("X-Slack-Request-Timestamp"),
+                                              self.headers.get("X-Slack-Signature"), raw_body)
+            if not ok:
+                audit_logger.warning("CHATOPS_REJECTED platform=slack client=%s reason=%s", self._client_ip(), reason)
+                self._send_json(401, {"error": reason})
+                return
+            self._send_json(200, chatops.handle_slack(raw_body))
+            return
+        ok, reason = chatops.verify_telegram(self.headers.get("X-Telegram-Bot-Api-Secret-Token"))
+        if not ok:
+            audit_logger.warning("CHATOPS_REJECTED platform=telegram client=%s reason=%s", self._client_ip(), reason)
+            self._send_json(401, {"error": reason})
+            return
+        try:
+            update = json.loads(raw_body.decode("utf-8", errors="replace"))
+        except ValueError:
+            self._send_json(400, {"error": "body must be JSON"})
+            return
+        self._send_json(200, chatops.handle_telegram(update if isinstance(update, dict) else {}))
+
     def do_POST(self):
         parsed = urlparse(self.path)
         path = parsed.path
@@ -734,6 +761,11 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         raw_body = self.rfile.read(content_length) if content_length > 0 else b"{}"
         body = raw_body.decode('utf-8', errors='replace')
 
+
+        # Chat-platform callbacks authenticate with the platform's own signature, not the API key
+        if path in ("/api/chatops/slack", "/api/chatops/telegram"):
+            self._handle_chatops(path, raw_body)
+            return
 
         # Login and the HMAC-signed webhook receiver do not use the API key / session gate
         login_request = path == "/api/session"
