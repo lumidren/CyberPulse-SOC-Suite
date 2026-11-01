@@ -28,6 +28,7 @@ from soar.orchestrator_hook import OrchestratorWebhook
 from soar.thehive import TheHiveClient
 from soar.user_notify import UserNotifier
 from soar.threat_feeds import FeedClient, FeedStore
+from soar.phishing_triage import triage as phishing_triage
 from soar.playbooks import PlaybookRegistry
 from soar.rule_exceptions import ExceptionRegistry
 from soar.sigma_correlation import CorrelationEngine
@@ -397,6 +398,10 @@ class SOAROrchestrator:
             incident["identity_blast_radius"] = identity_analysis
         else:
             incident["identity_blast_radius"] = {"status": "NO_USER_CONTEXT"}
+
+        if event.get("event_source") == "m365:email":
+            # Offline header/URL analysis for the analyst (no network calls, metadata only)
+            incident["phishing_triage"] = phishing_triage(event.get("details") or {})
 
         incident["playbook"] = ({**playbook.summary(), "tasks": [{"title": t, "status": "Open"} for t in playbook.tasks]}
                                 if playbook else None)

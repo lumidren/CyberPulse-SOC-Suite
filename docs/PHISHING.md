@@ -25,3 +25,21 @@ POST /api/incidents/<incident_id>/propose   {"analyst": "alice", "action": "QUAR
 The proposal is staged `PENDING_ANALYST_APPROVAL` and still needs an approval, where the
 kill switch, protected accounts and rate limits apply. The responder is **simulated**: it
 builds and records the Graph request but does not call Graph.
+
+## Triage (roadmap F46)
+
+Every email incident gets `phishing_triage` (`soar/phishing_triage.py`), computed offline
+from the metadata already in the event (no body, no network calls):
+
+- **Authentication:** SPF, DKIM and DMARC results from `AuthenticationResults`.
+- **Sender:** Reply-To on another domain; a display name that embeds a different address
+  or names a watched person (`PHISHING_WATCHED_NAMES`) on external mail; look-alikes of
+  your domains (`PHISHING_ORG_DOMAINS`) by edit distance, character swaps (rn/m, 0/o, 1/l),
+  punycode or embedding (`corp-example-billing.net`).
+- **URLs:** raw IP hosts, punycode, `@` tricks, shorteners, look-alike hosts and links to a
+  domain other than the sender's, all shown defanged (`hxxps://evil[.]example`).
+
+The result is a 0-100 score with the reason for every point and a verdict (`likely
+phishing`, `suspicious`, `no strong indicators`). It informs the analyst; it never acts.
+A low score does not make a message safe. URL detonation is opt-in through the lab
+sandbox (F47).
