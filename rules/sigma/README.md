@@ -38,3 +38,11 @@ least one `references` URL.
 
 Multi-event rules (brute force on raw 4625s, password spraying, mass file writes) live in
 [`correlations/`](correlations/README.md) and are evaluated by `soar/sigma_correlation.py`.
+
+## Regression corpus
+
+Every sample in `rules/tests/` and every scripted generator has its matching rules recorded in
+`tests/regression/expected_matches.json`. Changing a rule so that any old event matches differently
+fails the test suite. If the change is intended, run `python scripts/regression_corpus.py` to see
+the differences, then `--accept` and commit the JSON diff with the rule change. A positive sample that
+stops matching its own rule fails regardless of the golden file.

@@ -188,7 +188,7 @@ internal identifiers never go to external APIs.
 - [x] **F24** Detection-latency histogram per technique. — **Done**: `scripts/benchmark_pipeline.py --histogram` → `docs/LATENCY_HISTOGRAM.md` (lab-measured, machine-specific; stated in the file). Also fixed the stale README latency table (3e6563e).
 - [x] **F25** True/false-positive confusion matrix with real counts. — **Done**: confusion matrix section in `docs/VALIDATION_RESULTS.md` (generated, CI-checked). 660 synthetic events; pre-exception precision 0.335 published alongside.
 - [x] **F26** Benign-activity generators (admin scripts, backups, patching). — 🔀 **Merged into E5**: `simulator/benign_baseline.py` already covers admin scripts, backups, patching, AV scanning, auth and cloud ops.
-- [ ] **F27** Regression testing: a rule change must not break old detections.
+- [x] **F27** Regression testing: a rule change must not break old detections. — **Done**: `scripts/regression_corpus.py`, `tests/regression/expected_matches.json` (130 events), `tests/test_regression_corpus.py`.
 - [ ] **F28** Multi-stage attack chain emulation (initial access to exfil).
 - [ ] **F29** Evasion tests (obfuscation, renamed binaries); document bypasses.
 - [ ] **F30** Publish a "what I missed" report.
