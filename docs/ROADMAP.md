@@ -203,7 +203,7 @@ internal identifiers never go to external APIs.
 - [x] **F36** Integrate TheHive and Cortex. — **Done (needs your TheHive/Cortex)**: `soar/thehive.py` (`THEHIVE_ENABLED`, lab URLs only, PAP:RED on internal observables), `docs/THEHIVE_CORTEX.md`. Fixed the misleading "TheHive case created" timeline entry. Tested with a stubbed HTTP layer only.
 - [x] **F37** Integrate MISP for IoC sharing. — **Done (needs your MISP)**: `soar/misp.py`, `GET /api/cases/<id>/misp`, `POST /api/cases/<id>/misp/push`, `docs/MISP.md`. Public IPs/hashes only, org-only distribution, simulated excluded, never automatic. Stubbed HTTP only.
 - [x] **F38** Integrate the CIPHER project's feeds live. — **Stub (needs CIPHER's feed)**: `soar/threat_feeds.py` (JSON + STIX 2.1, local matching, ETag refresh), `GET /api/feeds`, `docs/THREAT_FEEDS.md`. CIPHER's real format not checked.
-- [ ] **F39** Consume GUARDIAN anomaly alerts as an ingest source.
+- [x] **F39** Consume GUARDIAN anomaly alerts as an ingest source. — **Stub (needs GUARDIAN)**: `soar/guardian.py`, `POST /api/ingest/guardian` (HMAC), SOC-RULE-049 (alert-only), `docs/GUARDIAN.md`. GUARDIAN's real schema not checked.
 - [ ] **F40** Shuffle or n8n integration as an alternative orchestrator.
 - [ ] **F41** Enrichment from OTX, URLhaus, Shodan, GreyNoise and Censys.
 - [ ] **F42** Multi-source reputation scoring with weighted consensus.

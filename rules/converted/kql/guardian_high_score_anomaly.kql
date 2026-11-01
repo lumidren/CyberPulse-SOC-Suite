@@ -1,0 +1,3 @@
+// SOC-RULE-049: High-Score Behavioural Anomaly from GUARDIAN (generated from rules/sigma/guardian_high_score_anomaly.yml; review before use)
+GuardianAnomaly_CL
+| where ((AnomalyScore >= 0.8))

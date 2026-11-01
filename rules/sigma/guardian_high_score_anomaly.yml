@@ -1,0 +1,25 @@
+title: High-Score Behavioural Anomaly from GUARDIAN
+id: b8e15278-552f-4540-9deb-1b95c9c51ce0
+status: experimental
+description: A GUARDIAN anomaly alert with a score of 0.8 or more (scores run 0 to 1). GUARDIAN models behaviour
+    such as low-and-slow authentication that threshold rules miss. An anomaly is a statistical signal, not proof,
+    so this rule only alerts.
+references:
+- https://attack.mitre.org/techniques/T1078/
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.initial_access
+- attack.defense_evasion
+- attack.t1078
+logsource:
+    product: guardian
+    service: anomaly
+detection:
+    selection:
+        AnomalyScore|gte: 0.8
+    condition: selection
+falsepositives:
+- New staff, travel, role changes and new software all look anomalous until the model retrains
+level: medium

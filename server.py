@@ -53,6 +53,7 @@ from soar.auth import SessionStore
 from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar.chatops import ChatOpsApprovals
+from soar.guardian import GuardianFormatError, guardian_to_event
 from soar.misp import MispClient, SharingDisabled
 from soar.misp import build_event as build_misp_event
 from soar.playbooks import ALLOWED_ACTIONS, validate_draft
@@ -805,7 +806,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         # Login and the HMAC-signed webhook receiver do not use the API key / session gate
         login_request = path == "/api/session"
-        signed_ingest = path == "/api/ingest"
+        signed_ingest = path in ("/api/ingest", "/api/ingest/guardian")
         if path == "/api/session/logout":
             if not self._csrf_ok():
                 self._send_json(403, {"error": "CSRF check failed."})
@@ -1065,6 +1066,20 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json(200, {"status": "SUCCESS", "active_policy_mode": new_mode})
             else:
                 self._send_json(400, {"error": "Invalid mode. Choose APPROVAL_REQUIRED, DRY_RUN, or AUTOMATIC."})
+
+        elif path == "/api/ingest/guardian":
+            try:
+                event = guardian_to_event(data)
+            except GuardianFormatError as exc:
+                self._send_json(400, {"status": "ERROR", "error": str(exc)})
+                return
+            result = orchestrator.webhook_ingest.handle_ingest(event)
+            if result["status"] != "SUCCESS":
+                self._send_json(400, result)
+                return
+            incident = orchestrator.process_event(result["normalized_event"])
+            self._send_json(200, {"status": "SUCCESS", "alerted": bool(incident),
+                                  "incident_id": (incident or {}).get("incident_id")})
 
         elif path in ("/api/ingest", "/api/ingest/manual"):
             # /api/ingest: HMAC-signed machine webhook. /api/ingest/manual: analyst paste-in

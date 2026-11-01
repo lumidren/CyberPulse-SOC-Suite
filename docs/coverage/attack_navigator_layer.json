@@ -108,8 +108,8 @@
     },
     {
       "techniqueID": "T1078",
-      "score": 1,
-      "comment": "Lab rules (synthetic-tested only): SOC-RULE-010",
+      "score": 2,
+      "comment": "Lab rules (synthetic-tested only): SOC-RULE-010, SOC-RULE-049",
       "enabled": true,
       "showSubtechniques": false
     },

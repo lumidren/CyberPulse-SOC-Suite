@@ -293,3 +293,9 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: d6523668e5058d4f86e1715fc7eac78c0e92d64f14de5c18e666c36de08299e5
+  b8e15278-552f-4540-9deb-1b95c9c51ce0:
+    soc_rule_id: SOC-RULE-049
+    name: High-Score Behavioural Anomaly from GUARDIAN
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 9c992ae38d1a29befe307ad111ddda0f3347be2bcaafe74246ed6b637687bede

@@ -47,6 +47,7 @@ DATA_SOURCE_NAMES = {
     ("aws", "cloudtrail"): "AWS CloudTrail (management events)",
     ("azure", "signinlogs"): "Entra ID sign-in logs",
     ("azure", "auditlogs"): "Entra ID audit logs",
+    ("guardian", "anomaly"): "GUARDIAN anomaly alerts (ML, via /api/ingest/guardian)",
 }
 
 

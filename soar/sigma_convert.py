@@ -38,6 +38,8 @@ KQL_TABLES = {
     ("aws", "cloudtrail"): "AWSCloudTrail",
     ("azure", "signinlogs"): "SigninLogs",
     ("azure", "auditlogs"): "AuditLogs",
+    # Custom log table you create when forwarding GUARDIAN alerts to Sentinel (name is your choice)
+    ("guardian", "anomaly"): "GuardianAnomaly_CL",
 }
 
 
