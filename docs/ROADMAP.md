@@ -231,7 +231,7 @@ internal identifiers never go to external APIs.
 - [x] **F61** Role-based views (analyst, lead, auditor). — **Done**: `soar/roles.py`, server-side checks on every POST, role in sessions and audit log, `data-requires` UI hiding, README + `.env.example`.
 - [x] **F62** Keyboard shortcuts for triage. — **Done**: shortcuts j/k / a i r n ? in `web/triage.js` with a help panel; disabled in text fields.
 - [x] **F63** Mobile-friendly status view. — **Done**: `web/status.html` + `status.js`, `GET /api/status/summary`; checked at 375 px.
-- [ ] **F64** Executive summary view.
+- [x] **F64** Executive summary view. — **Done**: `views.executive_summary`, `GET /api/summary/executive`, printable `web/executive.html`.
 - [ ] **F65** PDF export for incident reports.
 
 ## Phase 10 — Threat hunting (F66–F75)

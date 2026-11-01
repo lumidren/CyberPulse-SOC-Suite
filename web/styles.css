@@ -1081,3 +1081,19 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
 .st-recent { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .st-recent li { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; color: var(--text-primary); }
 .st-foot { text-align: center; }
+
+/* Executive summary (web/executive.html, roadmap F64) */
+.ex-body { max-width: 980px; margin: 0 auto; padding: 16px; }
+.ex-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.ex-header h1 { color: var(--text-primary); font-size: 1.5rem; }
+.ex-headline { color: var(--text-secondary); margin-top: 6px; font-size: 1.05rem; }
+.ex-actions { display: flex; gap: 8px; }
+.ex-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.ex-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; color: var(--text-primary); }
+.ex-card h2 { font-size: 1rem; margin-bottom: 8px; }
+.ex-card dl { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; }
+.ex-card dt { color: var(--text-secondary); }
+.ex-card dd { font-weight: 700; text-align: right; }
+.ex-card ul { padding-left: 18px; color: var(--text-secondary); }
+.ex-wide { grid-column: 1 / -1; }
+@media print { .ex-actions, .lab-mode-banner { display: none; } .ex-card { break-inside: avoid; } }
