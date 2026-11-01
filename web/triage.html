@@ -43,7 +43,7 @@
         </section>
 
         <section class="card tw-detail">
-            <div class="tw-controls">
+            <div class="tw-controls" data-requires="write">
                 <label>Status
                     <select id="caseStatus">
                         <option>New</option><option>Investigating</option><option>Resolved</option><option>Closed</option>
@@ -54,7 +54,7 @@
                 <span id="caseMessage" class="tw-muted" role="status"></span>
             </div>
             <div id="caseTasks" class="tw-tasks"></div>
-            <div class="tw-note"><input id="caseNote" type="text" maxlength="2000" placeholder="Add a note to the case"><button class="btn-secondary" id="addNote">Add note</button></div>
+            <div class="tw-note" data-requires="write"><input id="caseNote" type="text" maxlength="2000" placeholder="Add a note to the case"><button class="btn-secondary" id="addNote">Add note</button></div>
             <div class="card-header"><h3 id="caseTitle"><i class="fa-solid fa-timeline"></i> Attack timeline</h3></div>
             <p class="section-desc">When each step happened (event time), and how long until it was detected.</p>
             <ol id="timeline" class="tw-timeline"></ol>
