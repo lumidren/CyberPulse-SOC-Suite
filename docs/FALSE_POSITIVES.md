@@ -5,6 +5,7 @@
 
 Scenarios are what the rule author expects in real environments; none has been observed on real
 traffic here. *Baseline matches* are real counts on the synthetic benign traffic, before exceptions.
+How to tune each one: [TUNING.md](TUNING.md).
 
 ## SOC-RULE-001: OS Credential Dumping via LSASS Memory Access
 
