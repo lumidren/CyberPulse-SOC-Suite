@@ -19,7 +19,7 @@
             <div class="logo-badge"><i class="fa-solid fa-inbox"></i></div>
             <div>
                 <h1>TRIAGE WORKSPACE</h1>
-                <p class="subtitle">Cases, attack timelines and context for the analyst on shift</p>
+                <p class="subtitle">Cases, attack timelines and context for the analyst on shift. Press ? for shortcuts.</p>
             </div>
         </div>
         <div class="header-right">
@@ -77,6 +77,12 @@
             <div id="networkGraph" class="tw-graph"></div>
         </section>
     </main>
+
+    <aside id="shortcutHelp" class="tw-help card" hidden aria-label="Keyboard shortcuts">
+        <div class="card-header"><h3><i class="fa-solid fa-keyboard"></i> Keyboard shortcuts</h3></div>
+        <div id="shortcutList"></div>
+        <p class="tw-muted">Shortcuts are off while typing in a field; press Esc to leave it.</p>
+    </aside>
 
     <script src="session.js"></script>
     <script src="triage.js"></script>

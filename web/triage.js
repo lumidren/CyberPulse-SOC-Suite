@@ -299,10 +299,57 @@ async function saveHunt() {
     loadHunts();
 }
 
+// ------------------------------------------------------------------ F62 keyboard shortcuts
+const SHORTCUTS = {
+    j: ["Next case in the queue", () => moveSelection(1)],
+    k: ["Previous case in the queue", () => moveSelection(-1)],
+    "/": ["Search", () => $("searchBox").focus()],
+    a: ["Assign the case to me", () => update({ assignee: analystName() })],
+    i: ["Mark Investigating", () => update({ status: "Investigating" })],
+    r: ["Mark Resolved", () => update({ status: "Resolved" })],
+    n: ["Write a note", () => $("caseNote").focus()],
+    "?": ["Show or hide this help", () => { $("shortcutHelp").hidden = !$("shortcutHelp").hidden; }],
+};
+
+function moveSelection(delta) {
+    if (!state.queue.length) return;
+    const i = state.queue.findIndex((c) => c.case_id === state.selected);
+    const next = Math.min(state.queue.length - 1, Math.max(0, (i < 0 ? 0 : i + delta)));
+    selectCase(state.queue[next].case_id);
+    document.querySelectorAll(".tw-case")[next]?.scrollIntoView({ block: "nearest" });
+}
+
+function onKey(event) {
+    const target = event.target;
+    // Never steal keys from text fields, and leave browser/OS shortcuts alone
+    if (target.closest("input, textarea, select, [contenteditable]") || event.ctrlKey || event.metaKey || event.altKey) {
+        if (event.key === "Escape") target.blur();
+        return;
+    }
+    const entry = SHORTCUTS[event.key];
+    if (!entry) return;
+    // Write shortcuts are hidden for auditors; the server would refuse them anyway
+    if ("air".includes(event.key) && document.documentElement.dataset.role === "auditor") return;
+    event.preventDefault();
+    entry[1]();
+}
+
+function renderShortcutHelp() {
+    const list = $("shortcutList");
+    for (const [key, [label]] of Object.entries(SHORTCUTS)) {
+        const row = CP.el("div", null, "tw-shortcut");
+        row.appendChild(CP.el("kbd", key));
+        row.appendChild(CP.el("span", label));
+        list.appendChild(row);
+    }
+}
+
 function init() {
     $("analystName").value = analystName();
     $("analystName").addEventListener("change", (e) => setAnalystName(e.target.value.trim()));
     $("onlyMine").addEventListener("change", loadQueue);
+    document.addEventListener("keydown", onKey);
+    renderShortcutHelp();
     $("saveHunt").addEventListener("click", saveHunt);
     loadHunts();
     $("searchBox").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 250); });
