@@ -118,7 +118,9 @@ class AutomationSafety:
         trip = {"tripped_at": datetime.now(timezone.utc).isoformat(), "hosts": hosts, "reason": reason, "paged": False}
         if self.pager:
             try:
-                self.pager(reason)
+                # The page goes to an external chat service: host names stay in the local record only
+                self.pager(f"Isolation circuit breaker: {len(hosts)} hosts isolated within {minutes} min. "
+                           "Automation halted pending human review; host list at GET /api/safety.")
                 trip["paged"] = True
             except Exception as exc:  # paging must never crash containment
                 trip["page_error"] = str(exc)

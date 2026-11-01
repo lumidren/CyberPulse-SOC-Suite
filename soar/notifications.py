@@ -1,12 +1,20 @@
 """
 Webhook Notification Dispatcher for CyberPulse SOC Suite
 Dispatches real-time structured incident alerts to Discord, Slack, Telegram, or custom webhooks.
+
+Chat and webhook services are external, so payloads carry no internal identifiers:
+host names become stable pseudonyms (``host-1a2b3c4d``), internal IPs are withheld,
+usernames and execution logs are left out. The incident id points the analyst to the
+console, where the full record is.
 """
 
+import hashlib
+import hmac
 import ipaddress
 import json
 import logging
 import os
+import secrets
 import urllib.request
 import urllib.error
 from urllib.parse import urlparse
@@ -16,6 +24,51 @@ logger = logging.getLogger("cyberpulse.notifications")
 # Operators may opt in to internal/private webhook targets (e.g. an on-prem
 # Mattermost) by setting ALLOW_INTERNAL_WEBHOOKS=true in the environment.
 ALLOW_INTERNAL_WEBHOOKS = os.environ.get("ALLOW_INTERNAL_WEBHOOKS", "false").strip().lower() == "true"
+
+# Per-deployment key for host pseudonyms; random per process when unset (pseudonyms then change on restart)
+_PSEUDONYM_KEY = (os.environ.get("CYBERPULSE_PSEUDONYM_KEY") or secrets.token_hex(16)).encode("utf-8")
+
+
+def pseudonym(value, prefix="host"):
+    """Stable, non-reversible label for an internal identifier (keyed HMAC, 8 hex chars)."""
+    if not value:
+        return "unknown"
+    return f"{prefix}-{hmac.new(_PSEUDONYM_KEY, str(value).lower().encode('utf-8'), hashlib.sha256).hexdigest()[:8]}"
+
+
+# RFC 5737 documentation ranges: the lab's synthetic "external" attackers; not internal addresses
+_DOC_NETS = [ipaddress.ip_network(n) for n in ("192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24")]
+
+
+def shareable_ip(value):
+    """A public (or RFC 5737 documentation) source IP may be shown; internal addresses are withheld."""
+    try:
+        ip = ipaddress.ip_address(str(value))
+    except ValueError:
+        return "n/a"
+    if ip.is_global or any(ip in net for net in _DOC_NETS):
+        return str(ip)
+    return "internal (see console)"
+
+
+def external_summary(alert):
+    """The only alert fields that leave the network: no hostnames, usernames, internal IPs or logs."""
+    rule = alert.get("rule", {}) or {}
+    telemetry = alert.get("telemetry", {}) or {}
+    action = alert.get("soar_response") or alert.get("containment_action") or {}
+    return {
+        "incident_id": alert.get("incident_id") or alert.get("alert_id"),
+        "rule_id": rule.get("rule_id"),
+        "rule_name": rule.get("rule_name"),
+        "severity": rule.get("severity"),
+        "technique_id": rule.get("mitre_id") or telemetry.get("technique_id"),
+        "host": pseudonym(telemetry.get("computer_name")),
+        "source_ip": shareable_ip(telemetry.get("source_ip")),
+        "action_type": action.get("action_type"),
+        "action_status": action.get("status"),
+        "simulated": bool(alert.get("simulated")),
+    }
+
 
 def validate_webhook_url(url):
     """SSRF guard for analyst-supplied webhook URLs.
@@ -56,66 +109,42 @@ class WebhookDispatcher:
         self.webhook_url = webhook_url or os.environ.get("SOC_WEBHOOK_URL")
 
     def format_discord_payload(self, alert):
-        """Format alert as a high-visibility Discord Rich Embed"""
-        rule = alert.get("rule", {})
-        telemetry = alert.get("telemetry", {})
-        intel = alert.get("threat_intel", {}).get("ip_reputation", {})
-        soar_resp = alert.get("soar_response", {})
-        timing = alert.get("pipeline_timing", {})
-
-        severity = rule.get("severity", "MEDIUM")
-        # Crimson for CRITICAL, Orange for HIGH, Cyan for others
-        color = 16722517 if severity == "CRITICAL" else (16752384 if severity == "HIGH" else 58367)
-
+        """Discord embed built only from external_summary() fields."""
+        s = external_summary(alert)
+        color = 16722517 if s["severity"] == "CRITICAL" else (16752384 if s["severity"] == "HIGH" else 58367)
         embed = {
-            "title": f"🚨 [SOC ALERT] {rule.get('rule_name', 'Threat Detected')}",
-            "description": f"**MITRE ATT&CK**: `{alert.get('telemetry', {}).get('technique_id', 'Unknown')}` - {alert.get('telemetry', {}).get('technique_name', '')}",
+            "title": f"[SOC ALERT] {s['rule_name'] or 'Threat Detected'}",
+            "description": f"**MITRE ATT&CK**: `{s['technique_id']}`" + (" (simulated)" if s["simulated"] else ""),
             "color": color,
             "fields": [
-                {"name": "Alert ID", "value": f"`{alert.get('alert_id')}`", "inline": True},
-                {"name": "Severity", "value": f"**{severity}**", "inline": True},
-                {"name": "Target Host", "value": f"`{telemetry.get('computer_name', 'Unknown')}`", "inline": True},
-                {"name": "Attacker IP", "value": f"`{telemetry.get('source_ip', 'Unknown')}`", "inline": True},
-                {"name": "VirusTotal Rep", "value": f"{intel.get('virustotal_positives', 0)} / 72 Vendors", "inline": True},
-                {"name": "AbuseIPDB Score", "value": f"{intel.get('abuse_score', 0)}% Confidence", "inline": True},
-                {"name": "Automated SOAR Action", "value": f"✅ `{soar_resp.get('action_type', 'NONE')}`\n*{soar_resp.get('execution_log', '')}*", "inline": False},
-                {"name": "Pipeline Latency", "value": f"⚡ Total: **{timing.get('total_pipeline_sec', 0)}s** (Ingest: {timing.get('stage1_detection_ms', 0)}ms | Contain: {timing.get('stage3_containment_ms', 0)}ms)", "inline": False}
+                {"name": "Incident", "value": f"`{s['incident_id']}`", "inline": True},
+                {"name": "Severity", "value": f"**{s['severity']}**", "inline": True},
+                {"name": "Host", "value": f"`{s['host']}`", "inline": True},
+                {"name": "Source IP", "value": f"`{s['source_ip']}`", "inline": True},
+                {"name": "Response", "value": f"`{s['action_type']}` ({s['action_status']})", "inline": False},
             ],
-            "footer": {
-                "text": "CyberPulse SOC Suite | Automated SOAR Engine"
-            },
-            "timestamp": alert.get("timestamp")
+            "footer": {"text": "CyberPulse SOC Suite | details in the console"},
+            "timestamp": alert.get("timestamp"),
         }
-
         return {"username": "CyberPulse SOC Bot", "embeds": [embed]}
 
     def format_slack_payload(self, alert):
-        """Format alert as a Slack Block Kit payload"""
-        rule = alert.get("rule", {})
-        telemetry = alert.get("telemetry", {})
-        soar_resp = alert.get("soar_response", {})
-
+        """Slack Block Kit message built only from external_summary() fields."""
+        s = external_summary(alert)
         return {
-            "text": f"🚨 [SOC ALERT - {rule.get('severity')}] {rule.get('rule_name')}",
+            "text": f"[SOC ALERT - {s['severity']}] {s['rule_name']} ({s['incident_id']})",
             "blocks": [
-                {
-                    "type": "header",
-                    "text": {"type": "plain_text", "text": f"🚨 [SOC ALERT] {rule.get('rule_name')}"}
-                },
-                {
-                    "type": "section",
-                    "fields": [
-                        {"type": "mrkdwn", "text": f"*Technique:* `{telemetry.get('technique_id')}`"},
-                        {"type": "mrkdwn", "text": f"*Severity:* *{rule.get('severity')}*"},
-                        {"type": "mrkdwn", "text": f"*Host:* `{telemetry.get('computer_name')}`"},
-                        {"type": "mrkdwn", "text": f"*Source IP:* `{telemetry.get('source_ip')}`"}
-                    ]
-                },
-                {
-                    "type": "section",
-                    "text": {"type": "mrkdwn", "text": f"*SOAR Action:* `{soar_resp.get('action_type')}`\n>{soar_resp.get('execution_log')}"}
-                }
-            ]
+                {"type": "header", "text": {"type": "plain_text", "text": f"[SOC ALERT] {s['rule_name']}"}},
+                {"type": "section", "fields": [
+                    {"type": "mrkdwn", "text": f"*Technique:* `{s['technique_id']}`"},
+                    {"type": "mrkdwn", "text": f"*Severity:* *{s['severity']}*"},
+                    {"type": "mrkdwn", "text": f"*Host:* `{s['host']}`"},
+                    {"type": "mrkdwn", "text": f"*Source IP:* `{s['source_ip']}`"},
+                ]},
+                {"type": "section", "text": {"type": "mrkdwn",
+                                             "text": f"*Response:* `{s['action_type']}` ({s['action_status']}); "
+                                                     f"incident `{s['incident_id']}` in the console"}},
+            ],
         }
 
     def dispatch_text(self, text, custom_webhook_url=None):
@@ -159,7 +188,7 @@ class WebhookDispatcher:
         elif "hooks.slack.com" in target_url:
             payload = self.format_slack_payload(alert)
         else:
-            payload = alert
+            payload = external_summary(alert)
 
         try:
             req = urllib.request.Request(
