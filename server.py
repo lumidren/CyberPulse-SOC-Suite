@@ -53,6 +53,7 @@ from soar.auth import SessionStore
 from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar.chatops import ChatOpsApprovals
+from soar.triage_package import build_zip as build_triage_zip
 from soar.guardian import GuardianFormatError, guardian_to_event
 from soar.misp import MispClient, SharingDisabled
 from soar.misp import build_event as build_misp_event
@@ -554,6 +555,19 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json(200, {"ai_analysis": analysis})
         elif subresource == "identity":
             self._send_json(200, {"identity_blast_radius": inc.get("identity_blast_radius", {})})
+        elif subresource == "triage-package":
+            case = orchestrator.case_manager.find_by_incident(inc_id)
+            data, digest, _ = build_triage_zip(inc, case)
+            audit_logger.info("TRIAGE_PACKAGE_EXPORT client=%s principal=%s incident=%s sha256=%s",
+                              self._client_ip(), self._principal(), inc_id, digest)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/zip")
+            self.send_header("Content-Disposition", f'attachment; filename="{inc_id}-triage.zip"')
+            self.send_header("X-Package-SHA256", digest)
+            self.send_header("Content-Length", str(len(data)))
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(data)
         elif subresource == "report":
             html = report_generator.generate_html_report(mask_identities(inc) if masking_enabled() else inc)
             self.send_response(200)
