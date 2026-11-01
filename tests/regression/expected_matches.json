@@ -1,0 +1,659 @@
+{
+ "cloud_aws_assumerole_abuse.yml::negative::CI pipeline inside the VPC (excluded)": {
+  "all": [],
+  "top": null
+ },
+ "cloud_aws_assumerole_abuse.yml::negative::Low-privilege role": {
+  "all": [],
+  "top": null
+ },
+ "cloud_aws_assumerole_abuse.yml::positive::External source assumes admin role": {
+  "all": [
+   "SOC-RULE-009"
+  ],
+  "top": "SOC-RULE-009"
+ },
+ "cloud_aws_canary_credential_use.yml::negative::Real pipeline user": {
+  "all": [],
+  "top": null
+ },
+ "cloud_aws_canary_credential_use.yml::positive::Canary key identity check": {
+  "all": [
+   "SOC-RULE-048"
+  ],
+  "top": "SOC-RULE-048"
+ },
+ "cloud_aws_canary_credential_use.yml::positive::Canary key lists buckets": {
+  "all": [
+   "SOC-RULE-048"
+  ],
+  "top": "SOC-RULE-048"
+ },
+ "cloud_aws_cloudtrail_disabled.yml::negative::DescribeTrails read-only call": {
+  "all": [],
+  "top": null
+ },
+ "cloud_aws_cloudtrail_disabled.yml::positive::StopLogging on the org trail": {
+  "all": [
+   "SOC-RULE-041"
+  ],
+  "top": "SOC-RULE-041"
+ },
+ "cloud_entra_admin_consent.yml::negative::Single-user consent": {
+  "all": [],
+  "top": null
+ },
+ "cloud_entra_admin_consent.yml::positive::Tenant-wide consent": {
+  "all": [
+   "SOC-RULE-042"
+  ],
+  "top": "SOC-RULE-042"
+ },
+ "cloud_entra_impossible_travel.yml::negative::Failed sign-in (not a successful session)": {
+  "all": [],
+  "top": null
+ },
+ "cloud_entra_impossible_travel.yml::negative::Low-risk sign-in": {
+  "all": [],
+  "top": null
+ },
+ "cloud_entra_impossible_travel.yml::positive::High-risk impossible travel sign-in": {
+  "all": [
+   "SOC-RULE-010"
+  ],
+  "top": "SOC-RULE-010"
+ },
+ "generator::cloud_aws": {
+  "all": [
+   "SOC-RULE-009"
+  ],
+  "top": "SOC-RULE-009"
+ },
+ "generator::cloud_entra": {
+  "all": [
+   "SOC-RULE-010"
+  ],
+  "top": "SOC-RULE-010"
+ },
+ "generator::t1003": {
+  "all": [
+   "SOC-RULE-001"
+  ],
+  "top": "SOC-RULE-001"
+ },
+ "generator::t1003_dcsync": {
+  "all": [
+   "SOC-RULE-008"
+  ],
+  "top": "SOC-RULE-008"
+ },
+ "generator::t1053": {
+  "all": [
+   "SOC-RULE-003"
+  ],
+  "top": "SOC-RULE-003"
+ },
+ "generator::t1059": {
+  "all": [
+   "SOC-RULE-004"
+  ],
+  "top": "SOC-RULE-004"
+ },
+ "generator::t1110": {
+  "all": [
+   "SOC-RULE-002"
+  ],
+  "top": "SOC-RULE-002"
+ },
+ "generator::t1486": {
+  "all": [
+   "SOC-RULE-006"
+  ],
+  "top": "SOC-RULE-006"
+ },
+ "generator::t1558": {
+  "all": [
+   "SOC-RULE-007"
+  ],
+  "top": "SOC-RULE-007"
+ },
+ "generator::t1562": {
+  "all": [
+   "SOC-RULE-005"
+  ],
+  "top": "SOC-RULE-005"
+ },
+ "win_ad_reconnaissance.yml::negative::net use mapping a share": {
+  "all": [],
+  "top": null
+ },
+ "win_ad_reconnaissance.yml::positive::Enumerate Domain Admins": {
+  "all": [
+   "SOC-RULE-034"
+  ],
+  "top": "SOC-RULE-034"
+ },
+ "win_ad_reconnaissance.yml::positive::List domain trusts": {
+  "all": [
+   "SOC-RULE-034"
+  ],
+  "top": "SOC-RULE-034"
+ },
+ "win_archive_with_password.yml::negative::7z extraction": {
+  "all": [],
+  "top": null
+ },
+ "win_archive_with_password.yml::positive::7z archive with password": {
+  "all": [
+   "SOC-RULE-038"
+  ],
+  "top": "SOC-RULE-038"
+ },
+ "win_asrep_roasting.yml::negative::Normal pre-authenticated AES TGT": {
+  "all": [],
+  "top": null
+ },
+ "win_asrep_roasting.yml::positive::No-preauth RC4 TGT": {
+  "all": [
+   "SOC-RULE-033"
+  ],
+  "top": "SOC-RULE-033"
+ },
+ "win_brute_force_auth.yml::negative::Nine network failures (below threshold)": {
+  "all": [],
+  "top": null
+ },
+ "win_brute_force_auth.yml::negative::Two typos at the console": {
+  "all": [],
+  "top": null
+ },
+ "win_brute_force_auth.yml::positive::18 RDP failures from one source": {
+  "all": [
+   "SOC-RULE-002"
+  ],
+  "top": "SOC-RULE-002"
+ },
+ "win_dcsync.yml::negative::Domain controller replicating (machine account)": {
+  "all": [],
+  "top": null
+ },
+ "win_dcsync.yml::positive::Replication rights used by a user": {
+  "all": [
+   "SOC-RULE-008"
+  ],
+  "top": "SOC-RULE-008"
+ },
+ "win_defender_tamper.yml::negative::Read Defender status": {
+  "all": [],
+  "top": null
+ },
+ "win_defender_tamper.yml::positive::Disable real-time monitoring": {
+  "all": [
+   "SOC-RULE-005"
+  ],
+  "top": "SOC-RULE-005"
+ },
+ "win_driver_byovd_load.yml::negative::Ordinary signed driver": {
+  "all": [],
+  "top": null
+ },
+ "win_driver_byovd_load.yml::positive::Known vulnerable driver from Temp": {
+  "all": [
+   "SOC-RULE-011"
+  ],
+  "top": "SOC-RULE-011"
+ },
+ "win_firewall_disabled.yml::negative::netsh adds an allow rule": {
+  "all": [],
+  "top": null
+ },
+ "win_firewall_disabled.yml::positive::netsh turns the firewall off": {
+  "all": [
+   "SOC-RULE-030"
+  ],
+  "top": "SOC-RULE-030"
+ },
+ "win_golden_ticket_domain_anomaly.yml::negative::Lowercase domain is still an anomaly only for Kerberos": {
+  "all": [],
+  "top": null
+ },
+ "win_golden_ticket_domain_anomaly.yml::negative::Normal Kerberos logon in the lab domain": {
+  "all": [],
+  "top": null
+ },
+ "win_golden_ticket_domain_anomaly.yml::positive::Kerberos logon with FQDN domain field": {
+  "all": [
+   "SOC-RULE-013"
+  ],
+  "top": "SOC-RULE-013"
+ },
+ "win_golden_ticket_domain_anomaly.yml::positive::Kerberos logon with a made-up domain": {
+  "all": [
+   "SOC-RULE-013"
+  ],
+  "top": "SOC-RULE-013"
+ },
+ "win_honey_account_activity.yml::negative::Decoy name in an unrelated event": {
+  "all": [],
+  "top": null
+ },
+ "win_honey_account_activity.yml::negative::Real account logon": {
+  "all": [],
+  "top": null
+ },
+ "win_honey_account_activity.yml::positive::Failed RDP logon to decoy": {
+  "all": [
+   "SOC-RULE-046"
+  ],
+  "top": "SOC-RULE-046"
+ },
+ "win_honey_account_activity.yml::positive::Kerberoast request for decoy SPN": {
+  "all": [
+   "SOC-RULE-046"
+  ],
+  "top": "SOC-RULE-046"
+ },
+ "win_honey_file_access.yml::negative::Defender scans decoy": {
+  "all": [],
+  "top": null
+ },
+ "win_honey_file_access.yml::negative::Normal file": {
+  "all": [],
+  "top": null
+ },
+ "win_honey_file_access.yml::positive::Explorer opens decoy credentials": {
+  "all": [
+   "SOC-RULE-047"
+  ],
+  "top": "SOC-RULE-047"
+ },
+ "win_kerberoasting.yml::negative::AES service ticket": {
+  "all": [],
+  "top": null
+ },
+ "win_kerberoasting.yml::negative::RC4 ticket for a computer account (excluded)": {
+  "all": [],
+  "top": null
+ },
+ "win_kerberoasting.yml::positive::RC4 service ticket for a user SPN": {
+  "all": [
+   "SOC-RULE-007"
+  ],
+  "top": "SOC-RULE-007"
+ },
+ "win_local_admin_group_addition.yml::negative::User added to Remote Desktop Users": {
+  "all": [],
+  "top": null
+ },
+ "win_local_admin_group_addition.yml::positive::Backdoor account added to Administrators": {
+  "all": [
+   "SOC-RULE-026"
+  ],
+  "top": "SOC-RULE-026"
+ },
+ "win_lolbas_bitsadmin_transfer.yml::negative::Listing BITS jobs": {
+  "all": [],
+  "top": null
+ },
+ "win_lolbas_bitsadmin_transfer.yml::positive::bitsadmin download": {
+  "all": [
+   "SOC-RULE-018"
+  ],
+  "top": "SOC-RULE-018"
+ },
+ "win_lolbas_certutil_download.yml::negative::Other binary with similar words": {
+  "all": [],
+  "top": null
+ },
+ "win_lolbas_certutil_download.yml::negative::certutil certificate dump": {
+  "all": [],
+  "top": null
+ },
+ "win_lolbas_certutil_download.yml::positive::certutil URL cache download": {
+  "all": [
+   "SOC-RULE-014"
+  ],
+  "top": "SOC-RULE-014"
+ },
+ "win_lolbas_certutil_download.yml::positive::certutil base64 decode": {
+  "all": [
+   "SOC-RULE-014"
+  ],
+  "top": "SOC-RULE-014"
+ },
+ "win_lolbas_mshta_remote_script.yml::negative::Local HTA file": {
+  "all": [],
+  "top": null
+ },
+ "win_lolbas_mshta_remote_script.yml::positive::Inline javascript": {
+  "all": [
+   "SOC-RULE-015"
+  ],
+  "top": "SOC-RULE-015"
+ },
+ "win_lolbas_mshta_remote_script.yml::positive::Remote HTA": {
+  "all": [
+   "SOC-RULE-015"
+  ],
+  "top": "SOC-RULE-015"
+ },
+ "win_lolbas_regsvr32_squiblydoo.yml::negative::Registering a local DLL": {
+  "all": [],
+  "top": null
+ },
+ "win_lolbas_regsvr32_squiblydoo.yml::positive::Squiblydoo": {
+  "all": [
+   "SOC-RULE-016"
+  ],
+  "top": "SOC-RULE-016"
+ },
+ "win_lolbas_rundll32_script.yml::negative::Control panel applet": {
+  "all": [],
+  "top": null
+ },
+ "win_lolbas_rundll32_script.yml::positive::mshtml RunHTMLApplication": {
+  "all": [
+   "SOC-RULE-017"
+  ],
+  "top": "SOC-RULE-017"
+ },
+ "win_lsass_dumping.yml::negative::Defender inspects LSASS (excluded source)": {
+  "all": [],
+  "top": null
+ },
+ "win_lsass_dumping.yml::negative::Handle to a different process": {
+  "all": [],
+  "top": null
+ },
+ "win_lsass_dumping.yml::negative::Query-only access mask": {
+  "all": [],
+  "top": null
+ },
+ "win_lsass_dumping.yml::positive::Full access handle from user temp folder": {
+  "all": [
+   "SOC-RULE-001"
+  ],
+  "top": "SOC-RULE-001"
+ },
+ "win_lsass_dumping.yml::positive::Unknown tool opens LSASS with PROCESS_VM_READ": {
+  "all": [
+   "SOC-RULE-001"
+  ],
+  "top": "SOC-RULE-001"
+ },
+ "win_ntds_extraction.yml::negative::ntdsutil metadata cleanup help": {
+  "all": [],
+  "top": null
+ },
+ "win_ntds_extraction.yml::positive::IFM full copy to Temp": {
+  "all": [
+   "SOC-RULE-032"
+  ],
+  "top": "SOC-RULE-032"
+ },
+ "win_office_spawns_shell.yml::negative::Explorer launches PowerShell": {
+  "all": [],
+  "top": null
+ },
+ "win_office_spawns_shell.yml::negative::Word opens the print spooler helper": {
+  "all": [],
+  "top": null
+ },
+ "win_office_spawns_shell.yml::positive::Word macro launches PowerShell": {
+  "all": [
+   "SOC-RULE-004",
+   "SOC-RULE-021"
+  ],
+  "top": "SOC-RULE-004"
+ },
+ "win_pass_the_hash.yml::negative::Anonymous NTLM null session (excluded)": {
+  "all": [],
+  "top": null
+ },
+ "win_pass_the_hash.yml::negative::Interactive Kerberos logon": {
+  "all": [],
+  "top": null
+ },
+ "win_pass_the_hash.yml::negative::NTLM logon with a 128-bit session key": {
+  "all": [],
+  "top": null
+ },
+ "win_pass_the_hash.yml::positive::NTLM network logon with zero key length": {
+  "all": [
+   "SOC-RULE-012"
+  ],
+  "top": "SOC-RULE-012"
+ },
+ "win_pass_the_hash.yml::positive::NewCredentials logon via seclogo": {
+  "all": [
+   "SOC-RULE-012"
+  ],
+  "top": "SOC-RULE-012"
+ },
+ "win_powershell_obfuscation.yml::negative::Plain interactive PowerShell": {
+  "all": [],
+  "top": null
+ },
+ "win_powershell_obfuscation.yml::negative::cmd.exe with similar words": {
+  "all": [],
+  "top": null
+ },
+ "win_powershell_obfuscation.yml::positive::Encoded hidden download cradle": {
+  "all": [
+   "SOC-RULE-004"
+  ],
+  "top": "SOC-RULE-004"
+ },
+ "win_psexec_service.yml::negative::Shell spawned by Explorer": {
+  "all": [],
+  "top": null
+ },
+ "win_psexec_service.yml::positive::Shell spawned by PSEXESVC": {
+  "all": [
+   "SOC-RULE-035"
+  ],
+  "top": "SOC-RULE-035"
+ },
+ "win_ransomware_canary.yml::negative::Normal document save": {
+  "all": [],
+  "top": null
+ },
+ "win_ransomware_canary.yml::positive::Canary renamed to .locked": {
+  "all": [
+   "SOC-RULE-006"
+  ],
+  "top": "SOC-RULE-006"
+ },
+ "win_ransomware_canary.yml::positive::Ransom note dropped": {
+  "all": [
+   "SOC-RULE-006"
+  ],
+  "top": "SOC-RULE-006"
+ },
+ "win_ransomware_recovery_inhibition.yml::negative::Nightly wbadmin backup": {
+  "all": [],
+  "top": null
+ },
+ "win_ransomware_recovery_inhibition.yml::negative::bcdedit enumerate": {
+  "all": [],
+  "top": null
+ },
+ "win_ransomware_recovery_inhibition.yml::positive::bcdedit disables recovery": {
+  "all": [
+   "SOC-RULE-020"
+  ],
+  "top": "SOC-RULE-020"
+ },
+ "win_ransomware_recovery_inhibition.yml::positive::wbadmin delete catalog": {
+  "all": [
+   "SOC-RULE-020"
+  ],
+  "top": "SOC-RULE-020"
+ },
+ "win_ransomware_shadow_copy_deletion.yml::negative::Backup job creates a shadow": {
+  "all": [],
+  "top": null
+ },
+ "win_ransomware_shadow_copy_deletion.yml::negative::Backup job lists shadows": {
+  "all": [],
+  "top": null
+ },
+ "win_ransomware_shadow_copy_deletion.yml::positive::PowerShell CIM delete": {
+  "all": [
+   "SOC-RULE-019"
+  ],
+  "top": "SOC-RULE-019"
+ },
+ "win_ransomware_shadow_copy_deletion.yml::positive::vssadmin delete all shadows": {
+  "all": [
+   "SOC-RULE-019"
+  ],
+  "top": "SOC-RULE-019"
+ },
+ "win_ransomware_shadow_copy_deletion.yml::positive::wmic shadowcopy delete": {
+  "all": [
+   "SOC-RULE-019"
+  ],
+  "top": "SOC-RULE-019"
+ },
+ "win_rclone_exfiltration.yml::negative::rclone listing remotes": {
+  "all": [],
+  "top": null
+ },
+ "win_rclone_exfiltration.yml::positive::rclone copy to MEGA": {
+  "all": [
+   "SOC-RULE-039"
+  ],
+  "top": "SOC-RULE-039"
+ },
+ "win_registry_run_key_persistence.yml::negative::Query the Run key": {
+  "all": [],
+  "top": null
+ },
+ "win_registry_run_key_persistence.yml::positive::Run key pointing to Public folder": {
+  "all": [
+   "SOC-RULE-024"
+  ],
+  "top": "SOC-RULE-024"
+ },
+ "win_remote_access_tool.yml::negative::Sanctioned install in Program Files": {
+  "all": [],
+  "top": null
+ },
+ "win_remote_access_tool.yml::positive::AnyDesk from Downloads": {
+  "all": [
+   "SOC-RULE-037"
+  ],
+  "top": "SOC-RULE-037"
+ },
+ "win_sam_hive_export.yml::negative::Software hive exported for backup": {
+  "all": [],
+  "top": null
+ },
+ "win_sam_hive_export.yml::positive::SAM hive saved": {
+  "all": [
+   "SOC-RULE-031"
+  ],
+  "top": "SOC-RULE-031"
+ },
+ "win_scheduled_task_persistence.yml::negative::Vendor updater task": {
+  "all": [],
+  "top": null
+ },
+ "win_scheduled_task_persistence.yml::positive::Task launches hidden encoded PowerShell": {
+  "all": [
+   "SOC-RULE-003"
+  ],
+  "top": "SOC-RULE-003"
+ },
+ "win_script_host_user_writable.yml::negative::Admin VBScript from a share": {
+  "all": [],
+  "top": null
+ },
+ "win_script_host_user_writable.yml::positive::Invoice.js from Downloads": {
+  "all": [
+   "SOC-RULE-023"
+  ],
+  "top": "SOC-RULE-023"
+ },
+ "win_security_log_cleared.yml::negative::Ordinary logon": {
+  "all": [],
+  "top": null
+ },
+ "win_security_log_cleared.yml::positive::Audit log cleared": {
+  "all": [
+   "SOC-RULE-029"
+  ],
+  "top": "SOC-RULE-029"
+ },
+ "win_service_install_suspicious_path.yml::negative::Vendor service in Program Files": {
+  "all": [],
+  "top": null
+ },
+ "win_service_install_suspicious_path.yml::positive::Service running from Temp": {
+  "all": [
+   "SOC-RULE-025"
+  ],
+  "top": "SOC-RULE-025"
+ },
+ "win_service_stop_backup_security.yml::negative::Query service state": {
+  "all": [],
+  "top": null
+ },
+ "win_service_stop_backup_security.yml::negative::Stop print spooler": {
+  "all": [],
+  "top": null
+ },
+ "win_service_stop_backup_security.yml::positive::Disable VSS via sc": {
+  "all": [
+   "SOC-RULE-040"
+  ],
+  "top": "SOC-RULE-040"
+ },
+ "win_service_stop_backup_security.yml::positive::Stop Veeam service": {
+  "all": [
+   "SOC-RULE-040"
+  ],
+  "top": "SOC-RULE-040"
+ },
+ "win_uac_bypass_ms_settings.yml::negative::Unrelated shell open command": {
+  "all": [],
+  "top": null
+ },
+ "win_uac_bypass_ms_settings.yml::positive::ms-settings hijack": {
+  "all": [
+   "SOC-RULE-028"
+  ],
+  "top": "SOC-RULE-028"
+ },
+ "win_winrm_remote_shell.yml::negative::whoami from a local shell": {
+  "all": [],
+  "top": null
+ },
+ "win_winrm_remote_shell.yml::positive::whoami over WinRM": {
+  "all": [
+   "SOC-RULE-036"
+  ],
+  "top": "SOC-RULE-036"
+ },
+ "win_wmi_event_subscription.yml::negative::Event filter only (no consumer)": {
+  "all": [],
+  "top": null
+ },
+ "win_wmi_event_subscription.yml::positive::CommandLineEventConsumer created": {
+  "all": [
+   "SOC-RULE-027"
+  ],
+  "top": "SOC-RULE-027"
+ },
+ "win_wmic_process_call_create.yml::negative::WMIC inventory query": {
+  "all": [],
+  "top": null
+ },
+ "win_wmic_process_call_create.yml::positive::Remote process via WMIC": {
+  "all": [
+   "SOC-RULE-022"
+  ],
+  "top": "SOC-RULE-022"
+ }
+}
