@@ -24,6 +24,7 @@ from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
 from soar.case_manager import CaseManager
+from soar.orchestrator_hook import OrchestratorWebhook
 from soar.thehive import TheHiveClient
 from soar.threat_feeds import FeedClient, FeedStore
 from soar.playbooks import PlaybookRegistry
@@ -150,6 +151,7 @@ class SOAROrchestrator:
         self.playbooks = PlaybookRegistry()
         self.case_manager = CaseManager()
         self.thehive = TheHiveClient()
+        self.orchestrator_hook = OrchestratorWebhook()
         # Bulk threat feeds (CIPHER) matched locally; nothing about events leaves (off unless configured)
         self.feeds = FeedStore()
         self.feed_client = FeedClient(self.feeds)
@@ -371,6 +373,8 @@ class SOAROrchestrator:
         incident["case_id"] = self.case_manager.attach(incident)["case_id"]
         # Optional push to the analysts' own TheHive (off unless THEHIVE_ENABLED=true)
         incident["thehive_sync"] = self.thehive.send(incident, incident["case_id"])
+        # Optional hand-off to Shuffle / n8n (off unless ORCHESTRATOR_WEBHOOK_URL + _SECRET are set)
+        incident["orchestrator_dispatch"] = self.orchestrator_hook.send(incident)
 
         # Stage 12: Real-Time Mobile / Slack / Discord Notification
         if playbook is None or playbook.notify:
