@@ -1050,3 +1050,7 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
 .tw-search-results { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
 .tw-search-hit { display: flex; flex-direction: column; text-align: left; padding: 6px 8px; border-radius: 6px; cursor: pointer;
     background: var(--bg-accent); color: var(--text-primary); border: 1px solid var(--border-color); }
+.tw-hunts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tw-hunt { display: flex; align-items: center; }
+.tw-hunt-run { background: var(--bg-accent); color: var(--color-blue); border: 1px solid var(--border-color); border-radius: 12px; padding: 2px 10px; cursor: pointer; font-size: 0.8rem; }
+#saveHunt { margin-top: 6px; }

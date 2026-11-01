@@ -266,10 +266,45 @@ async function runSearch() {
     if (data.truncated) box.appendChild(CP.el("p", `Showing ${data.results.length} of ${data.total}; refine the search.`, "tw-muted"));
 }
 
+// ------------------------------------------------------------------ F60 saved hunts
+async function loadHunts() {
+    const data = await CP.api("/api/hunts");
+    const box = $("huntList");
+    box.replaceChildren();
+    if (!data) return;
+    for (const h of data.hunts) {
+        const row = CP.el("div", null, "tw-hunt");
+        const run = CP.el("button", h.name, "tw-hunt-run");
+        run.title = `${h.query} (by ${h.owner}, run ${h.runs}x)`;
+        run.addEventListener("click", () => { $("searchBox").value = h.query; CP.api(`/api/hunts/${encodeURIComponent(h.id)}/run`); runSearch(); });
+        const del = CP.el("button", "\u2715", "pb-mini");
+        del.title = "Delete hunt";
+        del.addEventListener("click", async () => {
+            await CP.api(`/api/hunts/${encodeURIComponent(h.id)}/delete`, { method: "POST", body: JSON.stringify({ analyst: analystName() }) });
+            loadHunts();
+        });
+        row.appendChild(run);
+        row.appendChild(del);
+        box.appendChild(row);
+    }
+}
+
+async function saveHunt() {
+    const query = $("searchBox").value.trim();
+    if (query.length < 2) { $("searchBox").focus(); return; }
+    const name = window.prompt("Name for this hunt:", query.slice(0, 60));
+    if (!name) return;
+    const res = await CP.api("/api/hunts", { method: "POST", body: JSON.stringify({ name, query, analyst: analystName() || "unknown" }) });
+    if (res && res.error) window.alert(res.error);
+    loadHunts();
+}
+
 function init() {
     $("analystName").value = analystName();
     $("analystName").addEventListener("change", (e) => setAnalystName(e.target.value.trim()));
     $("onlyMine").addEventListener("change", loadQueue);
+    $("saveHunt").addEventListener("click", saveHunt);
+    loadHunts();
     $("searchBox").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 250); });
     $("caseStatus").addEventListener("change", (e) => update({ status: e.target.value }));
     $("assignMe").addEventListener("click", () => update({ assignee: analystName() }));
