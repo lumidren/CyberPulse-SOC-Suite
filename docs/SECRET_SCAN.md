@@ -31,8 +31,9 @@ system, rotate it there.
   ChatOps docs (`4f36231`). That is a template, not a value, and `--allow-known`
   now skips all-caps `<NAME>` templates.
 - gitleaks flagged `token=aB3dE5gH7jK9mN1p` in `tests/test_secret_hygiene.py`
-  (`c6c3f71`). It is an invented value the test uses as a non-placeholder, and is
-  allowlisted in `.gitleaks.toml`.
+  (`c6c3f71`). It was an invented example of a non-placeholder value. The test now
+  generates a random one each run, and the old value is allowlisted in
+  `.gitleaks.toml` and in the history scanner.
 
 ## Re-running
 

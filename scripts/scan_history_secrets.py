@@ -33,6 +33,7 @@ ASSIGNMENT = re.compile(r"(?i)(password|passwd|secret|api_key|apikey|token)\w*\s
 KNOWN_PLACEHOLDERS = {
     "cyberpulse-dev-secret-key-2026",   # former published dev default (removed, E72)
     "SecretPassword123!", "SecretWinRMPassword!",  # former sample values (removed, E72)
+    "aB3dE5gH7jK9mN1p",  # invented test value, in history since c6c3f71
 }
 # Documentation templates such as `secret_token=<TELEGRAM_WEBHOOK_SECRET>`
 TEMPLATE_VALUE = re.compile(r"^<[A-Z0-9_]+>")

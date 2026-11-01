@@ -2,6 +2,7 @@
 
 import os
 import re
+import secrets
 import sys
 import unittest
 
@@ -48,7 +49,8 @@ class TestSecretHygiene(unittest.TestCase):
         sys.path.insert(0, ROOT)
         from scripts.scan_history_secrets import is_known
         self.assertTrue(is_known("secret_token=<TELEGRAM_WEBHOOK_SECRET>`).", "<TELEGRAM_WEBHOOK_SECRET>`)."))
-        self.assertFalse(is_known("token=aB3dE5gH7jK9mN1p", "aB3dE5gH7jK9mN1p"))
+        value = secrets.token_urlsafe(16)  # generated, so no fixed high-entropy literal lands in history
+        self.assertFalse(is_known(f"token={value}", value))
         self.assertFalse(is_known("token=<lowercase-not-a-template>", "<lowercase-not-a-template>"))
 
 
