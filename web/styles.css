@@ -1064,3 +1064,20 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
 .tw-help { position: fixed; right: 16px; bottom: 16px; width: 300px; z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
 .tw-shortcut { display: flex; gap: 10px; align-items: center; margin: 4px 0; font-size: 0.85rem; }
 .tw-shortcut kbd { min-width: 22px; text-align: center; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); font-family: monospace; }
+
+/* Mobile status view (web/status.html, roadmap F63) */
+.st-body { max-width: 520px; margin: 0 auto; padding: 0 16px 24px; }
+.st-header { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0; color: var(--text-primary); }
+.st-main { display: flex; flex-direction: column; gap: 12px; }
+.st-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.st-card { display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 10px; background: var(--bg-card);
+    border: 1px solid var(--border-color); color: var(--text-secondary); text-decoration: none; }
+.st-card h2 { font-size: 0.95rem; color: var(--text-primary); margin-bottom: 6px; }
+.st-num { font-size: 2rem; font-weight: 700; color: var(--text-primary); }
+.st-num.st-small { font-size: 1rem; }
+.st-ok { border-left: 6px solid var(--color-green); color: var(--text-primary); font-weight: 600; }
+.st-alert { border-left: 6px solid var(--color-red); background: var(--color-red); color: #fff; font-weight: 700; }
+.st-sev { display: flex; flex-wrap: wrap; gap: 6px; }
+.st-recent { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.st-recent li { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; color: var(--text-primary); }
+.st-foot { text-align: center; }
