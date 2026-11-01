@@ -72,6 +72,7 @@ nav:
   - Operations:
       - Architecture: ARCHITECTURE.md
       - Releasing: RELEASING.md
+      - Recording a demo: DEMO_RECORDING.md
       - Service account: SERVICE_ACCOUNT.md
       - Secret scanning: SECRET_SCAN.md
   - Roadmap: ROADMAP.md
