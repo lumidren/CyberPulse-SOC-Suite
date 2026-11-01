@@ -142,7 +142,7 @@ internal identifiers never go to external APIs.
 - [x] **E97** Log every automated action (who/what/why/when) in tamper-evident form. — **Done**: `soar/action_ledger.py` (hash-chained who/what/why/when), hooked into every containment entry point and the kill switch, `GET /api/audit/actions`, `--verify` CLI. Tamper-evident, not tamper-proof (documented).
 - [x] **E98** Appeals/review flow: analysts mark containment wrong, the rule gets tuned. — **Done**: `soar/appeals.py`, appeal/decide/tuned endpoints (decide is lead-only), draft exceptions never auto-applied, `docs/APPEALS.md`.
 - [x] **E99** Ethics and risk register (outage, wrongful lockout, missed detections). — **Done**: `docs/RISK_REGISTER.md` (11 risks, judgement ratings, controls, residual risk), linked from README.
-- [ ] **E100** Changelog records every change in automation behavior.
+- [x] **E100** Changelog records every change in automation behavior. — **Done**: CHANGELOG "Automation behaviour" section + `scripts/automation_fingerprint.py`; test fails on unrecorded automation changes.
 
 ## Phase 5 — Engineering quality (F86–F95)
 
