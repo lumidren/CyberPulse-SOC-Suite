@@ -2,6 +2,7 @@
 
 import os
 import re
+import sys
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -42,6 +43,13 @@ class TestSecretHygiene(unittest.TestCase):
                     for m in pattern.finditer(text):
                         hits.append(f"{rel}: {label}: {m.group(0)[:40]}")
         self.assertEqual(hits, [], "Possible secrets committed:\n" + "\n".join(hits))
+
+    def test_history_scan_skips_template_placeholders_only(self):
+        sys.path.insert(0, ROOT)
+        from scripts.scan_history_secrets import is_known
+        self.assertTrue(is_known("secret_token=<TELEGRAM_WEBHOOK_SECRET>`).", "<TELEGRAM_WEBHOOK_SECRET>`)."))
+        self.assertFalse(is_known("token=aB3dE5gH7jK9mN1p", "aB3dE5gH7jK9mN1p"))
+        self.assertFalse(is_known("token=<lowercase-not-a-template>", "<lowercase-not-a-template>"))
 
 
 if __name__ == "__main__":

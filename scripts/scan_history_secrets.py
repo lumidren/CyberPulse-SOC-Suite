@@ -34,6 +34,12 @@ KNOWN_PLACEHOLDERS = {
     "cyberpulse-dev-secret-key-2026",   # former published dev default (removed, E72)
     "SecretPassword123!", "SecretWinRMPassword!",  # former sample values (removed, E72)
 }
+# Documentation templates such as `secret_token=<TELEGRAM_WEBHOOK_SECRET>`
+TEMPLATE_VALUE = re.compile(r"^<[A-Z0-9_]+>")
+
+
+def is_known(line, value):
+    return any(known in line for known in KNOWN_PLACEHOLDERS) or bool(TEMPLATE_VALUE.match(value))
 
 
 def entropy(s):
@@ -56,7 +62,7 @@ def scan(allow_known):
                 findings.append((commit, label, line[1:].strip()[:120]))
         m = ASSIGNMENT.search(line)
         if m and entropy(m.group(2)) > 4.0 and "environ" not in line and "${" not in line:
-            if allow_known and any(known in line for known in KNOWN_PLACEHOLDERS):
+            if allow_known and is_known(line, m.group(2)):
                 continue
             findings.append((commit, "high-entropy-assignment", line[1:].strip()[:120]))
     return findings
