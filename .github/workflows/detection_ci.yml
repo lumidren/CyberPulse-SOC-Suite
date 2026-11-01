@@ -60,7 +60,8 @@ jobs:
     - name: Validate Sigma syntax with sigma-cli (pySigma)
       if: matrix.python-version == '3.12'
       run: |
-        pip install "sigma-cli>=1.0,<2"
+        # pySigma 0.11 (pulled in by sigma-cli 1.x) crashes parsing conditions under pyparsing 3.3
+        pip install "sigma-cli>=1.0,<2" "pyparsing<3.3"
         sigma check rules/sigma
 
     - name: Validate Sigma YAML Schema & MITRE Tags
