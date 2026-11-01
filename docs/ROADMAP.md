@@ -189,7 +189,7 @@ internal identifiers never go to external APIs.
 - [x] **F25** True/false-positive confusion matrix with real counts. — **Done**: confusion matrix section in `docs/VALIDATION_RESULTS.md` (generated, CI-checked). 660 synthetic events; pre-exception precision 0.335 published alongside.
 - [x] **F26** Benign-activity generators (admin scripts, backups, patching). — 🔀 **Merged into E5**: `simulator/benign_baseline.py` already covers admin scripts, backups, patching, AV scanning, auth and cloud ops.
 - [x] **F27** Regression testing: a rule change must not break old detections. — **Done**: `scripts/regression_corpus.py`, `tests/regression/expected_matches.json` (130 events), `tests/test_regression_corpus.py`.
-- [ ] **F28** Multi-stage attack chain emulation (initial access to exfil).
+- [x] **F28** Multi-stage attack chain emulation (initial access to exfil). — **Done**: `simulator/attack_chain.py` `run_chain()` (10 stages, 2 hosts, telemetry only, lab_only), `tests/test_attack_chain.py`. Fixed the old "DETECTED_AND_AUTO_CONTAINED" claim: reports the real (proposed) status.
 - [ ] **F29** Evasion tests (obfuscation, renamed binaries); document bypasses.
 - [ ] **F30** Publish a "what I missed" report.
 
