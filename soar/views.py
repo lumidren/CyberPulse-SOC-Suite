@@ -73,3 +73,55 @@ def triage_queue(orchestrator, include_closed=False, assignee=None):
         "open_tasks": sum(1 for t in c["tasks"] if t["status"] == "Open"), "updated_at": c["updated_at"],
         "simulated": c.get("simulated", False),
     } for c in cases]
+
+
+# ----------------------------------------------------------------- F53 process tree
+def _image(path):
+    return str(path).replace("/", "\\").rsplit("\\", 1)[-1] if path else None
+
+
+def _build_node(nodes, children, name, kind, seen):
+    node = dict(nodes[name], relation=kind, children=[])
+    if name in seen:  # cycles cannot happen in real lineage, but names repeat across incidents
+        return node
+    node["children"] = [_build_node(nodes, children, c, k, seen | {name}) for c, k in children.get(name, [])]
+    return node
+
+
+def process_tree(orchestrator, case_id):
+    """Parent -> child process forest per host, built from the case's process telemetry.
+
+    Each node is an executable seen in the case (by name, per host); alerted processes carry
+    the rule that fired. Sysmon 10 (process access) adds an 'accessed' edge, e.g. -> lsass.exe."""
+    case = orchestrator.case_manager.cases.get(case_id)
+    if not case:
+        return None
+    hosts = {}
+    for inc in _case_incidents(orchestrator, case):
+        telemetry = inc.get("telemetry") or {}
+        details = telemetry.get("details") or {}
+        host = telemetry.get("computer_name") or "unknown"
+        nodes, edges = hosts.setdefault(host, ({}, set()))
+        rule = (inc.get("rule") or {}).get("rule_id")
+        child = _image(details.get("Image")) or _image(details.get("SourceImage"))
+        parent = _image(details.get("ParentImage"))
+        target = _image(details.get("TargetImage"))
+        for name in filter(None, (child, parent, target)):
+            nodes.setdefault(name, {"name": name, "alerts": [], "command_line": None})
+        if child:
+            nodes[child]["alerts"].append(rule)
+            nodes[child]["command_line"] = nodes[child]["command_line"] or details.get("CommandLine")
+        if parent and child:
+            edges.add((parent, child, "spawned"))
+        if child and target:
+            edges.add((child, target, "accessed"))
+    forest = []
+    for host, (nodes, edges) in sorted(hosts.items()):
+        children = {}
+        for parent, child, kind in sorted(edges):
+            children.setdefault(parent, []).append((child, kind))
+        has_parent = {c for _, c, k in edges if k == "spawned"}
+
+        roots = [n for n in sorted(nodes) if n not in has_parent and (children.get(n) or nodes[n]["alerts"])]
+        forest.append({"host": host, "roots": [_build_node(nodes, children, r, "root", frozenset()) for r in roots]})
+    return {"case_id": case_id, "hosts": forest}

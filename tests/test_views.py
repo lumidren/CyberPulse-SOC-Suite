@@ -64,3 +64,23 @@ class TestQueue(ViewsTestBase):
         self.assertEqual([c["case_id"] for c in views.triage_queue(self.orchestrator, assignee="alice")], [first])
         self.assertNotIn(second, [c["case_id"] for c in views.triage_queue(self.orchestrator)])
         self.assertIn(second, [c["case_id"] for c in views.triage_queue(self.orchestrator, include_closed=True)])
+
+
+class TestProcessTree(ViewsTestBase):
+
+    def test_tree_links_parents_children_and_access(self):
+        trees = [views.process_tree(self.orchestrator, cid) for cid in self.case_ids]
+        flat = []
+
+        def walk(node, parent=None):
+            flat.append((parent, node["name"], node["relation"], bool([a for a in node["alerts"] if a])))
+            for child in node["children"]:
+                walk(child, node["name"])
+        for tree in trees:
+            for host in tree["hosts"]:
+                for root in host["roots"]:
+                    walk(root)
+        self.assertIn(("WINWORD.EXE", "powershell.exe", "spawned", True), flat)
+        self.assertTrue(any(name == "lsass.exe" and rel == "accessed" for _, name, rel, _ in flat))
+        self.assertTrue(any(parent == "PSEXESVC.exe" and name == "cmd.exe" for parent, name, _, _ in flat))
+        self.assertIsNone(views.process_tree(self.orchestrator, "CASE-missing"))
