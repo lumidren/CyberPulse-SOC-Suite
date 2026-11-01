@@ -10,7 +10,7 @@ Sigma rules evaluated as code · explainable risk scoring · human-approved cont
 
 [![Detection-as-Code CI/CD](https://github.com/lumidren/CyberPulse-SOC-Suite/actions/workflows/detection_ci.yml/badge.svg)](https://github.com/lumidren/CyberPulse-SOC-Suite/actions)
 ![Coverage](https://img.shields.io/badge/coverage-79%25%20(measured%202026--11--01)-yellowgreen)
-![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg)
+![Python Version](https://img.shields.io/badge/Python-3.11%2B-blue.svg)
 ![Data](https://img.shields.io/badge/data-synthetic%20only-orange)
 ![License](https://img.shields.io/badge/License-MIT-purple)
 
@@ -481,7 +481,7 @@ GitHub: https://github.com/lumidren/CyberPulse-SOC-Suite
 • Added a template-based (non-LLM) triage summary, attack-graph view, synthetic AD blast-radius
   analysis and a BloodHound CE-format export of the synthetic topology.
 • Hardened the lab REST API (constant-time key auth, rate limiting, SSRF guard, body limits,
-  audit logging) and ran the test suite in GitHub Actions on Python 3.10-3.12.
+  audit logging) and ran the test suite in GitHub Actions on Python 3.11 and 3.12.
 ```
 
 </details>
