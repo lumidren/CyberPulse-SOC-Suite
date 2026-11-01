@@ -1015,3 +1015,7 @@ body {
 .tw-node-internal, .tw-node-unknown { fill: var(--text-secondary); }
 .tw-node-host { fill: var(--color-blue); }
 .tw-node-label { fill: var(--text-primary); font-size: 12px; font-family: monospace; }
+.tw-axis { stroke: var(--border-color); }
+.tw-line-mttd { stroke: var(--color-blue); fill: var(--color-blue); }
+.tw-line-mttr { stroke: var(--color-green); fill: var(--color-green); }
+polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }

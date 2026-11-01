@@ -650,6 +650,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif len(segments) == 4 and segments[0] == "api" and segments[1] == "incidents":
             self._handle_incident_subresource(segments[2], segments[3])
 
+        elif path == "/api/metrics/trend":
+            self._send_json(200, views.mttd_mttr_trend(orchestrator))
+
         elif path == "/api/graph/network":
             self._send_json(200, views.network_graph(orchestrator))
 

@@ -180,6 +180,47 @@ async function loadNetwork() {
     box.appendChild(root);
 }
 
+// ------------------------------------------------------------------ F55 MTTD / MTTR trend
+function fmtDuration(sec) {
+    if (sec === null || sec === undefined) return "not yet measured";
+    if (sec < 1) return `${Math.round(sec * 1000)} ms`;
+    if (sec < 120) return `${sec.toFixed(1)} s`;
+    if (sec < 7200) return `${(sec / 60).toFixed(1)} min`;
+    return `${(sec / 3600).toFixed(1)} h`;
+}
+
+async function loadTrend() {
+    const data = await CP.api("/api/metrics/trend");
+    const box = $("trendChart");
+    box.replaceChildren();
+    if (!data) return;
+    $("trendBasis").textContent = data.basis;
+    const points = data.points || [];
+    if (!points.length) { box.appendChild(CP.el("p", "Not yet measured: no incidents with event times.", "section-desc")); return; }
+    const series = [["mttd_sec", "MTTD", "tw-line-mttd"], ["mttr_sec", "MTTR", "tw-line-mttr"]];
+    const width = 760, height = 220, pad = 40;
+    const max = Math.max(...points.flatMap((p) => series.map(([k]) => p[k] || 0)), 0.001);
+    const x = (i) => pad + (points.length === 1 ? (width - 2 * pad) / 2 : i * (width - 2 * pad) / (points.length - 1));
+    const y = (v) => height - pad - (v / max) * (height - 2 * pad);
+    const root = svg("svg", { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": "MTTD and MTTR per day" });
+    root.appendChild(svg("line", { x1: pad, y1: height - pad, x2: width - pad, y2: height - pad, class: "tw-axis" }));
+    root.appendChild(svg("text", { x: pad, y: pad - 12, class: "tw-node-label" }, `max ${fmtDuration(max)}`));
+    for (const [key, label, cls] of series) {
+        const pts = points.map((p, i) => [i, p[key]]).filter(([, v]) => v !== null);
+        if (pts.length > 1) root.appendChild(svg("polyline", { points: pts.map(([i, v]) => `${x(i)},${y(v)}`).join(" "), class: cls }));
+        for (const [i, v] of pts) {
+            const dot = svg("circle", { cx: x(i), cy: y(v), r: 4, class: cls });
+            dot.appendChild(svg("title", {}, `${points[i].day} ${label}: ${fmtDuration(v)}`));
+            root.appendChild(dot);
+        }
+    }
+    points.forEach((p, i) => root.appendChild(svg("text", { x: x(i), y: height - pad + 16, "text-anchor": "middle", class: "tw-node-label" }, p.day.slice(5))));
+    box.appendChild(root);
+    const latest = points[points.length - 1];
+    box.appendChild(CP.el("p", `Latest day ${latest.day}: MTTD ${fmtDuration(latest.mttd_sec)} over ${latest.incidents} incident(s); ` +
+                               `MTTR ${fmtDuration(latest.mttr_sec)} over ${latest.resolved_cases} resolved case(s).`, "tw-muted"));
+}
+
 function init() {
     $("analystName").value = analystName();
     $("analystName").addEventListener("change", (e) => setAnalystName(e.target.value.trim()));
@@ -192,6 +233,7 @@ function init() {
     });
     loadQueue();
     loadNetwork();
+    loadTrend();
 }
 
 init();
