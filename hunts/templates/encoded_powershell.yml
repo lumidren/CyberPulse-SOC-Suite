@@ -1,0 +1,16 @@
+name: Encoded or hidden PowerShell and who launched it
+hypothesis: Attackers hide PowerShell payloads with encoded or hidden-window flags; admins rarely need them.
+attack: [T1059.001, T1027]
+data_sources: [Sysmon Event 1]
+steps:
+  - type: search
+    query: "-enc"
+  - type: stack
+    field: parent_process
+    where_field: process
+    where_value: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+    note: Office, browsers or script hosts as parents are far more suspicious than svchost or a management agent.
+benign: [Management agents (SCCM, Intune), Signed admin scripts run by the task scheduler]
+next_steps:
+  - Decode the command line offline and check what it fetches
+  - Add a reviewed exception for confirmed management tooling

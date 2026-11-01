@@ -68,6 +68,22 @@ class TestStack(HuntBase):
         self.assertIn("error", views.stack(self.orchestrator, "nope"))
 
 
+class TestTemplates(HuntBase):
+
+    def test_templates_load_validate_and_run(self):
+        from soar.hunt_templates import load_templates, run_template
+        templates = load_templates()
+        self.assertGreaterEqual(len(templates), 5)
+        result = run_template(self.orchestrator, templates["cloud_exfil_tools"])
+        self.assertGreater(result["steps"][0]["result"]["total"], 0, "rclone is found in the lab chain")
+        for template in templates.values():
+            run_template(self.orchestrator, template)
+
+    def test_invalid_template_rejected(self):
+        from soar.hunt_templates import validate
+        self.assertTrue(validate({"name": "x", "attack": ["X1"], "steps": [{"type": "delete"}]}))
+
+
 class TestHuntPages(unittest.TestCase):
 
     def test_hunt_page_text_only(self):

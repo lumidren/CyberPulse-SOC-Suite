@@ -72,6 +72,51 @@ async function runStack() {
     }
 }
 
+async function loadTemplates() {
+    const data = await CP.api("/api/hunt/templates");
+    const box = $("templates");
+    box.replaceChildren();
+    if (!data) return;
+    for (const t of data.templates) {
+        const card = CP.el("div", null, "hw-template");
+        card.appendChild(CP.el("strong", t.name));
+        card.appendChild(CP.el("span", t.hypothesis, "tw-muted"));
+        card.appendChild(CP.el("span", `ATT&CK ${t.attack.join(", ")} · needs ${t.data_sources.join(", ")}`, "tw-muted"));
+        const run = CP.el("button", "Run hunt", "btn-secondary");
+        run.addEventListener("click", () => runTemplate(t.id));
+        card.appendChild(run);
+        box.appendChild(card);
+    }
+}
+
+async function runTemplate(id) {
+    const data = await CP.api(`/api/hunt/templates/${encodeURIComponent(id)}/run`);
+    const box = $("templateResult");
+    box.replaceChildren();
+    if (!data || data.error) return;
+    box.appendChild(CP.el("h4", data.template.name));
+    const ol = CP.el("ol", null, "hw-steps");
+    for (const s of data.steps) {
+        const li = CP.el("li");
+        const label = s.step.type === "search" ? `search "${s.step.query}"`
+            : s.step.type === "stack" ? `stack ${s.step.field}` + (s.step.where_field ? ` where ${s.step.where_field}=${s.step.where_value}` : "")
+            : `pivot ${s.step.field}=${s.step.value}`;
+        li.appendChild(CP.el("strong", `${label}: ${s.finding}`));
+        if (s.step.note) li.appendChild(CP.el("span", s.step.note, "tw-muted"));
+        if (s.step.type === "stack") {
+            (s.result.rows || []).filter((r) => r.tail).slice(0, 10).forEach((r) => {
+                const b = CP.el("button", `${r.value} (${r.count})`, "hw-pivot");
+                b.addEventListener("click", () => { trail.length = 0; pivot(s.step.field, r.value); });
+                li.appendChild(b);
+            });
+        }
+        ol.appendChild(li);
+    }
+    box.appendChild(ol);
+    box.appendChild(CP.el("p", `Usually benign: ${data.template.benign.join("; ")}`, "tw-muted"));
+    box.appendChild(CP.el("p", `Next: ${data.template.next_steps.join("; ")}`, "tw-muted"));
+}
+
 function init() {
     const select = $("pivotField");
     FIELDS.forEach((f) => { const o = CP.el("option", f); o.value = f; select.appendChild(o); });
@@ -79,6 +124,7 @@ function init() {
         FIELDS.forEach((f) => { const o = CP.el("option", f); o.value = f; $(id).appendChild(o); });
     }
     $("stackField").value = "process";
+    loadTemplates();
     $("stackForm").addEventListener("submit", (e) => { e.preventDefault(); runStack(); });
     $("pivotForm").addEventListener("submit", (e) => {
         e.preventDefault();
