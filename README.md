@@ -57,6 +57,29 @@ under *SOAR Policies* below.
 
 ---
 
+## 🛡️ Responsible Use
+
+CyberPulse is for **defending systems you own or are explicitly authorised to protect**,
+and for learning detection engineering in a lab.
+
+- **Only in your lab.** The simulator refuses to run without `CYBERPULSE_LAB_MODE=true`,
+  only targets the lab CIDR allowlist and emits telemetry, never attacks. Do not point
+  responders, Atomic Red Team or Caldera at networks you are not authorised to test.
+- **People are affected by automation.** Isolation, account lockout and email quarantine
+  disrupt real people. Keep the approval-required default; turn on opt-in automatic mode
+  only with the kill switch, rate limits, protected assets and TTLs configured.
+- **Personal data.** Telemetry names people. Keep username masking on, keep retention
+  short, never commit real logs, and see [PRIVACY.md](docs/PRIVACY.md).
+- **Third parties.** Enrichment, chat, MISP and sandbox integrations are off by default.
+  Respect each provider's terms and never send internal identifiers to them.
+- **Not a product.** Results here come from synthetic data. Do not cite them as evidence
+  of real-world detection; see [WHAT_I_MISSED.md](docs/WHAT_I_MISSED.md).
+
+Misuse of this project to attack others is against its licence intent, its
+[Code of Conduct](CODE_OF_CONDUCT.md) and, very likely, the law.
+
+---
+
 ## 📜 Credits & Third-Party Licences
 
 CyberPulse configures and integrates with Wazuh, Sysmon, Sigma, pfSense,
