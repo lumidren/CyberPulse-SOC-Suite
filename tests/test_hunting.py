@@ -102,6 +102,30 @@ class TestBeaconing(unittest.TestCase):
         self.assertEqual(find_beacons(regular, allow_destinations=("203.0.113.80",)), [])
 
 
+class TestHuntToRule(HuntBase):
+
+    def test_draft_from_pivot_loads_and_matches_its_samples(self):
+        import yaml
+        from soar.hunt_to_rule import draft_rule
+        from soar.sigma_engine import SigmaRule
+        result = draft_rule("process", "C:\\Users\\Public\\rclone.exe", self.orchestrator.event_store.snapshot())
+        self.assertNotIn("error", result)
+        doc = yaml.safe_load(result["rule_yaml"])
+        self.assertEqual(doc["logsource"], {"product": "windows", "category": "process_creation"})
+        self.assertIn("attack.t1567.002", doc["tags"])
+        self.assertEqual(doc["status"], "experimental")
+        self.assertGreaterEqual(result["matches_own_samples"], 1)
+        samples = yaml.safe_load(result["samples_yaml"])
+        rule = SigmaRule("rules/sigma/x.yml", doc, {})
+        self.assertTrue(all(rule.matches(p["event"]) for p in samples["positive"]))
+        self.assertIn("Draft only", result["note"])
+
+    def test_draft_refusals(self):
+        from soar.hunt_to_rule import draft_rule
+        self.assertIn("error", draft_rule("event_id", "1", self.orchestrator.event_store.snapshot()))
+        self.assertIn("error", draft_rule("process", "nothing.exe", self.orchestrator.event_store.snapshot()))
+
+
 class TestHuntPages(unittest.TestCase):
 
     def test_hunt_page_text_only(self):

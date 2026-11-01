@@ -245,7 +245,7 @@ internal identifiers never go to external APIs.
 - [x] **F72** Zeek/Suricata network sensor with detections. — **Done (needs your sensors)**: `soar/network_sensors.py`, `POST /api/ingest/network` (HMAC, batched), SOC-RULE-051/052, `docs/NETWORK_SENSORS.md`. No live sensor connected.
 - [x] **F73** DNS tunneling and beaconing detection. — **Done**: SOC-RULE-053 (unique-subdomain correlation), SOC-RULE-054 (long labels), `soar/beaconing.py` + `/api/hunt/beacons` (leads, not alerts). Synthetic records only.
 - [x] **F74** JA3/JA4 TLS fingerprint detections. — **Done**: SOC-RULE-055 (placeholders marked synthetic), `scripts/update_tls_blocklist.py`, ja3/ja4/SNI pivots. No real fingerprint list shipped (unverifiable); user loads one.
-- [ ] **F75** Hunt-to-detection workflow: a hunt finding becomes a rule.
+- [x] **F75** Hunt-to-detection workflow: a hunt finding becomes a rule. — **Done**: `soar/hunt_to_rule.py`, `POST /api/hunt/draft-rule` (never saved or enabled), workbench button, `docs/HUNTING.md`.
 
 ## Phase 10b — Reporting & documentation (F76–F85)
 
