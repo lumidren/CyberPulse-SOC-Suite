@@ -25,6 +25,7 @@ from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
 from soar.appeals import AppealStore
 from soar.case_manager import CaseManager
+from soar.event_store import EventStore
 from soar.custody import CustodyLedger, sha256_of
 from soar.orchestrator_hook import OrchestratorWebhook
 from soar.sandbox import SandboxClient
@@ -156,6 +157,7 @@ class SOAROrchestrator:
         self.exceptions = ExceptionRegistry()
         self.playbooks = PlaybookRegistry()
         self.case_manager = CaseManager()
+        self.event_store = EventStore()
         self.appeals = AppealStore(ledger=self.containment_engine.ledger)
         self.custody = CustodyLedger()
         self.thehive = TheHiveClient()
@@ -188,6 +190,7 @@ class SOAROrchestrator:
                 actions += 1
         syslog = self.syslog_receiver.purge_older_than(cutoff.timestamp())
         cases = self.case_manager.purge_missing(set(self.dfir_engine.incidents))
+        self.event_store.purge_older_than(cutoff)
         self.custody.purge(set(self.dfir_engine.incidents))
         return {"retention_days": days, "incidents_purged": len(removed),
                 "actions_purged": actions, "syslog_events_purged": syslog, "cases_purged": cases}
@@ -305,6 +308,8 @@ class SOAROrchestrator:
         t_detect = time.perf_counter()
         matched_rule = self.evaluate_detection(event)
         detection_ms = round((time.perf_counter() - t_detect) * 1000, 3)
+        # Hunting sees every evaluated event, not only the ones that alerted (F66)
+        self.event_store.add(event, matched_rule)
         if not matched_rule:
             return None
 

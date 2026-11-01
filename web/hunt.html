@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunting Workbench | CyberPulse SOC Lab</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="theme.js"></script>
+</head>
+<body>
+    <div class="lab-mode-banner" role="status">
+        <i class="fa-solid fa-flask"></i>
+        <span>Hunts run over the events this server has evaluated recently (in memory, retention-purged). Use your SIEM for history.</span>
+    </div>
+    <header class="soc-header">
+        <div class="header-left">
+            <div class="logo-badge"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+            <div>
+                <h1>HUNTING WORKBENCH</h1>
+                <p class="subtitle">Pivot from any host, IP, user, process or hash to everything it touched</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <span id="roleBadge" class="role-badge"></span>
+            <button class="btn-secondary theme-toggle" id="themeToggle" type="button">Light mode</button>
+            <a class="btn-secondary" href="/index.html"><i class="fa-solid fa-arrow-left"></i> Back to console</a>
+        </div>
+    </header>
+    <main class="tw-layout hw-layout">
+        <section class="card tw-wide">
+            <div class="card-header"><h3><i class="fa-solid fa-shuffle"></i> Pivot</h3></div>
+            <form id="pivotForm" class="hw-form">
+                <select id="pivotField" aria-label="Field"></select>
+                <input id="pivotValue" type="text" maxlength="500" placeholder="value, e.g. WIN-WORKSTATION09" aria-label="Value">
+                <button class="btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Pivot</button>
+            </form>
+            <nav id="breadcrumbs" class="hw-crumbs" aria-label="Pivot history"></nav>
+            <p id="pivotSummary" class="tw-muted"></p>
+            <div id="related" class="tw-top"></div>
+            <div class="table-responsive"><table class="data-table"><thead><tr><th>Seen</th><th>Rule</th><th>Host</th><th>User</th><th>Source IP</th><th>Event</th><th>Process / command</th></tr></thead><tbody id="pivotRows"></tbody></table></div>
+        </section>
+    </main>
+    <script src="session.js"></script>
+    <script src="hunt.js"></script>
+</body>
+</html>

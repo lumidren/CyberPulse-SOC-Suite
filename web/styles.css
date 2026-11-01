@@ -1097,3 +1097,10 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
 .ex-card ul { padding-left: 18px; color: var(--text-secondary); }
 .ex-wide { grid-column: 1 / -1; }
 @media print { .ex-actions, .lab-mode-banner { display: none; } .ex-card { break-inside: avoid; } }
+
+/* Hunting workbench (web/hunt.html, roadmap F66+) */
+.hw-form { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.hw-form select, .hw-form input { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 8px; }
+.hw-form input { flex: 1; min-width: 220px; }
+.hw-crumbs { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.hw-crumb, .hw-pivot { background: var(--bg-accent); color: var(--color-blue); border: 1px solid var(--border-color); border-radius: 12px; padding: 2px 10px; cursor: pointer; font-size: 0.8rem; margin: 2px; font-family: monospace; }

@@ -301,3 +301,35 @@ def executive_summary(orchestrator):
             "A value shown as 'not yet measured' has no recorded data behind it.",
         ],
     }
+
+
+# ----------------------------------------------------------------- F66 pivot queries
+def pivot(orchestrator, field, value, limit=200):
+    """Every stored event where `field` equals `value`, and what else those events touch."""
+    from collections import Counter
+
+    from soar.event_store import PIVOT_FIELDS, field_value
+    if field not in PIVOT_FIELDS:
+        return {"error": f"field must be one of {sorted(PIVOT_FIELDS)}"}
+    needle = str(value or "").strip().lower()
+    if not needle:
+        return {"error": "value is required"}
+    hits = [e for e in orchestrator.event_store.snapshot() if str(field_value(e, field) or "").lower() == needle]
+    related = {}
+    for other in PIVOT_FIELDS:
+        if other == field:
+            continue
+        counts = Counter(str(field_value(e, other)) for e in hits if field_value(e, other) not in (None, ""))
+        if counts:
+            related[other] = [{"value": v, "count": c} for v, c in counts.most_common(10)]
+    times = sorted(e["_seen_at"] for e in hits)
+    return {
+        "field": field, "value": value, "events": len(hits),
+        "alerted": sum(1 for e in hits if e.get("_rule")),
+        "first_seen": times[0] if times else None, "last_seen": times[-1] if times else None,
+        "related": related,
+        "sample": [{"seen_at": e["_seen_at"], "rule": e.get("_rule"), "host": e.get("computer_name"),
+                    "user": e.get("user"), "source_ip": e.get("source_ip"), "event_id": e.get("event_id"),
+                    "process": field_value(e, "process"), "command_line": field_value(e, "command_line")}
+                   for e in hits[-limit:]][::-1][:50],
+    }
