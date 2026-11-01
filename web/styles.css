@@ -952,3 +952,25 @@ body {
     resize: vertical;
 }
 
+
+/* Playbook editor (web/playbooks.html, roadmap F33) */
+.pb-layout { display: grid; grid-template-columns: 260px 1fr 1fr; gap: 16px; padding: 16px; }
+@media (max-width: 1100px) { .pb-layout { grid-template-columns: 1fr; } }
+.pb-items { list-style: none; display: flex; flex-direction: column; gap: 6px; margin: 8px 0 12px; }
+.pb-item { background: var(--bg-accent); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px; cursor: pointer; text-align: left; width: 100%; }
+.pb-items small { color: var(--text-muted); font-size: 0.75rem; padding-left: 4px; }
+.pb-form label { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; color: var(--text-secondary); font-size: 0.85rem; }
+.pb-form input, .pb-form select, .pb-task-add input { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 8px; }
+.pb-form .pb-check { flex-direction: row; align-items: center; }
+.pb-tasks ol { margin: 6px 0 6px 20px; color: var(--text-primary); }
+.pb-task-add { display: flex; gap: 6px; }
+.pb-task-add input { flex: 1; }
+.pb-mini { margin-left: 6px; background: none; border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 4px; cursor: pointer; }
+.pb-flow { list-style: none; counter-reset: step; display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+.pb-flow li { counter-increment: step; display: flex; flex-direction: column; border-left: 3px solid var(--color-blue); padding: 4px 10px; background: var(--bg-secondary); border-radius: 0 6px 6px 0; }
+.pb-flow li strong::before { content: counter(step) ". "; color: var(--color-blue); }
+.pb-flow li span { color: var(--text-secondary); font-size: 0.85rem; }
+.pb-actions { display: flex; gap: 8px; margin: 10px 0; }
+.pb-result.ok { color: var(--color-green); }
+.pb-result.bad { color: var(--color-red); }
+.pb-yaml { background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; overflow-x: auto; font-size: 0.8rem; }
