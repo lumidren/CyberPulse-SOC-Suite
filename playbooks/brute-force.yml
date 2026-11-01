@@ -1,0 +1,14 @@
+name: brute-force
+version: 1.0.0
+description: Password guessing and spraying against Windows logons.
+match:
+  techniques: [T1110]
+response:
+  # The firewall block is the one TIER_1 action that opt-in AUTOMATIC mode may run on its own
+  # (with the kill switch, rate limit, TTL and protected-asset checks). Set true to always ask.
+  require_approval: false
+  notify: true
+tasks:
+  - Check whether any targeted account logged on successfully from the same source afterwards
+  - Confirm the source IP is not a known scanner, VPN concentrator or jump host
+  - Review lockout events (4740) for the targeted accounts
