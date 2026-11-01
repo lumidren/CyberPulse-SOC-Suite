@@ -186,7 +186,7 @@ internal identifiers never go to external APIs.
 - [x] **F22** Integrate MITRE Caldera for automated campaigns. — **Stub**: `soar/caldera.py`, `scripts/caldera_compare.py`, `docs/CALDERA.md`. Needs the user's Caldera server (`CALDERA_URL`/`CALDERA_API_KEY`, off by default). Tested on a hand-written fixture only; report layout unverified against a live server.
 - [x] **F23** ⭐ Automated purple-team report: what ran, what fired, what missed. — **Done**: `scripts/purple_team_report.py` → `docs/PURPLE_TEAM_REPORT.md` (16/16 synthetic steps; default policy proposes, never executes). Real-lab runs go through `caldera_compare.py`.
 - [x] **F24** Detection-latency histogram per technique. — **Done**: `scripts/benchmark_pipeline.py --histogram` → `docs/LATENCY_HISTOGRAM.md` (lab-measured, machine-specific; stated in the file). Also fixed the stale README latency table (3e6563e).
-- [ ] **F25** True/false-positive confusion matrix with real counts.
+- [x] **F25** True/false-positive confusion matrix with real counts. — **Done**: confusion matrix section in `docs/VALIDATION_RESULTS.md` (generated, CI-checked). 660 synthetic events; pre-exception precision 0.335 published alongside.
 - [x] **F26** Benign-activity generators (admin scripts, backups, patching). — 🔀 **Merged into E5**: `simulator/benign_baseline.py` already covers admin scripts, backups, patching, AV scanning, auth and cloud ops.
 - [ ] **F27** Regression testing: a rule change must not break old detections.
 - [ ] **F28** Multi-stage attack chain emulation (initial access to exfil).
