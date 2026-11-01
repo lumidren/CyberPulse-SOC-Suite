@@ -228,7 +228,7 @@ internal identifiers never go to external APIs.
 - [x] **F58** Dark/light mode. — **Done**: `web/theme.js` + light tokens in `styles.css`, toggle on console, triage and playbook pages (login follows OS / saved choice).
 - [x] **F59** Global search across alerts, hosts and IoCs. — **Done**: `views.search`, `GET /api/search?q=` (audited, masked), search box in the triage workspace.
 - [x] **F60** Saved hunts and queries. — **Done**: `soar/hunts.py` (shared, optional `HUNTS_FILE`), `/api/hunts` endpoints, hunt chips in the triage workspace.
-- [ ] **F61** Role-based views (analyst, lead, auditor).
+- [x] **F61** Role-based views (analyst, lead, auditor). — **Done**: `soar/roles.py`, server-side checks on every POST, role in sessions and audit log, `data-requires` UI hiding, README + `.env.example`.
 - [ ] **F62** Keyboard shortcuts for triage.
 - [ ] **F63** Mobile-friendly status view.
 - [ ] **F64** Executive summary view.

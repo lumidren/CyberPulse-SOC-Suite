@@ -1054,3 +1054,10 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
 .tw-hunt { display: flex; align-items: center; }
 .tw-hunt-run { background: var(--bg-accent); color: var(--color-blue); border: 1px solid var(--border-color); border-radius: 12px; padding: 2px 10px; cursor: pointer; font-size: 0.8rem; }
 #saveHunt { margin-top: 6px; }
+
+/* Role-based views (F61): presentation only, the server enforces every rule */
+:root[data-role="analyst"] [data-requires="lead"],
+:root[data-role="auditor"] [data-requires="lead"],
+:root[data-role="auditor"] [data-requires="write"] { display: none !important; }
+.role-badge { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: var(--bg-accent); color: var(--color-blue); border: 1px solid var(--border-color); }
+.role-badge:empty { display: none; }

@@ -14,7 +14,16 @@ async function ensureCsrfToken() {
     const data = await safeJson(res);
     if (!data.authenticated) window.location.replace("/login.html");
     csrfToken = data.csrf_token;
+    applyRole(data.role);
     return csrfToken;
+}
+
+// Role-based view (F61): hide controls the role cannot use; the server enforces it regardless
+function applyRole(role) {
+    if (!role) return;
+    document.documentElement.dataset.role = role;
+    const badge = document.getElementById("roleBadge");
+    if (badge) badge.textContent = role.toUpperCase();
 }
 
 window.fetch = async function(url, options = {}) {
@@ -70,6 +79,7 @@ const DATACENTER_COORDS = [40.7128, -74.0060]; // New York
 
 // Initialize on DOM Ready
 document.addEventListener("DOMContentLoaded", () => {
+    ensureCsrfToken();
     initLeafletMap();
     loadIncidents();
     loadMetrics();

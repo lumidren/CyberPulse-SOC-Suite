@@ -34,5 +34,14 @@ const CP = (() => {
         return node;
     }
 
+    // Show the caller's role and hide controls it cannot use; the server enforces it regardless
+    async function applyRole() {
+        const s = await (await fetch("/api/session", { credentials: "same-origin" })).json().catch(() => ({}));
+        if (s.role) document.documentElement.dataset.role = s.role;
+        const badge = document.getElementById("roleBadge");
+        if (badge && s.role) badge.textContent = s.role.toUpperCase();
+    }
+    document.addEventListener("DOMContentLoaded", applyRole);
+
     return { api, el };
 })();

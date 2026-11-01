@@ -47,12 +47,13 @@
         <div class="header-right">
             <div class="policy-mode-selector">
                 <label><i class="fa-solid fa-sliders"></i> Mode:</label>
-                <select id="policyModeSelect" onchange="updatePolicyMode()">
+                <select id="policyModeSelect" data-requires="lead" onchange="updatePolicyMode()">
                     <option value="APPROVAL_REQUIRED" selected>🟡 APPROVAL REQUIRED (default)</option>
                     <option value="DRY_RUN">🔵 DRY-RUN (log only)</option>
                     <option value="AUTOMATIC">🔴 AUTOMATIC (opt-in)</option>
                 </select>
             </div>
+            <span id="roleBadge" class="role-badge" title="Your role decides what you can change"></span>
             <button class="btn-secondary theme-toggle" id="themeToggle" type="button">Light mode</button>
             <button class="btn-secondary" onclick="logout()" title="End this dashboard session"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
             <button id="killSwitchBtn" class="btn-danger" onclick="toggleKillSwitch()" title="Halt all containment immediately">
@@ -221,9 +222,9 @@
                 </div>
                 <div id="incidentActionsBar" class="incident-actions" style="display:flex; gap:8px;">
                     <button class="btn-primary" id="exportReportBtn" onclick="exportNistReport()"><i class="fa-solid fa-file-invoice"></i> Export NIST Report (HTML)</button>
-                    <button class="btn-primary" id="approveBtn" style="display:none;" onclick="decideActiveIncident('approve')"><i class="fa-solid fa-check"></i> Approve Containment</button>
-                    <button class="btn-secondary" id="rejectBtn" style="display:none;" onclick="decideActiveIncident('reject')"><i class="fa-solid fa-xmark"></i> Reject</button>
-                    <button class="btn-danger" id="rollbackBtn" onclick="rollbackActiveIncident()"><i class="fa-solid fa-rotate-left"></i> Rollback Containment</button>
+                    <button class="btn-primary" id="approveBtn" data-requires="lead" style="display:none;" onclick="decideActiveIncident('approve')"><i class="fa-solid fa-check"></i> Approve Containment</button>
+                    <button class="btn-secondary" id="rejectBtn" data-requires="lead" style="display:none;" onclick="decideActiveIncident('reject')"><i class="fa-solid fa-xmark"></i> Reject</button>
+                    <button class="btn-danger" id="rollbackBtn" data-requires="write" onclick="rollbackActiveIncident()"><i class="fa-solid fa-rotate-left"></i> Rollback Containment</button>
                 </div>
             </div>
 

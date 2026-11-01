@@ -279,6 +279,7 @@ round-trips and responder execution, none of which this lab measures yet
 All REST endpoints under `/api/*` require authentication to prevent unauthorized containment or simulation triggers:
 
 * **Header Authentication**: Provide `X-API-Key: <token>` or `Authorization: Bearer <token>` (validated with a constant-time comparison).
+* **Roles (lead / analyst / auditor)**: `CYBERPULSE_API_KEY` is the lead key; `CYBERPULSE_ROLE_KEYS` adds analyst keys (triage, propose, hunt; no approvals, policy or sharing changes) and auditor keys (read-only). The server enforces roles on every request and logs refusals; the console hides controls a role cannot use (`soar/roles.py`).
 * **Configurable Secret**: Set via the `CYBERPULSE_API_KEY` environment variable. In development, if it is unset, the server generates a random key for that run and prints it once on the console (there is no hardcoded fallback); with `CYBERPULSE_ENV=production` the server **refuses to start** without an explicit key. Keep real keys in `.env` (git-ignored) or a secrets manager.
 * **CORS Restrictions**: `Access-Control-Allow-Origin` is restricted to authorized origins (configurable via `CORS_ALLOWED_ORIGIN`, defaulting to `http://localhost:5000`).
 * **Rate Limiting**: Sliding-window per-client limits — `RATE_LIMIT_PER_MINUTE` (default 240) for all API traffic plus `AUTH_FAILURE_LIMIT_PER_MINUTE` (default 10) for failed authentication attempts, returning `429` when saturated.

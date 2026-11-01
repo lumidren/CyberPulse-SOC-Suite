@@ -54,6 +54,8 @@ from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar import views
 from soar.chatops import ChatOpsApprovals
+from soar.roles import allowed as role_allowed
+from soar.roles import parse_role_keys, role_for_key
 from soar.hunts import HuntStore
 from soar.triage_package import build_zip as build_triage_zip
 from soar.guardian import GuardianFormatError, guardian_to_event
@@ -277,6 +279,10 @@ def _resolve_api_key():
     return key
 
 API_KEY = _resolve_api_key()
+# Role keys (F61): CYBERPULSE_API_KEY is the lead key; CYBERPULSE_ROLE_KEYS adds analyst/auditor keys
+ROLE_KEYS, _role_key_problems = parse_role_keys(API_KEY)
+for _problem in _role_key_problems:
+    logger.warning("CYBERPULSE_ROLE_KEYS ignored entry: %s", _problem)
 ALLOWED_ORIGIN = os.environ.get("CORS_ALLOWED_ORIGIN", "http://localhost:5000")
 
 def allowed_origins():
@@ -371,23 +377,45 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         return session_store.get(self._session_token())
 
     def _key_matches(self, token):
-        return hmac.compare_digest((token or "").encode("utf-8"), API_KEY.encode("utf-8"))
+        """The role of a valid key (lead, analyst, auditor), else None."""
+        return role_for_key(token, ROLE_KEYS)
 
-    def _has_valid_api_key(self):
+    def _api_key_role(self):
         auth_header = self.headers.get("Authorization", "")
         api_key_header = self.headers.get("X-API-Key", "")
         if auth_header.startswith("Bearer "):
             return self._key_matches(auth_header.split(" ", 1)[1].strip())
         if api_key_header:
             return self._key_matches(api_key_header.strip())
-        return False
+        return None
+
+    def _has_valid_api_key(self):
+        return self._api_key_role() is not None
+
+    def _role(self):
+        """Role of the caller: from the API key, or from the session it signed in with."""
+        role = self._api_key_role()
+        if role:
+            return role
+        session = self._session()
+        return session["principal"] if session and session["principal"] in ("lead", "analyst", "auditor") else None
 
     def _principal(self):
         """How the caller authenticated, for the audit trail (never the secret itself)."""
-        if self._has_valid_api_key():
-            return "api-key"
+        role = self._api_key_role()
+        if role:
+            return "api-key" if role == "lead" else f"api-key:{role}"
         session = self._session()
         return f"session:{session['principal']}" if session else "anonymous"
+
+    def _role_allows(self, method, path, body=None):
+        """Server-side role check (F61); refuses with 403 and an audit entry."""
+        role = self._role()
+        if role_allowed(role, method, path, body):
+            return True
+        audit_logger.warning("ROLE_DENIED client=%s role=%s method=%s path=%s", self._client_ip(), role, method, path)
+        self._send_json(403, {"error": f"Your role ({role}) cannot do this."})
+        return False
 
     def _csrf_ok(self):
         """Cookie-authenticated state changes need the session's CSRF token and a same-origin request.
@@ -433,18 +461,19 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if auth_failure_limiter.hit_without_recording(client_ip):
             self._send_json(429, {"error": "Too many failed sign-ins. Wait a minute and retry."})
             return
-        if not self._key_matches(str(data.get("api_key", ""))):
+        role = self._key_matches(str(data.get("api_key", "")))
+        if not role:
             auth_failure_limiter.allow(client_ip)
             audit_logger.warning("LOGIN_FAILED client=%s", client_ip)
             self._send_json(401, {"error": "Invalid API key."})
             return
-        token, csrf = session_store.create(principal="api-key-holder")
-        audit_logger.info("LOGIN client=%s", client_ip)
+        token, csrf = session_store.create(principal=role)
+        audit_logger.info("LOGIN client=%s role=%s", client_ip, role)
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self._set_session_cookie(token, SESSION_TTL_MIN * 60)
         self.end_headers()
-        self.wfile.write(json.dumps({"status": "SUCCESS", "csrf_token": csrf,
+        self.wfile.write(json.dumps({"status": "SUCCESS", "csrf_token": csrf, "role": role,
                                      "expires_in_sec": SESSION_TTL_MIN * 60}).encode("utf-8"))
 
     def _handle_logout(self):
@@ -611,7 +640,8 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         if path == "/api/session":
             session = self._session()
             self._send_json(200, {"authenticated": bool(session),
-                                  "csrf_token": session["csrf_token"] if session else None})
+                                  "csrf_token": session["csrf_token"] if session else None,
+                                  "role": session["principal"] if session else None})
             return
 
         # Enforce rate limiting + API key authentication on all /api/* endpoints
@@ -913,6 +943,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         if login_request:
             self._handle_login(data)
+            return
+
+        if path.startswith("/api/") and not signed_ingest and not self._role_allows("POST", path, data):
             return
 
         if path in ("/api/simulate", "/api/purple-team/run") and not lab_mode_enabled():
