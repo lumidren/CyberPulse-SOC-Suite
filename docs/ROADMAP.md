@@ -199,7 +199,7 @@ internal identifiers never go to external APIs.
 - [x] **F32** ⭐ Playbooks as YAML that analysts edit without touching Python. — **Done**: `soar/playbooks.py`, `playbooks/*.yml` (6 playbooks + README), wired into `process_event`; included in the container image. Playbooks can only tighten policy.
 - [x] **F33** Visual playbook editor in the UI. — **Done**: `web/playbooks.html`/`playbooks.js`, `GET /api/playbooks`, `POST /api/playbooks/validate` (no writes; changes via review). Checked in the browser against a local server.
 - [x] **F34** Playbook versioning and testing. — **Done**: fingerprints in `playbooks/meta/versions.yml`, `playbooks/CHANGELOG.md`, 8 behaviour cases in `playbooks/tests/cases.yml` (`python -m soar.playbooks --test`).
-- [ ] **F35** Case management: auto-open tickets with full context.
+- [x] **F35** Case management: auto-open tickets with full context. — **Done**: `soar/case_manager.py`, `GET/POST /api/cases`, `docs/CASE_MANAGEMENT.md`. In-memory like incidents.
 - [ ] **F36** Integrate TheHive and Cortex.
 - [ ] **F37** Integrate MISP for IoC sharing.
 - [ ] **F38** Integrate the CIPHER project's feeds live.

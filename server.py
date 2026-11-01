@@ -499,7 +499,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     # Responses that carry incident/telemetry data get account names masked (E45)
     MASKED_PREFIXES = ("/api/incidents", "/api/alerts", "/api/approvals", "/api/simulate",
-                       "/api/purple-team/run", "/api/ingest")
+                       "/api/purple-team/run", "/api/ingest", "/api/cases")
 
     def _send_json(self, status_code, payload):
         if isinstance(payload, dict) and urlparse(self.path).path.startswith("/api/identity"):
@@ -625,6 +625,18 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         elif len(segments) == 4 and segments[0] == "api" and segments[1] == "incidents":
             self._handle_incident_subresource(segments[2], segments[3])
+
+        elif path == "/api/cases":
+            status = parse_qs(parsed.query).get("status", [None])[0]
+            cases = orchestrator.case_manager.list(status)
+            self._send_json(200, {"total": len(cases), "cases": cases})
+
+        elif len(segments) == 3 and segments[0] == "api" and segments[1] == "cases":
+            case = orchestrator.case_manager.cases.get(segments[2])
+            if case:
+                self._send_json(200, {"case": case})
+            else:
+                self._send_json(404, {"error": "Case not found"})
 
         elif path == "/api/approvals":
             pending = orchestrator.containment_engine.pending_approvals()
@@ -824,6 +836,18 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "error": "Simulation disabled: start the server with CYBERPULSE_LAB_MODE=true, "
                          "and only in a lab you own or are authorised to test."
             })
+            return
+
+        case_segments = [s for s in path.split("/") if s]
+        if len(case_segments) == 3 and case_segments[:2] == ["api", "cases"]:
+            analyst = str(data.get("analyst", "")).strip()[:64]
+            actor = f"{analyst} ({self._principal()})" if analyst else self._principal()
+            result = orchestrator.case_manager.update(
+                case_segments[2], actor, status=data.get("status"), assignee=data.get("assignee"),
+                note=data.get("note"), task=data.get("task"), task_status=data.get("task_status"))
+            audit_logger.info("CASE_UPDATE client=%s actor=%s case=%s result=%s",
+                              self._client_ip(), actor, case_segments[2], result["status"])
+            self._send_json(200 if result["status"] == "SUCCESS" else 400, result)
             return
 
         if path == "/api/playbooks/validate":
