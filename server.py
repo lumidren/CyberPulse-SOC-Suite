@@ -56,6 +56,9 @@ from soar import views
 from soar.chatops import ChatOpsApprovals
 from soar.post_incident import review_markdown
 from soar.hunt_to_rule import draft_rule
+from soar.nl_hunt import EXAMPLES as NL_HUNT_EXAMPLES
+from soar.nl_hunt import QueryNotUnderstood
+from soar.nl_hunt import translate as translate_hunt
 from soar.network_sensors import SensorFormatError
 from soar.network_sensors import convert_batch as convert_sensor_batch
 from soar.live_query import LiveQueryClient, LiveQueryRefused, osquery_catalogue, velociraptor_catalogue
@@ -1148,6 +1151,16 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             audit_logger.info("CASE_UPDATE client=%s actor=%s case=%s result=%s",
                               self._client_ip(), actor, case_segments[2], result["status"])
             self._send_json(200 if result["status"] == "SUCCESS" else 400, result)
+            return
+
+        if path == "/api/hunt/translate":
+            # Fixed phrase grammar, not a model: unrecognised words come back in not_understood
+            try:
+                result = translate_hunt(str(data.get("text", "")), orchestrator.event_store.snapshot())
+            except QueryNotUnderstood as exc:
+                self._send_json(400, {"error": str(exc), "examples": NL_HUNT_EXAMPLES})
+                return
+            self._send_json(200, result)
             return
 
         if path == "/api/hunt/draft-rule":

@@ -263,7 +263,7 @@ internal identifiers never go to external APIs.
 ## Phase 10c — Differentiators (F96–F100)
 
 - [x] **F96** ⭐ LLM-assisted triage summary; the analyst keeps final say. — Off by default; tested with a stub client, not against the live API (docs/LLM_TRIAGE.md).
-- [ ] **F97** Natural-language hunt queries translated to SPL/KQL.
+- [x] **F97** Natural-language hunt queries translated to SPL/KQL. — Fixed phrase grammar (soar/nl_hunt.py); words outside it are reported, not guessed.
 - [ ] **F98** Detection-quality leaderboard across the rules.
 - [ ] **F99** Public "red vs blue" scenario pack others can reuse.
 - [ ] **F100** ⭐ Honest case study: what worked, what failed, what I'd change.

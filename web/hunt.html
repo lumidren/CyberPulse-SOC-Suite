@@ -34,6 +34,20 @@
             <div id="templateResult"></div>
         </section>
         <section class="card tw-wide">
+            <div class="card-header"><h3><i class="fa-solid fa-language"></i> Ask in plain English</h3></div>
+            <p class="section-desc">A fixed phrase grammar, not a language model: words it does not know are listed and ignored. The SPL and KQL are generated; check them in your SIEM.</p>
+            <form id="askForm" class="hw-form">
+                <input id="askText" type="text" maxlength="300" placeholder="e.g. powershell.exe with parent winword.exe containing -enc in the last 24 hours" aria-label="Hunt question">
+                <button class="btn-primary" type="submit"><i class="fa-solid fa-wand-magic-sparkles"></i> Translate</button>
+            </form>
+            <div id="askBox" class="hw-draft" hidden>
+                <p id="askSummary" class="tw-muted"></p>
+                <h4>Splunk SPL</h4><pre id="askSpl" class="pb-yaml"></pre>
+                <h4>Microsoft KQL</h4><pre id="askKql" class="pb-yaml"></pre>
+                <h4>Sigma</h4><pre id="askSigma" class="pb-yaml"></pre>
+            </div>
+        </section>
+        <section class="card tw-wide">
             <div class="card-header"><h3><i class="fa-solid fa-shuffle"></i> Pivot</h3></div>
             <form id="pivotForm" class="hw-form">
                 <select id="pivotField" aria-label="Field"></select>

@@ -144,6 +144,23 @@ async function draftFromPivot() {
     $("draftSamplesYaml").textContent = data.samples_yaml;
 }
 
+async function ask() {
+    const text = $("askText").value.trim();
+    if (!text) return;
+    const data = await CP.api("/api/hunt/translate", { method: "POST", body: JSON.stringify({ text }) });
+    $("askBox").hidden = false;
+    for (const id of ["askSpl", "askKql", "askSigma"]) $(id).textContent = "";
+    if (!data || data.error) {
+        $("askSummary").textContent = ((data && data.error) || "failed") + (data && data.examples ? ". Examples: " + data.examples.join(" | ") : "");
+        return;
+    }
+    const ignored = data.not_understood.length ? ` Not understood (ignored): ${data.not_understood.join(", ")}.` : "";
+    $("askSummary").textContent = `Understood: ${data.understood.join("; ")}. ${data.matches} stored event(s) match.${ignored}`;
+    $("askSpl").textContent = data.splunk;
+    $("askKql").textContent = data.kql;
+    $("askSigma").textContent = data.sigma_yaml;
+}
+
 function init() {
     const select = $("pivotField");
     FIELDS.forEach((f) => { const o = CP.el("option", f); o.value = f; select.appendChild(o); });
@@ -153,6 +170,7 @@ function init() {
     $("stackField").value = "process";
     loadTemplates();
     $("findBeacons").addEventListener("click", findBeacons);
+    $("askForm").addEventListener("submit", (e) => { e.preventDefault(); ask(); });
     $("draftRule").addEventListener("click", draftFromPivot);
     $("stackForm").addEventListener("submit", (e) => { e.preventDefault(); runStack(); });
     $("pivotForm").addEventListener("submit", (e) => {
