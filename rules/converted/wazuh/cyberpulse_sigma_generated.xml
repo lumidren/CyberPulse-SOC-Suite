@@ -80,6 +80,30 @@
     <group>cyberpulse,sigma_generated,</group>
 </rule>
 
+<!-- SOC-RULE-051: High-Severity Suricata IDS Alert (generated from rules/sigma/net_suricata_high_severity_alert.yml; review before use) -->
+<rule id="110510" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.severity" type="pcre2">(?i)(?:^1$)</field>
+    <description>SOC-RULE-051: High-Severity Suricata IDS Alert</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+
+<!-- SOC-RULE-052: Executable Downloaded over HTTP by a Script Client or to a Raw IP (generated from rules/sigma/net_zeek_http_executable_from_script_client.yml; review before use) -->
+<rule id="110520" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.resp_mime_types" type="pcre2">(?i)(?:application/x\-dosexec)</field>
+    <field name="win.eventdata.user_agent" type="pcre2">(?i)(?:WindowsPowerShell|Microsoft\-CryptoAPI|BITS|curl|Wget)</field>
+    <description>SOC-RULE-052: Executable Downloaded over HTTP by a Script Client or to a Raw IP</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+<rule id="110521" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.resp_mime_types" type="pcre2">(?i)(?:application/x\-dosexec)</field>
+    <field name="win.eventdata.host" type="pcre2">(?i)(?:^[0-9]{1,3}(\.[0-9]{1,3}){3}(:[0-9]+)?$)</field>
+    <description>SOC-RULE-052: Executable Downloaded over HTTP by a Script Client or to a Raw IP</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+
 <!-- SOC-RULE-034: Active Directory Reconnaissance Commands (generated from rules/sigma/win_ad_reconnaissance.yml; review before use) -->
 <rule id="110340" level="8">
     <if_group>windows</if_group>

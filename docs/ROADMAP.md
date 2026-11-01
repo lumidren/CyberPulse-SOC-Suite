@@ -242,7 +242,7 @@ internal identifiers never go to external APIs.
 - [x] **F69** Stack counting and long-tail analysis. — **Done**: `views.stack`, `GET /api/hunt/stack`, stack panel with pivots in `web/hunt.html`.
 - [x] **F70** YARA scanning integration. — **Done**: `soar/yara_scan.py` (yara-python or a built-in subset that refuses unsupported syntax), `POST /api/evidence/yara-scan` (evidence dir only), `docs/YARA.md`. libyara path untested (not installed).
 - [x] **F71** Velociraptor or osquery integration for live endpoint queries. — **Done (needs Fleet/Velociraptor)**: `soar/live_query.py` (catalogue-only, lab URLs), `GET /api/live-query/catalogue`, `POST /api/live-query`, `docs/LIVE_QUERIES.md`. Stubbed HTTP only.
-- [ ] **F72** Zeek/Suricata network sensor with detections.
+- [x] **F72** Zeek/Suricata network sensor with detections. — **Done (needs your sensors)**: `soar/network_sensors.py`, `POST /api/ingest/network` (HMAC, batched), SOC-RULE-051/052, `docs/NETWORK_SENSORS.md`. No live sensor connected.
 - [ ] **F73** DNS tunneling and beaconing detection.
 - [ ] **F74** JA3/JA4 TLS fingerprint detections.
 - [ ] **F75** Hunt-to-detection workflow: a hunt finding becomes a rule.

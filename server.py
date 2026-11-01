@@ -54,6 +54,8 @@ from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar import views
 from soar.chatops import ChatOpsApprovals
+from soar.network_sensors import SensorFormatError
+from soar.network_sensors import convert_batch as convert_sensor_batch
 from soar.live_query import LiveQueryClient, LiveQueryRefused, osquery_catalogue, velociraptor_catalogue
 from soar.yara_scan import scan_evidence_file
 from soar.hunt_templates import load_templates as load_hunt_templates
@@ -965,7 +967,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         # Login and the HMAC-signed webhook receiver do not use the API key / session gate
         login_request = path == "/api/session"
-        signed_ingest = path in ("/api/ingest", "/api/ingest/guardian")
+        signed_ingest = path in ("/api/ingest", "/api/ingest/guardian", "/api/ingest/network")
         if path == "/api/session/logout":
             if not self._csrf_ok():
                 self._send_json(403, {"error": "CSRF check failed."})
@@ -1291,6 +1293,25 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json(200, {"status": "SUCCESS", "active_policy_mode": new_mode})
             else:
                 self._send_json(400, {"error": "Invalid mode. Choose APPROVAL_REQUIRED, DRY_RUN, or AUTOMATIC."})
+
+        elif path == "/api/ingest/network":
+            try:
+                events = convert_sensor_batch(data)
+            except SensorFormatError as exc:
+                self._send_json(400, {"status": "ERROR", "error": str(exc)})
+                return
+            accepted, rejected, incidents = 0, [], []
+            for i, event in enumerate(events):
+                result = orchestrator.webhook_ingest.handle_ingest(event)
+                if result["status"] != "SUCCESS":
+                    rejected.append({"index": i, "error": result.get("error")})
+                    continue
+                accepted += 1
+                incident = orchestrator.process_event(result["normalized_event"])
+                if incident:
+                    incidents.append(incident["incident_id"])
+            self._send_json(200, {"status": "SUCCESS", "accepted": accepted, "rejected": rejected[:20],
+                                  "incidents": incidents})
 
         elif path == "/api/ingest/guardian":
             try:

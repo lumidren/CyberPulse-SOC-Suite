@@ -1,0 +1,3 @@
+// SOC-RULE-051: High-Severity Suricata IDS Alert (generated from rules/sigma/net_suricata_high_severity_alert.yml; review before use)
+SuricataAlert_CL
+| where ((Severity =~ "1"))

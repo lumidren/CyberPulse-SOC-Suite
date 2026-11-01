@@ -47,6 +47,11 @@ DATA_SOURCE_NAMES = {
     ("aws", "cloudtrail"): "AWS CloudTrail (management events)",
     ("azure", "signinlogs"): "Entra ID sign-in logs",
     ("azure", "auditlogs"): "Entra ID audit logs",
+    ("zeek", "conn"): "Zeek conn.log (network sensor)",
+    ("zeek", "dns"): "Zeek dns.log (network sensor)",
+    ("zeek", "ssl"): "Zeek ssl.log (network sensor)",
+    ("zeek", "http"): "Zeek http.log (network sensor)",
+    ("suricata", "alert"): "Suricata EVE alerts (network IDS)",
     ("m365", "email"): "Microsoft 365 email events (message trace / Defender for Office)",
     ("guardian", "anomaly"): "GUARDIAN anomaly alerts (ML, via /api/ingest/guardian)",
 }

@@ -216,3 +216,11 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-050: Phishing Email Reported by a User or Failing DMARC with a Link or Attachment (`email_phishing_reported_or_auth_fail.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-051: High-Severity Suricata IDS Alert (`net_suricata_high_severity_alert.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-052: Executable Downloaded over HTTP by a Script Client or to a Raw IP (`net_zeek_http_executable_from_script_client.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

@@ -1,0 +1,2 @@
+``` SOC-RULE-051: High-Severity Suricata IDS Alert (generated from rules/sigma/net_suricata_high_severity_alert.yml; review before use) ```
+index=* (source="*suricata:alert*") | where ((match('Severity', "(?i)^1$")))

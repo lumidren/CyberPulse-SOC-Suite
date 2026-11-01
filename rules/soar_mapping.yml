@@ -305,3 +305,15 @@ rules:
     action_recommended: QUARANTINE_EMAIL
     version: 1.0.0
     detection_sha256: 9b9f5017ed293a975643288fd65e099bdde2c9664690dd6707e7cd29e7fd75fb
+  a41fa4df-8bbb-4874-b81f-2ef76c9fb4bf:
+    soc_rule_id: SOC-RULE-051
+    name: High-Severity Suricata IDS Alert
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: f15b41752599237fa1b98f72d74d60a0b1da70153f6c2a5f6f66e9894c5d503b
+  d8a85241-b6b3-41e4-9cdd-a3db2a62b4f9:
+    soc_rule_id: SOC-RULE-052
+    name: Executable Downloaded over HTTP by a Script Client or to a Raw IP
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 608fa5a31522fb57d5df8143d4e9b36fb7dbccd2b0fad524892e74490db0e495
