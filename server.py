@@ -671,6 +671,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                                   "allowed_actions": sorted(ALLOWED_ACTIONS),
                                   "default": registry.default.name if registry.default else None})
 
+        elif path == "/api/feeds":
+            self._send_json(200, {"configured": orchestrator.feed_client.configured, "status": orchestrator.feeds.status})
+
         elif path == "/api/exceptions":
             self._send_json(200, orchestrator.exceptions.status())
 
@@ -1110,6 +1113,9 @@ def _start_ttl_sweeper(interval_sec=60):
             try:
                 for entry in orchestrator.expire_containment():
                     audit_logger.info("TTL_EXPIRY action=%s rollback=%s", entry["original_action_id"], entry["rollback_id"])
+                feeds = orchestrator.feed_client
+                if feeds.configured and time.time() - (feeds.store.status["loaded_at"] or 0) >= feeds.refresh_sec:
+                    feeds.refresh()
                 purged = orchestrator.apply_retention(RETENTION_DAYS)
                 if purged["incidents_purged"] or purged["syslog_events_purged"]:
                     audit_logger.info("RETENTION_PURGE %s", purged)

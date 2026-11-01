@@ -202,7 +202,7 @@ internal identifiers never go to external APIs.
 - [x] **F35** Case management: auto-open tickets with full context. — **Done**: `soar/case_manager.py`, `GET/POST /api/cases`, `docs/CASE_MANAGEMENT.md`. In-memory like incidents.
 - [x] **F36** Integrate TheHive and Cortex. — **Done (needs your TheHive/Cortex)**: `soar/thehive.py` (`THEHIVE_ENABLED`, lab URLs only, PAP:RED on internal observables), `docs/THEHIVE_CORTEX.md`. Fixed the misleading "TheHive case created" timeline entry. Tested with a stubbed HTTP layer only.
 - [x] **F37** Integrate MISP for IoC sharing. — **Done (needs your MISP)**: `soar/misp.py`, `GET /api/cases/<id>/misp`, `POST /api/cases/<id>/misp/push`, `docs/MISP.md`. Public IPs/hashes only, org-only distribution, simulated excluded, never automatic. Stubbed HTTP only.
-- [ ] **F38** Integrate the CIPHER project's feeds live.
+- [x] **F38** Integrate the CIPHER project's feeds live. — **Stub (needs CIPHER's feed)**: `soar/threat_feeds.py` (JSON + STIX 2.1, local matching, ETag refresh), `GET /api/feeds`, `docs/THREAT_FEEDS.md`. CIPHER's real format not checked.
 - [ ] **F39** Consume GUARDIAN anomaly alerts as an ingest source.
 - [ ] **F40** Shuffle or n8n integration as an alternative orchestrator.
 - [ ] **F41** Enrichment from OTX, URLhaus, Shodan, GreyNoise and Censys.

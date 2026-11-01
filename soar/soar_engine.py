@@ -25,6 +25,7 @@ from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
 from soar.case_manager import CaseManager
 from soar.thehive import TheHiveClient
+from soar.threat_feeds import FeedClient, FeedStore
 from soar.playbooks import PlaybookRegistry
 from soar.rule_exceptions import ExceptionRegistry
 from soar.sigma_correlation import CorrelationEngine
@@ -149,6 +150,11 @@ class SOAROrchestrator:
         self.playbooks = PlaybookRegistry()
         self.case_manager = CaseManager()
         self.thehive = TheHiveClient()
+        # Bulk threat feeds (CIPHER) matched locally; nothing about events leaves (off unless configured)
+        self.feeds = FeedStore()
+        self.feed_client = FeedClient(self.feeds)
+        if self.feed_client.configured:
+            self.feed_client.refresh()
         # Optional external enrichment (off unless EXTERNAL_ENRICHMENT_ENABLED=true + API keys)
         self.intel_client = ThreatIntelClient()
         # Circuit-breaker trips page a human through the configured notification channel
@@ -236,6 +242,7 @@ class SOAROrchestrator:
                 "hash": self.intel_client.lookup(hash_val) if hash_val else {"status": "NO_INDICATOR", "verdicts": []},
             },
             "plugins": run_enrichers(event),
+            "feed_matches": self.feeds.match(event),
             "ip_reputation": ip_intel,
             "hash_reputation": THREAT_INTEL_CACHE.get(hash_val, {
                 "reputation": "UNKNOWN",
