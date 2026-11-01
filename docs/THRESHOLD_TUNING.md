@@ -4,6 +4,27 @@
 
 Firings per candidate threshold. *Suggested* is the most sensitive threshold with at most 0 benign firing(s); review it before changing a rule.
 
+## SOC-RULE-049: High-Score Behavioural Anomaly from GUARDIAN
+
+Parameter `selection.AnomalyScore|gte` (gte), current **0.8**, suggested **none (no usable signal in this data)**.
+
+| Threshold | Benign firings |
+| ---: | ---: |
+| 0 | 0 |
+| 1 | 0 |
+| 2 | 0 |
+| 3 | 0 |
+| 5 | 0 |
+| 10 | 0 |
+| 15 | 0 |
+| 20 | 0 |
+| 30 | 0 |
+| 50 | 0 |
+| 100 | 0 |
+| 200 | 0 |
+
+No benign event reaches this rule at any candidate threshold, so this data cannot tune it.
+
 ## SOC-RULE-002: Password Brute Force Authentication Failure Spike
 
 Parameter `selection.FailedAttemptsCount|gte` (gte), current **10**, suggested **5**.

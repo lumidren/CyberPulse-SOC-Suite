@@ -1,0 +1,52 @@
+# Positive/negative samples for rules/sigma/guardian_high_score_anomaly.yml (synthetic lab events)
+rule: guardian_high_score_anomaly.yml
+positive:
+- name: Score 0.91 anomaly
+  event:
+    event_id: 9950
+    event_source: guardian:anomaly
+    computer_name: WIN-WORKSTATION09
+    source_ip: 10.0.2.15
+    user: 'CORP\j.doe'
+    details:
+      GuardianAlertId: g-1
+      AnomalyType: impossible_logon_sequence
+      AnomalyScore: 0.91
+      Model: iforest-v3
+- name: Score exactly 0.8
+  event:
+    event_id: 9950
+    event_source: guardian:anomaly
+    computer_name: WIN-WORKSTATION09
+    source_ip: 10.0.2.15
+    user: 'CORP\j.doe'
+    details:
+      GuardianAlertId: g-1
+      AnomalyType: impossible_logon_sequence
+      AnomalyScore: 0.8
+      Model: iforest-v3
+negative:
+- name: Score 0.42 anomaly
+  event:
+    event_id: 9950
+    event_source: guardian:anomaly
+    computer_name: WIN-WORKSTATION09
+    source_ip: 10.0.2.15
+    user: 'CORP\j.doe'
+    details:
+      GuardianAlertId: g-1
+      AnomalyType: impossible_logon_sequence
+      AnomalyScore: 0.42
+      Model: iforest-v3
+- name: Same fields from another source
+  event:
+    event_id: 9950
+    event_source: Security
+    computer_name: WIN-WORKSTATION09
+    source_ip: 10.0.2.15
+    user: 'CORP\j.doe'
+    details:
+      GuardianAlertId: g-1
+      AnomalyType: impossible_logon_sequence
+      AnomalyScore: 0.95
+      Model: iforest-v3

@@ -208,3 +208,7 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-048: AWS Canary Credential Used (`cloud_aws_canary_credential_use.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-049: High-Score Behavioural Anomaly from GUARDIAN (`guardian_high_score_anomaly.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

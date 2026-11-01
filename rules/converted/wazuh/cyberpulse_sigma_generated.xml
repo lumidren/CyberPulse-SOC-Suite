@@ -48,6 +48,13 @@
     <group>cyberpulse,sigma_generated,</group>
 </rule>
 
+<!-- SOC-RULE-049: High-Score Behavioural Anomaly from GUARDIAN (generated from rules/sigma/guardian_high_score_anomaly.yml; review before use) -->
+<rule id="110490" level="8">
+    <if_group>windows</if_group>
+    <description>SOC-RULE-049: High-Score Behavioural Anomaly from GUARDIAN</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+
 <!-- SOC-RULE-034: Active Directory Reconnaissance Commands (generated from rules/sigma/win_ad_reconnaissance.yml; review before use) -->
 <rule id="110340" level="8">
     <if_group>windows</if_group>

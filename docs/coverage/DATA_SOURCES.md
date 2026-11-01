@@ -13,11 +13,12 @@ those techniques lose all coverage.
 | AWS CloudTrail (management events) | 3 | 4 | T1078.004, T1548, T1552.001, T1562.008 |
 | Sysmon Event 11 (file create) | 2 | 1 | T1486 |
 | Entra ID audit logs | 1 | 1 | T1528 |
-| Entra ID sign-in logs | 1 | 1 | T1078 |
+| Entra ID sign-in logs | 1 | 1 | - |
+| GUARDIAN anomaly alerts (ML, via /api/ingest/guardian) | 1 | 1 | - |
 | Sysmon (driver load, Event 6) | 1 | 1 | T1068 |
 | Sysmon Event 10 (process access) | 1 | 1 | T1003.001 |
 | Windows System log (Service Control Manager) | 1 | 1 | T1543.003 |
 | Sysmon Event 13 (registry value set) | 1 | 1 | T1548.002 |
 | Sysmon Events 19-21 (WMI activity) | 1 | 1 | T1546.003 |
 
-**54 techniques** across **48 rules** and **11 data sources**.
+**54 techniques** across **49 rules** and **12 data sources**.

@@ -123,6 +123,26 @@
   ],
   "top": "SOC-RULE-005"
  },
+ "guardian_high_score_anomaly.yml::negative::Same fields from another source": {
+  "all": [],
+  "top": null
+ },
+ "guardian_high_score_anomaly.yml::negative::Score 0.42 anomaly": {
+  "all": [],
+  "top": null
+ },
+ "guardian_high_score_anomaly.yml::positive::Score 0.91 anomaly": {
+  "all": [
+   "SOC-RULE-049"
+  ],
+  "top": "SOC-RULE-049"
+ },
+ "guardian_high_score_anomaly.yml::positive::Score exactly 0.8": {
+  "all": [
+   "SOC-RULE-049"
+  ],
+  "top": "SOC-RULE-049"
+ },
  "win_ad_reconnaissance.yml::negative::net use mapping a share": {
   "all": [],
   "top": null

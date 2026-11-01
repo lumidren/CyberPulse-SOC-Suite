@@ -47,6 +47,8 @@ DETAIL_FIELD_ALLOWLIST = {
     "SignatureStatus",
     # deception rules (F16): object access on canary files, canary IAM user
     "ObjectName", "ProcessName", "userIdentity.userName",
+    # GUARDIAN anomaly alerts (F39)
+    "GuardianAlertId", "AnomalyType", "AnomalyScore", "Model", "Summary",
     # provenance
     "simulation", "CredentialMaterial", "raw",
 }
