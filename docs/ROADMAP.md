@@ -195,7 +195,7 @@ internal identifiers never go to external APIs.
 
 ## Phase 8 — SOAR & automation (F31–F50)
 
-- [ ] **F31** ⭐ Approval workflows via Slack, Teams or Telegram buttons.
+- [x] **F31** ⭐ Approval workflows via Slack, Teams or Telegram buttons. — **Done (needs your Slack app / Telegram bot)**: `soar/chatops.py`, `POST /api/chatops/slack|telegram`, `docs/CHATOPS.md`. Teams opens the console (incoming webhooks can't call back). Tested with locally signed requests only.
 - [ ] **F32** ⭐ Playbooks as YAML that analysts edit without touching Python.
 - [ ] **F33** Visual playbook editor in the UI.
 - [ ] **F34** Playbook versioning and testing.
