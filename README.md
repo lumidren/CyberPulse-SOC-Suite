@@ -68,7 +68,8 @@ and for learning detection engineering in a lab.
   ([Rules of Engagement](docs/RULES_OF_ENGAGEMENT.md)).
 - **People are affected by automation.** Isolation, account lockout and email quarantine
   disrupt real people. Keep the approval-required default; turn on opt-in automatic mode
-  only with the kill switch, rate limits, protected assets and TTLs configured.
+  only with the kill switch, rate limits, protected assets and TTLs configured, and read
+  the [risk register](docs/RISK_REGISTER.md).
 - **Personal data.** Telemetry names people. Keep username masking on, keep retention
   short, never commit real logs, and see [PRIVACY.md](docs/PRIVACY.md).
 - **Third parties.** Enrichment, chat, MISP and sandbox integrations are off by default.
