@@ -1007,3 +1007,11 @@ body {
 .tw-proc { font-family: monospace; padding: 1px 6px; border-radius: 4px; background: var(--bg-secondary); }
 .tw-proc-alert { background: var(--color-red); color: #fff; }
 .tw-accessed > .tw-proc { border: 1px dashed var(--color-orange); }
+.tw-wide { grid-column: 1 / -1; }
+.tw-graph svg { width: 100%; height: auto; }
+.tw-edge { stroke: var(--text-muted); opacity: 0.7; }
+.tw-node { stroke: var(--bg-primary); stroke-width: 2; }
+.tw-node-external { fill: var(--color-red); }
+.tw-node-internal, .tw-node-unknown { fill: var(--text-secondary); }
+.tw-node-host { fill: var(--color-blue); }
+.tw-node-label { fill: var(--text-primary); font-size: 12px; font-family: monospace; }

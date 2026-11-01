@@ -221,7 +221,7 @@ internal identifiers never go to external APIs.
 - [x] **F51** ⭐ Attack timeline view per incident. — **Done**: `web/triage.html` + `triage.js` + shared `session.js`, `GET /api/cases/<id>/timeline` (`soar/views.py`).
 - [x] **F52** ⭐ Alert triage queue with severity, status and assignee. — **Done**: `GET /api/triage/queue` (`views.triage_queue`), queue + case controls in `web/triage.html`.
 - [x] **F53** Process tree visualization. — **Done**: `views.process_tree`, `GET /api/cases/<id>/process-tree`, tree panel in the triage workspace.
-- [ ] **F54** Network graph of attacker-to-host relationships.
+- [x] **F54** Network graph of attacker-to-host relationships. — **Done**: `views.network_graph`, `GET /api/graph/network`, SVG panel in the triage workspace.
 - [ ] **F55** MTTD/MTTR trend chart over time.
 - [ ] **F56** Top-talkers and top-rules widgets.
 - [x] **F57** Geo-map of attacker IPs. — **Done earlier** (dd759e8): Leaflet geo-map on the Overview tab plots attacker IP origins (synthetic geo data).

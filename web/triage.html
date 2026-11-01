@@ -54,6 +54,11 @@
             <p class="section-desc">Which process started which, per host; red = raised an alert, dashed = accessed (not spawned).</p>
             <div id="processTree" class="tw-tree"></div>
         </section>
+        <section class="card tw-wide">
+            <div class="card-header"><h3><i class="fa-solid fa-circle-nodes"></i> Source to host relationships</h3></div>
+            <p class="section-desc">Every source IP (left; red = external, grey = internal) and the hosts it touched (right). Line width = number of incidents.</p>
+            <div id="networkGraph" class="tw-graph"></div>
+        </section>
     </main>
 
     <script src="session.js"></script>

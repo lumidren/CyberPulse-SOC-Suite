@@ -84,3 +84,17 @@ class TestProcessTree(ViewsTestBase):
         self.assertTrue(any(name == "lsass.exe" and rel == "accessed" for _, name, rel, _ in flat))
         self.assertTrue(any(parent == "PSEXESVC.exe" and name == "cmd.exe" for parent, name, _, _ in flat))
         self.assertIsNone(views.process_tree(self.orchestrator, "CASE-missing"))
+
+
+class TestNetworkGraph(ViewsTestBase):
+
+    def test_edges_connect_sources_to_hosts(self):
+        graph = views.network_graph(self.orchestrator)
+        ids = {n["id"]: n for n in graph["nodes"]}
+        for edge in graph["edges"]:
+            self.assertEqual(ids[edge["source"]]["type"], "source")
+            self.assertEqual(ids[edge["target"]]["type"], "host")
+            self.assertGreaterEqual(edge["count"], 1)
+        self.assertEqual(ids["10.0.2.15"]["kind"], "internal")
+        self.assertEqual(views._ip_kind("198.51.100.33"), "external")
+        self.assertEqual(sum(e["count"] for e in graph["edges"]), len(self.orchestrator.dfir_engine.incident_list))

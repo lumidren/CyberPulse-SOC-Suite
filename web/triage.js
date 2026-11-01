@@ -142,6 +142,44 @@ async function update(change) {
     await selectCase(state.selected);
 }
 
+// ------------------------------------------------------------------ F54 network graph
+function svg(tag, attrs, text) {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
+    if (text !== undefined) node.textContent = text;
+    return node;
+}
+
+async function loadNetwork() {
+    const data = await CP.api("/api/graph/network");
+    const box = $("networkGraph");
+    box.replaceChildren();
+    if (!data || !data.edges || !data.edges.length) {
+        box.appendChild(CP.el("p", "No incidents with a source IP and host yet.", "section-desc"));
+        return;
+    }
+    const sources = data.nodes.filter((n) => n.type === "source");
+    const hosts = data.nodes.filter((n) => n.type === "host");
+    const rowH = 34, width = 760, height = Math.max(sources.length, hosts.length) * rowH + 20;
+    const pos = {};
+    sources.forEach((n, i) => { pos[n.id] = [170, 20 + i * rowH]; });
+    hosts.forEach((n, i) => { pos[n.id] = [width - 190, 20 + i * rowH]; });
+    const root = svg("svg", { viewBox: `0 0 ${width} ${height}`, role: "img", "aria-label": "Source to host graph" });
+    for (const e of data.edges) {
+        const [x1, y1] = pos[e.source], [x2, y2] = pos[e.target];
+        const line = svg("line", { x1, y1, x2, y2, class: "tw-edge", "stroke-width": Math.min(1 + e.count, 8) });
+        line.appendChild(svg("title", {}, `${e.source} -> ${e.target}: ${e.count} incident(s), ${e.techniques.join(", ")}`));
+        root.appendChild(line);
+    }
+    for (const n of data.nodes) {
+        const [x, y] = pos[n.id];
+        root.appendChild(svg("circle", { cx: x, cy: y, r: 6, class: `tw-node tw-node-${n.kind}` }));
+        root.appendChild(svg("text", { x: n.type === "source" ? x - 12 : x + 12, y: y + 4,
+                                       "text-anchor": n.type === "source" ? "end" : "start", class: "tw-node-label" }, n.id));
+    }
+    box.appendChild(root);
+}
+
 function init() {
     $("analystName").value = analystName();
     $("analystName").addEventListener("change", (e) => setAnalystName(e.target.value.trim()));
@@ -153,6 +191,7 @@ function init() {
         if (note) { update({ note }); $("caseNote").value = ""; }
     });
     loadQueue();
+    loadNetwork();
 }
 
 init();

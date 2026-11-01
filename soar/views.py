@@ -125,3 +125,41 @@ def process_tree(orchestrator, case_id):
         roots = [n for n in sorted(nodes) if n not in has_parent and (children.get(n) or nodes[n]["alerts"])]
         forest.append({"host": host, "roots": [_build_node(nodes, children, r, "root", frozenset()) for r in roots]})
     return {"case_id": case_id, "hosts": forest}
+
+
+# ----------------------------------------------------------------- F54 network graph
+def _ip_kind(ip):
+    import ipaddress
+    try:
+        addr = ipaddress.ip_address(str(ip))
+    except ValueError:
+        return "unknown"
+    from soar.notifications import _DOC_NETS
+    # RFC 5737 ranges are the lab's stand-ins for internet attackers; Python counts them as private
+    if any(addr in net for net in _DOC_NETS):
+        return "external"
+    if addr.is_private or addr.is_loopback:
+        return "internal"
+    return "external"
+
+
+def network_graph(orchestrator, limit=200):
+    """Source IP -> host relationships across all incidents: who touched what, how often, with which techniques."""
+    edges = {}
+    for inc in list(orchestrator.dfir_engine.incident_list)[-limit:]:
+        telemetry = inc.get("telemetry") or {}
+        src, host = telemetry.get("source_ip"), telemetry.get("computer_name")
+        if not src or not host:
+            continue
+        edge = edges.setdefault((src, host), {"source": src, "target": host, "count": 0, "techniques": set(),
+                                              "last_seen": None, "simulated": True})
+        edge["count"] += 1
+        edge["techniques"].add((inc.get("rule") or {}).get("mitre_id"))
+        edge["last_seen"] = max(filter(None, [edge["last_seen"], inc.get("created_at")]))
+        edge["simulated"] = edge["simulated"] and bool(inc.get("simulated"))
+    nodes = {}
+    for src, host in edges:
+        nodes.setdefault(src, {"id": src, "type": "source", "kind": _ip_kind(src), "degree": 0})["degree"] += 1
+        nodes.setdefault(host, {"id": host, "type": "host", "kind": "host", "degree": 0})["degree"] += 1
+    return {"nodes": sorted(nodes.values(), key=lambda n: (n["type"], -n["degree"], n["id"])),
+            "edges": [dict(e, techniques=sorted(filter(None, e["techniques"]))) for e in edges.values()]}
