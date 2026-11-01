@@ -48,7 +48,7 @@ def guardian_to_event(alert):
         "event_source": GUARDIAN_SOURCE,
         "timestamp": alert.get("detected_at"),
         "computer_name": entity.get("host") or (entity.get("id") if entity.get("type") == "host" else "unknown"),
-        "source_ip": entity.get("ip") or (entity.get("id") if entity.get("type") == "ip" else "0.0.0.0"),
+        "source_ip": entity.get("ip") or (entity.get("id") if entity.get("type") == "ip" else "0.0.0.0"),  # nosec B104 - "no IP" placeholder, not a bind
         "user": entity.get("id") if entity.get("type") == "user" else entity.get("user"),
         "technique_id": technique if TECHNIQUE_RE.match(technique) else "Unknown",
         "technique_name": f"GUARDIAN anomaly: {alert['anomaly_type']}",

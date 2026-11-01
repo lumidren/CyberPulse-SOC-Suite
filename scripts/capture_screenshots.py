@@ -39,7 +39,7 @@ def wait_for(url, timeout=30):
     deadline = time.time() + timeout
     while time.time() < deadline:
         try:
-            with urllib.request.urlopen(url, timeout=2):
+            with urllib.request.urlopen(url, timeout=2):  # nosec B310 - http://127.0.0.1 server started above
                 return
         except OSError:
             time.sleep(0.3)
@@ -49,7 +49,7 @@ def wait_for(url, timeout=30):
 def post(base, key, path, body):
     req = urllib.request.Request(base + path, data=json.dumps(body).encode(), method="POST",
                                  headers={"Content-Type": "application/json", "X-API-Key": key})
-    with urllib.request.urlopen(req, timeout=30) as resp:
+    with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310 - http://127.0.0.1 server started above
         return json.load(resp)
 
 
