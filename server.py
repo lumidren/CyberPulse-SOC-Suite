@@ -536,7 +536,8 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     # Responses that carry incident/telemetry data get account names masked (E45)
     MASKED_PREFIXES = ("/api/incidents", "/api/alerts", "/api/approvals", "/api/simulate",
-                       "/api/purple-team/run", "/api/ingest", "/api/cases", "/api/triage", "/api/graph", "/api/stats", "/api/search", "/api/hunts")
+                       "/api/purple-team/run", "/api/ingest", "/api/cases", "/api/triage", "/api/graph",
+                       "/api/stats", "/api/search", "/api/hunts", "/api/appeals")
 
     def _send_json(self, status_code, payload):
         if isinstance(payload, dict) and urlparse(self.path).path.startswith("/api/identity"):
@@ -790,6 +791,11 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif path == "/api/feeds":
             self._send_json(200, {"configured": orchestrator.feed_client.configured, "status": orchestrator.feeds.status})
 
+        elif path == "/api/appeals":
+            store = orchestrator.appeals
+            self._send_json(200, {"appeals": sorted(store.appeals.values(), key=lambda a: a["created_at"], reverse=True),
+                                  "per_rule": store.per_rule()})
+
         elif path == "/api/audit/actions":
             ledger = orchestrator.containment_engine.ledger
             limit = min(int(parse_qs(parsed.query).get("limit", ["200"])[0] or 200), 1000)
@@ -979,6 +985,26 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         case_segments = [s for s in path.split("/") if s]
+        if len(case_segments) == 4 and case_segments[:2] == ["api", "incidents"] and case_segments[3] == "appeal":
+            incident = orchestrator.dfir_engine.incidents.get(case_segments[2])
+            if not incident:
+                self._send_json(404, {"error": "Incident not found"})
+                return
+            result = orchestrator.appeals.open(incident, str(data.get("analyst", "")).strip()[:64],
+                                               data.get("kind"), data.get("reason"))
+            self._send_json(200 if result["status"] == "SUCCESS" else 400, result)
+            return
+        if len(case_segments) == 4 and case_segments[:2] == ["api", "appeals"] and case_segments[3] in ("decide", "tuned"):
+            store, appeal_id = orchestrator.appeals, case_segments[2]
+            actor = str(data.get("analyst", "")).strip()[:64]
+            if case_segments[3] == "decide":
+                appeal = store.appeals.get(appeal_id) or {}
+                result = store.decide(appeal_id, actor, bool(data.get("accept")), data.get("reason"),
+                                      orchestrator.dfir_engine.incidents.get(appeal.get("incident_id")))
+            else:
+                result = store.mark_tuned(appeal_id, actor, data.get("reference"))
+            self._send_json(200 if result["status"] == "SUCCESS" else 400, result)
+            return
         if path == "/api/hunts":
             result = hunts.add(data.get("name"), data.get("query"), data.get("analyst"), data.get("description", ""))
             self._send_json(200 if result["status"] == "SUCCESS" else 400, result)

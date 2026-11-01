@@ -6,7 +6,7 @@ access, as before). Optional extra keys come from ``CYBERPULSE_ROLE_KEYS``, e.g.
 ``analyst:<key>,auditor:<key>``; each key must be at least 24 characters.
 
   lead     everything: approve or reject containment, change the policy mode, release the
-           kill switch, change enrichment settings, push IoCs to MISP.
+           kill switch, change enrichment settings, push IoCs to MISP, decide appeals.
   analyst  triage: work cases, propose actions, roll back, run hunts, engage the kill
            switch (anyone may halt automation), but no approvals, policy or sharing changes.
   auditor  read only: every GET (and is itself audit-logged), no state changes at all.
@@ -28,6 +28,7 @@ LEAD_ONLY = [
     re.compile(r"^/api/policy/config$"),
     re.compile(r"^/api/enrichment/(config|cache/clear)$"),
     re.compile(r"^/api/cases/[^/]+/misp/push$"),
+    re.compile(r"^/api/appeals/[^/]+/decide$"),
 ]
 
 

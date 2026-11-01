@@ -140,7 +140,7 @@ internal identifiers never go to external APIs.
 - [x] **E95** Rule exclusions and tuning guidance. — **Done**: `docs/TUNING.md`, linked from README and `FALSE_POSITIVES.md`.
 - [x] **E96** Rules of Engagement doc for the lab. — **Done**: `docs/RULES_OF_ENGAGEMENT.md` (fill-in template matching the code's allowlists), linked from README.
 - [x] **E97** Log every automated action (who/what/why/when) in tamper-evident form. — **Done**: `soar/action_ledger.py` (hash-chained who/what/why/when), hooked into every containment entry point and the kill switch, `GET /api/audit/actions`, `--verify` CLI. Tamper-evident, not tamper-proof (documented).
-- [ ] **E98** Appeals/review flow: analysts mark containment wrong, the rule gets tuned.
+- [x] **E98** Appeals/review flow: analysts mark containment wrong, the rule gets tuned. — **Done**: `soar/appeals.py`, appeal/decide/tuned endpoints (decide is lead-only), draft exceptions never auto-applied, `docs/APPEALS.md`.
 - [ ] **E99** Ethics and risk register (outage, wrongful lockout, missed detections).
 - [ ] **E100** Changelog records every change in automation behavior.
 
