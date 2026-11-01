@@ -207,7 +207,7 @@ internal identifiers never go to external APIs.
 - [x] **F40** Shuffle or n8n integration as an alternative orchestrator. — **Done (needs your Shuffle/n8n)**: `soar/orchestrator_hook.py`, `docs/SHUFFLE_N8N.md`. Signed POST; full payload only to lab addresses; approvals via the normal API. Stubbed HTTP only.
 - [x] **F41** Enrichment from OTX, URLhaus, Shodan, GreyNoise and Censys. — **Done (needs your keys)**: `soar/intel_providers.py` (OTX, URLhaus, GreyNoise score; Shodan, Censys context only), per-provider limits, `docs/THIRD_PARTY_APIS.md`. Never called with real keys.
 - [x] **F42** Multi-source reputation scoring with weighted consensus. — **Done**: weighted consensus with `agreement` in `soar/reputation.py`, `REPUTATION_WEIGHTS`, documented defaults (judgement, not measured).
-- [ ] **F43** Automatic user notification for suspicious logins.
+- [x] **F43** Automatic user notification for suspicious logins. — **Done (needs your SMTP + address book)**: `soar/user_notify.py` (off by default, STARTTLS, no links, never for simulated/service/protected accounts, 24 h cooldown). No email actually sent.
 - [ ] **F44** MFA step-up or session revocation for Entra ID.
 - [ ] **F45** Email quarantine playbook for phishing.
 - [ ] **F46** Phishing triage playbook (URL detonation, header analysis).
