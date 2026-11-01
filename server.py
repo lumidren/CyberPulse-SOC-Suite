@@ -54,6 +54,7 @@ from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar import views
 from soar.chatops import ChatOpsApprovals
+from soar.post_incident import review_markdown
 from soar.hunt_to_rule import draft_rule
 from soar.network_sensors import SensorFormatError
 from soar.network_sensors import convert_batch as convert_sensor_batch
@@ -787,6 +788,21 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json(404, {"error": "Case not found"})
             else:
                 self._send_json(200, timeline)
+
+        elif len(segments) == 4 and segments[:2] == ["api", "cases"] and segments[3] == "review":
+            body = review_markdown(orchestrator, segments[2])
+            if body is None:
+                self._send_json(404, {"error": "Case not found"})
+            else:
+                # The review lists hosts, rules and analysts, not end-user account names
+                data = body.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "text/markdown; charset=utf-8")
+                self.send_header("Content-Disposition", f'attachment; filename="{segments[2]}-review.md"')
+                self.send_header("Content-Length", str(len(data)))
+                self._send_cors_headers()
+                self.end_headers()
+                self.wfile.write(data)
 
         elif len(segments) == 4 and segments[:2] == ["api", "cases"] and segments[3] == "process-tree":
             tree = views.process_tree(orchestrator, segments[2])

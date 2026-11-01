@@ -355,6 +355,9 @@ function init() {
     $("searchBox").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 250); });
     $("caseStatus").addEventListener("change", (e) => update({ status: e.target.value }));
     $("assignMe").addEventListener("click", () => update({ assignee: analystName() }));
+    $("reviewDoc").addEventListener("click", () => {
+        if (state.selected) window.open(`/api/cases/${encodeURIComponent(state.selected)}/review`, "_blank");
+    });
     $("addNote").addEventListener("click", () => {
         const note = $("caseNote").value.trim();
         if (note) { update({ note }); $("caseNote").value = ""; }
