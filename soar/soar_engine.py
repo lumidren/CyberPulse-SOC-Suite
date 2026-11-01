@@ -23,6 +23,7 @@ from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
+from soar.appeals import AppealStore
 from soar.case_manager import CaseManager
 from soar.custody import CustodyLedger, sha256_of
 from soar.orchestrator_hook import OrchestratorWebhook
@@ -155,6 +156,7 @@ class SOAROrchestrator:
         self.exceptions = ExceptionRegistry()
         self.playbooks = PlaybookRegistry()
         self.case_manager = CaseManager()
+        self.appeals = AppealStore(ledger=self.containment_engine.ledger)
         self.custody = CustodyLedger()
         self.thehive = TheHiveClient()
         self.orchestrator_hook = OrchestratorWebhook()
