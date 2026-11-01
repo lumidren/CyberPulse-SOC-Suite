@@ -25,6 +25,7 @@ from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
 from soar.case_manager import CaseManager
 from soar.orchestrator_hook import OrchestratorWebhook
+from soar.sandbox import SandboxClient
 from soar.thehive import TheHiveClient
 from soar.user_notify import UserNotifier
 from soar.threat_feeds import FeedClient, FeedStore
@@ -155,6 +156,7 @@ class SOAROrchestrator:
         self.thehive = TheHiveClient()
         self.orchestrator_hook = OrchestratorWebhook()
         self.user_notifier = UserNotifier()
+        self.sandbox = SandboxClient()
         # Bulk threat feeds (CIPHER) matched locally; nothing about events leaves (off unless configured)
         self.feeds = FeedStore()
         self.feed_client = FeedClient(self.feeds)
@@ -402,6 +404,8 @@ class SOAROrchestrator:
         if event.get("event_source") == "m365:email":
             # Offline header/URL analysis for the analyst (no network calls, metadata only)
             incident["phishing_triage"] = phishing_triage(event.get("details") or {})
+        # Lab sandbox: hash look-ups always, URL detonation only if opted in (off unless SANDBOX_URL is set)
+        incident["sandbox"] = self.sandbox.for_incident(event)
 
         incident["playbook"] = ({**playbook.summary(), "tasks": [{"title": t, "status": "Open"} for t in playbook.tasks]}
                                 if playbook else None)
