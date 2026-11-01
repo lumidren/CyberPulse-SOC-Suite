@@ -6,6 +6,7 @@ Resilient Containment, Circuit Breakers, Rollback, DFIR, and Purple Team Replay.
 
 import unittest
 import os
+import re
 os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")  # tests run in a declared lab
 import sys
 import time
@@ -420,7 +421,9 @@ class TestSOCLabPlatform(unittest.TestCase):
         with open(os.path.join(root, "web", "app.js"), encoding="utf-8") as fh:
             js = fh.read()
         self.assertIn("function escapeHtml(value)", js)
-        self.assertNotRegex(js, r"await (res|response)\.json\(\)")
+        # Every response is parsed through safeJson; only safeJson itself may call .json()
+        outside = re.sub(r"async function safeJson\(res\) \{.*?\n\}", "", js, flags=re.S)
+        self.assertNotRegex(outside, r"await (res|response)\.json\(\)")
 
     def test_cloud_detection_aws_and_entra(self):
         """Verify AWS STS AssumeRole and Entra ID Impossible Travel detections and containments"""

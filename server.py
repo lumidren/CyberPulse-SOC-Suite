@@ -344,6 +344,8 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("X-Frame-Options", "DENY")
         self.send_header("Referrer-Policy", "no-referrer")
+        # API data is never cached; console files are revalidated so an upgrade is picked up at once
+        self.send_header("Cache-Control", "no-store" if urlparse(self.path).path.startswith("/api/") else "no-cache")
         super().end_headers()
 
     def _client_ip(self):
