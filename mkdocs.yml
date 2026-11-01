@@ -43,6 +43,7 @@ nav:
       - MITRE coverage narrative: MITRE_COVERAGE_AND_GAPS.md
   - Validation and honesty:
       - What I missed: WHAT_I_MISSED.md
+      - Metrics: METRICS.md
       - Validation results: VALIDATION_RESULTS.md
       - Evasion tests: EVASION.md
       - Purple-team report: PURPLE_TEAM_REPORT.md

@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+"""
+Generate docs/METRICS.md (roadmap F85): every number the project quotes, each produced by
+this script from the repository, with the command that reproduces it and what it does
+NOT mean.
+
+    CYBERPULSE_LAB_MODE=true python scripts/metrics_page.py           # write
+    CYBERPULSE_LAB_MODE=true python scripts/metrics_page.py --check   # exit 1 if stale
+
+Machine-dependent measurements (latency) and slow ones (code coverage) are linked, not
+embedded, because they are not reproducible to the digit.
+"""
+
+import argparse
+import os
+import sys
+import unittest
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")
+
+from scripts.coverage_report import data_sources, gaps, rule_quality  # noqa: E402
+from scripts.evasion_report import results as evasion_results  # noqa: E402
+from scripts.purple_team_report import build as purple_build  # noqa: E402
+from scripts.validate_detections import run_baseline, run_confusion, run_scripted  # noqa: E402
+from soar.sigma_correlation import CorrelationEngine  # noqa: E402
+from soar.sigma_engine import SigmaEngine  # noqa: E402
+
+REPORT = os.path.join(ROOT, "docs", "METRICS.md")
+
+
+def count_tests():
+    suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, "tests"), "test_*.py")
+
+    def flatten(s):
+        for item in s:
+            yield from (flatten(item) if isinstance(item, unittest.TestSuite) else [item])
+    return sum(1 for _ in flatten(suite))
+
+
+def metrics():
+    rules, correlations = SigmaEngine().rules, CorrelationEngine().rules
+    techniques = {t for r in rules + correlations for t in r.technique_ids}
+    targets, uncovered = gaps()
+    scripted = run_scripted()
+    baseline = run_baseline()
+    conf = run_confusion()["overall"]
+    evasion = evasion_results()
+    purple = [r for _, _, rows in purple_build() for r in rows]
+    quality = rule_quality()
+    suppressed = sum((baseline.get("suppressed") or {}).values())
+    tp, fp = conf["tp"], conf["fp"]
+    return [
+        ("Detection content", [
+            ("Single-event Sigma rules", len(rules), "`ls rules/sigma/*.yml`", "Count, not quality."),
+            ("Correlation rules", len(correlations), "`ls rules/sigma/correlations/*.yml`", ""),
+            ("ATT&CK techniques with at least one rule", len(techniques), "`python scripts/export_navigator.py`",
+             "A rule existing is not proof of detection."),
+            ("Target techniques covered", f"{len(targets) - len(uncovered)}/{len(targets)}", "`python scripts/coverage_report.py`",
+             "Targets are chosen by the author (rules/coverage_targets.yml)."),
+            ("Data sources the rules depend on", len(data_sources()), "`python scripts/coverage_report.py`", ""),
+            ("Mean rule quality score", f"{sum(r['score'] for r in quality) / len(quality):.1f}/100",
+             "`python scripts/coverage_report.py`", "A review heuristic with documented weights, not efficacy."),
+        ]),
+        ("Validation (synthetic, self-authored data)", [
+            ("Scripted attack runs detected by the expected rule",
+             f"{sum(r['detected'] for r in scripted.values())}/{sum(r['runs'] for r in scripted.values())}",
+             "`python scripts/validate_detections.py`", "Attacks and rules have the same author: a regression check."),
+            ("Benign baseline events alerting (after exceptions)", f"{baseline['false_positives']}/{baseline['events']}",
+             "`python scripts/validate_detections.py`", f"{suppressed} matches suppressed by exceptions tuned on this same baseline."),
+            ("Precision without exceptions", f"{tp / (tp + fp + suppressed):.3f}" if tp + fp + suppressed else "n/a",
+             "`python scripts/validate_detections.py`", "On synthetic data; says nothing about real traffic."),
+            ("Purple-team steps detected", f"{sum(1 for r in purple if r['verdict'].startswith('DETECTED'))}/{len(purple)}",
+             "`python scripts/purple_team_report.py`", "Synthetic scenarios."),
+            ("Evasion variants that bypass their rule", f"{sum(1 for e in evasion if e['actual'] == 'bypass')}/{len(evasion)}",
+             "`python scripts/evasion_report.py`", "Known, unfixed weaknesses."),
+        ]),
+        ("Engineering", [
+            ("Automated test cases", count_tests(), "`python -m unittest discover -s tests -p \"test_*.py\"`", ""),
+            ("Code coverage", "not embedded", "`coverage run -m unittest discover -s tests && coverage report`",
+             "CI fails below 75% (.coveragerc); the value varies with the run, so it is not frozen here."),
+            ("Pipeline latency", "not embedded", "`python scripts/benchmark_pipeline.py --runs 20`",
+             "Machine-specific; last measurement and conditions in LATENCY_HISTOGRAM.md and the README."),
+        ]),
+    ]
+
+
+def render():
+    lines = ["# Metrics", "",
+             "> Generated by `CYBERPULSE_LAB_MODE=true python scripts/metrics_page.py`. Every number below is produced",
+             "> by that script from this repository; nothing is typed in by hand. All detection data is synthetic.", ""]
+    for title, rows in metrics():
+        lines += [f"## {title}", "", "| Metric | Value | Reproduce | What it does not mean |", "| :--- | ---: | :--- | :--- |"]
+        lines += [f"| {name} | {value} | {source} | {caveat or '-'} |" for name, value, source, caveat in rows]
+        lines.append("")
+    lines += ["Not measured anywhere in this repository: real-world detection rate, real false-positive rate, mean time to",
+              "detect on real infrastructure, and analyst time saved. Do not quote numbers for those.", ""]
+    return "\n".join(lines)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate the metrics page")
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    body = render()
+    if args.check:
+        try:
+            with open(REPORT, encoding="utf-8") as fh:
+                sys.exit(0 if fh.read().replace("\r\n", "\n") == body else 1)
+        except FileNotFoundError:
+            sys.exit(1)
+    with open(REPORT, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(body)
+    print(f"wrote {os.path.relpath(REPORT, ROOT)}")
+
+
+if __name__ == "__main__":
+    main()
