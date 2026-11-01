@@ -27,6 +27,7 @@ Lowest scores first.
 | `SOC-RULE-050` | Phishing Email Reported by a User or Failing DMARC with a Link or Attachment | 70 | 2/3 | 0 |
 | `SOC-RULE-051` | High-Severity Suricata IDS Alert | 70 | 1/2 | 0 |
 | `SOC-RULE-052` | Executable Downloaded over HTTP by a Script Client or to a Raw IP | 70 | 2/2 | 0 |
+| `SOC-RULE-055` | TLS Client Fingerprint on the Local JA3/JA4 Blocklist | 70 | 2/1 | 0 |
 | `SOC-RULE-001` | OS Credential Dumping via LSASS Memory Access | 80 | 2/3 | 0 |
 | `SOC-RULE-010` | Microsoft Entra ID Impossible Travel Anomaly | 80 | 1/2 | 0 |
 | `SOC-RULE-012` | Pass-the-Hash Logon Patterns (NTLM and seclogo) | 90 | 2/3 | 0 |
@@ -67,4 +68,4 @@ Lowest scores first.
 | `SOC-RULE-008` | Active Directory Replication Abuse (DCSync) via Non-DC Account | 100 | 1/1 | 0 |
 | `SOC-RULE-009` | Suspicious AWS STS AssumeRole Abuse Across External Account | 100 | 1/2 | 0 |
 
-Mean score: **86.4** across 50 rules.
+Mean score: **86.1** across 51 rules.

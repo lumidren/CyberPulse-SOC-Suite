@@ -232,3 +232,7 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-053: Many Unique Subdomains of One Domain from One Host (DNS tunnelling) (`correlations/net_dns_tunnel_unique_subdomains.yml`)
 
 * **1.0.0** (2026-11-01): Initial correlation rule.
+
+## SOC-RULE-055: TLS Client Fingerprint on the Local JA3/JA4 Blocklist (`net_zeek_tls_fingerprint_blocklist.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

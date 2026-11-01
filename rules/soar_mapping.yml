@@ -329,3 +329,9 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: d716c101b742edb1b5eee5de3c3808f2838a1cfefc9f493e8eede1efeefb4766
+  9816dd19-d474-400a-822b-b5d4160cd4b4:
+    soc_rule_id: SOC-RULE-055
+    name: TLS Client Fingerprint on the Local JA3/JA4 Blocklist
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: dc709c29aa8cd7548b9e903b33d7b99aa99afa19f03c3408773b7b27bed17876

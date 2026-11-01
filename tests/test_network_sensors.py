@@ -74,5 +74,20 @@ class TestNetworkIngest(unittest.TestCase):
             server.ingest_verifier = saved
 
 
+class TestTlsFingerprints(unittest.TestCase):
+
+    def test_blocklist_parsing_and_placeholders_are_marked(self):
+        from scripts.update_tls_blocklist import RULE, read_ja3, read_ja4
+        self.assertEqual(read_ja3("# header\n" + "A" * 32 + ",x\nshort,y\n"), ["a" * 32])
+        self.assertEqual(read_ja4("t13d1516h2_8daaf6152771_02713d6af862\nnot-ja4\n"), ["t13d1516h2_8daaf6152771_02713d6af862"])
+        with open(RULE, encoding="utf-8") as fh:
+            self.assertIn("SYNTHETIC LAB PLACEHOLDERS", fh.read())
+
+    def test_ja3_is_a_hunting_pivot(self):
+        from soar.event_store import field_value
+        event = zeek_to_event("ssl", {"id.orig_h": "10.0.2.15", "ja3": "b" * 32, "server_name": "x.example"})
+        self.assertEqual(field_value(event, "ja3"), "b" * 32)
+
+
 if __name__ == "__main__":
     unittest.main()
