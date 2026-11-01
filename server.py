@@ -52,6 +52,7 @@ from soar.report_generator import IncidentReportGenerator
 from soar.auth import SessionStore
 from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
+from soar import views
 from soar.chatops import ChatOpsApprovals
 from soar.triage_package import build_zip as build_triage_zip
 from soar.guardian import GuardianFormatError, guardian_to_event
@@ -660,6 +661,13 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self._send_json(200, {"case": case})
             else:
                 self._send_json(404, {"error": "Case not found"})
+
+        elif len(segments) == 4 and segments[:2] == ["api", "cases"] and segments[3] == "timeline":
+            timeline = views.case_timeline(orchestrator, segments[2])
+            if timeline is None:
+                self._send_json(404, {"error": "Case not found"})
+            else:
+                self._send_json(200, timeline)
 
         elif len(segments) == 4 and segments[:2] == ["api", "cases"] and segments[3] == "misp":
             # Preview of what would be shared: public IPs and hashes only, never pushed from here

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triage Workspace | CyberPulse SOC Lab</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="lab-mode-banner" role="status">
+        <i class="fa-solid fa-flask"></i>
+        <span>Lab console: incidents marked SIMULATED come from synthetic telemetry.</span>
+    </div>
+
+    <header class="soc-header">
+        <div class="header-left">
+            <div class="logo-badge"><i class="fa-solid fa-inbox"></i></div>
+            <div>
+                <h1>TRIAGE WORKSPACE</h1>
+                <p class="subtitle">Cases, attack timelines and context for the analyst on shift</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <a class="btn-secondary" href="/index.html"><i class="fa-solid fa-arrow-left"></i> Back to console</a>
+        </div>
+    </header>
+
+    <main class="tw-layout">
+        <section class="card tw-cases">
+            <div class="card-header"><h3><i class="fa-solid fa-folder-tree"></i> Cases</h3></div>
+            <div id="caseList" class="tw-case-list"></div>
+        </section>
+
+        <section class="card tw-detail">
+            <div class="card-header"><h3 id="caseTitle"><i class="fa-solid fa-timeline"></i> Attack timeline</h3></div>
+            <p class="section-desc">When each step happened (event time), and how long until it was detected.</p>
+            <ol id="timeline" class="tw-timeline"></ol>
+        </section>
+    </main>
+
+    <script src="session.js"></script>
+    <script src="triage.js"></script>
+</body>
+</html>
