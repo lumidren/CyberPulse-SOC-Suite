@@ -1061,3 +1061,6 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
 :root[data-role="auditor"] [data-requires="write"] { display: none !important; }
 .role-badge { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: var(--bg-accent); color: var(--color-blue); border: 1px solid var(--border-color); }
 .role-badge:empty { display: none; }
+.tw-help { position: fixed; right: 16px; bottom: 16px; width: 300px; z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+.tw-shortcut { display: flex; gap: 10px; align-items: center; margin: 4px 0; font-size: 0.85rem; }
+.tw-shortcut kbd { min-width: 22px; text-align: center; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); font-family: monospace; }

@@ -229,7 +229,7 @@ internal identifiers never go to external APIs.
 - [x] **F59** Global search across alerts, hosts and IoCs. — **Done**: `views.search`, `GET /api/search?q=` (audited, masked), search box in the triage workspace.
 - [x] **F60** Saved hunts and queries. — **Done**: `soar/hunts.py` (shared, optional `HUNTS_FILE`), `/api/hunts` endpoints, hunt chips in the triage workspace.
 - [x] **F61** Role-based views (analyst, lead, auditor). — **Done**: `soar/roles.py`, server-side checks on every POST, role in sessions and audit log, `data-requires` UI hiding, README + `.env.example`.
-- [ ] **F62** Keyboard shortcuts for triage.
+- [x] **F62** Keyboard shortcuts for triage. — **Done**: shortcuts j/k / a i r n ? in `web/triage.js` with a help panel; disabled in text fields.
 - [ ] **F63** Mobile-friendly status view.
 - [ ] **F64** Executive summary view.
 - [ ] **F65** PDF export for incident reports.

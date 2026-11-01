@@ -136,3 +136,15 @@ class TestSearch(ViewsTestBase):
     def test_short_and_empty_queries(self):
         self.assertEqual(views.search(self.orchestrator, "a")["results"], [])
         self.assertEqual(views.search(self.orchestrator, "no-such-thing-xyz")["total"], 0)
+
+
+class TestShortcuts(unittest.TestCase):
+
+    def test_shortcuts_skip_text_fields_and_are_documented(self):
+        with open(os.path.join(ROOT, "web", "triage.js"), encoding="utf-8") as fh:
+            script = fh.read()
+        self.assertIn('target.closest("input, textarea, select, [contenteditable]")', script)
+        for key in ("j", "k", "a", "i", "r", "n"):
+            self.assertRegex(script, rf'\n    {key}: \["')
+        with open(os.path.join(ROOT, "web", "triage.html"), encoding="utf-8") as fh:
+            self.assertIn('id="shortcutHelp"', fh.read())
