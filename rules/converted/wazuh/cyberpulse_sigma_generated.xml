@@ -119,6 +119,20 @@
     <group>cyberpulse,sigma_generated,</group>
 </rule>
 
+<!-- SOC-RULE-055: TLS Client Fingerprint on the Local JA3/JA4 Blocklist (generated from rules/sigma/net_zeek_tls_fingerprint_blocklist.yml; review before use) -->
+<rule id="110550" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.ja3" type="pcre2">(?i)(?:^0000000000000000000000000000c0de$|^0000000000000000000000000000beef$)</field>
+    <description>SOC-RULE-055: TLS Client Fingerprint on the Local JA3/JA4 Blocklist</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+<rule id="110551" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.ja4" type="pcre2">(?i)(?:^t00d0000h0_000000000000_00000000c0de$)</field>
+    <description>SOC-RULE-055: TLS Client Fingerprint on the Local JA3/JA4 Blocklist</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+
 <!-- SOC-RULE-034: Active Directory Reconnaissance Commands (generated from rules/sigma/win_ad_reconnaissance.yml; review before use) -->
 <rule id="110340" level="8">
     <if_group>windows</if_group>

@@ -1,0 +1,2 @@
+``` SOC-RULE-055: TLS Client Fingerprint on the Local JA3/JA4 Blocklist (generated from rules/sigma/net_zeek_tls_fingerprint_blocklist.yml; review before use) ```
+index=* (source="*zeek:ssl*") | where (((match('ja3', "(?i)^0000000000000000000000000000c0de$") OR match('ja3', "(?i)^0000000000000000000000000000beef$")))) OR ((match('ja4', "(?i)^t00d0000h0_000000000000_00000000c0de$")))

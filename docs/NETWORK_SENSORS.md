@@ -25,5 +25,13 @@ records and any incidents raised.
 executable fetched over HTTP by a script client or from a raw IP), plus DNS tunnelling,
 beaconing and TLS-fingerprint detections (F73, F74). All are alert-only.
 
+**TLS fingerprints (F74).** `SOC-RULE-055` alerts on JA3/JA4 client fingerprints in its
+blocklist. The shipped values are **synthetic placeholders**, not real malware fingerprints:
+load a list you trust (for example the abuse.ch SSLBL JA3 CSV, under its licence) with
+`python scripts/update_tls_blocklist.py --ja3-csv sslbl.csv [--ja4-file ja4.txt]`, which bumps
+the rule version, fingerprint and changelog. Fingerprints identify TLS libraries, not programs,
+so expect shared fingerprints. For unknown-bad, hunt instead: stack `ja3` or `ja4` in the
+workbench and pivot on the rare ones.
+
 **Not verified:** no live Zeek or Suricata sensor has been connected; rules are tested on
 synthetic records only.

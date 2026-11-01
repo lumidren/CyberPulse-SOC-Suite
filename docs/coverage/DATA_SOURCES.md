@@ -19,10 +19,11 @@ those techniques lose all coverage.
 | GUARDIAN anomaly alerts (ML, via /api/ingest/guardian) | 1 | 1 | - |
 | Suricata EVE alerts (network IDS) | 1 | 1 | T1071 |
 | Zeek http.log (network sensor) | 1 | 1 | - |
+| Zeek ssl.log (network sensor) | 1 | 2 | T1071.001, T1573.002 |
 | Sysmon (driver load, Event 6) | 1 | 1 | T1068 |
 | Sysmon Event 10 (process access) | 1 | 1 | T1003.001 |
 | Windows System log (Service Control Manager) | 1 | 1 | T1543.003 |
 | Sysmon Event 13 (registry value set) | 1 | 1 | T1548.002 |
 | Sysmon Events 19-21 (WMI activity) | 1 | 1 | T1546.003 |
 
-**57 techniques** across **54 rules** and **16 data sources**.
+**59 techniques** across **55 rules** and **17 data sources**.

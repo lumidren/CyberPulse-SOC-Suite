@@ -36,8 +36,9 @@ without a new entry here.
   hash-chained ledger.
 - **Network detections** (SOC-RULE-051 Suricata severity-1 alerts, SOC-RULE-052 executables over HTTP from script clients or raw IPs) raise alert-only incidents from signed Zeek/Suricata batches.
 - **DNS tunnelling detections** (SOC-RULE-053 many unique subdomains per source and domain, SOC-RULE-054 very long DNS labels) raise alert-only incidents; beaconing is a hunting analytic, never an alert.
+- **TLS fingerprint detection** (SOC-RULE-055) raises alert-only incidents for JA3/JA4 values on a local blocklist (synthetic placeholders until you load a list).
 
-Automation fingerprint: `cb2072ff117846d6`
+Automation fingerprint: `f59528ea72d5430a`
 
 ## [2.5.0] - 2026-10-31
 

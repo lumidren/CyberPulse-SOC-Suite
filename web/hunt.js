@@ -1,7 +1,7 @@
 // CyberPulse SOC Suite: hunting workbench (roadmap F66+). Text-only rendering.
 const $ = (id) => document.getElementById(id);
 const FIELDS = ["host", "source_ip", "user", "process", "parent_process", "command_line", "hash", "technique",
-                "event_id", "source", "target_user", "destination"];
+                "event_id", "source", "target_user", "destination", "ja3", "ja4", "tls_server_name"];
 const trail = [];
 
 function cell(text) { return CP.el("td", text === null || text === undefined ? "" : text); }

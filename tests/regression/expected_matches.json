@@ -221,6 +221,22 @@
   ],
   "top": "SOC-RULE-052"
  },
+ "net_zeek_tls_fingerprint_blocklist.yml::negative::Unlisted browser fingerprint": {
+  "all": [],
+  "top": null
+ },
+ "net_zeek_tls_fingerprint_blocklist.yml::positive::JA3 on the list": {
+  "all": [
+   "SOC-RULE-055"
+  ],
+  "top": "SOC-RULE-055"
+ },
+ "net_zeek_tls_fingerprint_blocklist.yml::positive::JA4 on the list": {
+  "all": [
+   "SOC-RULE-055"
+  ],
+  "top": "SOC-RULE-055"
+ },
  "win_ad_reconnaissance.yml::negative::net use mapping a share": {
   "all": [],
   "top": null

@@ -392,3 +392,11 @@ How to tune each one: [TUNING.md](TUNING.md).
 - DKIM and domain-verification TXT records with long tokens
 - Some CDNs and anti-virus cloud lookups encode hashes in names
 - Baseline matches before exceptions: **0**
+
+## SOC-RULE-055: TLS Client Fingerprint on the Local JA3/JA4 Blocklist
+
+`rules/sigma/net_zeek_tls_fingerprint_blocklist.yml` (rule, level high)
+
+- Legitimate software built on the same TLS library and settings as a listed tool
+- Stale blocklist entries; review the list's source and age
+- Baseline matches before exceptions: **0**

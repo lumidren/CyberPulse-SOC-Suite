@@ -244,7 +244,7 @@ internal identifiers never go to external APIs.
 - [x] **F71** Velociraptor or osquery integration for live endpoint queries. — **Done (needs Fleet/Velociraptor)**: `soar/live_query.py` (catalogue-only, lab URLs), `GET /api/live-query/catalogue`, `POST /api/live-query`, `docs/LIVE_QUERIES.md`. Stubbed HTTP only.
 - [x] **F72** Zeek/Suricata network sensor with detections. — **Done (needs your sensors)**: `soar/network_sensors.py`, `POST /api/ingest/network` (HMAC, batched), SOC-RULE-051/052, `docs/NETWORK_SENSORS.md`. No live sensor connected.
 - [x] **F73** DNS tunneling and beaconing detection. — **Done**: SOC-RULE-053 (unique-subdomain correlation), SOC-RULE-054 (long labels), `soar/beaconing.py` + `/api/hunt/beacons` (leads, not alerts). Synthetic records only.
-- [ ] **F74** JA3/JA4 TLS fingerprint detections.
+- [x] **F74** JA3/JA4 TLS fingerprint detections. — **Done**: SOC-RULE-055 (placeholders marked synthetic), `scripts/update_tls_blocklist.py`, ja3/ja4/SNI pivots. No real fingerprint list shipped (unverifiable); user loads one.
 - [ ] **F75** Hunt-to-detection workflow: a hunt finding becomes a rule.
 
 ## Phase 10b — Reporting & documentation (F76–F85)

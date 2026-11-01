@@ -21,6 +21,7 @@ PIVOT_FIELDS = {
     "command_line": ("details.CommandLine",), "hash": ("details.FileHash_SHA256", "details.Hashes"),
     "technique": ("technique_id",), "event_id": ("event_id",), "source": ("event_source",),
     "target_user": ("details.TargetUserName",), "destination": ("details.DestinationIp", "details.query"),
+    "ja3": ("details.ja3",), "ja4": ("details.ja4",), "tls_server_name": ("details.server_name",),
 }
 
 
