@@ -53,3 +53,23 @@ def case_timeline(orchestrator, case_id):
     return {"case_id": case_id, "title": case["title"], "entries": entries,
             "span_sec": round((_parse(entries[-1]["at"]) - _parse(entries[0]["at"])).total_seconds(), 3)
             if len(entries) > 1 and entries[0]["at"] and entries[-1]["at"] else 0}
+
+
+# ----------------------------------------------------------------- F52 triage queue
+STATUS_ORDER = {"New": 0, "Investigating": 1, "Resolved": 2, "Closed": 3}
+SEVERITY_ORDER = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+
+
+def triage_queue(orchestrator, include_closed=False, assignee=None):
+    """Open work first: status (New, Investigating), then severity, then risk, then oldest update."""
+    cases = [c for c in orchestrator.case_manager.cases.values()
+             if (include_closed or c["status"] != "Closed") and (assignee is None or c["assignee"] == assignee)]
+    cases.sort(key=lambda c: (STATUS_ORDER.get(c["status"], 9), SEVERITY_ORDER.get(c["severity"], 9),
+                              -(c.get("max_risk_score") or 0), c["updated_at"]))
+    return [{
+        "case_id": c["case_id"], "title": c["title"], "severity": c["severity"], "status": c["status"],
+        "assignee": c["assignee"], "incidents": len(c["incidents"]), "max_risk_score": c.get("max_risk_score"),
+        "pending_responses": sum(1 for r in c["responses"] if r.get("status") == "PENDING_ANALYST_APPROVAL"),
+        "open_tasks": sum(1 for t in c["tasks"] if t["status"] == "Open"), "updated_at": c["updated_at"],
+        "simulated": c.get("simulated", False),
+    } for c in cases]

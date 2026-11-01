@@ -504,7 +504,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     # Responses that carry incident/telemetry data get account names masked (E45)
     MASKED_PREFIXES = ("/api/incidents", "/api/alerts", "/api/approvals", "/api/simulate",
-                       "/api/purple-team/run", "/api/ingest", "/api/cases")
+                       "/api/purple-team/run", "/api/ingest", "/api/cases", "/api/triage")
 
     def _send_json(self, status_code, payload):
         if isinstance(payload, dict) and urlparse(self.path).path.startswith("/api/identity"):
@@ -649,6 +649,12 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         elif len(segments) == 4 and segments[0] == "api" and segments[1] == "incidents":
             self._handle_incident_subresource(segments[2], segments[3])
+
+        elif path == "/api/triage/queue":
+            query = parse_qs(parsed.query)
+            queue = views.triage_queue(orchestrator, include_closed=query.get("closed", ["0"])[0] == "1",
+                                       assignee=query.get("assignee", [None])[0])
+            self._send_json(200, {"total": len(queue), "queue": queue})
 
         elif path == "/api/cases":
             status = parse_qs(parsed.query).get("status", [None])[0]

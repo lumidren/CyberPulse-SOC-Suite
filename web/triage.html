@@ -28,11 +28,25 @@
 
     <main class="tw-layout">
         <section class="card tw-cases">
-            <div class="card-header"><h3><i class="fa-solid fa-folder-tree"></i> Cases</h3></div>
+            <div class="card-header"><h3><i class="fa-solid fa-list-ol"></i> Triage queue</h3></div>
+            <label class="tw-field">Your name (recorded on every change) <input id="analystName" type="text" maxlength="64"></label>
+            <label class="tw-check"><input id="onlyMine" type="checkbox"> Only cases assigned to me</label>
             <div id="caseList" class="tw-case-list"></div>
         </section>
 
         <section class="card tw-detail">
+            <div class="tw-controls">
+                <label>Status
+                    <select id="caseStatus">
+                        <option>New</option><option>Investigating</option><option>Resolved</option><option>Closed</option>
+                    </select>
+                </label>
+                <span>Assignee: <strong id="caseAssignee">-</strong></span>
+                <button class="btn-secondary" id="assignMe"><i class="fa-solid fa-hand"></i> Assign to me</button>
+                <span id="caseMessage" class="tw-muted" role="status"></span>
+            </div>
+            <div id="caseTasks" class="tw-tasks"></div>
+            <div class="tw-note"><input id="caseNote" type="text" maxlength="2000" placeholder="Add a note to the case"><button class="btn-secondary" id="addNote">Add note</button></div>
             <div class="card-header"><h3 id="caseTitle"><i class="fa-solid fa-timeline"></i> Attack timeline</h3></div>
             <p class="section-desc">When each step happened (event time), and how long until it was detected.</p>
             <ol id="timeline" class="tw-timeline"></ol>
