@@ -1,0 +1,23 @@
+# Playbook versions and behaviour fingerprints (roadmap F34).
+#
+# Changing a playbook's match, response or tasks changes its fingerprint; the tests then
+# require a version bump here and in the playbook, plus a CHANGELOG.md entry.
+playbooks:
+  brute-force:
+    version: 1.0.0
+    sha256: a68b5d67eadc6db26b5c37ddb604ddf24ff8778185c446f2757b08acf6678098
+  cloud-identity:
+    version: 1.0.0
+    sha256: 944b9fd41f8803ce4d1c7d4b12bf3b1cba2368659113e19e6b8806d782f49e18
+  credential-theft:
+    version: 1.0.0
+    sha256: 24a3f16b9b69909fb2e5531a9d66aa3d2aee5eac64f61bc4b3fb5de72409e645
+  deception-hit:
+    version: 1.0.0
+    sha256: 6da2286bfa7a4057c95f5ad25a2ace10e936f4d20ff343db8601666b39c46f04
+  default-triage:
+    version: 1.0.0
+    sha256: 25d3711a30298df2ec534cf3d6916e865998d00fda32ec769681d2c773a72790
+  ransomware:
+    version: 1.0.0
+    sha256: 5ef0bbf365f3de9fa1054f683a49c22caf830cfe53cafeb17a8f7d96aaa2c68b
