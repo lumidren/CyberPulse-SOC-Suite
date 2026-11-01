@@ -132,7 +132,7 @@ internal identifiers never go to external APIs.
 ## Phase 4d — Documentation, transparency & accountability (E89–E100)
 
 - [x] **E89** SECURITY.md with a vulnerability reporting process. — **Done earlier** (176e547): `SECURITY.md` includes a vulnerability reporting process.
-- [ ] **E90** CODE_OF_CONDUCT.md.
+- [x] **E90** CODE_OF_CONDUCT.md. — **Done**: `CODE_OF_CONDUCT.md`.
 - [ ] **E91** CONTRIBUTING.md with ethical-use rules.
 - [ ] **E92** "Responsible Use" section in the README.
 - [ ] **E93** Document every automated action and its failure mode.
