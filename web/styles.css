@@ -1025,3 +1025,23 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
 .tw-bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; }
 .tw-bar { height: 8px; border-radius: 4px; background: var(--color-blue); justify-self: start; }
 .tw-bar-count { text-align: right; color: var(--text-secondary); }
+
+/* Light theme (roadmap F58): same tokens, light values; set by web/theme.js */
+:root[data-theme="light"] {
+    --bg-primary: #f4f6fa;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-accent: #eef2f7;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --border-color: #d5dde8;
+
+    --color-blue: #0369a1;
+    --color-green: #15803d;
+    --color-orange: #c2410c;
+    --color-red: #b91c1c;
+    --color-purple: #7e22ce;
+    --color-yellow: #a16207;
+}
+.theme-toggle { min-width: 96px; }

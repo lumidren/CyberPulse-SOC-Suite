@@ -44,5 +44,22 @@ class TestCacheHeaders(unittest.TestCase):
             httpd.server_close()
 
 
+
+class TestThemes(unittest.TestCase):
+
+    def test_light_theme_overrides_every_colour_token(self):
+        with open(os.path.join(ROOT, "web", "styles.css"), encoding="utf-8") as fh:
+            css = fh.read()
+        dark = set(re.findall(r"(--[\w-]+):", re.search(r":root \{(.*?)\}", css, re.S).group(1)))
+        light = set(re.findall(r"(--[\w-]+):", re.search(r':root\[data-theme="light"\] \{(.*?)\}', css, re.S).group(1)))
+        self.assertEqual(dark - light, set())
+
+    def test_every_page_loads_the_theme_before_paint(self):
+        for page in ("index.html", "triage.html", "playbooks.html", "login.html"):
+            with open(os.path.join(ROOT, "web", page), encoding="utf-8") as fh:
+                head = fh.read().split("</head>")[0]
+            self.assertIn('<script src="theme.js"></script>', head, page)
+
+
 if __name__ == "__main__":
     unittest.main()

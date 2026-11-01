@@ -225,7 +225,7 @@ internal identifiers never go to external APIs.
 - [x] **F55** MTTD/MTTR trend chart over time. — **Done**: `views.mttd_mttr_trend`, `GET /api/metrics/trend`, SVG chart (unmeasured = "not yet measured").
 - [x] **F56** Top-talkers and top-rules widgets. — **Done**: `views.top_stats`, `GET /api/stats/top`, widgets in the triage workspace.
 - [x] **F57** Geo-map of attacker IPs. — **Done earlier** (dd759e8): Leaflet geo-map on the Overview tab plots attacker IP origins (synthetic geo data).
-- [ ] **F58** Dark/light mode.
+- [x] **F58** Dark/light mode. — **Done**: `web/theme.js` + light tokens in `styles.css`, toggle on console, triage and playbook pages (login follows OS / saved choice).
 - [ ] **F59** Global search across alerts, hosts and IoCs.
 - [ ] **F60** Saved hunts and queries.
 - [ ] **F61** Role-based views (analyst, lead, auditor).
