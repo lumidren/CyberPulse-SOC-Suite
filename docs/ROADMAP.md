@@ -136,7 +136,7 @@ internal identifiers never go to external APIs.
 - [x] **E91** CONTRIBUTING.md with ethical-use rules. — **Done**: `CONTRIBUTING.md`.
 - [x] **E92** "Responsible Use" section in the README. — **Done**: README "Responsible Use"; `tests/test_doc_links.py` checks relative links.
 - [x] **E93** Document every automated action and its failure mode. — **Done**: `scripts/document_actions.py` → `docs/AUTOMATED_ACTIONS.md` (12 actions + 9 side effects), test-enforced.
-- [ ] **E94** Known false-positive scenarios per rule.
+- [x] **E94** Known false-positive scenarios per rule. — **Done**: `scripts/rule_docs.py` → `docs/FALSE_POSITIVES.md` (all 52 rules), test-enforced.
 - [ ] **E95** Rule exclusions and tuning guidance.
 - [ ] **E96** Rules of Engagement doc for the lab.
 - [ ] **E97** Log every automated action (who/what/why/when) in tamper-evident form.
