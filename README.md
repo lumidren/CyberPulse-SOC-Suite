@@ -64,7 +64,8 @@ and for learning detection engineering in a lab.
 
 - **Only in your lab.** The simulator refuses to run without `CYBERPULSE_LAB_MODE=true`,
   only targets the lab CIDR allowlist and emits telemetry, never attacks. Do not point
-  responders, Atomic Red Team or Caldera at networks you are not authorised to test.
+  responders, Atomic Red Team or Caldera at networks you are not authorised to test
+  ([Rules of Engagement](docs/RULES_OF_ENGAGEMENT.md)).
 - **People are affected by automation.** Isolation, account lockout and email quarantine
   disrupt real people. Keep the approval-required default; turn on opt-in automatic mode
   only with the kill switch, rate limits, protected assets and TTLs configured.

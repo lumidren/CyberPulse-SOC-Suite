@@ -138,7 +138,7 @@ internal identifiers never go to external APIs.
 - [x] **E93** Document every automated action and its failure mode. — **Done**: `scripts/document_actions.py` → `docs/AUTOMATED_ACTIONS.md` (12 actions + 9 side effects), test-enforced.
 - [x] **E94** Known false-positive scenarios per rule. — **Done**: `scripts/rule_docs.py` → `docs/FALSE_POSITIVES.md` (all 50 rules and correlations), test-enforced.
 - [x] **E95** Rule exclusions and tuning guidance. — **Done**: `docs/TUNING.md`, linked from README and `FALSE_POSITIVES.md`.
-- [ ] **E96** Rules of Engagement doc for the lab.
+- [x] **E96** Rules of Engagement doc for the lab. — **Done**: `docs/RULES_OF_ENGAGEMENT.md` (fill-in template matching the code's allowlists), linked from README.
 - [ ] **E97** Log every automated action (who/what/why/when) in tamper-evident form.
 - [ ] **E98** Appeals/review flow: analysts mark containment wrong, the rule gets tuned.
 - [ ] **E99** Ethics and risk register (outage, wrongful lockout, missed detections).
