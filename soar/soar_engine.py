@@ -23,6 +23,7 @@ from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
+from soar.playbooks import PlaybookRegistry
 from soar.rule_exceptions import ExceptionRegistry
 from soar.sigma_correlation import CorrelationEngine
 from soar.sigma_engine import SEVERITY_ORDER, SigmaEngine
@@ -143,6 +144,7 @@ class SOAROrchestrator:
         self.sigma = SigmaEngine()
         self.correlation = CorrelationEngine()
         self.exceptions = ExceptionRegistry()
+        self.playbooks = PlaybookRegistry()
         # Optional external enrichment (off unless EXTERNAL_ENRICHMENT_ENABLED=true + API keys)
         self.intel_client = ThreatIntelClient()
         # Circuit-breaker trips page a human through the configured notification channel
@@ -252,6 +254,10 @@ class SOAROrchestrator:
         if not matched_rule:
             return None
 
+        # The YAML playbook (playbooks/*.yml) chooses the proposed action before policy runs
+        playbook = self.playbooks.select(matched_rule)
+        matched_rule = PlaybookRegistry.apply_to_rule(playbook, matched_rule)
+
         # Stage 2: Threat Intel Enrichment
         t_intel = time.perf_counter()
         intel = self.enrich_threat_intel(event)
@@ -264,6 +270,8 @@ class SOAROrchestrator:
         policy_decision = self.risk_engine.evaluate_policy(risk_assessment, matched_rule)
         if execution_intent:
             policy_decision["execution_intent"] = execution_intent
+        # ...and may only make the decision more conservative (min risk, forced approval)
+        policy_decision = PlaybookRegistry.apply_to_decision(playbook, policy_decision)
 
         # Stage 5a: Volatile evidence is collected BEFORE any containment can run
         evidence_package = self.evidence_collector.collect_volatile_evidence(event, None)
@@ -344,8 +352,14 @@ class SOAROrchestrator:
         else:
             incident["identity_blast_radius"] = {"status": "NO_USER_CONTEXT"}
 
+        incident["playbook"] = ({**playbook.summary(), "tasks": [{"title": t, "status": "Open"} for t in playbook.tasks]}
+                                if playbook else None)
+
         # Stage 12: Real-Time Mobile / Slack / Discord Notification
-        webhook_res = self.dispatcher.dispatch(incident, custom_webhook_url=custom_webhook_url)
+        if playbook is None or playbook.notify:
+            webhook_res = self.dispatcher.dispatch(incident, custom_webhook_url=custom_webhook_url)
+        else:
+            webhook_res = {"status": "SKIPPED", "message": f"playbook {playbook.name} disables notifications"}
         incident["webhook_dispatch"] = webhook_res
 
         # Compatibility fields

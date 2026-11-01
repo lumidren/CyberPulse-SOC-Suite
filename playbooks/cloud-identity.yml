@@ -1,0 +1,12 @@
+name: cloud-identity
+version: 1.0.0
+description: Cloud account abuse, risky consent and audit tampering (AWS, Entra ID).
+match:
+  techniques: [T1078, T1078.004, T1548, T1528, T1562.008]
+response:
+  require_approval: true
+  notify: true
+tasks:
+  - Confirm the sign-in or API call with the user or workload owner out of band
+  - Review the identity's other activity in the same window (CloudTrail / Entra audit logs)
+  - If confirmed, revoke sessions and rotate credentials; record the scope of access

@@ -14,6 +14,7 @@ COPY soar/ ./soar/
 COPY plugins/ ./plugins/
 COPY config/ ./config/
 COPY rules/ ./rules/
+COPY playbooks/ ./playbooks/
 COPY web/ ./web/
 COPY server.py ./
 

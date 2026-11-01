@@ -1,0 +1,11 @@
+# Fallback playbook for alerts no other playbook claims. See soar/playbooks.py for the format.
+name: default-triage
+version: 1.0.0
+description: Generic triage for any alert without a dedicated playbook.
+response:
+  notify: true
+tasks:
+  - Confirm the alert against the raw telemetry in the incident record
+  - Check whether the host, user or source IP appears in other open incidents
+  - Decide true or false positive and record why in the analyst notes
+  - If false positive, propose a rule exception (rules/exceptions.yml) with an owner and expiry

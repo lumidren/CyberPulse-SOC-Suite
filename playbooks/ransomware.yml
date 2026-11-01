@@ -1,0 +1,13 @@
+name: ransomware
+version: 1.0.0
+description: Encryption, mass file writes and recovery inhibition.
+match:
+  techniques: [T1486, T1490]
+response:
+  require_approval: true
+  notify: true
+tasks:
+  - Page the incident lead immediately; ransomware is time-critical
+  - Confirm scope - which shares and hosts show encrypted files or deleted shadow copies
+  - Approve or reject the proposed isolation within minutes, not hours
+  - Verify backups are offline and intact before any restore

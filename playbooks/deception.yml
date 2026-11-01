@@ -1,0 +1,12 @@
+name: deception-hit
+version: 1.0.0
+description: Any interaction with a honey account, canary file or canary credential.
+match:
+  rules: [SOC-RULE-046, SOC-RULE-047, SOC-RULE-048]
+response:
+  require_approval: true
+  notify: true
+tasks:
+  - Treat as a likely intrusion; decoys have no legitimate use
+  - Check the announced decoy test calendar before escalating
+  - Trace the source host or IP and open a scoped investigation
