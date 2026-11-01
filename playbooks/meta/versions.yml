@@ -21,3 +21,6 @@ playbooks:
   ransomware:
     version: 1.0.0
     sha256: 5ef0bbf365f3de9fa1054f683a49c22caf830cfe53cafeb17a8f7d96aaa2c68b
+  phishing:
+    version: 1.0.0
+    sha256: 2778dc06755a83baed31680ed2642f8a220e59d8970510a05fcf78db24a69278

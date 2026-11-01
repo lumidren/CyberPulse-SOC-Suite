@@ -1,0 +1,15 @@
+name: phishing
+version: 1.0.0
+description: Reported or authentication-failing phishing mail; quarantine the message after approval.
+match:
+  # Rule id, not technique: SOC-RULE-021 (T1566.001 macro on a host) has no message to quarantine
+  rules: [SOC-RULE-050]
+response:
+  action: QUARANTINE_EMAIL
+  require_approval: true
+  notify: true
+tasks:
+  - Review the phishing triage (headers, sender, links) attached to the incident
+  - Search for the same sender, subject or URL in other mailboxes and add them to the case
+  - If anyone clicked or replied, check their sign-ins and reset the password if credentials were entered
+  - Approve quarantine; release the message (rollback) if it turns out to be legitimate

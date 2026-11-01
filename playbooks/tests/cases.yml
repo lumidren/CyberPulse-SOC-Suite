@@ -42,3 +42,13 @@ cases:
     rule: {rule_id: SOC-RULE-001, mitre_id: T1003.001, action_recommended: ISOLATE_HOST_AND_KILL_PROCESS}
     decision: {action: ISOLATE_HOST_AND_KILL_PROCESS, execution_intent: DRY_RUN_SIMULATION, risk_score: 99}
     expect: {playbook: credential-theft, execution_intent: DRY_RUN_SIMULATION}
+
+  - name: Reported phishing mail routes to the phishing playbook and proposes quarantine
+    rule: {rule_id: SOC-RULE-050, mitre_id: T1566.001, action_recommended: QUARANTINE_EMAIL}
+    decision: {action: QUARANTINE_EMAIL, execution_intent: PENDING_APPROVAL, risk_score: 70}
+    expect: {playbook: phishing, action: QUARANTINE_EMAIL, execution_intent: PENDING_APPROVAL}
+
+  - name: Office macro on a host is not routed to email quarantine
+    rule: {rule_id: SOC-RULE-021, mitre_id: T1566.001, action_recommended: ENRICH_AND_ALERT_ANALYST}
+    decision: {action: ENRICH_AND_ALERT_ANALYST, execution_intent: ALERT_ONLY, risk_score: 70}
+    expect: {playbook: default-triage, action: ENRICH_AND_ALERT_ANALYST}

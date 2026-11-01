@@ -314,6 +314,17 @@ class ResilientContainmentEngine:
             }
             self.disabled_users.add(target_user)
 
+        elif action_type == "QUARANTINE_EMAIL":
+            message_id = (action_record.get("context") or {}).get("message_id")
+            action_record["execution_protocol"] = "Microsoft Graph mail API"
+            action_record["execution_log"] = (f"[MS Graph -> {target_user}] Moved message {message_id} to the "
+                                              "CyberPulseQuarantine folder (simulated responder).")
+            action_record["rollback_plan"] = {
+                "method": "MS_GRAPH_API",
+                "request": cmd.graph_move_message(target_user, message_id, "inbox"),
+            }
+            action_record["quarantine_request"] = cmd.graph_move_message(target_user, message_id, "CyberPulseQuarantine")
+
         elif action_type == "REVOKE_AWS_STS_SESSION_AND_ATTACH_DENY_POLICY":
             action_record["execution_protocol"] = "AWS IAM & STS API (boto3)"
             action_record["execution_log"] = f"[AWS IAM -> {target_user}] Attached AWSRevokeOlderSessions inline policy and invalidated active STS tokens."
@@ -580,6 +591,10 @@ class ResilientContainmentEngine:
 
 # action_type -> (reversibility, log builder, what cannot be restored)
 ROLLBACK_PLAYBOOKS = {
+    "QUARANTINE_EMAIL": (
+        "FULL",
+        lambda r: f"[MS Graph] Moved message {(r.get('context') or {}).get('message_id')} back to {r['target_user']}'s inbox.",
+        None),
     "BLOCK_SOURCE_IP_FIREWALL": (
         "FULL",
         lambda r: f"[pfSense] Removed drop rule for {r['target_ip']}/32. Traffic unblocked.",

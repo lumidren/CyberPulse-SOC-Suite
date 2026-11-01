@@ -212,3 +212,7 @@ bump here and in `rules/soar_mapping.yml`.
 ## SOC-RULE-049: High-Score Behavioural Anomaly from GUARDIAN (`guardian_high_score_anomaly.yml`)
 
 * **1.0.0** (2026-11-01): Initial rule.
+
+## SOC-RULE-050: Phishing Email Reported by a User or Failing DMARC with a Link or Attachment (`email_phishing_reported_or_auth_fail.yml`)
+
+* **1.0.0** (2026-11-01): Initial rule.

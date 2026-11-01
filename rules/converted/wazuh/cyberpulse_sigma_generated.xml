@@ -48,6 +48,31 @@
     <group>cyberpulse,sigma_generated,</group>
 </rule>
 
+<!-- SOC-RULE-050: Phishing Email Reported by a User or Failing DMARC with a Link or Attachment (generated from rules/sigma/email_phishing_reported_or_auth_fail.yml; review before use) -->
+<rule id="110500" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.deliveryAction" type="pcre2">(?i)(?:^Delivered$)</field>
+    <field name="win.eventdata.reportedByUser" type="pcre2">(?i)(?:^True$)</field>
+    <description>SOC-RULE-050: Phishing Email Reported by a User or Failing DMARC with a Link or Attachment</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+<rule id="110501" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.deliveryAction" type="pcre2">(?i)(?:^Delivered$)</field>
+    <field name="win.eventdata.authenticationResults" type="pcre2">(?i)(?:dmarc=fail)</field>
+    <field name="win.eventdata.urls" type="pcre2">(?i)(?:^True$)</field>
+    <description>SOC-RULE-050: Phishing Email Reported by a User or Failing DMARC with a Link or Attachment</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+<rule id="110502" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.deliveryAction" type="pcre2">(?i)(?:^Delivered$)</field>
+    <field name="win.eventdata.authenticationResults" type="pcre2">(?i)(?:dmarc=fail)</field>
+    <field name="win.eventdata.attachmentSha256" type="pcre2">(?i)(?:^True$)</field>
+    <description>SOC-RULE-050: Phishing Email Reported by a User or Failing DMARC with a Link or Attachment</description>
+    <group>cyberpulse,sigma_generated,</group>
+</rule>
+
 <!-- SOC-RULE-049: High-Score Behavioural Anomaly from GUARDIAN (generated from rules/sigma/guardian_high_score_anomaly.yml; review before use) -->
 <rule id="110490" level="8">
     <if_group>windows</if_group>

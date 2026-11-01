@@ -111,6 +111,17 @@ def graph_revoke_sessions(upn: str) -> Dict[str, str]:
             "url": f"https://graph.microsoft.com/v1.0/users/{quote(valid_upn(upn), safe='@.')}/revokeSignInSessions"}
 
 
+def graph_move_message(upn: str, message_id: str, folder: str) -> Dict[str, Any]:
+    """Graph request moving one message to a folder (quarantine or back to the inbox)."""
+    if not isinstance(message_id, str) or not re.match(r"^[A-Za-z0-9=+/_-]{8,512}$", message_id):
+        raise CommandValidationError("not a valid Graph message id")
+    if folder not in ("inbox", "CyberPulseQuarantine"):
+        raise CommandValidationError(f"unsupported folder {folder!r}")
+    return {"method": "POST",
+            "url": f"https://graph.microsoft.com/v1.0/users/{quote(valid_upn(upn), safe='@.')}/messages/{quote(message_id)}/move",
+            "body": {"destinationId": folder}}
+
+
 def citool_refresh() -> List[str]:
     return ["CiTool.exe", "--refresh"]
 

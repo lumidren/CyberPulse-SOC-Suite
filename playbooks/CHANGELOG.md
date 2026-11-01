@@ -23,3 +23,7 @@
 ## ransomware
 
 * **1.0.0** (2026-11-01): Initial playbook.
+
+## phishing
+
+* **1.0.0** (2026-11-01): Initial playbook.

@@ -27,6 +27,8 @@ ACTION_TIERS = {
     "REMOVE_SCHEDULED_TASK": TIER_2_HOST,
     "KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS": TIER_2_HOST,
     "UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK": TIER_2_HOST,
+    # Reversible, but quarantining the wrong message (e.g. a real invoice) disrupts a person: always ask
+    "QUARANTINE_EMAIL": TIER_2_HOST,
 
     "TERMINATE_PROCESS_TREE": TIER_3_IDENTITY,  # also locks the user account
     "RESET_SERVICE_ACCOUNT_AND_REVOKE_KERBEROS_TICKET": TIER_3_IDENTITY,

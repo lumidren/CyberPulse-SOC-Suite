@@ -299,3 +299,9 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: 9c992ae38d1a29befe307ad111ddda0f3347be2bcaafe74246ed6b637687bede
+  20e00c9f-8021-435b-9387-9d4e9f247d7e:
+    soc_rule_id: SOC-RULE-050
+    name: Phishing Email Reported by a User or Failing DMARC with a Link or Attachment
+    action_recommended: QUARANTINE_EMAIL
+    version: 1.0.0
+    detection_sha256: 9b9f5017ed293a975643288fd65e099bdde2c9664690dd6707e7cd29e7fd75fb

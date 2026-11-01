@@ -1,0 +1,3 @@
+// SOC-RULE-050: Phishing Email Reported by a User or Failing DMARC with a Link or Attachment (generated from rules/sigma/email_phishing_reported_or_auth_fail.yml; review before use)
+EmailEvents
+| where ((DeliveryAction =~ "Delivered") and (ReportedByUser =~ "True")) or ((DeliveryAction =~ "Delivered") and (AuthenticationResults contains "dmarc=fail") and (Urls =~ "True")) or ((DeliveryAction =~ "Delivered") and (AuthenticationResults contains "dmarc=fail") and (AttachmentSha256 =~ "True"))

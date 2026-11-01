@@ -62,6 +62,7 @@ LOGSOURCE_SOURCES = {
     ("zeek", "ssl"): {"zeek:ssl"},
     ("zeek", "http"): {"zeek:http"},
     ("guardian", "anomaly"): {"guardian:anomaly"},
+    ("m365", "email"): {"m365:email"},
 }
 
 # Sigma/vendor field names -> where the lab event keeps the value

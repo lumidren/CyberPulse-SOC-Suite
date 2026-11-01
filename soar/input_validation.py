@@ -47,6 +47,9 @@ DETAIL_FIELD_ALLOWLIST = {
     "SignatureStatus",
     # deception rules (F16): object access on canary files, canary IAM user
     "ObjectName", "ProcessName", "userIdentity.userName",
+    # Email (F45/F46): message metadata only, never bodies
+    "NetworkMessageId", "SenderFromAddress", "SenderDisplayName", "ReplyToAddress", "RecipientEmailAddress",
+    "Subject", "AuthenticationResults", "Urls", "AttachmentSha256", "ReportedByUser", "DeliveryAction",
     # GUARDIAN anomaly alerts (F39)
     "GuardianAlertId", "AnomalyType", "AnomalyScore", "Model", "Summary",
     # provenance
