@@ -51,3 +51,6 @@ hunts.json
 
 # Action ledger (ACTION_LEDGER_FILE) records real targets and actors
 actions.jsonl
+
+# MkDocs build output
+site/

@@ -292,6 +292,8 @@ Related generated reports: [gap report](docs/coverage/GAPS.md), [data-source dep
 mis-ranked alert and unverified component in one generated page; [`docs/EVASION.md`](docs/EVASION.md) and
 [`docs/PURPLE_TEAM_REPORT.md`](docs/PURPLE_TEAM_REPORT.md) have the detail.
 
+**Docs site.** Everything under `docs/` builds into a browsable site: `pip install -r requirements-docs.txt && mkdocs serve` (or `mkdocs build --strict`); `.github/workflows/docs.yml` publishes it to GitHub Pages from `main` once Pages is enabled.
+
 **Write-ups.** [`docs/rules/`](docs/rules/README.md) explains each rule: what it detects, how its logic works in plain words, the telemetry it needs, the evidence it works (and the bypasses it has), and how to tune it.
 
 **Runbooks.** Every detection has a generated response runbook in [`docs/runbooks/`](docs/runbooks/README.md): what fired, playbook triage steps, fields to check, the proposed action with its tier, rollback and failure modes, known false positives and when to escalate.

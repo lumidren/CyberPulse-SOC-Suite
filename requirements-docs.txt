@@ -1,0 +1,2 @@
+# Documentation site only (mkdocs.yml). Version-pinned; not needed to run CyberPulse.
+mkdocs==1.6.1

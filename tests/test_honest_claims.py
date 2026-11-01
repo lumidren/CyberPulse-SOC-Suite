@@ -14,7 +14,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SCANNED_EXTENSIONS = (".md", ".py", ".html", ".js", ".json", ".yml", ".yaml")
-EXCLUDED_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules"}
+EXCLUDED_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules", "site"}  # site: local MkDocs build output
 EXCLUDED_FILES = {
     os.path.join("docs", "ROADMAP.md"),          # quotes the banned phrases as roadmap items
     os.path.join("tests", "test_honest_claims.py"),

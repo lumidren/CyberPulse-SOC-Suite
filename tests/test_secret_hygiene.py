@@ -5,7 +5,7 @@ import re
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules"}
+SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules", "site"}  # site: local MkDocs build output
 SKIP_FILES = {os.path.join("tests", "test_secret_hygiene.py"), os.path.join("tests", "test_dashboard_auth.py"),
               "CHANGELOG.md", os.path.join("docs", "ROADMAP.md"),
               # These name the historical placeholders on purpose (allowlist / scan record / scanner)
