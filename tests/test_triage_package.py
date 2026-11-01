@@ -28,7 +28,7 @@ class TestTriagePackage(unittest.TestCase):
     def test_contents_manifest_and_integrity(self):
         data, digest, manifest = build_zip(self.incident, self.case)
         names = set(zipfile.ZipFile(io.BytesIO(data)).namelist())
-        self.assertEqual(names, {"README.txt", "incident.json", "telemetry.json", "timeline.json", "evidence.json",
+        self.assertEqual(names, {"README.txt", "incident.json", "telemetry.json", "timeline.json", "evidence.json", "custody.json",
                                  "response.json", "case.json", "tasks.md", "manifest.json"})
         self.assertEqual(set(manifest), names - {"manifest.json"})
         self.assertEqual(verify_zip(data), [])

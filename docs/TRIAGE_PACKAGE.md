@@ -22,3 +22,16 @@ that hash. Account names are masked when masking is on. Verify a package with
 Set `TRIAGE_PACKAGE_DIR` to also write a package automatically for every new incident.
 That folder then holds incident data: keep it outside the repository (it is git-ignored
 by name) and restrict access. The package holds telemetry, not disk or memory images.
+
+## Chain of custody (F50)
+
+`soar/custody.py` keeps a hash-chained custody log per incident. The pipeline records the
+SHA-256 of the evidence package and the telemetry when they are collected; every triage
+package download records the zip's SHA-256 and who downloaded it. Each entry stores the
+previous entry's hash and a hash of its own content, so editing, deleting or reordering an
+entry is detected. `GET /api/incidents/<id>/custody` returns the log, the chain
+verification and whether the stored evidence still matches its collection hash. The log
+is also inside each triage package as `custody.json`.
+
+It proves handling inside one CyberPulse process. For court-grade custody, also copy the
+packages and the log to write-once storage.
