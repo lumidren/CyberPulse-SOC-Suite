@@ -191,7 +191,7 @@ internal identifiers never go to external APIs.
 - [x] **F27** Regression testing: a rule change must not break old detections. — **Done**: `scripts/regression_corpus.py`, `tests/regression/expected_matches.json` (130 events), `tests/test_regression_corpus.py`.
 - [x] **F28** Multi-stage attack chain emulation (initial access to exfil). — **Done**: `simulator/attack_chain.py` `run_chain()` (10 stages, 2 hosts, telemetry only, lab_only), `tests/test_attack_chain.py`. Fixed the old "DETECTED_AND_AUTO_CONTAINED" claim: reports the real (proposed) status.
 - [x] **F29** Evasion tests (obfuscation, renamed binaries); document bypasses. — **Done**: `scripts/evasion_cases.py` (16 synthetic variants), `scripts/evasion_report.py` → `docs/EVASION.md`. **11/16 bypass**, all unfixed and documented with suggested fixes.
-- [ ] **F30** Publish a "what I missed" report.
+- [x] **F30** Publish a "what I missed" report. — **Done**: `scripts/what_i_missed.py` → `docs/WHAT_I_MISSED.md` (generated from evasion, gaps, regression corpus, baseline; hand-kept never-verified list).
 
 ## Phase 8 — SOAR & automation (F31–F50)
 
