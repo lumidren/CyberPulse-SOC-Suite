@@ -135,7 +135,7 @@ internal identifiers never go to external APIs.
 - [x] **E90** CODE_OF_CONDUCT.md. — **Done**: `CODE_OF_CONDUCT.md`.
 - [x] **E91** CONTRIBUTING.md with ethical-use rules. — **Done**: `CONTRIBUTING.md`.
 - [x] **E92** "Responsible Use" section in the README. — **Done**: README "Responsible Use"; `tests/test_doc_links.py` checks relative links.
-- [ ] **E93** Document every automated action and its failure mode.
+- [x] **E93** Document every automated action and its failure mode. — **Done**: `scripts/document_actions.py` → `docs/AUTOMATED_ACTIONS.md` (12 actions + 9 side effects), test-enforced.
 - [ ] **E94** Known false-positive scenarios per rule.
 - [ ] **E95** Rule exclusions and tuning guidance.
 - [ ] **E96** Rules of Engagement doc for the lab.
