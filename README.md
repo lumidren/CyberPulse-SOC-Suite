@@ -235,6 +235,10 @@ Related generated reports: [gap report](docs/coverage/GAPS.md), [data-source dep
 [rule quality scores](docs/coverage/QUALITY.md), [threshold tuning](docs/THRESHOLD_TUNING.md) and the
 [rare parent-child process baseline](docs/BEHAVIORAL_BASELINE.md).
 
+**Known misses.** [`docs/WHAT_I_MISSED.md`](docs/WHAT_I_MISSED.md) collects every known bypass, uncovered technique,
+mis-ranked alert and unverified component in one generated page; [`docs/EVASION.md`](docs/EVASION.md) and
+[`docs/PURPLE_TEAM_REPORT.md`](docs/PURPLE_TEAM_REPORT.md) have the detail.
+
 **Tuning exceptions.** Known-benign matches are allowlisted per rule in [`rules/exceptions.yml`](rules/exceptions.yml):
 every entry has an owner, a reason and an expiry (at most 180 days), cannot match a rule's own attack samples,
 and is counted when it suppresses an alert (`GET /api/exceptions`).
