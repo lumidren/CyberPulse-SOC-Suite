@@ -3,6 +3,40 @@
 All notable changes to CyberPulse SOC Suite are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Automation behaviour
+
+Every change to what CyberPulse does automatically is listed here (roadmap E100). The
+fingerprint below covers action tiers, reversibility, rule-to-action mapping, rule
+confidence, risk weights, safety limits, playbooks, role restrictions and exception
+lifetimes (`python scripts/automation_fingerprint.py`); the test suite fails if it changes
+without a new entry here.
+
+- **Correlation rules** (SOC-RULE-043/044/045) can now raise incidents and propose
+  `BLOCK_SOURCE_IP_FIREWALL` or ransomware containment, subject to the usual policy.
+- **Rule exceptions** suppress matching alerts until they expire (at most 180 days);
+  EXC-0001 and EXC-0002 suppress two benign baseline patterns.
+- **YAML playbooks** choose the proposed action and may force approval or a minimum risk;
+  they can only make handling more conservative. Opt-in automatic mode keeps running the
+  TIER_1 firewall block for brute force.
+- **ChatOps**: listed Slack/Telegram users can approve or reject staged actions (same checks
+  as the console).
+- **Email quarantine** (`QUARANTINE_EMAIL`, TIER_2, always approved) is proposed for
+  reported or DMARC-failing phishing; analysts can propose a playbook action on any incident.
+- **Entra ID responder** revokes sessions and adds the account to an MFA step-up group when
+  `ENTRA_RESPONDER_ENABLED=true` (TIER_3, always approved); otherwise simulated.
+- **Roles**: only leads can approve, reject, change policy or enrichment, release the kill
+  switch, push to MISP or decide appeals; auditors are read-only.
+- **User notification** emails about suspicious sign-ins, off by default, never for
+  simulated events.
+- **Hand-offs** to TheHive, Shuffle/n8n and the lab sandbox happen automatically when
+  configured (all off by default); none of them can execute containment.
+- **Action ledger**: every containment decision and kill-switch change is recorded in a
+  hash-chained ledger.
+
+Automation fingerprint: `e898332815799085`
+
 ## [2.5.0] - 2026-10-31
 
 ### Fixed
