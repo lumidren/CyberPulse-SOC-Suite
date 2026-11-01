@@ -209,3 +209,36 @@ def top_stats(orchestrator, n=5):
                 counters[key][value] += 1
     return {"incidents": len(orchestrator.dfir_engine.incident_list),
             **{k: [{"value": v, "count": c} for v, c in counter.most_common(n)] for k, counter in counters.items()}}
+
+
+# ----------------------------------------------------------------- F59 global search
+SEARCH_FIELDS = {
+    "incident": lambda i: i.get("incident_id"),
+    "rule": lambda i: f"{(i.get('rule') or {}).get('rule_id')} {(i.get('rule') or {}).get('rule_name')}",
+    "technique": lambda i: (i.get("rule") or {}).get("mitre_id"),
+    "host": lambda i: (i.get("telemetry") or {}).get("computer_name"),
+    "source_ip": lambda i: (i.get("telemetry") or {}).get("source_ip"),
+    "user": lambda i: (i.get("telemetry") or {}).get("user"),
+    "ioc": lambda i: " ".join(str(o.get("value")) for o in i.get("observables") or []),
+    "command_line": lambda i: ((i.get("telemetry") or {}).get("details") or {}).get("CommandLine"),
+}
+
+
+def search(orchestrator, query, limit=50):
+    """Case-insensitive substring search across incidents and cases; each hit names the field that matched."""
+    q = str(query or "").strip().lower()
+    if len(q) < 2:
+        return {"query": query, "error": "type at least 2 characters", "results": []}
+    results = []
+    for inc in reversed(orchestrator.dfir_engine.incident_list):
+        fields = [name for name, get in SEARCH_FIELDS.items() if q in str(get(inc) or "").lower()]
+        if fields:
+            case = orchestrator.case_manager.find_by_incident(inc["incident_id"])
+            results.append({"type": "incident", "id": inc["incident_id"], "case_id": case["case_id"] if case else None,
+                            "title": (inc.get("rule") or {}).get("rule_name"),
+                            "host": (inc.get("telemetry") or {}).get("computer_name"), "matched": fields})
+    for case in orchestrator.case_manager.cases.values():
+        if q in case["case_id"].lower() or q in case["title"].lower():
+            results.append({"type": "case", "id": case["case_id"], "case_id": case["case_id"], "title": case["title"],
+                            "host": ", ".join(case["hosts"]), "matched": ["case"]})
+    return {"query": query, "total": len(results), "results": results[:limit], "truncated": len(results) > limit}

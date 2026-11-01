@@ -226,7 +226,7 @@ internal identifiers never go to external APIs.
 - [x] **F56** Top-talkers and top-rules widgets. — **Done**: `views.top_stats`, `GET /api/stats/top`, widgets in the triage workspace.
 - [x] **F57** Geo-map of attacker IPs. — **Done earlier** (dd759e8): Leaflet geo-map on the Overview tab plots attacker IP origins (synthetic geo data).
 - [x] **F58** Dark/light mode. — **Done**: `web/theme.js` + light tokens in `styles.css`, toggle on console, triage and playbook pages (login follows OS / saved choice).
-- [ ] **F59** Global search across alerts, hosts and IoCs.
+- [x] **F59** Global search across alerts, hosts and IoCs. — **Done**: `views.search`, `GET /api/search?q=` (audited, masked), search box in the triage workspace.
 - [ ] **F60** Saved hunts and queries.
 - [ ] **F61** Role-based views (analyst, lead, auditor).
 - [ ] **F62** Keyboard shortcuts for triage.

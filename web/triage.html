@@ -30,6 +30,10 @@
 
     <main class="tw-layout">
         <section class="card tw-cases">
+            <div class="tw-search">
+                <input id="searchBox" type="search" maxlength="200" placeholder="Search alerts, hosts, IPs, users, IoCs ( / )" aria-label="Global search">
+                <div id="searchResults" class="tw-search-results" role="listbox"></div>
+            </div>
             <div class="card-header"><h3><i class="fa-solid fa-list-ol"></i> Triage queue</h3></div>
             <label class="tw-field">Your name (recorded on every change) <input id="analystName" type="text" maxlength="64"></label>
             <label class="tw-check"><input id="onlyMine" type="checkbox"> Only cases assigned to me</label>

@@ -246,10 +246,31 @@ async function loadTop() {
     }
 }
 
+// ------------------------------------------------------------------ F59 global search
+let searchTimer = null;
+async function runSearch() {
+    const q = $("searchBox").value.trim();
+    const box = $("searchResults");
+    box.replaceChildren();
+    if (q.length < 2) return;
+    const data = await CP.api(`/api/search?q=${encodeURIComponent(q)}`);
+    if (!data) return;
+    if (!data.results.length) { box.appendChild(CP.el("p", "No matches.", "tw-muted")); return; }
+    for (const r of data.results) {
+        const b = CP.el("button", null, "tw-search-hit");
+        b.appendChild(CP.el("strong", `${r.type === "case" ? "Case" : "Incident"} ${r.id}`));
+        b.appendChild(CP.el("span", `${r.title || ""} · ${r.host || ""} · matched ${r.matched.join(", ")}`, "tw-muted"));
+        if (r.case_id) b.addEventListener("click", () => { box.replaceChildren(); selectCase(r.case_id); });
+        box.appendChild(b);
+    }
+    if (data.truncated) box.appendChild(CP.el("p", `Showing ${data.results.length} of ${data.total}; refine the search.`, "tw-muted"));
+}
+
 function init() {
     $("analystName").value = analystName();
     $("analystName").addEventListener("change", (e) => setAnalystName(e.target.value.trim()));
     $("onlyMine").addEventListener("change", loadQueue);
+    $("searchBox").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 250); });
     $("caseStatus").addEventListener("change", (e) => update({ status: e.target.value }));
     $("assignMe").addEventListener("click", () => update({ assignee: analystName() }));
     $("addNote").addEventListener("click", () => {
