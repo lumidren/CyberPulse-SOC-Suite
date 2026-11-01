@@ -264,6 +264,8 @@ Related generated reports: [gap report](docs/coverage/GAPS.md), [data-source dep
 mis-ranked alert and unverified component in one generated page; [`docs/EVASION.md`](docs/EVASION.md) and
 [`docs/PURPLE_TEAM_REPORT.md`](docs/PURPLE_TEAM_REPORT.md) have the detail.
 
+**Runbooks.** Every detection has a generated response runbook in [`docs/runbooks/`](docs/runbooks/README.md): what fired, playbook triage steps, fields to check, the proposed action with its tier, rollback and failure modes, known false positives and when to escalate.
+
 **Tuning.** [`docs/TUNING.md`](docs/TUNING.md) explains when to use an exception, a rule change or threshold tuning; [`docs/FALSE_POSITIVES.md`](docs/FALSE_POSITIVES.md) lists known false positives per rule.
 
 **Tuning exceptions.** Known-benign matches are allowlisted per rule in [`rules/exceptions.yml`](rules/exceptions.yml):
