@@ -98,3 +98,15 @@ class TestNetworkGraph(ViewsTestBase):
         self.assertEqual(ids["10.0.2.15"]["kind"], "internal")
         self.assertEqual(views._ip_kind("198.51.100.33"), "external")
         self.assertEqual(sum(e["count"] for e in graph["edges"]), len(self.orchestrator.dfir_engine.incident_list))
+
+
+class TestTrend(ViewsTestBase):
+
+    def test_mttd_measured_mttr_only_after_resolution(self):
+        trend = views.mttd_mttr_trend(self.orchestrator)
+        self.assertTrue(trend["points"])
+        self.assertTrue(all(p["mttd_sec"] is not None and p["mttd_sec"] >= 0 for p in trend["points"] if p["incidents"]))
+        self.assertTrue(all(p["mttr_sec"] is None for p in trend["points"]), "nothing resolved yet")
+        self.orchestrator.case_manager.update(self.case_ids[0], "alice", status="Resolved")
+        trend = views.mttd_mttr_trend(self.orchestrator)
+        self.assertEqual(sum(p["resolved_cases"] for p in trend["points"]), 1)

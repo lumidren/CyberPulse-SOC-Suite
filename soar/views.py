@@ -163,3 +163,32 @@ def network_graph(orchestrator, limit=200):
         nodes.setdefault(host, {"id": host, "type": "host", "kind": "host", "degree": 0})["degree"] += 1
     return {"nodes": sorted(nodes.values(), key=lambda n: (n["type"], -n["degree"], n["id"])),
             "edges": [dict(e, techniques=sorted(filter(None, e["techniques"]))) for e in edges.values()]}
+
+
+# ----------------------------------------------------------------- F55 MTTD / MTTR trend
+def _mean(values):
+    return round(sum(values) / len(values), 3) if values else None
+
+
+def mttd_mttr_trend(orchestrator):
+    """Per-day mean time to detect (event time -> incident) and to resolve (case opened -> Resolved/Closed).
+
+    Only measured values are reported; a day without data has None ("not yet measured")."""
+    detect, resolve = {}, {}
+    for inc in orchestrator.dfir_engine.incident_list:
+        happened = _parse((inc.get("telemetry") or {}).get("timestamp"))
+        detected = _parse(inc.get("created_at"))
+        if happened and detected and detected >= happened:
+            detect.setdefault(detected.date().isoformat(), []).append((detected - happened).total_seconds())
+    for case in orchestrator.case_manager.cases.values():
+        opened = _parse(case["created_at"])
+        done = next((_parse(e["at"]) for e in case["timeline"]
+                     if e["event"].startswith("status ") and (e["event"].endswith("-> Resolved") or e["event"].endswith("-> Closed"))), None)
+        if opened and done:
+            resolve.setdefault(done.date().isoformat(), []).append((done - opened).total_seconds())
+    days = sorted(set(detect) | set(resolve))
+    return {
+        "basis": "Measured from incident and case timestamps in this process; lab events are synthetic.",
+        "points": [{"day": d, "mttd_sec": _mean(detect.get(d, [])), "mttr_sec": _mean(resolve.get(d, [])),
+                    "incidents": len(detect.get(d, [])), "resolved_cases": len(resolve.get(d, []))} for d in days],
+    }
