@@ -31,3 +31,24 @@ Sign in, choose the light or dark theme, set the browser window to 1280x720.
 Tools: ScreenToGif (Windows), Kap (macOS) or Peek (Linux). Keep the file under 5 MB
 (about 12 fps, 1280 px wide) and save it as `docs/media/demo.gif`, then add it under the README
 title with alt text describing what it shows.
+
+## Video walkthrough: alert to closure (F84), 6-8 minutes, narrated
+
+Script (say what is synthetic as you go):
+
+1. **Context (30 s).** "This is a lab with synthetic telemetry; nothing here attacks a real host."
+   Show the Rules of Engagement and the lab-mode banner.
+2. **Attack (1 min).** Run the ten-stage chain (`CYBERPULSE_LAB_MODE=true python simulator/attack_chain.py`)
+   or the launcher; point out that each stage is a log record, not an action.
+3. **Triage (2 min).** Triage workspace: pick the top case, assign it, read the attack timeline in
+   event time, open the process tree, tick the first playbook tasks.
+4. **Decide (1.5 min).** Open the LSASS incident: risk factors, rule confidence, the proposed
+   isolation and its tier. Approve as a lead; show that an analyst key cannot.
+5. **Hunt (1 min).** Pivot from the host in the hunting workbench; stack processes and point at
+   the long tail.
+6. **Close (1 min).** Roll back the containment, raise an appeal for a false positive on
+   another incident, export the triage package and the PDF report, open the post-incident review,
+   close the case.
+7. **Limits (30 s).** Show `WHAT_I_MISSED.md`: the bypasses and gaps.
+
+Publish it outside the repository (video host) and link it from the README.
