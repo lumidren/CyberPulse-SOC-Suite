@@ -103,3 +103,10 @@ independent sources flag the indicator, otherwise at half weight with
 `corroborated: false`. Together with the intel-alone rule above, one
 provider's opinion can never block an address by itself.
 
+Weighted consensus (F42): each source has a weight (VirusTotal, AbuseIPDB and URLhaus 1.0,
+GreyNoise 0.8, OTX 0.6; override with `REPUTATION_WEIGHTS="AlienVault OTX=0.4"`; 0 mutes a
+source). The score is the weighted mean of the flagging sources, multiplied by the
+*agreement*, the share of all reporting weight that flags the indicator, so one flag among
+several clean answers is diluted. Each source's weight and the agreement are shown in the
+risk assessment. The default weights are judgement calls, not measured accuracy.
+
