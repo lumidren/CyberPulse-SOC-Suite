@@ -1,0 +1,85 @@
+# Red vs blue scenario (roadmap F99). Synthetic telemetry only; see scenarios/README.md.
+id: RVB-04
+title: Domain dominance
+summary: From a foothold the attacker roasts service tickets, replicates directory secrets and forges a ticket.
+difficulty: medium
+lab_host: WIN-DC01
+synthetic: true
+steps:
+- id: RVB-04-S1
+  name: Kerberoasting
+  technique: T1558.003
+  red: RC4 service tickets are requested for an SPN account.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-007
+    question: Is the targeted service account's password long and random?
+  events:
+  - event_id: 4769
+    event_source: Security
+    details:
+      ServiceName: MSSQLSvc/sql01.corp.local:1433
+      TicketOptions: '0x40810000'
+      TicketEncryptionType: '0x17'
+    computer_name: WIN-DC01
+    timestamp: '2026-11-01T09:07:00Z'
+    technique_id: T1558.003
+- id: RVB-04-S2
+  name: DCSync
+  technique: T1003.006
+  red: A non-DC account requests directory replication.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-008
+    question: Which account holds replication rights it should not have?
+  events:
+  - event_id: 4662
+    event_source: Security
+    details:
+      AccessMask: '0x100'
+      SubjectUserName: compromised_admin
+      Properties: '{1131f6aa-9c07-11d1-f79f-00c04fc2dcd2}'
+    computer_name: WIN-DC01
+    timestamp: '2026-11-01T09:14:00Z'
+    technique_id: T1003.006
+- id: RVB-04-S3
+  name: NTDS.dit extraction
+  technique: T1003.003
+  red: ntdsutil or a shadow copy is used to copy the AD database.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-032
+    question: Has KRBTGT been rotated twice since?
+  events:
+  - event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\ntdsutil.exe
+      CommandLine: ntdsutil "ac i ntds" "ifm" "create full C:\Windows\Temp\x" q q
+      ParentImage: C:\Windows\System32\cmd.exe
+    computer_name: WIN-DC01
+    timestamp: '2026-11-01T09:21:00Z'
+    technique_id: T1003.003
+- id: RVB-04-S4
+  name: Golden ticket use
+  technique: T1558.001
+  red: A logon carries a domain name that does not match the forest.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-013
+    question: What is the plan to rotate KRBTGT safely?
+  events:
+  - event_id: 4624
+    event_source: Security
+    details:
+      LogonType: 3
+      AuthenticationPackageName: Kerberos
+      TargetUserName: Administrator
+      TargetDomainName: corp.local
+    computer_name: WIN-DC01
+    timestamp: '2026-11-01T09:28:00Z'
+    technique_id: T1558.001

@@ -1,0 +1,82 @@
+# Red vs blue scenario (roadmap F99). Synthetic telemetry only; see scenarios/README.md.
+id: RVB-01
+title: Phishing to credential theft
+summary: A user opens a macro document; the attacker stages PowerShell, turns off Defender and reads LSASS.
+difficulty: easy
+lab_host: WIN-WORKSTATION09
+synthetic: true
+steps:
+- id: RVB-01-S1
+  name: Macro spawns a shell
+  technique: T1204.002
+  red: Word starts a command interpreter from the user's document.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-021
+    question: Which document and parent process started the shell?
+  events:
+  - event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      CommandLine: powershell -nop -w hidden -c IEX(...)
+      ParentImage: C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE
+    computer_name: WIN-WORKSTATION09
+    timestamp: '2026-11-01T09:07:00Z'
+    technique_id: T1204.002
+- id: RVB-01-S2
+  name: Encoded PowerShell cradle
+  technique: T1059.001
+  red: A hidden PowerShell window runs an encoded command.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-004
+    question: 'Decode the command: what does it download?'
+  events:
+  - event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      CommandLine: powershell.exe -nop -w hidden -encodedcommand JABjAGwA
+    computer_name: WIN-WORKSTATION09
+    timestamp: '2026-11-01T09:14:00Z'
+    technique_id: T1059.001
+- id: RVB-01-S3
+  name: Defender real-time protection off
+  technique: T1562.001
+  red: Set-MpPreference disables real-time monitoring.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-005
+    question: Is tamper protection enabled on this host?
+  events:
+  - event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      CommandLine: powershell.exe -Command Set-MpPreference -DisableRealtimeMonitoring $true
+    computer_name: WIN-WORKSTATION09
+    timestamp: '2026-11-01T09:21:00Z'
+    technique_id: T1562.001
+- id: RVB-01-S4
+  name: LSASS memory read
+  technique: T1003.001
+  red: An unsigned tool opens lsass.exe with read access.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-001
+    question: Which accounts had sessions on the host and need a reset?
+  events:
+  - event_id: 10
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      SourceImage: C:\Windows\Temp\tool.exe
+      TargetImage: C:\Windows\System32\lsass.exe
+      GrantedAccess: '0x1010'
+    computer_name: WIN-WORKSTATION09
+    timestamp: '2026-11-01T09:28:00Z'
+    technique_id: T1003.001

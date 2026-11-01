@@ -36,10 +36,10 @@ class TestSyntheticDemoData(unittest.TestCase):
         ip_re = re.compile(r"(?<![\d.])(\d{1,3}(?:\.\d{1,3}){3})(?![\d.])")
         allowed_public = {"8.8.8.8"}  # well-known resolver used only as an example/probe target
         offenders = []
-        for folder in ("simulator", "soar", "web", "docs", "integrations"):
+        for folder in ("simulator", "soar", "web", "docs", "integrations", "scenarios"):
             for dirpath, _dirs, files in os.walk(os.path.join(ROOT, folder)):
                 for name in files:
-                    if not name.endswith((".py", ".md", ".json", ".html", ".js")):
+                    if not name.endswith((".py", ".md", ".json", ".html", ".js", ".yml")):
                         continue
                     with open(os.path.join(dirpath, name), encoding="utf-8", errors="ignore") as fh:
                         for ip in ip_re.findall(fh.read()):

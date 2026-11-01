@@ -49,6 +49,7 @@ nav:
       - Evasion tests: EVASION.md
       - Purple-team report: PURPLE_TEAM_REPORT.md
       - Purple-team exercise: PURPLE_TEAM_EXERCISE.md
+      - Red vs blue scenarios: SCENARIO_RESULTS.md
       - Latency histogram: LATENCY_HISTOGRAM.md
       - Baseline traffic: BASELINE_TRAFFIC.md
       - Atomic Red Team: ATOMIC_RED_TEAM.md

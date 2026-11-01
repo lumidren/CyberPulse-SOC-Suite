@@ -28,7 +28,7 @@
 
 | Metric | Value | Reproduce | What it does not mean |
 | :--- | ---: | :--- | :--- |
-| Automated test cases | 511 | `python -m unittest discover -s tests -p "test_*.py"` | - |
+| Automated test cases | 518 | `python -m unittest discover -s tests -p "test_*.py"` | - |
 | Code coverage | not embedded | `coverage run -m unittest discover -s tests && coverage report` | CI fails below 75% (.coveragerc); the value varies with the run, so it is not frozen here. |
 | Pipeline latency | not embedded | `python scripts/benchmark_pipeline.py --runs 20` | Machine-specific; last measurement and conditions in LATENCY_HISTOGRAM.md and the README. |
 
