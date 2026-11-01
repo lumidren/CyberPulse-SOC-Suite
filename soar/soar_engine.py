@@ -23,6 +23,7 @@ from soar.syslog_receiver import SyslogReceiver, WebhookIngestionHandler
 from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
+from soar.case_manager import CaseManager
 from soar.playbooks import PlaybookRegistry
 from soar.rule_exceptions import ExceptionRegistry
 from soar.sigma_correlation import CorrelationEngine
@@ -145,6 +146,7 @@ class SOAROrchestrator:
         self.correlation = CorrelationEngine()
         self.exceptions = ExceptionRegistry()
         self.playbooks = PlaybookRegistry()
+        self.case_manager = CaseManager()
         # Optional external enrichment (off unless EXTERNAL_ENRICHMENT_ENABLED=true + API keys)
         self.intel_client = ThreatIntelClient()
         # Circuit-breaker trips page a human through the configured notification channel
@@ -165,8 +167,9 @@ class SOAROrchestrator:
             if action_id and self.containment_engine.action_registry.pop(action_id, None) is not None:
                 actions += 1
         syslog = self.syslog_receiver.purge_older_than(cutoff.timestamp())
+        cases = self.case_manager.purge_missing(set(self.dfir_engine.incidents))
         return {"retention_days": days, "incidents_purged": len(removed),
-                "actions_purged": actions, "syslog_events_purged": syslog}
+                "actions_purged": actions, "syslog_events_purged": syslog, "cases_purged": cases}
 
     def expire_containment(self):
         """Roll back expired actions and record it on their incidents."""
@@ -354,6 +357,9 @@ class SOAROrchestrator:
 
         incident["playbook"] = ({**playbook.summary(), "tasks": [{"title": t, "status": "Open"} for t in playbook.tasks]}
                                 if playbook else None)
+
+        # Every incident is filed into a case (same host within the grouping window = same case)
+        incident["case_id"] = self.case_manager.attach(incident)["case_id"]
 
         # Stage 12: Real-Time Mobile / Slack / Discord Notification
         if playbook is None or playbook.notify:
