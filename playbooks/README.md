@@ -26,3 +26,14 @@ technique match (exact sub-technique beats parent); otherwise `default.yml`.
 
 Changes are reviewed like code: open a pull request, and the test suite loads
 every playbook and checks its routing.
+
+## Versioning and tests (F34)
+
+- Every playbook has a semantic `version`. `playbooks/meta/versions.yml` records it with a
+  SHA-256 fingerprint of the behaviour (`match`, `response`, `tasks`; not the description).
+  Changing behaviour without bumping the version, updating `meta/versions.yml` and adding a
+  `CHANGELOG.md` entry fails the test suite.
+- `playbooks/tests/cases.yml` holds behaviour cases: a matched rule plus the policy decision,
+  and the expected playbook, action and execution intent. Run them with
+  `python -m soar.playbooks --test`; the unit tests run them too.
+

@@ -26,6 +26,8 @@ match, then ``default.yml``. Two playbooks claiming the same rule id is a load e
 """
 
 import copy
+import hashlib
+import json
 import os
 
 import yaml
@@ -91,6 +93,11 @@ class Playbook:
         if technique.split(".")[0] in self.techniques:
             return 1
         return 0
+
+    def fingerprint(self):
+        """SHA-256 over everything that changes behaviour (match, response, tasks); see playbooks/versions.yml."""
+        payload = {k: self.doc.get(k) for k in ("match", "response", "tasks")}
+        return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
     def summary(self):
         return {"name": self.name, "version": self.version, "file": self.file}
@@ -175,3 +182,72 @@ def validate_draft(text, registry, rules):
                 for pb in others for t in sorted(draft.techniques & pb.techniques)]
     return {"valid": not errors, "errors": errors, "warnings": warnings,
             "normalized_yaml": yaml.safe_dump(doc, sort_keys=False, allow_unicode=True), "routes": routes}
+
+
+CASES_PATH = os.path.join(DEFAULT_DIR, "tests", "cases.yml")
+VERSIONS_PATH = os.path.join(DEFAULT_DIR, "meta", "versions.yml")
+
+
+def pb_for_test(**doc):
+    """Build an in-memory playbook (tests and the editor's previews)."""
+    base = {"name": "test", "version": "1.0.0", "description": "test"}
+    base.update(doc)
+    return Playbook(os.path.join(DEFAULT_DIR, "test.yml"), base)
+
+
+def run_case(registry, case):
+    """Apply the playbook layer to one test case; returns a list of failure messages (empty = pass)."""
+    playbook = registry.select(case["rule"])
+    rule = PlaybookRegistry.apply_to_rule(playbook, case["rule"])
+    decision = dict(case["decision"], action=rule["action_recommended"]) if playbook and playbook.action else dict(case["decision"])
+    decision = PlaybookRegistry.apply_to_decision(playbook, decision)
+    actual = {"playbook": playbook.name if playbook else None, "action": decision.get("action"),
+              "execution_intent": decision.get("execution_intent"), "tasks": len(playbook.tasks) if playbook else 0}
+    failures = []
+    for key, want in (case.get("expect") or {}).items():
+        if key == "min_tasks":
+            if actual["tasks"] < want:
+                failures.append(f"tasks: want at least {want}, got {actual['tasks']}")
+        elif actual.get(key) != want:
+            failures.append(f"{key}: want {want!r}, got {actual.get(key)!r}")
+    return failures
+
+
+def run_cases(registry=None, path=CASES_PATH):
+    registry = registry or PlaybookRegistry()
+    with open(path, encoding="utf-8") as fh:
+        cases = (yaml.safe_load(fh) or {}).get("cases") or []
+    return [(case["name"], run_case(registry, case)) for case in cases]
+
+
+def version_problems(registry=None, path=VERSIONS_PATH):
+    """Playbooks whose behaviour changed without a version bump in playbooks/meta/versions.yml."""
+    registry = registry or PlaybookRegistry()
+    with open(path, encoding="utf-8") as fh:
+        recorded = (yaml.safe_load(fh) or {}).get("playbooks") or {}
+    problems = []
+    for pb in registry.playbooks:
+        entry = recorded.get(pb.name)
+        if not entry:
+            problems.append(f"{pb.name}: missing from meta/versions.yml")
+        elif str(entry.get("version")) != pb.version:
+            problems.append(f"{pb.name}: version {pb.version} in the playbook, {entry.get('version')} recorded")
+        elif entry.get("sha256") != pb.fingerprint():
+            problems.append(f"{pb.name}: behaviour changed; bump version, update meta/versions.yml and CHANGELOG.md")
+    return problems
+
+
+if __name__ == "__main__":
+    import sys
+
+    if "--test" not in sys.argv:
+        sys.exit("usage: python -m soar.playbooks --test")
+    results = run_cases()
+    for name, failures in results:
+        print(("PASS " if not failures else "FAIL ") + name)
+        for f in failures:
+            print("     " + f)
+    problems = version_problems()
+    for p in problems:
+        print("VERSION " + p)
+    sys.exit(1 if problems or any(f for _, f in results) else 0)

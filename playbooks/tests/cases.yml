@@ -1,0 +1,44 @@
+# Playbook test cases (roadmap F34). Run: python -m soar.playbooks --test
+#
+# Each case gives a matched rule and the policy engine's decision, and states what the
+# playbook layer must produce. Cases cover routing and the "only more conservative" rule.
+cases:
+  - name: LSASS dump routes to credential-theft and stays pending approval
+    rule: {rule_id: SOC-RULE-001, mitre_id: T1003.001, action_recommended: ISOLATE_HOST_AND_KILL_PROCESS}
+    decision: {action: ISOLATE_HOST_AND_KILL_PROCESS, execution_intent: PENDING_APPROVAL, risk_score: 88}
+    expect: {playbook: credential-theft, action: ISOLATE_HOST_AND_KILL_PROCESS, execution_intent: PENDING_APPROVAL, min_tasks: 3}
+
+  - name: Ransomware in opt-in automatic mode is forced back to approval
+    rule: {rule_id: SOC-RULE-006, mitre_id: T1486, action_recommended: KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS}
+    decision: {action: KILL_RANSOMWARE_PROCESS_AND_RESTORE_VSS, execution_intent: EXECUTE_IMMEDIATE, risk_score: 97}
+    expect: {playbook: ransomware, execution_intent: PENDING_APPROVAL}
+
+  - name: Brute-force firewall block keeps the opt-in TIER_1 automatic path
+    rule: {rule_id: SOC-RULE-002, mitre_id: T1110.001, action_recommended: BLOCK_SOURCE_IP_FIREWALL}
+    decision: {action: BLOCK_SOURCE_IP_FIREWALL, execution_intent: EXECUTE_IMMEDIATE, risk_score: 90}
+    expect: {playbook: brute-force, execution_intent: EXECUTE_IMMEDIATE}
+
+  - name: Password spraying correlation routes by technique parent
+    rule: {rule_id: SOC-RULE-044, mitre_id: T1110.003, action_recommended: BLOCK_SOURCE_IP_FIREWALL}
+    decision: {action: BLOCK_SOURCE_IP_FIREWALL, execution_intent: PENDING_APPROVAL, risk_score: 70}
+    expect: {playbook: brute-force, execution_intent: PENDING_APPROVAL}
+
+  - name: Honey account hit routes by rule id
+    rule: {rule_id: SOC-RULE-046, mitre_id: T1078.002, action_recommended: ENRICH_AND_ALERT_ANALYST}
+    decision: {action: ENRICH_AND_ALERT_ANALYST, execution_intent: ALERT_ONLY, risk_score: 80}
+    expect: {playbook: deception-hit, execution_intent: ALERT_ONLY}
+
+  - name: CloudTrail disabled routes to cloud-identity on the exact sub-technique
+    rule: {rule_id: SOC-RULE-041, mitre_id: T1562.008, action_recommended: ENRICH_AND_ALERT_ANALYST}
+    decision: {action: ENRICH_AND_ALERT_ANALYST, execution_intent: ALERT_ONLY, risk_score: 75}
+    expect: {playbook: cloud-identity}
+
+  - name: Unclaimed rule falls back to default triage
+    rule: {rule_id: SOC-RULE-014, mitre_id: T1105, action_recommended: ENRICH_AND_ALERT_ANALYST}
+    decision: {action: ENRICH_AND_ALERT_ANALYST, execution_intent: ALERT_ONLY, risk_score: 60}
+    expect: {playbook: default-triage, execution_intent: ALERT_ONLY}
+
+  - name: Dry run is never upgraded
+    rule: {rule_id: SOC-RULE-001, mitre_id: T1003.001, action_recommended: ISOLATE_HOST_AND_KILL_PROCESS}
+    decision: {action: ISOLATE_HOST_AND_KILL_PROCESS, execution_intent: DRY_RUN_SIMULATION, risk_score: 99}
+    expect: {playbook: credential-theft, execution_intent: DRY_RUN_SIMULATION}
