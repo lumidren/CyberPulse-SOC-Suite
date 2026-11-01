@@ -96,7 +96,74 @@ def run_baseline(count=BASELINE_COUNT, seed=BASELINE_SEED):
     }
 
 
-def render_markdown(scripted, baseline):
+def run_confusion(runs=SCRIPTED_RUNS, count=BASELINE_COUNT, seed=BASELINE_SEED):
+    """Confusion counts over a labelled set: scripted attacks (label = expected rule) + benign baseline.
+
+    Overall: did an attack event alert at all, did a benign one. Per rule: TP when the rule is the
+    top match for an event labelled with it, FN when such an event got another or no rule, FP when
+    the rule is the top match for any other event, TN for everything else."""
+    labelled = []
+    attacks = SOAROrchestrator(policy_mode="DRY_RUN")
+    for _ in range(runs):
+        for name, generator in SCRIPTED_GENERATORS:
+            match = attacks.evaluate_detection(generator())
+            labelled.append((EXPECTED_RULE[name], (match or {}).get("rule_id")))
+    benign = SOAROrchestrator(policy_mode="DRY_RUN")
+    benign.exceptions.clock = lambda: VALIDATION_DATE
+    for event in generate_baseline(count, seed):
+        labelled.append((None, (benign.evaluate_detection(event) or {}).get("rule_id")))
+    overall = {
+        "tp": sum(1 for label, fired in labelled if label and fired),
+        "fn": sum(1 for label, fired in labelled if label and not fired),
+        "fp": sum(1 for label, fired in labelled if not label and fired),
+        "tn": sum(1 for label, fired in labelled if not label and not fired),
+    }
+    rules = sorted({label for label, _ in labelled if label} | {fired for _, fired in labelled if fired})
+    per_rule = {}
+    for rule in rules:
+        tp = sum(1 for label, fired in labelled if label == rule and fired == rule)
+        fn = sum(1 for label, fired in labelled if label == rule and fired != rule)
+        fp = sum(1 for label, fired in labelled if label != rule and fired == rule)
+        per_rule[rule] = {"tp": tp, "fn": fn, "fp": fp, "tn": len(labelled) - tp - fn - fp}
+    return {"events": len(labelled), "overall": overall, "per_rule": per_rule}
+
+
+def _ratio(num, den):
+    return f"{num / den:.3f}" if den else "n/a"
+
+
+def render_confusion(conf, suppressed=0):
+    o = conf["overall"]
+    lines = [
+        "## Confusion matrix",
+        "",
+        f"Over {conf['events']} labelled events: every scripted attack run (label: the expected rule) plus every",
+        "benign baseline event (label: none), after exceptions. Counts are real outputs of this script; the",
+        "events are synthetic and self-authored, so precision and recall here describe agreement between",
+        "the rules and their own test data, not performance on real traffic.",
+        "",
+        "| | Alerted | Did not alert |",
+        "| :--- | ---: | ---: |",
+        f"| **Attack event** | TP {o['tp']} | FN {o['fn']} |",
+        f"| **Benign event** | FP {o['fp']} | TN {o['tn']} |",
+        "",
+        f"Precision {_ratio(o['tp'], o['tp'] + o['fp'])}, recall {_ratio(o['tp'], o['tp'] + o['fn'])}"
+        + (f" (without the exceptions, FP would be {o['fp'] + suppressed} and precision "
+           f"{_ratio(o['tp'], o['tp'] + o['fp'] + suppressed)})." if suppressed else "."),
+        f"Only the {len([r for r, c in conf['per_rule'].items() if c['tp'] + c['fn']])} rules with a scripted attack "
+        "generator appear below; the others are checked by their samples in `rules/tests/` only.",
+        "",
+        "Per rule (top match only; a rule that fires for another rule's attack counts as a false positive):",
+        "",
+        "| Rule | TP | FN | FP | TN |",
+        "| :--- | ---: | ---: | ---: | ---: |",
+    ]
+    lines += [f"| `{rule}` | {c['tp']} | {c['fn']} | {c['fp']} | {c['tn']} |" for rule, c in conf["per_rule"].items()]
+    lines.append("")
+    return lines
+
+
+def render_markdown(scripted, baseline, confusion=None):
     lines = [
         "# Detection Validation Results",
         "",
@@ -143,11 +210,13 @@ def render_markdown(scripted, baseline):
                   "| Exception | Suppressed matches |", "| :--- | ---: |"]
         lines += [f"| `{exc}` | {n} |" for exc, n in baseline["suppressed"].items()]
     lines.append("")
+    if confusion:
+        lines += render_confusion(confusion, sum((baseline.get("suppressed") or {}).values()))
     return "\n".join(lines)
 
 
 def build_report():
-    return render_markdown(run_scripted(), run_baseline())
+    return render_markdown(run_scripted(), run_baseline(), run_confusion())
 
 
 def main():

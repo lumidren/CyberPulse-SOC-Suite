@@ -41,3 +41,33 @@ tuning against known data, not an independent measurement.
 | :--- | ---: |
 | `EXC-0001` | 100 |
 | `EXC-0002` | 19 |
+
+## Confusion matrix
+
+Over 660 labelled events: every scripted attack run (label: the expected rule) plus every
+benign baseline event (label: none), after exceptions. Counts are real outputs of this script; the
+events are synthetic and self-authored, so precision and recall here describe agreement between
+the rules and their own test data, not performance on real traffic.
+
+| | Alerted | Did not alert |
+| :--- | ---: | ---: |
+| **Attack event** | TP 60 | FN 0 |
+| **Benign event** | FP 0 | TN 600 |
+
+Precision 1.000, recall 1.000 (without the exceptions, FP would be 119 and precision 0.335).
+Only the 10 rules with a scripted attack generator appear below; the others are checked by their samples in `rules/tests/` only.
+
+Per rule (top match only; a rule that fires for another rule's attack counts as a false positive):
+
+| Rule | TP | FN | FP | TN |
+| :--- | ---: | ---: | ---: | ---: |
+| `SOC-RULE-001` | 6 | 0 | 0 | 654 |
+| `SOC-RULE-002` | 6 | 0 | 0 | 654 |
+| `SOC-RULE-003` | 6 | 0 | 0 | 654 |
+| `SOC-RULE-004` | 6 | 0 | 0 | 654 |
+| `SOC-RULE-005` | 6 | 0 | 0 | 654 |
+| `SOC-RULE-006` | 6 | 0 | 0 | 654 |
+| `SOC-RULE-007` | 6 | 0 | 0 | 654 |
+| `SOC-RULE-008` | 6 | 0 | 0 | 654 |
+| `SOC-RULE-009` | 6 | 0 | 0 | 654 |
+| `SOC-RULE-010` | 6 | 0 | 0 | 654 |
