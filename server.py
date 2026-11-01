@@ -54,6 +54,7 @@ from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar import views
 from soar.chatops import ChatOpsApprovals
+from soar.live_query import LiveQueryClient, LiveQueryRefused, osquery_catalogue, velociraptor_catalogue
 from soar.yara_scan import scan_evidence_file
 from soar.hunt_templates import load_templates as load_hunt_templates
 from soar.hunt_templates import run_template as run_hunt_template
@@ -728,6 +729,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                                   self._principal(), segments[3])
                 self._send_json(200, run_hunt_template(orchestrator, template))
 
+        elif path == "/api/live-query/catalogue":
+            self._send_json(200, {"osquery": osquery_catalogue(), "velociraptor": velociraptor_catalogue()})
+
         elif path == "/api/hunts":
             self._send_json(200, {"hunts": hunts.list()})
 
@@ -1079,6 +1083,26 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             audit_logger.info("CASE_UPDATE client=%s actor=%s case=%s result=%s",
                               self._client_ip(), actor, case_segments[2], result["status"])
             self._send_json(200 if result["status"] == "SUCCESS" else 400, result)
+            return
+
+        if path == "/api/live-query":
+            client, engine = LiveQueryClient(), data.get("engine")
+            try:
+                if engine == "osquery":
+                    result = client.run_osquery(str(data.get("query_id", "")), data.get("targets") or [])
+                elif engine == "velociraptor":
+                    result = client.run_velociraptor(str(data.get("artifact", "")), data.get("targets") or [])
+                else:
+                    raise LiveQueryRefused("engine must be osquery or velociraptor")
+            except (LiveQueryRefused, ValueError) as exc:
+                self._send_json(400, {"status": "REFUSED", "error": str(exc)})
+                return
+            except Exception as exc:
+                self._send_json(502, {"status": "ERROR", "error": f"{type(exc).__name__}"})
+                return
+            audit_logger.info("LIVE_QUERY client=%s principal=%s engine=%s query=%s targets=%d", self._client_ip(),
+                              self._principal(), engine, data.get("query_id") or data.get("artifact"), len(data.get("targets") or []))
+            self._send_json(200, result)
             return
 
         if path == "/api/evidence/yara-scan":

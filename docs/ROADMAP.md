@@ -241,7 +241,7 @@ internal identifiers never go to external APIs.
 - [x] **F68** Jupyter notebook set for hunts. — **Done**: 3 notebooks in `notebooks/` + README; `tests/test_notebooks.py` executes every cell (no stored outputs). Jupyter itself not run here; cells run via the test.
 - [x] **F69** Stack counting and long-tail analysis. — **Done**: `views.stack`, `GET /api/hunt/stack`, stack panel with pivots in `web/hunt.html`.
 - [x] **F70** YARA scanning integration. — **Done**: `soar/yara_scan.py` (yara-python or a built-in subset that refuses unsupported syntax), `POST /api/evidence/yara-scan` (evidence dir only), `docs/YARA.md`. libyara path untested (not installed).
-- [ ] **F71** Velociraptor or osquery integration for live endpoint queries.
+- [x] **F71** Velociraptor or osquery integration for live endpoint queries. — **Done (needs Fleet/Velociraptor)**: `soar/live_query.py` (catalogue-only, lab URLs), `GET /api/live-query/catalogue`, `POST /api/live-query`, `docs/LIVE_QUERIES.md`. Stubbed HTTP only.
 - [ ] **F72** Zeek/Suricata network sensor with detections.
 - [ ] **F73** DNS tunneling and beaconing detection.
 - [ ] **F74** JA3/JA4 TLS fingerprint detections.
