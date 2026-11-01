@@ -130,6 +130,20 @@ async function findBeacons() {
     }
 }
 
+async function draftFromPivot() {
+    const field = $("pivotField").value, value = $("pivotValue").value.trim();
+    if (!value) return;
+    const data = await CP.api("/api/hunt/draft-rule", { method: "POST", body: JSON.stringify({ field, value }) });
+    const box = $("draftBox");
+    box.hidden = false;
+    const list = $("draftChecklist");
+    list.replaceChildren();
+    if (!data || data.error) { list.appendChild(CP.el("li", (data && data.error) || "failed")); return; }
+    data.checklist.forEach((item) => list.appendChild(CP.el("li", item)));
+    $("draftRuleYaml").textContent = data.rule_yaml;
+    $("draftSamplesYaml").textContent = data.samples_yaml;
+}
+
 function init() {
     const select = $("pivotField");
     FIELDS.forEach((f) => { const o = CP.el("option", f); o.value = f; select.appendChild(o); });
@@ -139,6 +153,7 @@ function init() {
     $("stackField").value = "process";
     loadTemplates();
     $("findBeacons").addEventListener("click", findBeacons);
+    $("draftRule").addEventListener("click", draftFromPivot);
     $("stackForm").addEventListener("submit", (e) => { e.preventDefault(); runStack(); });
     $("pivotForm").addEventListener("submit", (e) => {
         e.preventDefault();

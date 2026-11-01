@@ -54,6 +54,7 @@ from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar import views
 from soar.chatops import ChatOpsApprovals
+from soar.hunt_to_rule import draft_rule
 from soar.network_sensors import SensorFormatError
 from soar.network_sensors import convert_batch as convert_sensor_batch
 from soar.live_query import LiveQueryClient, LiveQueryRefused, osquery_catalogue, velociraptor_catalogue
@@ -1088,6 +1089,15 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             audit_logger.info("CASE_UPDATE client=%s actor=%s case=%s result=%s",
                               self._client_ip(), actor, case_segments[2], result["status"])
             self._send_json(200 if result["status"] == "SUCCESS" else 400, result)
+            return
+
+        if path == "/api/hunt/draft-rule":
+            # Drafts are returned for review, never written or enabled
+            result = draft_rule(str(data.get("field", "")), str(data.get("value", ""))[:500],
+                                orchestrator.event_store.snapshot())
+            audit_logger.info("HUNT_DRAFT_RULE client=%s principal=%s field=%s ok=%s", self._client_ip(),
+                              self._principal(), str(data.get("field", ""))[:32], "error" not in result)
+            self._send_json(400 if "error" in result else 200, result)
             return
 
         if path == "/api/live-query":

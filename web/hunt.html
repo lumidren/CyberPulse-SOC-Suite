@@ -41,6 +41,13 @@
                 <button class="btn-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Pivot</button>
             </form>
             <nav id="breadcrumbs" class="hw-crumbs" aria-label="Pivot history"></nav>
+            <button class="btn-secondary" id="draftRule" type="button" data-requires="write"><i class="fa-solid fa-file-pen"></i> Draft a detection from this pivot</button>
+            <div id="draftBox" class="hw-draft" hidden>
+                <p class="tw-muted">Draft only: review, complete the TODOs and commit it through a pull request. It is not saved or enabled.</p>
+                <ul id="draftChecklist"></ul>
+                <h4>rules/sigma/&lt;name&gt;.yml</h4><pre id="draftRuleYaml" class="pb-yaml"></pre>
+                <h4>rules/tests/&lt;name&gt;.yml</h4><pre id="draftSamplesYaml" class="pb-yaml"></pre>
+            </div>
             <p id="pivotSummary" class="tw-muted"></p>
             <div id="related" class="tw-top"></div>
             <div class="table-responsive"><table class="data-table"><thead><tr><th>Seen</th><th>Rule</th><th>Host</th><th>User</th><th>Source IP</th><th>Event</th><th>Process / command</th></tr></thead><tbody id="pivotRows"></tbody></table></div>

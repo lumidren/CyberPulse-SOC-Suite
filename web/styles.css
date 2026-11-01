@@ -1110,3 +1110,4 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
 .hw-template button { align-self: flex-start; margin-top: 4px; }
 .hw-steps { margin: 6px 0 6px 20px; display: flex; flex-direction: column; gap: 6px; color: var(--text-primary); }
 .hw-steps li { display: flex; flex-direction: column; gap: 2px; }
+.hw-draft { margin-top: 10px; } .hw-draft ul { margin: 6px 0 6px 20px; color: var(--text-secondary); }
