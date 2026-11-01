@@ -54,6 +54,7 @@ from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar import views
 from soar.chatops import ChatOpsApprovals
+from soar.pdf_report import incident_pdf
 from soar.roles import allowed as role_allowed
 from soar.roles import parse_role_keys, role_for_key
 from soar.hunts import HuntStore
@@ -601,6 +602,16 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_cors_headers()
             self.end_headers()
             self.wfile.write(data)
+        elif subresource == "report.pdf":
+            pdf = incident_pdf(inc, orchestrator.case_manager.find_by_incident(inc_id), orchestrator.custody.logs.get(inc_id, []))
+            audit_logger.info("REPORT_PDF_EXPORT client=%s principal=%s incident=%s", self._client_ip(), self._principal(), inc_id)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/pdf")
+            self.send_header("Content-Disposition", f'attachment; filename="{inc_id}-report.pdf"')
+            self.send_header("Content-Length", str(len(pdf)))
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(pdf)
         elif subresource == "custody":
             self._send_json(200, {"custody": orchestrator.custody.logs.get(inc_id, []),
                                   "verification": orchestrator.custody.verify(inc_id),
