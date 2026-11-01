@@ -50,6 +50,24 @@ class TestEventStoreAndPivot(HuntBase):
         self.assertEqual(store.purge_older_than(datetime.now(timezone.utc) + timedelta(seconds=1)), 3)
 
 
+class TestStack(HuntBase):
+
+    def test_rarest_first_with_long_tail(self):
+        result = views.stack(self.orchestrator, "process")
+        counts = [r["count"] for r in result["rows"]]
+        self.assertEqual(counts, sorted(counts))
+        tail = {r["value"] for r in result["rows"] if r["tail"]}
+        self.assertTrue(any("rclone" in v for v in tail), "attacker tooling sits in the long tail")
+        self.assertFalse(any(v.endswith("powershell.exe") and r["tail"] for r in result["rows"] for v in [r["value"]]),
+                         "common admin tooling is not in the tail")
+
+    def test_filtered_stack(self):
+        result = views.stack(self.orchestrator, "process", "host", "CORP-FINANCE-02")
+        self.assertEqual(result["where"], {"host": "CORP-FINANCE-02"})
+        self.assertLess(result["events"], len(self.orchestrator.event_store.snapshot()))
+        self.assertIn("error", views.stack(self.orchestrator, "nope"))
+
+
 class TestHuntPages(unittest.TestCase):
 
     def test_hunt_page_text_only(self):

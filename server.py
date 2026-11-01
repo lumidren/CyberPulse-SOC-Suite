@@ -707,6 +707,12 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             result = views.pivot(orchestrator, query.get("field", [""])[0], query.get("value", [""])[0][:500])
             self._send_json(400 if "error" in result else 200, result)
 
+        elif path == "/api/hunt/stack":
+            query = parse_qs(parsed.query)
+            first = lambda key: query.get(key, [None])[0]  # noqa: E731
+            result = views.stack(orchestrator, first("field") or "", first("where_field"), (first("where_value") or "")[:500])
+            self._send_json(400 if "error" in result else 200, result)
+
         elif path == "/api/hunts":
             self._send_json(200, {"hunts": hunts.list()})
 

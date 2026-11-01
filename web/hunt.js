@@ -49,9 +49,37 @@ function renderCrumbs() {
     });
 }
 
+async function runStack() {
+    const field = $("stackField").value, whereField = $("stackWhereField").value;
+    let url = `/api/hunt/stack?field=${encodeURIComponent(field)}`;
+    if (whereField) url += `&where_field=${encodeURIComponent(whereField)}&where_value=${encodeURIComponent($("stackWhereValue").value.trim())}`;
+    const data = await CP.api(url);
+    if (!data) return;
+    if (data.error) { $("stackSummary").textContent = data.error; return; }
+    $("stackSummary").textContent = `${data.with_value} value(s) in ${data.events} event(s), ${data.distinct} distinct; ` +
+        `${data.tail} in the long tail (seen ${data.tail_limit} time(s) or fewer).`;
+    const rows = $("stackRows");
+    rows.replaceChildren();
+    for (const r of data.rows) {
+        const tr = CP.el("tr", null, r.tail ? "hw-tail" : "");
+        const valueCell = CP.el("td");
+        const b = CP.el("button", r.value, "hw-pivot");
+        b.addEventListener("click", () => { trail.length = 0; pivot(field, r.value); window.scrollTo(0, 0); });
+        valueCell.appendChild(b);
+        tr.appendChild(valueCell);
+        [r.count, `${(r.share * 100).toFixed(1)}%`, r.tail ? "yes" : "", r.alerted || ""].forEach((v) => tr.appendChild(cell(v)));
+        rows.appendChild(tr);
+    }
+}
+
 function init() {
     const select = $("pivotField");
     FIELDS.forEach((f) => { const o = CP.el("option", f); o.value = f; select.appendChild(o); });
+    for (const id of ["stackField", "stackWhereField"]) {
+        FIELDS.forEach((f) => { const o = CP.el("option", f); o.value = f; $(id).appendChild(o); });
+    }
+    $("stackField").value = "process";
+    $("stackForm").addEventListener("submit", (e) => { e.preventDefault(); runStack(); });
     $("pivotForm").addEventListener("submit", (e) => {
         e.preventDefault();
         const value = $("pivotValue").value.trim();
