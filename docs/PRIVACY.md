@@ -73,6 +73,10 @@ you need full names for a real investigation. Take screenshots with masking on.
   restarts), a public or documentation source IP (internal IPs are withheld) and the
   response status. No hostnames, usernames, internal IPs or execution logs; circuit-breaker
   pages give the host count, not the host list.
+* Optional user sign-in notifications (`USER_NOTIFY_ENABLED`, off by default): an email to
+  the affected account's address from your own address book, over STARTTLS, with no
+  links and no incident details; never for simulated events, service or protected
+  accounts, and at most once per account per day.
 * External threat-intel enrichment and the related health-check probes are
   **off by default** (`EXTERNAL_ENRICHMENT_ENABLED=false`, or toggle at runtime
   with `POST /api/enrichment/config`). While off, nothing is sent to

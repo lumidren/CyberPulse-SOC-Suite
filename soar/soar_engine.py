@@ -26,6 +26,7 @@ from soar.plugins import run_enrichers
 from soar.case_manager import CaseManager
 from soar.orchestrator_hook import OrchestratorWebhook
 from soar.thehive import TheHiveClient
+from soar.user_notify import UserNotifier
 from soar.threat_feeds import FeedClient, FeedStore
 from soar.playbooks import PlaybookRegistry
 from soar.rule_exceptions import ExceptionRegistry
@@ -152,6 +153,7 @@ class SOAROrchestrator:
         self.case_manager = CaseManager()
         self.thehive = TheHiveClient()
         self.orchestrator_hook = OrchestratorWebhook()
+        self.user_notifier = UserNotifier()
         # Bulk threat feeds (CIPHER) matched locally; nothing about events leaves (off unless configured)
         self.feeds = FeedStore()
         self.feed_client = FeedClient(self.feeds)
@@ -375,6 +377,8 @@ class SOAROrchestrator:
         incident["thehive_sync"] = self.thehive.send(incident, incident["case_id"])
         # Optional hand-off to Shuffle / n8n (off unless ORCHESTRATOR_WEBHOOK_URL + _SECRET are set)
         incident["orchestrator_dispatch"] = self.orchestrator_hook.send(incident)
+        # Tell the affected user about a suspicious sign-in (off by default; never for simulated events)
+        incident["user_notification"] = self.user_notifier.notify(incident)
 
         # Stage 12: Real-Time Mobile / Slack / Discord Notification
         if playbook is None or playbook.notify:
