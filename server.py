@@ -54,6 +54,7 @@ from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar import views
 from soar.chatops import ChatOpsApprovals
+from soar.hunts import HuntStore
 from soar.triage_package import build_zip as build_triage_zip
 from soar.guardian import GuardianFormatError, guardian_to_event
 from soar.misp import MispClient, SharingDisabled
@@ -329,6 +330,7 @@ PUBLIC_STATIC_PATHS = {"/login.html", "/login.js", "/styles.css", "/theme.js", "
 # Machine webhook receiver (/api/ingest) authenticates with an HMAC signature
 ingest_verifier = IngestVerifier(os.environ.get("INGEST_HMAC_SECRET", ""))
 chatops = ChatOpsApprovals(orchestrator.containment_engine)
+hunts = HuntStore()
 
 api_rate_limiter = SlidingWindowRateLimiter(RATE_LIMIT_PER_MINUTE)
 simulation_throttle = SimulationThrottle()
@@ -504,7 +506,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     # Responses that carry incident/telemetry data get account names masked (E45)
     MASKED_PREFIXES = ("/api/incidents", "/api/alerts", "/api/approvals", "/api/simulate",
-                       "/api/purple-team/run", "/api/ingest", "/api/cases", "/api/triage", "/api/graph", "/api/stats", "/api/search")
+                       "/api/purple-team/run", "/api/ingest", "/api/cases", "/api/triage", "/api/graph", "/api/stats", "/api/search", "/api/hunts")
 
     def _send_json(self, status_code, payload):
         if isinstance(payload, dict) and urlparse(self.path).path.startswith("/api/identity"):
@@ -649,6 +651,17 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         elif len(segments) == 4 and segments[0] == "api" and segments[1] == "incidents":
             self._handle_incident_subresource(segments[2], segments[3])
+
+        elif path == "/api/hunts":
+            self._send_json(200, {"hunts": hunts.list()})
+
+        elif len(segments) == 4 and segments[:2] == ["api", "hunts"] and segments[3] == "run":
+            hunt = hunts.mark_run(segments[2])
+            if not hunt:
+                self._send_json(404, {"error": "Hunt not found"})
+            else:
+                audit_logger.info("HUNT_RUN client=%s principal=%s hunt=%s", self._client_ip(), self._principal(), hunt["id"])
+                self._send_json(200, {"hunt": hunt, **views.search(orchestrator, hunt["query"])})
 
         elif path == "/api/search":
             query = parse_qs(parsed.query).get("q", [""])[0][:200]
@@ -910,6 +923,16 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         case_segments = [s for s in path.split("/") if s]
+        if path == "/api/hunts":
+            result = hunts.add(data.get("name"), data.get("query"), data.get("analyst"), data.get("description", ""))
+            self._send_json(200 if result["status"] == "SUCCESS" else 400, result)
+            return
+        if len(case_segments) == 4 and case_segments[:2] == ["api", "hunts"] and case_segments[3] == "delete":
+            result = hunts.delete(case_segments[2], str(data.get("analyst", "")).strip())
+            audit_logger.info("HUNT_DELETE client=%s principal=%s hunt=%s result=%s", self._client_ip(),
+                              self._principal(), case_segments[2], result["status"])
+            self._send_json(200 if result["status"] == "SUCCESS" else 400, result)
+            return
         if len(case_segments) == 4 and case_segments[:2] == ["api", "incidents"] and case_segments[3] == "propose":
             analyst = str(data.get("analyst", "")).strip()[:64]
             result = orchestrator.propose_action(case_segments[2], analyst, data.get("action"))

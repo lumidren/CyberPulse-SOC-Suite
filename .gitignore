@@ -45,3 +45,6 @@ deploy/vagrant/certs/
 # Triage packages hold incident data (TRIAGE_PACKAGE_DIR); never commit them
 triage_packages/
 *-triage.zip
+
+# Saved hunts file (HUNTS_FILE) may hold host names and IPs from searches
+hunts.json
