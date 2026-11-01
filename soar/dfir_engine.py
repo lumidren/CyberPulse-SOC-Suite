@@ -118,15 +118,16 @@ class DFIREngine:
             {
                 "timestamp": datetime.fromtimestamp(t_base + (timing_breakdown.get("total_pipeline_sec", 0.0)), timezone.utc).isoformat(),
                 "stage": "5. AUTOMATED_CONTAINMENT",
-                "title": f"SOAR executed {containment_action.get('action_type')}",
+                "title": f"SOAR {containment_action.get('action_type')}: {containment_action.get('status')}",
                 "detail": f"Protocol: {containment_action.get('execution_protocol')} | Log: {containment_action.get('execution_log')}",
                 "status": containment_action.get("status")
             },
             {
                 "timestamp": utc_now,
                 "stage": "6. DFIR_CASE_INITIALIZED",
-                "title": f"TheHive 5 Case #{thehive_case['case_id']} created with {len(observables)} observables",
-                "detail": "Standardized NIST SP 800-61 triage task list attached. Notification dispatched to SOC channel.",
+                "title": f"Local case record {thehive_case['case_id']} prepared with {len(observables)} observables",
+                "detail": "TheHive 5 format with the NIST SP 800-61 triage task list. Sent to TheHive only when "
+                          "THEHIVE_ENABLED=true (see thehive_sync on the incident).",
                 "status": "READY_FOR_TRIAGE"
             }
         ]

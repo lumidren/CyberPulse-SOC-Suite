@@ -24,6 +24,7 @@ from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
 from soar.case_manager import CaseManager
+from soar.thehive import TheHiveClient
 from soar.playbooks import PlaybookRegistry
 from soar.rule_exceptions import ExceptionRegistry
 from soar.sigma_correlation import CorrelationEngine
@@ -147,6 +148,7 @@ class SOAROrchestrator:
         self.exceptions = ExceptionRegistry()
         self.playbooks = PlaybookRegistry()
         self.case_manager = CaseManager()
+        self.thehive = TheHiveClient()
         # Optional external enrichment (off unless EXTERNAL_ENRICHMENT_ENABLED=true + API keys)
         self.intel_client = ThreatIntelClient()
         # Circuit-breaker trips page a human through the configured notification channel
@@ -360,6 +362,8 @@ class SOAROrchestrator:
 
         # Every incident is filed into a case (same host within the grouping window = same case)
         incident["case_id"] = self.case_manager.attach(incident)["case_id"]
+        # Optional push to the analysts' own TheHive (off unless THEHIVE_ENABLED=true)
+        incident["thehive_sync"] = self.thehive.send(incident, incident["case_id"])
 
         # Stage 12: Real-Time Mobile / Slack / Discord Notification
         if playbook is None or playbook.notify:
