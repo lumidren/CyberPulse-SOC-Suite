@@ -10,6 +10,7 @@ import time
 from datetime import datetime, timezone
 
 from soar import command_builder as cmd
+from soar.entra_responder import EntraResponder
 from soar.plugins import RESPONDERS
 from soar.evidence_collector import VolatileEvidenceCollector
 from soar.process_termination import RANSOMWARE_GRACE_SECONDS, termination_plan
@@ -77,6 +78,8 @@ class ResilientContainmentEngine:
         self.host_isolation_registry = set()
         self.blocked_ips = set()
         self.disabled_users = set()
+        # Live Entra ID responder (F44); simulated unless ENTRA_RESPONDER_ENABLED=true and configured
+        self.entra = EntraResponder()
 
     def execute_containment(self, action_type, target_host, target_ip, target_user, pid, process_name, execution_intent="EXECUTE_IMMEDIATE", correlation_id=None, context=None):
         """
@@ -322,7 +325,20 @@ class ResilientContainmentEngine:
 
         elif action_type == "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA":
             action_record["execution_protocol"] = "Microsoft Graph API / Azure AD"
-            action_record["execution_log"] = f"[MS Graph -> {target_user}] Revoked all OAuth refresh tokens via RevokeSignInSessions API and enforced immediate MFA re-challenge."
+            if self.entra.enabled:
+                try:
+                    live = self.entra.contain(target_user)
+                except cmd.CommandValidationError:
+                    raise
+                except Exception as exc:
+                    action_record["status"] = "FLAGGED_FOR_MANUAL_REVIEW"
+                    action_record["execution_mode"] = "live"
+                    action_record["execution_log"] = f"[MS Graph] Live response failed: {exc}. Finish it manually in Entra."
+                    return
+                action_record["execution_mode"] = "live"
+                action_record["execution_log"] = f"[MS Graph -> {target_user}] " + "; ".join(live["steps"]) + "."
+            else:
+                action_record["execution_log"] = f"[MS Graph -> {target_user}] Revoked all OAuth refresh tokens via RevokeSignInSessions API and enforced immediate MFA re-challenge."
             action_record["rollback_plan"] = {
                 "method": "MS_GRAPH_API",
                 "note": "Revoked sessions cannot be restored; the user signs in again. Remove any forced-MFA "
@@ -493,6 +509,12 @@ class ResilientContainmentEngine:
             rollback_entry["reversibility"] = reversibility
             rollback_entry["log"] = describe(record)
             rollback_entry["not_restored"] = not_restored
+        if record["action_type"] == "REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA" and record.get("execution_mode") == "live":
+            try:
+                rollback_entry["live_result"] = self.entra.release(record.get("target_user"))
+            except Exception as exc:
+                rollback_entry["status"] = "PARTIAL_FAILURE"
+                rollback_entry["log"] += f" Live step-up group removal failed: {exc}; remove it manually in Entra."
         rollback_entry["restored_state"] = self._release_state(record)
         rollback_entry["pre_action_state"] = record.get("pre_action_state")
 
