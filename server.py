@@ -537,7 +537,7 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
     # Responses that carry incident/telemetry data get account names masked (E45)
     MASKED_PREFIXES = ("/api/incidents", "/api/alerts", "/api/approvals", "/api/simulate",
                        "/api/purple-team/run", "/api/ingest", "/api/cases", "/api/triage", "/api/graph",
-                       "/api/stats", "/api/search", "/api/hunts", "/api/appeals")
+                       "/api/stats", "/api/search", "/api/hunts", "/api/appeals", "/api/hunt")
 
     def _send_json(self, status_code, payload):
         if isinstance(payload, dict) and urlparse(self.path).path.startswith("/api/identity"):
@@ -699,6 +699,13 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         elif path == "/api/status/summary":
             self._send_json(200, views.status_summary(orchestrator))
+
+        elif path == "/api/hunt/pivot":
+            query = parse_qs(parsed.query)
+            audit_logger.info("HUNT_PIVOT client=%s principal=%s field=%s", self._client_ip(), self._principal(),
+                              query.get("field", [""])[0][:32])
+            result = views.pivot(orchestrator, query.get("field", [""])[0], query.get("value", [""])[0][:500])
+            self._send_json(400 if "error" in result else 200, result)
 
         elif path == "/api/hunts":
             self._send_json(200, {"hunts": hunts.list()})
