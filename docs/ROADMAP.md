@@ -133,7 +133,7 @@ internal identifiers never go to external APIs.
 
 - [x] **E89** SECURITY.md with a vulnerability reporting process. — **Done earlier** (176e547): `SECURITY.md` includes a vulnerability reporting process.
 - [x] **E90** CODE_OF_CONDUCT.md. — **Done**: `CODE_OF_CONDUCT.md`.
-- [ ] **E91** CONTRIBUTING.md with ethical-use rules.
+- [x] **E91** CONTRIBUTING.md with ethical-use rules. — **Done**: `CONTRIBUTING.md`.
 - [ ] **E92** "Responsible Use" section in the README.
 - [ ] **E93** Document every automated action and its failure mode.
 - [ ] **E94** Known false-positive scenarios per rule.
