@@ -1,0 +1,48 @@
+"""Triage workspace views (roadmap F51-F64)."""
+
+import os
+import re
+import sys
+import unittest
+from datetime import datetime, timezone
+
+os.environ.setdefault("CYBERPULSE_LAB_MODE", "true")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+
+from simulator.attack_chain import run_chain  # noqa: E402
+from soar import views  # noqa: E402
+from soar.soar_engine import SOAROrchestrator  # noqa: E402
+
+
+class ViewsTestBase(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.orchestrator = SOAROrchestrator(policy_mode="APPROVAL_REQUIRED")
+        run_chain(cls.orchestrator, start=datetime(2026, 11, 1, 9, 0, tzinfo=timezone.utc))
+        cls.case_ids = list(cls.orchestrator.case_manager.cases)
+
+
+class TestTimeline(ViewsTestBase):
+
+    def test_case_timeline_is_in_event_time_order(self):
+        timelines = [views.case_timeline(self.orchestrator, cid) for cid in self.case_ids]
+        foothold = max(timelines, key=lambda t: len(t["entries"]))
+        times = [e["at"] for e in foothold["entries"]]
+        self.assertEqual(times, sorted(times))
+        self.assertGreater(foothold["span_sec"], 0)
+        self.assertTrue(all(e["detection_delay_sec"] is not None for e in foothold["entries"]))
+        self.assertIsNone(views.case_timeline(self.orchestrator, "CASE-missing"))
+
+
+class TestConsolePages(unittest.TestCase):
+
+    def test_workspace_scripts_never_inject_html(self):
+        for name in ("session.js", "triage.js"):
+            with open(os.path.join(ROOT, "web", name), encoding="utf-8") as fh:
+                self.assertIsNone(re.search(r"innerHTML|outerHTML|insertAdjacentHTML|document\.write", fh.read()), name)
+
+
+if __name__ == "__main__":
+    unittest.main()

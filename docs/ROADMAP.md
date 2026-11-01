@@ -218,7 +218,7 @@ internal identifiers never go to external APIs.
 
 ## Phase 9 — Dashboard & UX (F51–F65)
 
-- [ ] **F51** ⭐ Attack timeline view per incident.
+- [x] **F51** ⭐ Attack timeline view per incident. — **Done**: `web/triage.html` + `triage.js` + shared `session.js`, `GET /api/cases/<id>/timeline` (`soar/views.py`).
 - [ ] **F52** ⭐ Alert triage queue with severity, status and assignee.
 - [ ] **F53** Process tree visualization.
 - [ ] **F54** Network graph of attacker-to-host relationships.
