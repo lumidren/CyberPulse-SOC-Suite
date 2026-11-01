@@ -1,0 +1,17 @@
+name: Bulk copy to cloud storage
+hypothesis: Data is staged and copied out with sync tools such as rclone to personal cloud storage.
+attack: [T1567.002, T1560.001]
+data_sources: [Sysmon Event 1]
+steps:
+  - type: search
+    query: rclone
+  - type: search
+    query: "mega:"
+  - type: stack
+    field: command_line
+    where_field: process
+    where_value: C:\Program Files\7-Zip\7z.exe
+    note: Password-protected archives created just before an upload are the usual staging step.
+benign: [Sanctioned backup jobs using rclone to company storage]
+next_steps:
+  - Identify the destination remote and the volume moved; check egress logs

@@ -237,7 +237,7 @@ internal identifiers never go to external APIs.
 ## Phase 10 — Threat hunting (F66–F75)
 
 - [x] **F66** Hunting workbench with pivot queries. — **Done**: `soar/event_store.py`, `views.pivot`, `GET /api/hunt/pivot`, `web/hunt.html` with click-to-pivot and breadcrumbs.
-- [ ] **F67** Hypothesis-driven hunt templates mapped to ATT&CK.
+- [x] **F67** Hypothesis-driven hunt templates mapped to ATT&CK. — **Done**: 5 templates in `hunts/templates/`, `soar/hunt_templates.py` (validated, read-only), `/api/hunt/templates` + run, cards in `web/hunt.html`.
 - [ ] **F68** Jupyter notebook set for hunts.
 - [x] **F69** Stack counting and long-tail analysis. — **Done**: `views.stack`, `GET /api/hunt/stack`, stack panel with pivots in `web/hunt.html`.
 - [ ] **F70** YARA scanning integration.

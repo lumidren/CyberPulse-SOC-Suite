@@ -54,6 +54,8 @@ from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar import views
 from soar.chatops import ChatOpsApprovals
+from soar.hunt_templates import load_templates as load_hunt_templates
+from soar.hunt_templates import run_template as run_hunt_template
 from soar.pdf_report import incident_pdf
 from soar.roles import allowed as role_allowed
 from soar.roles import parse_role_keys, role_for_key
@@ -712,6 +714,18 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             first = lambda key: query.get(key, [None])[0]  # noqa: E731
             result = views.stack(orchestrator, first("field") or "", first("where_field"), (first("where_value") or "")[:500])
             self._send_json(400 if "error" in result else 200, result)
+
+        elif path == "/api/hunt/templates":
+            self._send_json(200, {"templates": list(load_hunt_templates().values())})
+
+        elif len(segments) == 5 and segments[:3] == ["api", "hunt", "templates"] and segments[4] == "run":
+            template = load_hunt_templates().get(segments[3])
+            if not template:
+                self._send_json(404, {"error": "Template not found"})
+            else:
+                audit_logger.info("HUNT_TEMPLATE_RUN client=%s principal=%s template=%s", self._client_ip(),
+                                  self._principal(), segments[3])
+                self._send_json(200, run_hunt_template(orchestrator, template))
 
         elif path == "/api/hunts":
             self._send_json(200, {"hunts": hunts.list()})

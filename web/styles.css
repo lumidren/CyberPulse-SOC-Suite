@@ -1105,3 +1105,8 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
 .hw-crumbs { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
 .hw-crumb, .hw-pivot { background: var(--bg-accent); color: var(--color-blue); border: 1px solid var(--border-color); border-radius: 12px; padding: 2px 10px; cursor: pointer; font-size: 0.8rem; margin: 2px; font-family: monospace; }
 .hw-tail td { background: color-mix(in srgb, var(--color-orange) 12%, transparent); }
+.hw-templates { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin: 8px 0; }
+.hw-template { display: flex; flex-direction: column; gap: 4px; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); }
+.hw-template button { align-self: flex-start; margin-top: 4px; }
+.hw-steps { margin: 6px 0 6px 20px; display: flex; flex-direction: column; gap: 6px; color: var(--text-primary); }
+.hw-steps li { display: flex; flex-direction: column; gap: 2px; }

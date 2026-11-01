@@ -1,0 +1,14 @@
+name: Services and tasks created for persistence
+hypothesis: Persistence is planted as a service or scheduled task pointing at a user-writable path.
+attack: [T1543.003, T1053.005]
+data_sources: [System 7045, Security 4698]
+steps:
+  - type: stack
+    field: host
+    where_field: event_id
+    where_value: "4698"
+  - type: search
+    query: \Users\
+benign: [Software updaters, IT maintenance tasks (see rules/exceptions.yml)]
+next_steps:
+  - Compare each task or service binary against your software inventory

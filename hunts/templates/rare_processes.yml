@@ -1,0 +1,12 @@
+name: Rare processes across the estate
+hypothesis: An intruder's tools are executables that almost no other host runs.
+attack: [T1059, T1204.002, T1036.003]
+data_sources: [Sysmon Event 1 / Security 4688]
+steps:
+  - type: stack
+    field: process
+    note: Look at the long tail first; a renamed system binary or a tool in a user folder stands out.
+benign: [Software rolled out to a few pilot machines, Developer tooling, One-off installers]
+next_steps:
+  - Pivot on each tail process to see hosts, users and parents
+  - Check the binary's signature and hash reputation
