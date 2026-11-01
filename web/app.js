@@ -56,7 +56,7 @@ function escapeDeep(value) {
     return typeof value === "string" ? escapeHtml(value) : value;
 }
 async function safeJson(res) {
-    return escapeDeep(await safeJson(res));
+    return escapeDeep(await res.json());
 }
 
 let map;
