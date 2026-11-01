@@ -211,7 +211,7 @@ internal identifiers never go to external APIs.
 - [x] **F44** MFA step-up or session revocation for Entra ID. — **Done (needs your tenant)**: `soar/entra_responder.py` (revokeSignInSessions + CA step-up group, rollback), `docs/ENTRA_RESPONDER.md`. Approval-only (TIER_3). Stubbed Graph only.
 - [x] **F45** Email quarantine playbook for phishing. — **Done (simulated responder)**: SOC-RULE-050, `QUARANTINE_EMAIL` (TIER_2, rollback to inbox), `playbooks/phishing.yml`, `POST /api/incidents/<id>/propose`, `docs/PHISHING.md`. Graph request built, not sent.
 - [x] **F46** Phishing triage playbook (URL detonation, header analysis). — **Done**: `soar/phishing_triage.py` (offline header + URL analysis, defanged, explained score), attached to email incidents, `docs/PHISHING.md`. Detonation is F47's opt-in sandbox.
-- [ ] **F47** Automatic sandbox submission for suspicious files.
+- [x] **F47** Automatic sandbox submission for suspicious files. — **Done (needs your CAPE)**: `soar/sandbox.py` (lab URL only, hash look-up automatic, URL detonation opt-in, files only from `SANDBOX_EVIDENCE_DIR`), `docs/SANDBOX.md`. Stubbed HTTP only.
 - [x] **F48** Memory acquisition before isolation. — 🔀 **Merged into E29**: memory acquisition order (process dump before kill, host image before isolation) is recorded in `pre_containment_snapshot`; simulated in the lab.
 - [ ] **F49** Automatic evidence collection (triage package) per incident.
 - [ ] **F50** Chain-of-custody hashing for collected evidence.
