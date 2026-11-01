@@ -15,6 +15,7 @@ COPY plugins/ ./plugins/
 COPY config/ ./config/
 COPY rules/ ./rules/
 COPY playbooks/ ./playbooks/
+COPY hunts/ ./hunts/
 COPY web/ ./web/
 COPY server.py ./
 
