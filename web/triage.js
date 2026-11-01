@@ -221,6 +221,31 @@ async function loadTrend() {
                                `MTTR ${fmtDuration(latest.mttr_sec)} over ${latest.resolved_cases} resolved case(s).`, "tw-muted"));
 }
 
+// ------------------------------------------------------------------ F56 top talkers / rules
+async function loadTop() {
+    const data = await CP.api("/api/stats/top");
+    const box = $("topStats");
+    box.replaceChildren();
+    if (!data) return;
+    for (const [key, title] of [["source_ips", "Source IPs"], ["hosts", "Hosts"], ["users", "Users"], ["rules", "Rules"]]) {
+        const widget = CP.el("div", null, "tw-top-widget");
+        widget.appendChild(CP.el("h4", title));
+        const items = data[key] || [];
+        if (!items.length) widget.appendChild(CP.el("p", "none yet", "tw-muted"));
+        const max = Math.max(1, ...items.map((i) => i.count));
+        for (const item of items) {
+            const row = CP.el("div", null, "tw-bar-row");
+            row.appendChild(CP.el("span", item.value, "tw-bar-label"));
+            const bar = CP.el("span", null, "tw-bar");
+            bar.style.width = `${Math.round((item.count / max) * 100)}%`;
+            row.appendChild(bar);
+            row.appendChild(CP.el("span", item.count, "tw-bar-count"));
+            widget.appendChild(row);
+        }
+        box.appendChild(widget);
+    }
+}
+
 function init() {
     $("analystName").value = analystName();
     $("analystName").addEventListener("change", (e) => setAnalystName(e.target.value.trim()));
@@ -234,6 +259,7 @@ function init() {
     loadQueue();
     loadNetwork();
     loadTrend();
+    loadTop();
 }
 
 init();
