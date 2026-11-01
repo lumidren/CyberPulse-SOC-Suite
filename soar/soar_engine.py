@@ -27,6 +27,7 @@ from soar.case_manager import CaseManager
 from soar.orchestrator_hook import OrchestratorWebhook
 from soar.sandbox import SandboxClient
 from soar.thehive import TheHiveClient
+from soar.triage_package import write_automatic as write_triage_package
 from soar.user_notify import UserNotifier
 from soar.threat_feeds import FeedClient, FeedStore
 from soar.phishing_triage import triage as phishing_triage
@@ -418,6 +419,8 @@ class SOAROrchestrator:
         incident["orchestrator_dispatch"] = self.orchestrator_hook.send(incident)
         # Tell the affected user about a suspicious sign-in (off by default; never for simulated events)
         incident["user_notification"] = self.user_notifier.notify(incident)
+        # Triage package written automatically only if TRIAGE_PACKAGE_DIR is set (F49)
+        incident["triage_package"] = write_triage_package(incident, self.case_manager.cases.get(incident["case_id"]))
 
         # Stage 12: Real-Time Mobile / Slack / Discord Notification
         if playbook is None or playbook.notify:

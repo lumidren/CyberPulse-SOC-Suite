@@ -213,7 +213,7 @@ internal identifiers never go to external APIs.
 - [x] **F46** Phishing triage playbook (URL detonation, header analysis). — **Done**: `soar/phishing_triage.py` (offline header + URL analysis, defanged, explained score), attached to email incidents, `docs/PHISHING.md`. Detonation is F47's opt-in sandbox.
 - [x] **F47** Automatic sandbox submission for suspicious files. — **Done (needs your CAPE)**: `soar/sandbox.py` (lab URL only, hash look-up automatic, URL detonation opt-in, files only from `SANDBOX_EVIDENCE_DIR`), `docs/SANDBOX.md`. Stubbed HTTP only.
 - [x] **F48** Memory acquisition before isolation. — 🔀 **Merged into E29**: memory acquisition order (process dump before kill, host image before isolation) is recorded in `pre_containment_snapshot`; simulated in the lab.
-- [ ] **F49** Automatic evidence collection (triage package) per incident.
+- [x] **F49** Automatic evidence collection (triage package) per incident. — **Done**: `soar/triage_package.py`, `GET /api/incidents/<id>/triage-package`, optional `TRIAGE_PACKAGE_DIR`, `docs/TRIAGE_PACKAGE.md`.
 - [ ] **F50** Chain-of-custody hashing for collected evidence.
 
 ## Phase 9 — Dashboard & UX (F51–F65)

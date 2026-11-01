@@ -41,3 +41,7 @@ Thumbs.db
 .idea/
 .vscode/
 deploy/vagrant/certs/
+
+# Triage packages hold incident data (TRIAGE_PACKAGE_DIR); never commit them
+triage_packages/
+*-triage.zip
