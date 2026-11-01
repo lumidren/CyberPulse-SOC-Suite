@@ -985,6 +985,10 @@ input:focus, select:focus, textarea:focus {
 .tw-case:hover { border-color: var(--border-strong); background: var(--bg-accent); }
 .tw-case.active { border-color: var(--color-blue); background: color-mix(in srgb, var(--color-blue) 8%, var(--bg-secondary)); box-shadow: 0 0 0 1px var(--color-blue) inset; }
 .tw-case span, .tw-muted { color: var(--text-secondary); font-size: 12px; }
+/* Badges inside a case card must win over the muted ".tw-case span" text style */
+.tw-case .tw-sev, .tw-case .tw-status, .tw-case .tw-badge { font-size: 10px; margin-left: 0; }
+.tw-case .tw-badge, .tw-case .tw-sev-critical, .tw-case .tw-sev-high { color: #fff; }
+.tw-case .tw-sev-medium { color: #1a1204; }
 .tw-timeline { list-style: none; margin: 10px 0; padding-left: 14px; border-left: 2px solid var(--border-color); }
 .tw-timeline li { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 6px 0 12px 12px; }
 .tw-timeline li::before {
