@@ -54,6 +54,7 @@ from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar import views
 from soar.chatops import ChatOpsApprovals
+from soar.yara_scan import scan_evidence_file
 from soar.hunt_templates import load_templates as load_hunt_templates
 from soar.hunt_templates import run_template as run_hunt_template
 from soar.pdf_report import incident_pdf
@@ -1078,6 +1079,12 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             audit_logger.info("CASE_UPDATE client=%s actor=%s case=%s result=%s",
                               self._client_ip(), actor, case_segments[2], result["status"])
             self._send_json(200 if result["status"] == "SUCCESS" else 400, result)
+            return
+
+        if path == "/api/evidence/yara-scan":
+            result = scan_evidence_file(str(data.get("path", ""))[:500])
+            audit_logger.info("YARA_SCAN client=%s principal=%s status=%s", self._client_ip(), self._principal(), result["status"])
+            self._send_json(200 if result["status"] == "OK" else 400, result)
             return
 
         if path == "/api/playbooks/validate":

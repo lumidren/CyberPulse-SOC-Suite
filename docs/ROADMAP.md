@@ -240,7 +240,7 @@ internal identifiers never go to external APIs.
 - [x] **F67** Hypothesis-driven hunt templates mapped to ATT&CK. — **Done**: 5 templates in `hunts/templates/`, `soar/hunt_templates.py` (validated, read-only), `/api/hunt/templates` + run, cards in `web/hunt.html`.
 - [x] **F68** Jupyter notebook set for hunts. — **Done**: 3 notebooks in `notebooks/` + README; `tests/test_notebooks.py` executes every cell (no stored outputs). Jupyter itself not run here; cells run via the test.
 - [x] **F69** Stack counting and long-tail analysis. — **Done**: `views.stack`, `GET /api/hunt/stack`, stack panel with pivots in `web/hunt.html`.
-- [ ] **F70** YARA scanning integration.
+- [x] **F70** YARA scanning integration. — **Done**: `soar/yara_scan.py` (yara-python or a built-in subset that refuses unsupported syntax), `POST /api/evidence/yara-scan` (evidence dir only), `docs/YARA.md`. libyara path untested (not installed).
 - [ ] **F71** Velociraptor or osquery integration for live endpoint queries.
 - [ ] **F72** Zeek/Suricata network sensor with detections.
 - [ ] **F73** DNS tunneling and beaconing detection.
