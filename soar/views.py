@@ -361,3 +361,10 @@ def stack(orchestrator, field, where_field=None, where_value=None, tail_share=0.
     return {"field": field, "where": {where_field: where_value} if where_field else None, "events": len(events),
             "with_value": total, "distinct": len(counts), "tail_limit": tail_limit,
             "tail": sum(1 for r in rows if r["tail"]), "rows": rows[:500]}
+
+
+# ----------------------------------------------------------------- F73 beaconing
+def beacons(orchestrator):
+    from soar.beaconing import find_beacons
+    found = find_beacons(orchestrator.event_store.snapshot())
+    return {"beacons": found, "note": "Regular-interval connections from Zeek conn logs; leads to investigate, not alerts."}

@@ -317,3 +317,15 @@ rules:
     action_recommended: ENRICH_AND_ALERT_ANALYST
     version: 1.0.0
     detection_sha256: 608fa5a31522fb57d5df8143d4e9b36fb7dbccd2b0fad524892e74490db0e495
+  a762a31a-d1ab-4385-85e3-4e22ba8c72f2:
+    soc_rule_id: SOC-RULE-054
+    name: DNS Query with an Unusually Long Label (possible tunnelling)
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: 41c61029a1c87824d3f54dac350a1bad125b9e4e41cbd63dbe20ecc866760fd8
+  7e2d9c41-5b8a-4f3e-a1c6-2f4b9e8d0c13:
+    soc_rule_id: SOC-RULE-053
+    name: Many Unique Subdomains of One Domain from One Host (DNS tunnelling)
+    action_recommended: ENRICH_AND_ALERT_ANALYST
+    version: 1.0.0
+    detection_sha256: d716c101b742edb1b5eee5de3c3808f2838a1cfefc9f493e8eede1efeefb4766

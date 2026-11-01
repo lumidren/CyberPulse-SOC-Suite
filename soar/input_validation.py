@@ -52,7 +52,7 @@ DETAIL_FIELD_ALLOWLIST = {
     "Subject", "AuthenticationResults", "Urls", "AttachmentSha256", "ReportedByUser", "DeliveryAction",
     # Network sensors (F72-F74): Zeek and Suricata metadata, never payloads
     "proto", "service", "duration", "orig_bytes", "resp_bytes", "conn_state", "id.resp_p", "id.resp_h", "uid",
-    "query", "qtype_name", "rcode_name", "answers", "server_name", "version", "ja3", "ja3s", "ja4",
+    "query", "query_parent", "qtype_name", "rcode_name", "answers", "server_name", "version", "ja3", "ja3s", "ja4",
     "validation_status", "method", "host", "uri", "user_agent", "status_code", "resp_mime_types",
     "SignatureId", "Signature", "Severity", "DestinationIp", "DestinationPort", "Protocol",
     # GUARDIAN anomaly alerts (F39)

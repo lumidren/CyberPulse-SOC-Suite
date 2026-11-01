@@ -713,6 +713,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             result = views.pivot(orchestrator, query.get("field", [""])[0], query.get("value", [""])[0][:500])
             self._send_json(400 if "error" in result else 200, result)
 
+        elif path == "/api/hunt/beacons":
+            self._send_json(200, views.beacons(orchestrator))
+
         elif path == "/api/hunt/stack":
             query = parse_qs(parsed.query)
             first = lambda key: query.get(key, [None])[0]  # noqa: E731

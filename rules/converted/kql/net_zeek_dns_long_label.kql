@@ -1,0 +1,3 @@
+// SOC-RULE-054: DNS Query with an Unusually Long Label (possible tunnelling) (generated from rules/sigma/net_zeek_dns_long_label.yml; review before use)
+ZeekDns_CL
+| where ((query matches regex "(^|\\.)[A-Za-z0-9-]{40,}\\.")) or ((qtype_name =~ "TXT" and query matches regex "(^|\\.)[A-Za-z0-9-]{30,}\\."))

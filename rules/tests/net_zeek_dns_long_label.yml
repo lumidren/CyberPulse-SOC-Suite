@@ -1,0 +1,52 @@
+# Positive/negative samples for rules/sigma/net_zeek_dns_long_label.yml (synthetic lab events)
+rule: net_zeek_dns_long_label.yml
+positive:
+- name: Base32 chunk in a label
+  event:
+    event_id: 9971
+    event_source: zeek:dns
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      query: mzxw6ytboi4tgnbtgq3dqmrsgm4tsnzzhe2dmmzqg4ydsnrx.tunnel.example.net
+      qtype_name: A
+      rcode_name: NOERROR
+      id.resp_h: 10.0.0.53
+      query_parent: example.net
+- name: TXT lookup with an encoded label
+  event:
+    event_id: 9971
+    event_source: zeek:dns
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      query: aGVsbG8gd29ybGQgdGhpcyBpcyBkYXRh.c2.example.net
+      qtype_name: TXT
+      rcode_name: NOERROR
+      id.resp_h: 10.0.0.53
+      query_parent: example.net
+negative:
+- name: Normal host name
+  event:
+    event_id: 9971
+    event_source: zeek:dns
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      query: www.example.com
+      qtype_name: A
+      rcode_name: NOERROR
+      id.resp_h: 10.0.0.53
+      query_parent: example.com
+- name: Long but normal multi-label name
+  event:
+    event_id: 9971
+    event_source: zeek:dns
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      query: eu-west-1.compute.internal.example.com
+      qtype_name: A
+      rcode_name: NOERROR
+      id.resp_h: 10.0.0.53
+      query_parent: example.com

@@ -1,0 +1,2 @@
+``` SOC-RULE-054: DNS Query with an Unusually Long Label (possible tunnelling) (generated from rules/sigma/net_zeek_dns_long_label.yml; review before use) ```
+index=* (source="*zeek:dns*") | where ((match('query', "(?i)(^|\\.)[A-Za-z0-9-]{40,}\\."))) OR ((match('qtype_name', "(?i)^TXT$") AND match('query', "(?i)(^|\\.)[A-Za-z0-9-]{30,}\\.")))

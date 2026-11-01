@@ -117,6 +117,19 @@ async function runTemplate(id) {
     box.appendChild(CP.el("p", `Next: ${data.template.next_steps.join("; ")}`, "tw-muted"));
 }
 
+async function findBeacons() {
+    const data = await CP.api("/api/hunt/beacons");
+    const rows = $("beaconRows");
+    rows.replaceChildren();
+    if (!data) return;
+    if (!data.beacons.length) { const tr = CP.el("tr"); tr.appendChild(CP.el("td", "No regular beacons in stored conn logs.")); rows.appendChild(tr); }
+    for (const b of data.beacons) {
+        const tr = CP.el("tr");
+        [b.source_ip, b.destination, b.port, b.connections, `${b.mean_interval_sec}s`, b.jitter_cv].forEach((v) => tr.appendChild(cell(v)));
+        rows.appendChild(tr);
+    }
+}
+
 function init() {
     const select = $("pivotField");
     FIELDS.forEach((f) => { const o = CP.el("option", f); o.value = f; select.appendChild(o); });
@@ -125,6 +138,7 @@ function init() {
     }
     $("stackField").value = "process";
     loadTemplates();
+    $("findBeacons").addEventListener("click", findBeacons);
     $("stackForm").addEventListener("submit", (e) => { e.preventDefault(); runStack(); });
     $("pivotForm").addEventListener("submit", (e) => {
         e.preventDefault();
