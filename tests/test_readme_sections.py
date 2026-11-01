@@ -1,6 +1,7 @@
 """README must keep the sections that frame what the lab can and cannot show."""
 
 import os
+import re
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -43,6 +44,19 @@ class TestReadmeSections(unittest.TestCase):
             js = fh.read()
         self.assertIn("attributionControl: true", js)
         self.assertIn("OpenStreetMap", js)
+
+    def test_at_a_glance_figures_match_the_metrics_page(self):
+        glance = readme().split("<!-- glance:start -->")[1].split("<!-- glance:end -->")[0]
+        with open(os.path.join(ROOT, "docs", "METRICS.md"), encoding="utf-8") as fh:
+            metrics = fh.read()
+        figures = re.findall(r"(?<![\w./-])(\d+/\d+|\d+\.\d+)(?![\w/])", glance)
+        self.assertTrue({"60/60", "0/600", "0.335", "11/16", "27/36"} <= set(figures))
+        self.assertEqual([f for f in figures if f not in metrics], [])
+        singles = re.search(r"\| Single-event Sigma rules \| (\d+) \|", metrics).group(1)
+        correlations = re.search(r"\| Correlation rules \| (\d+) \|", metrics).group(1)
+        suppressed = re.search(r"(\d+) matches suppressed", metrics).group(1)
+        self.assertIn(f"{singles} single-event rules + {correlations} correlations", glance)
+        self.assertIn(f"({suppressed} suppressed by exceptions)", glance)
 
     def test_human_oversight_section_present(self):
         text = readme()
