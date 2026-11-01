@@ -21,6 +21,8 @@ select = ["E", "W", "F", "B"]
 "soar/notifications.py" = ["E501"]
 "soar/dfir_engine.py" = ["E501"]
 "soar/ai_copilot.py" = ["E501"]
+# Notebook setup cells must put the repository on sys.path before importing it
+"notebooks/*.ipynb" = ["E402"]
 # Scripts and tests adjust sys.path before importing project modules
 "scripts/*.py" = ["E402"]
 "tests/*.py" = ["E402"]
