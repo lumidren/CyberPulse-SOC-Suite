@@ -151,7 +151,9 @@ Read this before drawing conclusions from anything else in the README.
 * **Latency figures are in-process microseconds** on emulated traffic and say
   nothing about production SOC timing.
 * **The "AI copilot" is template-based.** It fills text templates from
-  incident fields; no language model is involved.
+  incident fields; no language model is involved. A separate, opt-in
+  [LLM triage draft](docs/LLM_TRIAGE.md) can call the Claude API with a
+  pseudonymised summary; it has not been run against the live API.
 * **The identity graph and BloodHound export use a synthetic AD topology**,
   not a real directory.
 

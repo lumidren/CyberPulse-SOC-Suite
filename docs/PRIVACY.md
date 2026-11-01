@@ -81,7 +81,11 @@ you need full names for a real investigation. Take screenshots with masking on.
   **off by default** (`EXTERNAL_ENRICHMENT_ENABLED=false`, or toggle at runtime
   with `POST /api/enrichment/config`). While off, nothing is sent to
   VirusTotal or AbuseIPDB, not even a reachability probe.
-* No incident data is sent to any third party.
+* Optional LLM triage drafts (`LLM_TRIAGE_ENABLED`, off by default, one request per analyst
+  action): the same pseudonymised fields as the webhooks plus risk factors and the rule's
+  description, sent to the Anthropic API. A leak check refuses any payload containing the
+  incident's host, user or a private IP ([LLM_TRIAGE.md](LLM_TRIAGE.md)).
+* Otherwise, no incident data is sent to any third party unless you configure an integration.
 
 ## External threat-intel enrichment: what leaves your environment
 

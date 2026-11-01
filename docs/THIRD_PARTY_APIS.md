@@ -64,6 +64,13 @@ setting a key. Shodan takes its key as a query parameter by design; it is never 
 CyberPulse. Censys has been moving users to its newer Platform API, so the v2 endpoint
 may need updating.
 
+## Anthropic Claude API (F96)
+
+The optional triage-summary draft (`LLM_TRIAGE_ENABLED=true`, `ANTHROPIC_API_KEY`) sends a
+pseudonymised incident summary to the Claude Messages API, one request per analyst action.
+You supply the key and are bound by Anthropic's terms. What is and is not sent is listed in
+[LLM_TRIAGE.md](LLM_TRIAGE.md).
+
 ## Attribution
 
 Every verdict from a provider carries an `attribution` string naming the

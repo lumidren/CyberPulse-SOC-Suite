@@ -58,6 +58,7 @@ nav:
       - Triage package and custody: TRIAGE_PACKAGE.md
       - ChatOps approvals: CHATOPS.md
       - Entra ID responder: ENTRA_RESPONDER.md
+      - LLM triage summary: LLM_TRIAGE.md
       - Sandbox: SANDBOX.md
       - YARA: YARA.md
       - Post-incident review template: templates/POST_INCIDENT_REVIEW.md

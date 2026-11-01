@@ -63,6 +63,7 @@ from soar.yara_scan import scan_evidence_file
 from soar.hunt_templates import load_templates as load_hunt_templates
 from soar.hunt_templates import run_template as run_hunt_template
 from soar.pdf_report import incident_pdf
+from soar import llm_triage
 from soar.roles import allowed as role_allowed
 from soar.roles import parse_role_keys, role_for_key
 from soar.hunts import HuntStore
@@ -579,6 +580,43 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         offset = max(0, offset)
         return limit, offset
 
+    def _handle_llm_summary(self, inc_id, review, data):
+        """POST /api/incidents/<id>/llm-summary (draft) and .../llm-summary/review (accept or reject, F96).
+
+        The draft is advisory and never triggers an action; only an analyst's acceptance puts it on the record."""
+        incident = orchestrator.dfir_engine.incidents.get(inc_id)
+        if not incident:
+            self._send_json(404, {"error": "Incident not found"})
+            return
+        analyst = str(data.get("analyst", "")).strip()[:64]
+        ledger = orchestrator.containment_engine.ledger
+        try:
+            if review:
+                decision = str(data.get("decision", "")).strip().lower()
+                record = llm_triage.review_summary(incident, analyst, decision, data.get("text"))
+                ledger.record(analyst, f"llm_summary_{record['status'].lower()}", f"triage summary for {inc_id}",
+                              "edited by the analyst" if record.get("edited") else "", record["status"])
+                if record["status"] == "ACCEPTED":
+                    orchestrator.dfir_engine.add_analyst_note(
+                        inc_id, f"Triage summary (AI-drafted by {record['model']}, reviewed by {analyst}"
+                                f"{', edited' if record.get('edited') else ''}):\n{record['text']}", author=analyst)
+            else:
+                record = llm_triage.draft_summary(incident, analyst)
+                ledger.record(analyst, "llm_summary_requested", f"triage summary for {inc_id}",
+                              f"model {record['model']}; fields sent: {', '.join(record['sent_fields'])}", record["status"])
+        except llm_triage.LlmTriageDisabled as exc:
+            self._send_json(503, {"error": str(exc)})
+            return
+        except (llm_triage.PayloadRefused, ValueError) as exc:
+            self._send_json(400, {"error": str(exc)})
+            return
+        except Exception as exc:
+            self._send_json(502, {"error": f"LLM request failed: {type(exc).__name__}"})
+            return
+        audit_logger.info("LLM_SUMMARY client=%s principal=%s analyst=%s incident=%s status=%s", self._client_ip(),
+                          self._principal(), analyst, inc_id, record["status"])
+        self._send_json(200, {"status": "SUCCESS", "llm_summary": record})
+
     def _handle_incident_subresource(self, inc_id, subresource):
         """Dispatch GET /api/incidents/<id>/<subresource> routes."""
         if inc_id not in orchestrator.dfir_engine.incidents:
@@ -621,6 +659,8 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_cors_headers()
             self.end_headers()
             self.wfile.write(pdf)
+        elif subresource == "llm-summary":
+            self._send_json(200, {"enabled": llm_triage.enabled(), "llm_summary": inc.get("llm_summary")})
         elif subresource == "custody":
             self._send_json(200, {"custody": orchestrator.custody.logs.get(inc_id, []),
                                   "verification": orchestrator.custody.verify(inc_id),
@@ -1039,6 +1079,9 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         case_segments = [s for s in path.split("/") if s]
+        if case_segments[:2] == ["api", "incidents"] and case_segments[3:] in (["llm-summary"], ["llm-summary", "review"]):
+            self._handle_llm_summary(case_segments[2], case_segments[4:] == ["review"], data)
+            return
         if len(case_segments) == 4 and case_segments[:2] == ["api", "incidents"] and case_segments[3] == "appeal":
             incident = orchestrator.dfir_engine.incidents.get(case_segments[2])
             if not incident:
