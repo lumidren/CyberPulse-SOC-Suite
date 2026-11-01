@@ -31,19 +31,20 @@
 
         <div class="header-center">
             <!-- Navigation Tabs -->
-            <nav class="nav-tabs">
-                <button class="nav-btn active" onclick="switchTab('tab-overview')"><i class="fa-solid fa-chart-line"></i> SOC Overview</button>
+            <nav class="nav-tabs" aria-label="Console sections">
+                <button class="nav-btn active" onclick="switchTab('tab-overview')"><i class="fa-solid fa-chart-line"></i> Overview</button>
                 <button class="nav-btn" onclick="switchTab('tab-incident')"><i class="fa-solid fa-timeline"></i> Incident DFIR</button>
-                <button class="nav-btn" onclick="switchTab('tab-detections')"><i class="fa-solid fa-book-skull"></i> Detection Catalogue</button>
+                <button class="nav-btn" onclick="switchTab('tab-detections')"><i class="fa-solid fa-book-skull"></i> Detections</button>
                 <button class="nav-btn" onclick="switchTab('tab-soar')"><i class="fa-solid fa-robot"></i> SOAR Policies</button>
+                <button class="nav-btn" onclick="switchTab('tab-purple')"><i class="fa-solid fa-flag"></i> Purple Team</button>
+                <button class="nav-btn" onclick="switchTab('tab-health')"><i class="fa-solid fa-heart-pulse"></i> Health</button>
+                <button class="nav-btn" onclick="switchTab('tab-ingest')"><i class="fa-solid fa-satellite-dish"></i> Ingestion</button>
+                <span class="nav-sep" aria-hidden="true"></span>
+                <a class="nav-btn" href="/triage.html"><i class="fa-solid fa-inbox"></i> Triage</a>
+                <a class="nav-btn" href="/hunt.html"><i class="fa-solid fa-magnifying-glass-chart"></i> Hunt</a>
+                <a class="nav-btn" href="/playbooks.html"><i class="fa-solid fa-diagram-project"></i> Playbooks</a>
                 <a class="nav-btn" href="/executive.html"><i class="fa-solid fa-briefcase"></i> Executive</a>
                 <a class="nav-btn" href="/status.html"><i class="fa-solid fa-mobile-screen"></i> Status</a>
-                <a class="nav-btn" href="/hunt.html"><i class="fa-solid fa-magnifying-glass-chart"></i> Hunt</a>
-                <a class="nav-btn" href="/triage.html"><i class="fa-solid fa-inbox"></i> Triage</a>
-                <a class="nav-btn" href="/playbooks.html"><i class="fa-solid fa-diagram-project"></i> Playbooks</a>
-                <button class="nav-btn" onclick="switchTab('tab-purple')"><i class="fa-solid fa-flag"></i> Purple Team Replay</button>
-                <button class="nav-btn" onclick="switchTab('tab-health')"><i class="fa-solid fa-heart-pulse"></i> System Health</button>
-                <button class="nav-btn" onclick="switchTab('tab-ingest')"><i class="fa-solid fa-satellite-dish"></i> Live Ingestion & Syslog</button>
             </nav>
         </div>
 

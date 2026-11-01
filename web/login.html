@@ -11,7 +11,10 @@
     <div class="lab-mode-banner" role="status">LAB / TEST MODE — synthetic data, simulated responders. Not for production use.</div>
     <main class="login-container">
         <div class="card login-card">
-            <h1>CyberPulse SOC Lab</h1>
+            <div class="login-brand">
+                <div class="logo-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z" fill="currentColor" opacity=".9"/><path d="m8.5 12 2.5 2.5 4.5-5" stroke="#0b1324" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <h1>CyberPulse SOC Lab</h1>
+            </div>
             <p class="section-desc">Sign in with the server's API key (<code>CYBERPULSE_API_KEY</code>). The key is
                 exchanged for an HttpOnly session cookie and is not stored in the browser.</p>
             <form id="loginForm">
@@ -20,6 +23,7 @@
                 <button type="submit" class="btn-primary">Sign in</button>
             </form>
             <p id="loginError" class="login-error" role="alert"></p>
+            <p class="login-foot">Roles: lead, analyst and auditor. Auditors have read-only access.</p>
         </div>
     </main>
     <script src="login.js"></script>
