@@ -31,7 +31,7 @@ To maintain engineering transparency, the repository separates **deployable conf
 ├──────────────────────────────────────────┬──────────────────────────────────────────────────┤
 │ 1. Deployable Artifacts (untested)       │ 2. Python Simulation & Validation Harness        │
 ├──────────────────────────────────────────┼──────────────────────────────────────────────────┤
-│ • 10+ Sigma YAML rules (Sysmon & Cloud)  │ • Adversary Emulation Generator (Sysmon/EVTX)    │
+│ • 51 Sigma rules + 4 correlations        │ • Adversary Emulation Generator (Sysmon/EVTX)    │
 │ • Wazuh Manager XML detection rules      │ • Multi-Factor Risk & Policy Decision Engine     │
 │ • Sysmon v14 XML auditing configuration  │ • Resilient Containment with Rollback Engine     │
 │ • WDAC Kernel Driver Blocklist (XML)     │ • Pre-Containment DFIR Volatile Packager         │
@@ -161,33 +161,61 @@ Read this before drawing conclusions from anything else in the README.
 
 ```mermaid
 flowchart TD
-    subgraph 1. Adversary Emulation & Ingestion
-        SIM[Adversary Simulator / RFC 5424 Syslog UDP 5514] -->|EVTX Telemetry| INGEST[Ingestion Gateway / Webhook]
+    subgraph S1["1. Telemetry in"]
+        SIM["Lab simulator (telemetry only, lab mode)"]
+        HOSTS["Hosts and cloud: syslog / signed webhook"]
+        NET["Zeek and Suricata batches"]
+        GUARD["GUARDIAN anomalies"]
+        VALID["Validation and data minimisation"]
+        SIM --> VALID
+        HOSTS --> VALID
+        NET --> VALID
+        GUARD --> VALID
     end
 
-    subgraph 2. Detection & Intelligence Layer
-        INGEST --> DE[Detection Engine: Sigma / Wazuh Signatures]
-        DE -->|Alert Context| ORCH[SOAR Orchestrator]
-        ORCH -->|Non-blocking Query| CB[Circuit Breaker Threat Intel Cache]
-        CB --> RISK[Multi-Factor Risk Engine]
-        RISK -->|Composite Score 0-100| POL[Policy Decision Matrix]
+    subgraph S2["2. Detection"]
+        SIGMA["Sigma rules and correlations"]
+        EXC["Expiring rule exceptions"]
+        STORE["Hunting event store"]
+        VALID --> SIGMA
+        VALID --> STORE
+        SIGMA --> EXC
     end
 
-    subgraph 3. Containment & Rollback Layer
-        POL -->|Automatic / Approval / Dry-Run| CONT[Resilient Containment Engine]
-        CONT -->|WinRM WFP Isolation / pfSense Drop / AD Reset| ACTION[Enforce Mitigation]
-        ACTION --> ROLLBACK[Rollback Receipt Engine]
+    subgraph S3["3. Decision"]
+        INTEL["Enrichment: local feeds, opt-in public-IP and hash lookups"]
+        RISK["Risk score and weighted reputation"]
+        PB["YAML playbook: may only tighten"]
+        POLICY["Policy: approval required by default"]
+        EXC --> INTEL --> RISK --> PB --> POLICY
     end
 
-    subgraph 4. Forensics & Case Management Layer
-        POL --> DFIR[DFIR Volatile Evidence Collector]
-        DFIR --> GRAPH[Attack Graph & Process Lineage]
-        DFIR --> COPILOT[Template-based Triage Summary]
-        DFIR --> ID[AD Identity Blast Radius & BloodHound Export]
-        DFIR --> TH5[TheHive 5 Case Dossier]
-        DFIR --> REPORT[NIST SP 800-61 HTML Report Generator]
+    subgraph S4["4. Response, human in the loop"]
+        EVID["Volatile evidence before any action"]
+        STAGE["Staged action awaiting approval"]
+        APPROVE["Approval: console, Slack or Telegram, lead role"]
+        SAFE["Kill switch, rate limit, circuit breaker, protected assets, TTL"]
+        ACT["Responder (simulated unless configured)"]
+        RB["Rollback"]
+        POLICY --> EVID --> STAGE --> APPROVE --> SAFE --> ACT --> RB
+    end
+
+    subgraph S5["5. Record and learn"]
+        CASE["Case, timeline, playbook tasks"]
+        LEDGER["Hash-chained action ledger and custody log"]
+        APPEAL["Appeals lead to tuning"]
+        OUT["Triage package, PDF report, TheHive, MISP (opt-in)"]
+        POLICY --> CASE
+        ACT --> LEDGER
+        STAGE --> LEDGER
+        CASE --> APPEAL
+        CASE --> OUT
+        APPEAL -.-> EXC
     end
 ```
+
+The diagram is Mermaid (rendered by GitHub); every label is quoted so it renders on GitHub and in MkDocs.
+Checked with Mermaid 10.9.1 in a browser.
 
 ---
 
