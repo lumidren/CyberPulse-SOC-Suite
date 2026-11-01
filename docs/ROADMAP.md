@@ -214,7 +214,7 @@ internal identifiers never go to external APIs.
 - [x] **F47** Automatic sandbox submission for suspicious files. — **Done (needs your CAPE)**: `soar/sandbox.py` (lab URL only, hash look-up automatic, URL detonation opt-in, files only from `SANDBOX_EVIDENCE_DIR`), `docs/SANDBOX.md`. Stubbed HTTP only.
 - [x] **F48** Memory acquisition before isolation. — 🔀 **Merged into E29**: memory acquisition order (process dump before kill, host image before isolation) is recorded in `pre_containment_snapshot`; simulated in the lab.
 - [x] **F49** Automatic evidence collection (triage package) per incident. — **Done**: `soar/triage_package.py`, `GET /api/incidents/<id>/triage-package`, optional `TRIAGE_PACKAGE_DIR`, `docs/TRIAGE_PACKAGE.md`.
-- [ ] **F50** Chain-of-custody hashing for collected evidence.
+- [x] **F50** Chain-of-custody hashing for collected evidence. — **Done**: `soar/custody.py` (hash-chained, verify + artifact check), `GET /api/incidents/<id>/custody`, `custody.json` in triage packages. In-process; write-once storage advised in docs.
 
 ## Phase 9 — Dashboard & UX (F51–F65)
 

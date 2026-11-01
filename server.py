@@ -557,7 +557,8 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json(200, {"identity_blast_radius": inc.get("identity_blast_radius", {})})
         elif subresource == "triage-package":
             case = orchestrator.case_manager.find_by_incident(inc_id)
-            data, digest, _ = build_triage_zip(inc, case)
+            data, digest, _ = build_triage_zip(inc, case, orchestrator.custody.logs.get(inc_id, []))
+            orchestrator.custody.record(inc_id, "exported", "triage-package.zip", digest, self._principal())
             audit_logger.info("TRIAGE_PACKAGE_EXPORT client=%s principal=%s incident=%s sha256=%s",
                               self._client_ip(), self._principal(), inc_id, digest)
             self.send_response(200)
@@ -568,6 +569,11 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             self._send_cors_headers()
             self.end_headers()
             self.wfile.write(data)
+        elif subresource == "custody":
+            self._send_json(200, {"custody": orchestrator.custody.logs.get(inc_id, []),
+                                  "verification": orchestrator.custody.verify(inc_id),
+                                  "evidence_unchanged": orchestrator.custody.verify_artifact(
+                                      inc_id, "evidence_package", inc.get("evidence_package"))})
         elif subresource == "report":
             html = report_generator.generate_html_report(mask_identities(inc) if masking_enabled() else inc)
             self.send_response(200)

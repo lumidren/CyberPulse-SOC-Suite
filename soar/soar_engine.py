@@ -24,6 +24,7 @@ from soar.identity_graph import IdentityBlastRadiusEngine
 from soar.enrichment import ThreatIntelClient
 from soar.plugins import run_enrichers
 from soar.case_manager import CaseManager
+from soar.custody import CustodyLedger, sha256_of
 from soar.orchestrator_hook import OrchestratorWebhook
 from soar.sandbox import SandboxClient
 from soar.thehive import TheHiveClient
@@ -154,6 +155,7 @@ class SOAROrchestrator:
         self.exceptions = ExceptionRegistry()
         self.playbooks = PlaybookRegistry()
         self.case_manager = CaseManager()
+        self.custody = CustodyLedger()
         self.thehive = TheHiveClient()
         self.orchestrator_hook = OrchestratorWebhook()
         self.user_notifier = UserNotifier()
@@ -184,6 +186,7 @@ class SOAROrchestrator:
                 actions += 1
         syslog = self.syslog_receiver.purge_older_than(cutoff.timestamp())
         cases = self.case_manager.purge_missing(set(self.dfir_engine.incidents))
+        self.custody.purge(set(self.dfir_engine.incidents))
         return {"retention_days": days, "incidents_purged": len(removed),
                 "actions_purged": actions, "syslog_events_purged": syslog, "cases_purged": cases}
 
@@ -384,6 +387,9 @@ class SOAROrchestrator:
 
         # Stage 8: Attach the pre-containment evidence collected in stage 5a
         incident["evidence_package"] = evidence_package
+        # Chain of custody starts at collection (F50)
+        self.custody.record(incident["incident_id"], "collected", "evidence_package", sha256_of(evidence_package), "soar-pipeline")
+        self.custody.record(incident["incident_id"], "collected", "telemetry", sha256_of(incident["telemetry"]), "soar-pipeline")
         incident["thehive_evidence_attachment"] = self.evidence_collector.package_for_thehive(evidence_package)
 
         # Stage 9: Interactive Attack Graph & Process Tree

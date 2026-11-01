@@ -37,7 +37,7 @@ def _json(obj):
     return json.dumps(obj, indent=2, sort_keys=True, default=str).encode("utf-8")
 
 
-def package_files(incident, case=None):
+def package_files(incident, case=None, custody=None):
     """{filename: bytes} for the package, before zipping."""
     inc = strip_provider_data(incident)
     if masking_enabled():
@@ -53,6 +53,7 @@ def package_files(incident, case=None):
                                 "containment_action": inc.get("containment_action"),
                                 "proposed_actions": inc.get("proposed_actions", [])}),
         "case.json": _json(case),
+        "custody.json": _json(custody or []),
         "tasks.md": ("# Playbook tasks\n\n" + "".join(f"- [ ] {t['title']}\n" for t in tasks)).encode("utf-8"),
         "README.txt": (
             f"CyberPulse triage package for {inc.get('incident_id')}\n"
@@ -67,9 +68,9 @@ def package_files(incident, case=None):
     return files
 
 
-def build_zip(incident, case=None):
+def build_zip(incident, case=None, custody=None):
     """(zip bytes, sha256 of the zip, manifest dict)."""
-    files = package_files(incident, case)
+    files = package_files(incident, case, custody)
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
         for name in sorted(files):
