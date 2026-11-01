@@ -63,6 +63,30 @@
   ],
   "top": "SOC-RULE-010"
  },
+ "email_phishing_reported_or_auth_fail.yml::negative::Blocked at the gateway": {
+  "all": [],
+  "top": null
+ },
+ "email_phishing_reported_or_auth_fail.yml::negative::Clean newsletter with link": {
+  "all": [],
+  "top": null
+ },
+ "email_phishing_reported_or_auth_fail.yml::negative::DMARC fail, no link or attachment": {
+  "all": [],
+  "top": null
+ },
+ "email_phishing_reported_or_auth_fail.yml::positive::DMARC fail with link": {
+  "all": [
+   "SOC-RULE-050"
+  ],
+  "top": "SOC-RULE-050"
+ },
+ "email_phishing_reported_or_auth_fail.yml::positive::User reported the message": {
+  "all": [
+   "SOC-RULE-050"
+  ],
+  "top": "SOC-RULE-050"
+ },
  "generator::cloud_aws": {
   "all": [
    "SOC-RULE-009"

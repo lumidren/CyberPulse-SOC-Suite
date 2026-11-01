@@ -1,0 +1,2 @@
+// SOC-RULE-050: Phishing Email Reported by a User or Failing DMARC with a Link or Attachment (generated from rules/sigma/email_phishing_reported_or_auth_fail.yml; review before use)
+((winlog.event_data.DeliveryAction:Delivered) AND (winlog.event_data.ReportedByUser:True)) OR ((winlog.event_data.DeliveryAction:Delivered) AND (winlog.event_data.AuthenticationResults:*dmarc\=fail*) AND (winlog.event_data.Urls:True)) OR ((winlog.event_data.DeliveryAction:Delivered) AND (winlog.event_data.AuthenticationResults:*dmarc\=fail*) AND (winlog.event_data.AttachmentSha256:True))

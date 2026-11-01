@@ -40,6 +40,7 @@ KQL_TABLES = {
     ("azure", "auditlogs"): "AuditLogs",
     # Custom log table you create when forwarding GUARDIAN alerts to Sentinel (name is your choice)
     ("guardian", "anomaly"): "GuardianAnomaly_CL",
+    ("m365", "email"): "EmailEvents",
 }
 
 

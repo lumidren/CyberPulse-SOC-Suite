@@ -213,6 +213,35 @@ class SOAROrchestrator:
         best["also_matched"] = [r["rule_id"] for r in candidates[1:]] + list((hit or {}).get("also_matched", []))
         return best
 
+    def propose_action(self, incident_id, analyst, action_type=None):
+        """Analyst-initiated proposal: stage a containment action for an existing incident.
+
+        Used when policy only alerted (e.g. medium risk) but an analyst wants to act. The action
+        defaults to the incident's playbook action and is always staged PENDING_APPROVAL, so it
+        still needs an approval and passes every safety check at that point."""
+        incident = self.dfir_engine.incidents.get(incident_id)
+        if not incident:
+            return {"status": "ERROR", "message": f"incident {incident_id} not found"}
+        if not analyst:
+            return {"status": "ERROR", "message": "an analyst name is required"}
+        playbook = self.playbooks.select(incident.get("rule") or {})
+        action_type = action_type or (playbook.action if playbook else None) or (incident.get("rule") or {}).get("action_recommended")
+        from soar.action_tiers import ACTION_TIERS
+        if action_type not in ACTION_TIERS:
+            return {"status": "ERROR", "message": f"{action_type!r} is not a containment action"}
+        telemetry = incident.get("telemetry") or {}
+        details = telemetry.get("details") or {}
+        action = self.containment_engine.execute_containment(
+            action_type=action_type, target_host=telemetry.get("computer_name"), target_ip=telemetry.get("source_ip"),
+            target_user=telemetry.get("user"), pid=details.get("ProcessId", 0),
+            process_name=details.get("Image", "n/a"), execution_intent="PENDING_APPROVAL",
+            correlation_id=incident.get("correlation_id"),
+            context={"message_id": details.get("NetworkMessageId"), "proposed_by": analyst})
+        incident.setdefault("proposed_actions", []).append({"action_id": action["action_id"], "action_type": action_type,
+                                                            "status": action["status"], "proposed_by": analyst})
+        self.dfir_engine.add_analyst_note(incident_id, f"{analyst} proposed {action_type} ({action['action_id']}); awaiting approval.")
+        return {"status": "SUCCESS", "action": action}
+
     def _suppressed(self, rule, event):
         """True when an active exception in rules/exceptions.yml covers this rule match."""
         return self.exceptions.suppressing(rule.soar.get("soc_rule_id", rule.id), event) is not None
@@ -312,6 +341,7 @@ class SOAROrchestrator:
             context={
                 "task_name": event.get("details", {}).get("TaskName"),
                 "task_xml": event.get("details", {}).get("TaskContent"),
+                "message_id": event.get("details", {}).get("NetworkMessageId"),
             },
         )
 

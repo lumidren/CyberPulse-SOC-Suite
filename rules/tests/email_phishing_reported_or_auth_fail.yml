@@ -1,0 +1,80 @@
+# Positive/negative samples for rules/sigma/email_phishing_reported_or_auth_fail.yml (synthetic lab events)
+rule: email_phishing_reported_or_auth_fail.yml
+positive:
+- name: User reported the message
+  event:
+    event_id: 9960
+    event_source: m365:email
+    computer_name: exchange-online
+    source_ip: 203.0.113.77
+    user: j.doe@corp.example
+    details:
+      NetworkMessageId: AAMkAGI2TG93AAA=
+      SenderFromAddress: billing@pay-corp-example.net
+      RecipientEmailAddress: j.doe@corp.example
+      Subject: Invoice overdue
+      AuthenticationResults: spf=pass dkim=pass dmarc=pass
+      DeliveryAction: Delivered
+      ReportedByUser: true
+- name: DMARC fail with link
+  event:
+    event_id: 9960
+    event_source: m365:email
+    computer_name: exchange-online
+    source_ip: 203.0.113.77
+    user: j.doe@corp.example
+    details:
+      NetworkMessageId: AAMkAGI2TG93AAA=
+      SenderFromAddress: billing@pay-corp-example.net
+      RecipientEmailAddress: j.doe@corp.example
+      Subject: Invoice overdue
+      AuthenticationResults: spf=fail dkim=none dmarc=fail
+      DeliveryAction: Delivered
+      Urls:
+      - http://pay-corp-example.net/login
+negative:
+- name: DMARC fail, no link or attachment
+  event:
+    event_id: 9960
+    event_source: m365:email
+    computer_name: exchange-online
+    source_ip: 203.0.113.77
+    user: j.doe@corp.example
+    details:
+      NetworkMessageId: AAMkAGI2TG93AAA=
+      SenderFromAddress: billing@pay-corp-example.net
+      RecipientEmailAddress: j.doe@corp.example
+      Subject: Invoice overdue
+      AuthenticationResults: spf=fail dmarc=fail
+      DeliveryAction: Delivered
+- name: Blocked at the gateway
+  event:
+    event_id: 9960
+    event_source: m365:email
+    computer_name: exchange-online
+    source_ip: 203.0.113.77
+    user: j.doe@corp.example
+    details:
+      NetworkMessageId: AAMkAGI2TG93AAA=
+      SenderFromAddress: billing@pay-corp-example.net
+      RecipientEmailAddress: j.doe@corp.example
+      Subject: Invoice overdue
+      AuthenticationResults: spf=pass dkim=pass dmarc=pass
+      DeliveryAction: Blocked
+      ReportedByUser: true
+- name: Clean newsletter with link
+  event:
+    event_id: 9960
+    event_source: m365:email
+    computer_name: exchange-online
+    source_ip: 203.0.113.77
+    user: j.doe@corp.example
+    details:
+      NetworkMessageId: AAMkAGI2TG93AAA=
+      SenderFromAddress: billing@pay-corp-example.net
+      RecipientEmailAddress: j.doe@corp.example
+      Subject: Invoice overdue
+      AuthenticationResults: spf=pass dkim=pass dmarc=pass
+      DeliveryAction: Delivered
+      Urls:
+      - https://news.example.com

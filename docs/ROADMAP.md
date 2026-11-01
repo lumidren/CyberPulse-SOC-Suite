@@ -209,7 +209,7 @@ internal identifiers never go to external APIs.
 - [x] **F42** Multi-source reputation scoring with weighted consensus. — **Done**: weighted consensus with `agreement` in `soar/reputation.py`, `REPUTATION_WEIGHTS`, documented defaults (judgement, not measured).
 - [x] **F43** Automatic user notification for suspicious logins. — **Done (needs your SMTP + address book)**: `soar/user_notify.py` (off by default, STARTTLS, no links, never for simulated/service/protected accounts, 24 h cooldown). No email actually sent.
 - [x] **F44** MFA step-up or session revocation for Entra ID. — **Done (needs your tenant)**: `soar/entra_responder.py` (revokeSignInSessions + CA step-up group, rollback), `docs/ENTRA_RESPONDER.md`. Approval-only (TIER_3). Stubbed Graph only.
-- [ ] **F45** Email quarantine playbook for phishing.
+- [x] **F45** Email quarantine playbook for phishing. — **Done (simulated responder)**: SOC-RULE-050, `QUARANTINE_EMAIL` (TIER_2, rollback to inbox), `playbooks/phishing.yml`, `POST /api/incidents/<id>/propose`, `docs/PHISHING.md`. Graph request built, not sent.
 - [ ] **F46** Phishing triage playbook (URL detonation, header analysis).
 - [ ] **F47** Automatic sandbox submission for suspicious files.
 - [x] **F48** Memory acquisition before isolation. — 🔀 **Merged into E29**: memory acquisition order (process dump before kill, host image before isolation) is recorded in `pre_containment_snapshot`; simulated in the lab.

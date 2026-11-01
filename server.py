@@ -855,6 +855,13 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         case_segments = [s for s in path.split("/") if s]
+        if len(case_segments) == 4 and case_segments[:2] == ["api", "incidents"] and case_segments[3] == "propose":
+            analyst = str(data.get("analyst", "")).strip()[:64]
+            result = orchestrator.propose_action(case_segments[2], analyst, data.get("action"))
+            audit_logger.info("ACTION_PROPOSED client=%s principal=%s analyst=%s incident=%s result=%s", self._client_ip(),
+                              self._principal(), analyst, case_segments[2], result["status"])
+            self._send_json(200 if result["status"] == "SUCCESS" else 400, result)
+            return
         if case_segments[:2] == ["api", "cases"] and case_segments[3:] == ["misp", "push"]:
             # Sharing is outward-facing: only on an explicit analyst request, never automatically
             case = orchestrator.case_manager.cases.get(case_segments[2])

@@ -367,8 +367,15 @@
     },
     {
       "techniqueID": "T1566.001",
+      "score": 2,
+      "comment": "Lab rules (synthetic-tested only): SOC-RULE-021, SOC-RULE-050",
+      "enabled": true,
+      "showSubtechniques": true
+    },
+    {
+      "techniqueID": "T1566.002",
       "score": 1,
-      "comment": "Lab rules (synthetic-tested only): SOC-RULE-021",
+      "comment": "Lab rules (synthetic-tested only): SOC-RULE-050",
       "enabled": true,
       "showSubtechniques": true
     },
