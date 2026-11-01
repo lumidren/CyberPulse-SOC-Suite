@@ -74,6 +74,28 @@ class TestNetworkIngest(unittest.TestCase):
             server.ingest_verifier = saved
 
 
+class TestDnsTunnelCorrelation(unittest.TestCase):
+
+    def test_fifty_unique_subdomains_fire_once(self):
+        from soar.sigma_correlation import CorrelationEngine
+        engine = CorrelationEngine()
+        fired = []
+        for i in range(60):
+            event = zeek_to_event("dns", dict(DNS, ts=1793500000 + i, query=f"chunk{i:04d}x.exfil.example.net"))
+            fired += [r["rule_id"] for r in engine.observe(event)]
+        self.assertEqual(fired, ["SOC-RULE-053"])
+
+    def test_repeated_same_name_does_not_fire(self):
+        from soar.sigma_correlation import CorrelationEngine
+        engine = CorrelationEngine()
+        fired = [r for i in range(80) for r in engine.observe(zeek_to_event("dns", dict(DNS, ts=1793500000 + i)))]
+        self.assertEqual(fired, [])
+
+    def test_parent_domain_is_added_for_correlation(self):
+        self.assertEqual(zeek_to_event("dns", dict(DNS, query="a.b.exfil.example.net."))["details"]["query_parent"],
+                         "example.net")
+
+
 class TestTlsFingerprints(unittest.TestCase):
 
     def test_blocklist_parsing_and_placeholders_are_marked(self):
