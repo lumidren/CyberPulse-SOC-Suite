@@ -13,6 +13,7 @@ documentation to run it responsibly.
 
 | If you want to... | Read |
 | :--- | :--- |
+| Read what worked and what failed | [Case study](CASE_STUDY.md) |
 | Know what can go wrong before turning anything on | [Risk register](RISK_REGISTER.md), [Automated actions](AUTOMATED_ACTIONS.md) |
 | Run an exercise in your lab | [Rules of Engagement](RULES_OF_ENGAGEMENT.md), [Atomic Red Team](ATOMIC_RED_TEAM.md) |
 | Understand a detection | [Rule write-ups](rules/README.md), [Runbooks](runbooks/README.md) |

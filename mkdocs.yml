@@ -43,6 +43,7 @@ nav:
       - Phishing: PHISHING.md
       - MITRE coverage narrative: MITRE_COVERAGE_AND_GAPS.md
   - Validation and honesty:
+      - Case study: CASE_STUDY.md
       - What I missed: WHAT_I_MISSED.md
       - Metrics: METRICS.md
       - Validation results: VALIDATION_RESULTS.md

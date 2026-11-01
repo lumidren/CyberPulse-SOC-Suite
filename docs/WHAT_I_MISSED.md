@@ -49,13 +49,19 @@ only listed in `also_matched`.
 - Threshold tuning: no correlation rule receives any benign events from the synthetic baseline, so their thresholds are untuned ([THRESHOLD_TUNING.md](THRESHOLD_TUNING.md)).
 - False positives: the baseline reaches zero only because two exceptions written for that same baseline suppress 119 matches ([VALIDATION_RESULTS.md](VALIDATION_RESULTS.md)).
 
-## 5. Never verified end to end (10)
+## 5. Never verified end to end (16)
 
 - Container images: `compose.yaml` and `deploy/docker-compose.yml` pass `docker compose config`, but no image has been built or run here (Docker daemon unavailable).
 - Vagrant and Ansible lab provisioning (`deploy/vagrant`, `deploy/ansible`): neither tool was installed.
 - `sigma check` (sigma-cli) on the rules, including the correlation files: runs in CI only; the local install failed.
 - GitHub Actions: workflows are written and linted locally; whether CI is green on GitHub is unknown here.
 - Live VirusTotal / AbuseIPDB enrichment: implemented and opt-in, never called with a real key.
+- OTX, URLhaus, GreyNoise, Shodan and Censys lookups: built to each API's documentation, tested with stubs, never called with a real key.
+- TheHive / Cortex, MISP, Shuffle / n8n, CIPHER feeds and GUARDIAN: request and payload formats tested with stubs and fixtures, never exchanged with a running instance.
+- Entra ID (Graph) responder, email quarantine, SMTP user notifications and Slack / Telegram ChatOps: tested with stub clients, never run against a real tenant, mailbox or chat workspace.
+- CAPE sandbox, osquery (Fleet) and Velociraptor live queries, yara-python: tested with stubs; no live sandbox, fleet or yara-python install.
+- Zeek and Suricata ingest: tested on synthetic log records, no live sensor connected.
+- LLM triage summary (Claude API): request shape tested with a stub client; no live API call made and summary quality not measured.
 - SIEM conversions in `rules/converted/` (Splunk, Elastic, KQL, Wazuh): generated and syntax-checked where possible, never loaded into a real SIEM.
 - Prometheus scrape and Grafana dashboards (`deploy/monitoring`): config only.
 - Caldera report import: tested on a hand-written fixture, not a real Caldera export.
