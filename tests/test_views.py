@@ -122,3 +122,17 @@ class TestTopStats(ViewsTestBase):
         self.assertEqual(top["hosts"][0]["count"], max(hosts.values()))
         counts = [h["count"] for h in top["rules"]]
         self.assertEqual(counts, sorted(counts, reverse=True))
+
+
+class TestSearch(ViewsTestBase):
+
+    def test_finds_by_host_ip_rule_and_ioc(self):
+        self.assertIn("host", views.search(self.orchestrator, "win-workstation")["results"][0]["matched"])
+        self.assertTrue(views.search(self.orchestrator, "SOC-RULE-001")["total"] >= 1)
+        hits = views.search(self.orchestrator, "rclone")["results"]
+        self.assertTrue(any("command_line" in h["matched"] for h in hits))
+        self.assertTrue(all(h["case_id"] for h in hits if h["type"] == "incident"))
+
+    def test_short_and_empty_queries(self):
+        self.assertEqual(views.search(self.orchestrator, "a")["results"], [])
+        self.assertEqual(views.search(self.orchestrator, "no-such-thing-xyz")["total"], 0)

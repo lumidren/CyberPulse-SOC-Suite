@@ -1045,3 +1045,8 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
     --color-yellow: #a16207;
 }
 .theme-toggle { min-width: 96px; }
+.tw-search { position: relative; margin-bottom: 10px; }
+.tw-search input { width: 100%; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; }
+.tw-search-results { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.tw-search-hit { display: flex; flex-direction: column; text-align: left; padding: 6px 8px; border-radius: 6px; cursor: pointer;
+    background: var(--bg-accent); color: var(--text-primary); border: 1px solid var(--border-color); }
