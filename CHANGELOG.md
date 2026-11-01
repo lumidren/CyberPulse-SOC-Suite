@@ -34,8 +34,9 @@ without a new entry here.
   configured (all off by default); none of them can execute containment.
 - **Action ledger**: every containment decision and kill-switch change is recorded in a
   hash-chained ledger.
+- **Network detections** (SOC-RULE-051 Suricata severity-1 alerts, SOC-RULE-052 executables over HTTP from script clients or raw IPs) raise alert-only incidents from signed Zeek/Suricata batches.
 
-Automation fingerprint: `e898332815799085`
+Automation fingerprint: `f87517ccf5c6e668`
 
 ## [2.5.0] - 2026-10-31
 

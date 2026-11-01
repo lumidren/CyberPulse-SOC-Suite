@@ -107,6 +107,13 @@
       "showSubtechniques": true
     },
     {
+      "techniqueID": "T1071",
+      "score": 1,
+      "comment": "Lab rules (synthetic-tested only): SOC-RULE-051",
+      "enabled": true,
+      "showSubtechniques": false
+    },
+    {
       "techniqueID": "T1078",
       "score": 2,
       "comment": "Lab rules (synthetic-tested only): SOC-RULE-010, SOC-RULE-049",
@@ -150,8 +157,8 @@
     },
     {
       "techniqueID": "T1105",
-      "score": 1,
-      "comment": "Lab rules (synthetic-tested only): SOC-RULE-014",
+      "score": 2,
+      "comment": "Lab rules (synthetic-tested only): SOC-RULE-014, SOC-RULE-052",
       "enabled": true,
       "showSubtechniques": false
     },

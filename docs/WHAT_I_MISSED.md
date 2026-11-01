@@ -27,12 +27,12 @@ Details and the detected variants: [EVASION.md](EVASION.md).
 - **T1021.001** Remote Services: Remote Desktop Protocol: Legitimate RDP is constant in the lab; needs a baseline of normal source/destination pairs (F13)
 - **T1027** Obfuscated Files or Information: Only the encoded-PowerShell sub-case is covered (SOC-RULE-004); file-level obfuscation needs content inspection (YARA, F70)
 - **T1036.003** Masquerading: Rename System Utilities: Needs OriginalFileName in process telemetry and a rule comparing it to Image
-- **T1048** Exfiltration Over Alternative Protocol: Needs network telemetry (Zeek); no sensor in the lab yet (F72)
+- **T1048** Exfiltration Over Alternative Protocol: Zeek ingest exists (F72); volume-based exfiltration needs per-host byte baselines not built yet
 - **T1055** Process Injection: Needs kernel ETW (Microsoft-Windows-Threat-Intelligence); Sysmon does not see thread-context changes
 - **T1071.004** Application Layer Protocol: DNS: Needs DNS query logs; no resolver logging in the lab
 - **T1190** Exploit Public-Facing Application: Needs web/WAF logs; the lab has no public-facing application
 - **T1555.003** Credentials from Password Stores: Credentials from Web Browsers: Needs Sysmon file-access auditing on browser profile paths (SACLs), not collected in the lab
-- **T1557.001** Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning: Needs network telemetry (Zeek); no sensor in the lab yet (F72)
+- **T1557.001** Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning: Zeek ingest exists (F72) but no rule yet: needs LLMNR/NBT-NS traffic in conn.log and a baseline of name-resolution responders
 
 Source: [coverage/GAPS.md](coverage/GAPS.md).
 

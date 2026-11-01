@@ -1,0 +1,24 @@
+title: High-Severity Suricata IDS Alert
+id: a41fa4df-8bbb-4874-b81f-2ef76c9fb4bf
+status: experimental
+description: Suricata raised a severity-1 alert (the highest; 1 is most severe in Suricata). The signature decides
+    the technique; this rule only lifts the IDS alert into a CyberPulse incident.
+references:
+- https://docs.suricata.io/en/latest/output/eve/eve-json-format.html
+author: lumidren (CyberPulse SOC Suite)
+date: '2026-11-01'
+modified: '2026-11-01'
+tags:
+- attack.command_and_control
+- attack.t1071
+logsource:
+    product: suricata
+    service: alert
+detection:
+    selection:
+        Severity: 1
+    condition: selection
+falsepositives:
+- Signatures with known noise on your network (tune them in Suricata, not here)
+- Vulnerability scanners triggering exploit signatures
+level: high

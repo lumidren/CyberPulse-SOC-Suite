@@ -1,0 +1,43 @@
+# Positive/negative samples for rules/sigma/net_suricata_high_severity_alert.yml (synthetic lab events)
+rule: net_suricata_high_severity_alert.yml
+positive:
+- name: Severity 1 alert
+  event:
+    event_id: 9980
+    event_source: suricata:alert
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      SignatureId: 2030000
+      Signature: ET MALWARE Possible C2 Beacon
+      Category: A Network Trojan was detected
+      Severity: 1
+      DestinationIp: 203.0.113.50
+      DestinationPort: 443
+negative:
+- name: Severity 2 alert
+  event:
+    event_id: 9980
+    event_source: suricata:alert
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      SignatureId: 2030000
+      Signature: ET MALWARE Possible C2 Beacon
+      Category: A Network Trojan was detected
+      Severity: 2
+      DestinationIp: 203.0.113.50
+      DestinationPort: 443
+- name: Severity 3 informational
+  event:
+    event_id: 9980
+    event_source: suricata:alert
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      SignatureId: 2030000
+      Signature: ET INFO Session
+      Category: A Network Trojan was detected
+      Severity: 3
+      DestinationIp: 203.0.113.50
+      DestinationPort: 443

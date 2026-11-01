@@ -1,0 +1,64 @@
+# Positive/negative samples for rules/sigma/net_zeek_http_executable_from_script_client.yml (synthetic lab events)
+rule: net_zeek_http_executable_from_script_client.yml
+positive:
+- name: PowerShell downloads an exe
+  event:
+    event_id: 9973
+    event_source: zeek:http
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      method: GET
+      host: dl.example.net
+      uri: /a.exe
+      user_agent: Mozilla/5.0 (Windows NT; Windows NT 10.0) WindowsPowerShell/5.1
+      status_code: 200
+      resp_mime_types:
+      - application/x-dosexec
+      id.resp_h: dl.example.net
+- name: Browser fetches exe from raw IP
+  event:
+    event_id: 9973
+    event_source: zeek:http
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      method: GET
+      host: 203.0.113.60
+      uri: /update.exe
+      user_agent: Mozilla/5.0
+      status_code: 200
+      resp_mime_types:
+      - application/x-dosexec
+      id.resp_h: 203.0.113.60
+negative:
+- name: Browser fetches exe from a named host
+  event:
+    event_id: 9973
+    event_source: zeek:http
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      method: GET
+      host: downloads.example.com
+      uri: /setup.exe
+      user_agent: Mozilla/5.0
+      status_code: 200
+      resp_mime_types:
+      - application/x-dosexec
+      id.resp_h: downloads.example.com
+- name: PowerShell fetches a text file
+  event:
+    event_id: 9973
+    event_source: zeek:http
+    computer_name: 10.0.2.15
+    source_ip: 10.0.2.15
+    details:
+      method: GET
+      host: 203.0.113.60
+      uri: /a.txt
+      user_agent: WindowsPowerShell/5.1
+      status_code: 200
+      resp_mime_types:
+      - text/plain
+      id.resp_h: 203.0.113.60

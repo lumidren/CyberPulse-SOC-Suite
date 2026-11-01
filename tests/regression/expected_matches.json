@@ -167,6 +167,40 @@
   ],
   "top": "SOC-RULE-049"
  },
+ "net_suricata_high_severity_alert.yml::negative::Severity 2 alert": {
+  "all": [],
+  "top": null
+ },
+ "net_suricata_high_severity_alert.yml::negative::Severity 3 informational": {
+  "all": [],
+  "top": null
+ },
+ "net_suricata_high_severity_alert.yml::positive::Severity 1 alert": {
+  "all": [
+   "SOC-RULE-051"
+  ],
+  "top": "SOC-RULE-051"
+ },
+ "net_zeek_http_executable_from_script_client.yml::negative::Browser fetches exe from a named host": {
+  "all": [],
+  "top": null
+ },
+ "net_zeek_http_executable_from_script_client.yml::negative::PowerShell fetches a text file": {
+  "all": [],
+  "top": null
+ },
+ "net_zeek_http_executable_from_script_client.yml::positive::Browser fetches exe from raw IP": {
+  "all": [
+   "SOC-RULE-052"
+  ],
+  "top": "SOC-RULE-052"
+ },
+ "net_zeek_http_executable_from_script_client.yml::positive::PowerShell downloads an exe": {
+  "all": [
+   "SOC-RULE-052"
+  ],
+  "top": "SOC-RULE-052"
+ },
  "win_ad_reconnaissance.yml::negative::net use mapping a share": {
   "all": [],
   "top": null

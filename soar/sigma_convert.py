@@ -41,6 +41,9 @@ KQL_TABLES = {
     # Custom log table you create when forwarding GUARDIAN alerts to Sentinel (name is your choice)
     ("guardian", "anomaly"): "GuardianAnomaly_CL",
     ("m365", "email"): "EmailEvents",
+    # Custom tables you create when forwarding sensor logs to Sentinel (names are your choice)
+    ("zeek", "conn"): "ZeekConn_CL", ("zeek", "dns"): "ZeekDns_CL", ("zeek", "ssl"): "ZeekSsl_CL",
+    ("zeek", "http"): "ZeekHttp_CL", ("suricata", "alert"): "SuricataAlert_CL",
 }
 
 

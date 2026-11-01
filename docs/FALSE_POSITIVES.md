@@ -361,3 +361,19 @@ How to tune each one: [TUNING.md](TUNING.md).
 - Newsletters and SaaS senders with broken DMARC alignment
 - Users reporting legitimate but unexpected mail
 - Baseline matches before exceptions: **0**
+
+## SOC-RULE-051: High-Severity Suricata IDS Alert
+
+`rules/sigma/net_suricata_high_severity_alert.yml` (rule, level high)
+
+- Signatures with known noise on your network (tune them in Suricata, not here)
+- Vulnerability scanners triggering exploit signatures
+- Baseline matches before exceptions: **0**
+
+## SOC-RULE-052: Executable Downloaded over HTTP by a Script Client or to a Raw IP
+
+`rules/sigma/net_zeek_http_executable_from_script_client.yml` (rule, level high)
+
+- Software updaters that download installers over HTTP from IP-addressed mirrors
+- Admin scripts pulling tools from an internal web server by IP
+- Baseline matches before exceptions: **0**

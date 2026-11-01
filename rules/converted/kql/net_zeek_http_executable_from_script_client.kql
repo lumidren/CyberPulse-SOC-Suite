@@ -1,0 +1,3 @@
+// SOC-RULE-052: Executable Downloaded over HTTP by a Script Client or to a Raw IP (generated from rules/sigma/net_zeek_http_executable_from_script_client.yml; review before use)
+ZeekHttp_CL
+| where ((resp_mime_types contains "application/x-dosexec") and ((user_agent contains "WindowsPowerShell" or user_agent contains "Microsoft-CryptoAPI" or user_agent contains "BITS" or user_agent contains "curl" or user_agent contains "Wget"))) or ((resp_mime_types contains "application/x-dosexec") and (host matches regex "^[0-9]{1,3}(\\.[0-9]{1,3}){3}(:[0-9]+)?$"))

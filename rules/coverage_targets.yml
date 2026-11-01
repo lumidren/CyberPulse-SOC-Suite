@@ -15,7 +15,7 @@ targets:
   T1555.003: {name: "Credentials from Password Stores: Credentials from Web Browsers", tactic: credential-access, why: "Common infostealer behaviour",
               blocker: "Needs Sysmon file-access auditing on browser profile paths (SACLs), not collected in the lab"}
   T1557.001: {name: "Adversary-in-the-Middle: LLMNR/NBT-NS Poisoning", tactic: credential-access, why: "Frequent internal-network finding",
-              blocker: "Needs network telemetry (Zeek); no sensor in the lab yet (F72)"}
+              blocker: "Zeek ingest exists (F72) but no rule yet: needs LLMNR/NBT-NS traffic in conn.log and a baseline of name-resolution responders"}
   T1053.005: {name: "Scheduled Task/Job: Scheduled Task", tactic: persistence, why: "Most common Windows persistence"}
   T1547.001: {name: "Boot or Logon Autostart Execution: Registry Run Keys", tactic: persistence, why: "Common persistence"}
   T1543.003: {name: "Create or Modify System Process: Windows Service", tactic: persistence, why: "Persistence and lateral movement"}
@@ -41,7 +41,7 @@ targets:
               blocker: "Needs DNS query logs; no resolver logging in the lab"}
   T1105: {name: "Ingress Tool Transfer", tactic: command-and-control, why: "Tool download via LOLBins"}
   T1048: {name: "Exfiltration Over Alternative Protocol", tactic: exfiltration, why: "DNS/ICMP exfiltration",
-          blocker: "Needs network telemetry (Zeek); no sensor in the lab yet (F72)"}
+          blocker: "Zeek ingest exists (F72); volume-based exfiltration needs per-host byte baselines not built yet"}
   T1567.002: {name: "Exfiltration Over Web Service: Exfiltration to Cloud Storage", tactic: exfiltration, why: "rclone-style exfiltration"}
   T1486: {name: "Data Encrypted for Impact", tactic: impact, why: "Ransomware"}
   T1490: {name: "Inhibit System Recovery", tactic: impact, why: "Shadow-copy deletion precedes encryption"}
