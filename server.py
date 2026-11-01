@@ -53,6 +53,7 @@ from soar.auth import SessionStore
 from soar.privacy import mask_identities, masking_enabled
 from soar.observability import render_prometheus
 from soar.chatops import ChatOpsApprovals
+from soar.playbooks import ALLOWED_ACTIONS, validate_draft
 from soar.ingest_auth import SIGNATURE_HEADER, TIMESTAMP_HEADER, IngestVerifier
 from scripts.validate_detections import run_scripted, scripted_status
 from simulator.lab_guard import SimulationThrottle, lab_mode_enabled
@@ -638,6 +639,12 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "full_auto_allowed": ALLOW_FULL_AUTO
             })
 
+        elif path == "/api/playbooks":
+            registry = orchestrator.playbooks
+            self._send_json(200, {"playbooks": [{**pb.doc, "file": pb.file} for pb in registry.playbooks],
+                                  "allowed_actions": sorted(ALLOWED_ACTIONS),
+                                  "default": registry.default.name if registry.default else None})
+
         elif path == "/api/exceptions":
             self._send_json(200, orchestrator.exceptions.status())
 
@@ -815,6 +822,12 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "error": "Simulation disabled: start the server with CYBERPULSE_LAB_MODE=true, "
                          "and only in a lab you own or are authorised to test."
             })
+            return
+
+        if path == "/api/playbooks/validate":
+            # Drafts are checked, never saved: playbook changes go through code review
+            rules = [r.as_matched_rule() for r in orchestrator.sigma.rules + orchestrator.correlation.rules]
+            self._send_json(200, validate_draft(str(data.get("yaml", "")), orchestrator.playbooks, rules))
             return
 
         if path == "/api/simulate":

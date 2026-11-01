@@ -151,3 +151,27 @@ class PlaybookRegistry:
             decision["approval_reason"] = f"playbook {playbook.name} requires analyst approval"
         decision["playbook"] = playbook.summary()
         return decision
+
+
+def validate_draft(text, registry, rules):
+    """Check a playbook draft (YAML text) as the loader would, without writing anything.
+
+    Returns {"valid", "errors", "normalized_yaml", "routes"}; `routes` lists the SOC rule ids
+    this draft would handle if it replaced the committed playbook of the same name."""
+    try:
+        doc = yaml.safe_load(text)
+        draft = Playbook(os.path.join(registry.directory, "draft.yml"), doc)
+    except (yaml.YAMLError, PlaybookError) as exc:
+        return {"valid": False, "errors": [str(exc)], "warnings": [], "normalized_yaml": None, "routes": []}
+    others = [pb for pb in registry.playbooks if pb.name != draft.name]
+    errors = [f"{rule} is already claimed by {pb.name}" for pb in others for rule in sorted(draft.rules & pb.rules)]
+    if draft.is_default and any(pb.is_default for pb in others):
+        errors.append("another playbook is already the default (no match block)")
+    trial = PlaybookRegistry.__new__(PlaybookRegistry)
+    trial.directory, trial.playbooks = registry.directory, others + [draft]
+    trial.default = draft if draft.is_default else registry.default
+    routes = sorted({r["rule_id"] for r in rules if trial.select(r) is draft})
+    warnings = [f"technique {t} is also matched by {pb.name}; on a tie the playbook loaded first wins"
+                for pb in others for t in sorted(draft.techniques & pb.techniques)]
+    return {"valid": not errors, "errors": errors, "warnings": warnings,
+            "normalized_yaml": yaml.safe_dump(doc, sort_keys=False, allow_unicode=True), "routes": routes}

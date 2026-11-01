@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playbook Editor | CyberPulse SOC Lab</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="lab-mode-banner" role="status">
+        <i class="fa-solid fa-flask"></i>
+        <span>Drafts are validated by the server but never saved. Download the YAML and commit it through review.</span>
+    </div>
+
+    <header class="soc-header">
+        <div class="header-left">
+            <div class="logo-badge"><i class="fa-solid fa-diagram-project"></i></div>
+            <div>
+                <h1>PLAYBOOK EDITOR</h1>
+                <p class="subtitle">Edit playbooks/*.yml visually; see what each change routes and does</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <a class="btn-secondary" href="/index.html"><i class="fa-solid fa-arrow-left"></i> Back to console</a>
+        </div>
+    </header>
+
+    <main class="pb-layout">
+        <section class="card pb-list">
+            <div class="card-header"><h3><i class="fa-solid fa-list"></i> Playbooks</h3></div>
+            <ul id="pbList" class="pb-items"></ul>
+            <button class="btn-secondary" id="pbNew"><i class="fa-solid fa-plus"></i> New playbook</button>
+        </section>
+
+        <section class="card pb-form">
+            <div class="card-header"><h3><i class="fa-solid fa-pen"></i> Edit</h3></div>
+            <label>Name <input id="pbName" type="text" maxlength="64"></label>
+            <label>Version <input id="pbVersion" type="text" maxlength="16" placeholder="1.0.0"></label>
+            <label>Description <input id="pbDescription" type="text" maxlength="200"></label>
+            <label>Match rule ids (comma separated) <input id="pbRules" type="text" placeholder="SOC-RULE-001, SOC-RULE-008"></label>
+            <label>Match techniques (comma separated) <input id="pbTechniques" type="text" placeholder="T1003, T1558.003"></label>
+            <label>Proposed action <select id="pbAction"></select></label>
+            <label>Minimum risk for containment (blank = none) <input id="pbMinRisk" type="number" min="0" max="100"></label>
+            <label class="pb-check"><input id="pbApproval" type="checkbox"> Always require analyst approval</label>
+            <label class="pb-check"><input id="pbNotify" type="checkbox" checked> Send chat notification</label>
+            <div class="pb-tasks">
+                <span>Analyst tasks</span>
+                <ol id="pbTasks"></ol>
+                <div class="pb-task-add"><input id="pbTaskInput" type="text" maxlength="200" placeholder="Add a task"><button class="btn-secondary" id="pbTaskAdd">Add</button></div>
+            </div>
+            <p class="section-desc">There is no option to enable automatic execution or skip approval: the server rejects it.</p>
+        </section>
+
+        <section class="card pb-preview">
+            <div class="card-header"><h3><i class="fa-solid fa-route"></i> Flow</h3></div>
+            <ol id="pbFlow" class="pb-flow"></ol>
+            <div class="pb-actions">
+                <button class="btn-primary" id="pbValidate"><i class="fa-solid fa-check"></i> Validate on server</button>
+                <button class="btn-secondary" id="pbDownload"><i class="fa-solid fa-download"></i> Download YAML</button>
+            </div>
+            <div id="pbResult" class="pb-result" role="status"></div>
+            <pre id="pbYaml" class="pb-yaml"></pre>
+        </section>
+    </main>
+
+    <script src="playbooks.js"></script>
+</body>
+</html>
