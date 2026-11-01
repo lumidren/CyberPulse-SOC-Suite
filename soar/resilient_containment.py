@@ -10,6 +10,7 @@ import time
 from datetime import datetime, timezone
 
 from soar import command_builder as cmd
+from soar.action_ledger import ActionLedger, action_summary
 from soar.entra_responder import EntraResponder
 from soar.plugins import RESPONDERS
 from soar.evidence_collector import VolatileEvidenceCollector
@@ -80,8 +81,44 @@ class ResilientContainmentEngine:
         self.disabled_users = set()
         # Live Entra ID responder (F44); simulated unless ENTRA_RESPONDER_ENABLED=true and configured
         self.entra = EntraResponder()
+        # Tamper-evident who/what/why/when ledger of every action decision (E97)
+        self.ledger = ActionLedger()
+        self.safety.ledger = self.ledger
 
-    def execute_containment(self, action_type, target_host, target_ip, target_user, pid, process_name, execution_intent="EXECUTE_IMMEDIATE", correlation_id=None, context=None):
+    # ------------------------------------------------------------------ ledgered entry points (E97)
+    def execute_containment(self, *args, **kwargs):
+        record = self._execute_containment(*args, **kwargs)
+        context = record.get("context") or {}
+        self.ledger.record(actor=context.get("proposed_by") or "soar-pipeline", event=f"containment.{record['status'].lower()}",
+                           what=action_summary(record), why=context.get("reason") or record.get("execution_log", ""),
+                           outcome=record["status"])
+        return record
+
+    def approve_action(self, action_id, approver, comment=""):
+        result = self._approve_action(action_id, approver, comment)
+        self.ledger.record(actor=approver, event="containment.approve", what={"action_id": action_id}, why=comment,
+                           outcome=result.get("status") if result.get("status") != "SUCCESS" else result["action"]["status"])
+        return result
+
+    def reject_action(self, action_id, approver, reason=""):
+        result = self._reject_action(action_id, approver, reason)
+        self.ledger.record(actor=approver, event="containment.reject", what={"action_id": action_id}, why=reason,
+                           outcome=result.get("status"))
+        return result
+
+    def rollback_containment(self, action_id, actor="analyst_lumidren"):
+        result = self._rollback_containment(action_id, actor)
+        self.ledger.record(actor=actor, event="containment.rollback", what={"action_id": action_id},
+                           why=result.get("log") or result.get("message", ""), outcome=result.get("status"))
+        return result
+
+    def extend_action(self, action_id, minutes, actor):
+        result = self._extend_action(action_id, minutes, actor)
+        self.ledger.record(actor=actor, event="containment.extend", what={"action_id": action_id, "minutes": minutes},
+                           outcome=result.get("status"))
+        return result
+
+    def _execute_containment(self, action_type, target_host, target_ip, target_user, pid, process_name, execution_intent="EXECUTE_IMMEDIATE", correlation_id=None, context=None):
         """
         Executes idempotent policy-driven containment with audit logging and rollback metadata.
         """
@@ -404,7 +441,7 @@ class ResilientContainmentEngine:
         record["expires_at_epoch"] = expires
         record["expires_at"] = datetime.fromtimestamp(expires, timezone.utc).isoformat()
 
-    def extend_action(self, action_id, minutes, actor):
+    def _extend_action(self, action_id, minutes, actor):
         """Analyst renews an active action's TTL from now."""
         record = self.action_registry.get(action_id)
         if not record or record["status"] != "SUCCESS" or "expires_at_epoch" not in record:
@@ -431,7 +468,7 @@ class ResilientContainmentEngine:
         """Actions staged for analyst sign-off, oldest first."""
         return [r for r in self.action_registry.values() if r["status"] == "PENDING_ANALYST_APPROVAL"]
 
-    def approve_action(self, action_id, approver, comment=""):
+    def _approve_action(self, action_id, approver, comment=""):
         """Analyst approves a staged action; only then is the playbook applied."""
         record = self.action_registry.get(action_id)
         if not record:
@@ -464,7 +501,7 @@ class ResilientContainmentEngine:
         record["latency_ms"] = round((time.perf_counter() - t_start) * 1000, 3)
         return {"status": "SUCCESS", "action": record}
 
-    def reject_action(self, action_id, approver, reason=""):
+    def _reject_action(self, action_id, approver, reason=""):
         """Analyst rejects a staged action; nothing is executed."""
         record = self.action_registry.get(action_id)
         if not record:
@@ -484,7 +521,7 @@ class ResilientContainmentEngine:
         return {"status": "SUCCESS", "action": record}
 
 
-    def rollback_containment(self, action_id, actor="analyst_lumidren"):
+    def _rollback_containment(self, action_id, actor="analyst_lumidren"):
         """
         Reverses an executed containment action and records exactly what was and
         was not restored. Only executed (SUCCESS) actions can be rolled back; staged

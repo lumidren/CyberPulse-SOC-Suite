@@ -27,6 +27,7 @@ class AutomationSafety:
     def __init__(self, clock: Callable[[], float] = time.time) -> None:
         self._lock = threading.Lock()
         self.clock = clock  # injectable for tests
+        self.ledger: Optional[Any] = None  # ActionLedger, set by the containment engine (E97)
 
         # Rate limit: max containment executions in any rolling hour
         self.max_actions_per_hour = int(os.environ.get("CONTAINMENT_MAX_ACTIONS_PER_HOUR", "20"))
@@ -63,7 +64,10 @@ class AutomationSafety:
                 "reason": reason,
                 "changed_at": datetime.now(timezone.utc).isoformat(),
             }
-            return dict(self.kill_switch)
+            state = dict(self.kill_switch)
+        if self.ledger is not None:
+            self.ledger.record(actor=actor, event="kill_switch.engage", what={}, why=reason, outcome="ENGAGED")
+        return state
 
     def release_kill_switch(self, actor: str, reason: str = "") -> Dict[str, Any]:
         with self._lock:
@@ -73,7 +77,10 @@ class AutomationSafety:
                 "reason": reason,
                 "changed_at": datetime.now(timezone.utc).isoformat(),
             }
-            return dict(self.kill_switch)
+            state = dict(self.kill_switch)
+        if self.ledger is not None:
+            self.ledger.record(actor=actor, event="kill_switch.release", what={}, why=reason, outcome="RELEASED")
+        return state
 
     def is_halted(self) -> bool:
         return bool(self.kill_switch["engaged"])

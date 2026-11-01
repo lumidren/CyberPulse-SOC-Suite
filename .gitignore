@@ -48,3 +48,6 @@ triage_packages/
 
 # Saved hunts file (HUNTS_FILE) may hold host names and IPs from searches
 hunts.json
+
+# Action ledger (ACTION_LEDGER_FILE) records real targets and actors
+actions.jsonl
