@@ -51,14 +51,48 @@ async function loadQueue() {
 async function selectCase(caseId) {
     state.selected = caseId;
     document.querySelectorAll(".tw-case").forEach((b) => b.classList.toggle("active", state.queue[b.dataset.index]?.case_id === caseId));
-    const [detail, timeline] = await Promise.all([
+    const [detail, timeline, tree] = await Promise.all([
         CP.api(`/api/cases/${encodeURIComponent(caseId)}`),
         CP.api(`/api/cases/${encodeURIComponent(caseId)}/timeline`),
+        CP.api(`/api/cases/${encodeURIComponent(caseId)}/process-tree`),
     ]);
     if (!detail || detail.error) return;
     state.case = detail.case;
     renderControls(detail.case);
     renderTimeline(timeline);
+    renderTree(tree);
+}
+
+// ------------------------------------------------------------------ F53 process tree
+function treeNode(node) {
+    const li = CP.el("li", null, node.relation === "accessed" ? "tw-accessed" : "");
+    const label = CP.el("span", node.name, node.alerts.filter(Boolean).length ? "tw-proc tw-proc-alert" : "tw-proc");
+    if (node.command_line) label.title = node.command_line;
+    li.appendChild(label);
+    const rules = node.alerts.filter(Boolean);
+    if (rules.length) li.appendChild(CP.el("span", ` ${[...new Set(rules)].join(", ")}`, "tw-muted"));
+    if (node.children.length) {
+        const ul = CP.el("ul");
+        node.children.forEach((c) => ul.appendChild(treeNode(c)));
+        li.appendChild(ul);
+    }
+    return li;
+}
+
+function renderTree(data) {
+    const box = $("processTree");
+    box.replaceChildren();
+    if (!data || data.error || !data.hosts.some((h) => h.roots.length)) {
+        box.appendChild(CP.el("p", "No process telemetry in this case.", "section-desc"));
+        return;
+    }
+    for (const host of data.hosts) {
+        if (!host.roots.length) continue;
+        box.appendChild(CP.el("h4", host.host));
+        const ul = CP.el("ul");
+        host.roots.forEach((r) => ul.appendChild(treeNode(r)));
+        box.appendChild(ul);
+    }
 }
 
 function renderControls(c) {

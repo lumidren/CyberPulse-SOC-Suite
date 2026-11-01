@@ -675,6 +675,13 @@ class SOCHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             else:
                 self._send_json(200, timeline)
 
+        elif len(segments) == 4 and segments[:2] == ["api", "cases"] and segments[3] == "process-tree":
+            tree = views.process_tree(orchestrator, segments[2])
+            if tree is None:
+                self._send_json(404, {"error": "Case not found"})
+            else:
+                self._send_json(200, tree)
+
         elif len(segments) == 4 and segments[:2] == ["api", "cases"] and segments[3] == "misp":
             # Preview of what would be shared: public IPs and hashes only, never pushed from here
             case = orchestrator.case_manager.cases.get(segments[2])

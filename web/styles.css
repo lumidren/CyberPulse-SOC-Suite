@@ -1002,3 +1002,8 @@ body {
 .tw-task { display: flex; gap: 8px; align-items: center; color: var(--text-primary); font-size: 0.85rem; }
 .tw-note { display: flex; gap: 6px; margin-bottom: 10px; }
 .tw-note input { flex: 1; }
+.tw-tree ul { list-style: none; margin: 4px 0 4px 18px; padding-left: 10px; border-left: 1px solid var(--border-color); }
+.tw-tree h4 { margin: 8px 0 2px; color: var(--color-blue); font-size: 0.85rem; }
+.tw-proc { font-family: monospace; padding: 1px 6px; border-radius: 4px; background: var(--bg-secondary); }
+.tw-proc-alert { background: var(--color-red); color: #fff; }
+.tw-accessed > .tw-proc { border: 1px dashed var(--color-orange); }
