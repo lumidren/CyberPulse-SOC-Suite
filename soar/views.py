@@ -333,3 +333,31 @@ def pivot(orchestrator, field, value, limit=200):
                     "process": field_value(e, "process"), "command_line": field_value(e, "command_line")}
                    for e in hits[-limit:]][::-1][:50],
     }
+
+
+# ----------------------------------------------------------------- F69 stack counting / long tail
+def stack(orchestrator, field, where_field=None, where_value=None, tail_share=0.01):
+    """Count every value of `field` across stored events (optionally filtered), rarest first.
+
+    Values seen in at most max(1, tail_share x total) events are flagged as the long tail:
+    on a stable estate, attacker tooling tends to live there."""
+    from collections import Counter
+
+    from soar.event_store import PIVOT_FIELDS, field_value
+    for f in filter(None, (field, where_field)):
+        if f not in PIVOT_FIELDS:
+            return {"error": f"field must be one of {sorted(PIVOT_FIELDS)}"}
+    events = orchestrator.event_store.snapshot()
+    if where_field:
+        needle = str(where_value or "").lower()
+        events = [e for e in events if str(field_value(e, where_field) or "").lower() == needle]
+    values = [str(field_value(e, field)) for e in events if field_value(e, field) not in (None, "")]
+    counts = Counter(values)
+    total = len(values)
+    tail_limit = max(1, int(total * tail_share))
+    alerted = Counter(str(field_value(e, field)) for e in events if e.get("_rule") and field_value(e, field) not in (None, ""))
+    rows = [{"value": v, "count": c, "share": round(c / total, 4) if total else 0, "tail": c <= tail_limit,
+             "alerted": alerted.get(v, 0)} for v, c in sorted(counts.items(), key=lambda kv: (kv[1], kv[0]))]
+    return {"field": field, "where": {where_field: where_value} if where_field else None, "events": len(events),
+            "with_value": total, "distinct": len(counts), "tail_limit": tail_limit,
+            "tail": sum(1 for r in rows if r["tail"]), "rows": rows[:500]}

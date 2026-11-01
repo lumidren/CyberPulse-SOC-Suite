@@ -40,6 +40,17 @@
             <div id="related" class="tw-top"></div>
             <div class="table-responsive"><table class="data-table"><thead><tr><th>Seen</th><th>Rule</th><th>Host</th><th>User</th><th>Source IP</th><th>Event</th><th>Process / command</th></tr></thead><tbody id="pivotRows"></tbody></table></div>
         </section>
+        <section class="card tw-wide">
+            <div class="card-header"><h3><i class="fa-solid fa-layer-group"></i> Stack counting (rarest first)</h3></div>
+            <form id="stackForm" class="hw-form">
+                <select id="stackField" aria-label="Count values of"></select>
+                <select id="stackWhereField" aria-label="Only where"><option value="">(all events)</option></select>
+                <input id="stackWhereValue" type="text" maxlength="500" placeholder="where value (optional)" aria-label="Where value">
+                <button class="btn-primary" type="submit"><i class="fa-solid fa-chart-bar"></i> Stack</button>
+            </form>
+            <p id="stackSummary" class="tw-muted"></p>
+            <div class="table-responsive"><table class="data-table"><thead><tr><th>Value</th><th>Count</th><th>Share</th><th>Long tail</th><th>Alerted</th></tr></thead><tbody id="stackRows"></tbody></table></div>
+        </section>
     </main>
     <script src="session.js"></script>
     <script src="hunt.js"></script>

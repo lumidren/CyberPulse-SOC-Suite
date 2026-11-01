@@ -1104,3 +1104,4 @@ polyline.tw-line-mttd, polyline.tw-line-mttr { fill: none; stroke-width: 2; }
 .hw-form input { flex: 1; min-width: 220px; }
 .hw-crumbs { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
 .hw-crumb, .hw-pivot { background: var(--bg-accent); color: var(--color-blue); border: 1px solid var(--border-color); border-radius: 12px; padding: 2px 10px; cursor: pointer; font-size: 0.8rem; margin: 2px; font-family: monospace; }
+.hw-tail td { background: color-mix(in srgb, var(--color-orange) 12%, transparent); }
