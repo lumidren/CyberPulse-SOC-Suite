@@ -111,8 +111,9 @@ def enrichment_degraded(external):
     return False
 
 
-def _default_transport(url, headers, timeout=8):
-    req = urllib.request.Request(url, headers=headers)
+def _default_transport(url, headers, timeout=8, data=None):
+    body = urllib.parse.urlencode(data).encode("ascii") if data else None
+    req = urllib.request.Request(url, headers=headers, data=body, method="POST" if body else "GET")
     with urllib.request.urlopen(req, timeout=timeout) as resp:  # nosec B310 - fixed https provider URLs
         return resp.status, json.loads(resp.read().decode("utf-8"))
 
@@ -222,6 +223,20 @@ class ThreatIntelClient:
         # AbuseIPDB free plan: daily quota on the check endpoint (docs/THIRD_PARTY_APIS.md)
         self.abuse_limiter = ProviderLimiter(int(os.environ.get("ABUSEIPDB_RATE_LIMIT_PER_MIN", "60")),
                                              int(os.environ.get("ABUSEIPDB_DAILY_QUOTA", "1000")), clock=clock)
+        # OTX, URLhaus, GreyNoise, Shodan, Censys: each enabled by its own key (soar/intel_providers.py)
+        from soar.intel_providers import configured_providers
+        self.providers = configured_providers(lambda per_min, per_day: ProviderLimiter(per_min, per_day, clock=clock))
+
+    def _provider_call(self, url, headers, data):
+        """Like _call, with an optional form body (URLhaus uses POST)."""
+        try:
+            return self.transport(url, headers, data=data) if data else self.transport(url, headers)
+        except Exception as exc:
+            self.last_error = str(exc)
+            return None, {}
+
+    def _provider_verdicts(self, kind, value):
+        return [p.verdict(self._provider_call, kind, value) for p in self.providers if kind in p.kinds]
 
     def _call(self, url, headers):
         """Transport call that never raises: outages become (None, {})."""
@@ -259,11 +274,19 @@ class ThreatIntelClient:
         digest = normalise_hash(value)
         if not digest:
             return {"status": "REFUSED", "verdicts": [], "reason": "Not a file hash."}
-        if not self.vt_key:
+        if not self.vt_key and not any("hash" in p.kinds for p in self.providers):
             return {"status": "NO_PROVIDERS", "verdicts": []}
         return self._cached(f"hash:{digest}", lambda: self._fetch_hash(digest))
 
     def _fetch_hash(self, digest):
+        extra = self._provider_verdicts("hash", digest)
+        if not self.vt_key:
+            return {"status": "OK", "verdicts": extra}
+        result = self._fetch_vt_hash(digest)
+        result["verdicts"] += extra
+        return result
+
+    def _fetch_vt_hash(self, digest):
         blocked = self._vt_terms_block(digest) or self._vt_rate_block(digest)
         if blocked:
             return {"status": blocked["status"], "verdicts": [blocked]}
@@ -293,6 +316,7 @@ class ThreatIntelClient:
             verdicts.append(self._virustotal_ip(ip))
         if self.abuse_key:
             verdicts.append(self._abuseipdb_ip(ip))
+        verdicts += self._provider_verdicts("ip", ip)
         return {"status": "OK" if verdicts else "NO_PROVIDERS", "verdicts": verdicts}
 
     def _vt_terms_block(self, indicator):

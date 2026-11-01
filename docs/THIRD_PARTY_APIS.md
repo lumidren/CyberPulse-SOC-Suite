@@ -1,6 +1,7 @@
 # Third-Party API Use: Terms, Limits and Attribution
 
-CyberPulse can optionally query **VirusTotal** and **AbuseIPDB**. Both are off
+CyberPulse can optionally query **VirusTotal** and **AbuseIPDB**, and (F41) **AlienVault
+OTX**, **URLhaus**, **GreyNoise**, **Shodan** and **Censys**. All are off
 by default (`EXTERNAL_ENRICHMENT_ENABLED=false`). If you enable them you are
 bound by each provider's terms, and you supply your own API keys.
 
@@ -40,6 +41,28 @@ bound by each provider's terms, and you supply your own API keys.
 * Check AbuseIPDB's terms for attribution and redistribution rules.
   CyberPulse attributes every AbuseIPDB verdict it displays and does not
   redistribute their data (see the sections below).
+
+## OTX, URLhaus, GreyNoise, Shodan, Censys (F41)
+
+Each is enabled by its own key and goes through the same client as VirusTotal and
+AbuseIPDB: external enrichment must be on, only public IPs and file hashes are sent,
+answers are cached, and failures degrade to `UNAVAILABLE`. Client-side limits are
+conservative defaults; set them to your plan with `<NAME>_RATE_LIMIT_PER_MIN` and
+`<NAME>_DAILY_QUOTA` (names below). None has been called with a real key from this repo.
+
+| Provider | Key variable(s) | Sends | Default limits | Used as |
+| :--- | :--- | :--- | :--- | :--- |
+| AlienVault OTX | `OTX_API_KEY` | IP, hash | 60/min, 10000/day | reputation (pulse count; flags at 3+ pulses) |
+| URLhaus (abuse.ch) | `URLHAUS_AUTH_KEY` | IP (host), SHA-256 | 30/min, 5000/day | reputation (malware URLs hosted / known payload) |
+| GreyNoise Community | `GREYNOISE_API_KEY` | IP | 10/min, 50/day | reputation (`malicious` flags; `benign`/RIOT never flags) |
+| Shodan | `SHODAN_API_KEY` | IP | 60/min, 100/day | **context only** (ports, CVEs), never scored |
+| Censys Search v2 | `CENSYS_API_ID`, `CENSYS_API_SECRET` | IP | 10/min, 250/day | **context only** (services), never scored |
+
+Several of these have free tiers restricted to non-commercial or community use
+(GreyNoise Community, Shodan, Censys); check each provider's terms for your use before
+setting a key. Shodan takes its key as a query parameter by design; it is never logged by
+CyberPulse. Censys has been moving users to its newer Platform API, so the v2 endpoint
+may need updating.
 
 ## Attribution
 
