@@ -62,4 +62,4 @@ jobs:
         fi
     - id: deployment
       if: steps.pages.outputs.enabled == 'true'
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@v5
