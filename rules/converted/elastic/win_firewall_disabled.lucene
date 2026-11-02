@@ -1,2 +1,2 @@
 // SOC-RULE-030: Windows Firewall Disabled via netsh or PowerShell (generated from rules/sigma/win_firewall_disabled.yml; review before use)
-(event.code:1 OR event.code:4688) AND ((process.executable:*\\netsh.exe AND (process.command_line:*advfirewall* AND process.command_line:*state\ off*))) OR (((process.command_line:*Set\-NetFirewallProfile* AND process.command_line:*\-Enabled* AND process.command_line:*False*)))
+(event.code:1 OR event.code:4688) AND (((process.executable:*\\netsh.exe AND (process.command_line:*advfirewall* AND process.command_line:*state\ off*))) OR (((process.command_line:*Set\-NetFirewallProfile* AND process.command_line:*\-Enabled* AND process.command_line:*False*))))

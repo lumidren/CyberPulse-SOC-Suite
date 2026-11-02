@@ -1,3 +1,3 @@
 // SOC-RULE-001: OS Credential Dumping via LSASS Memory Access (generated from rules/sigma/win_lsass_dumping.yml; review before use)
 SecurityEvent
-| where ((TargetImage endswith "\\lsass.exe" and (GrantedAccess contains "0x1010" or GrantedAccess contains "0x1400" or GrantedAccess contains "0x1F0FFF")) and not ((SourceImage endswith "\\svchost.exe" or SourceImage endswith "\\csrss.exe" or SourceImage endswith "\\MsMpEng.exe")))
+| where EventID in (10) and (((TargetImage endswith "\\lsass.exe" and (GrantedAccess contains "0x1010" or GrantedAccess contains "0x1400" or GrantedAccess contains "0x1F0FFF")) and not ((SourceImage endswith "\\svchost.exe" or SourceImage endswith "\\csrss.exe" or SourceImage endswith "\\MsMpEng.exe"))))

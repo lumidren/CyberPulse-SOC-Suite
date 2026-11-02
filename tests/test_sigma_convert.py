@@ -41,6 +41,28 @@ class TestSigmaConvert(unittest.TestCase):
         self.assertIn("<if_group>amazon</if_group>", aws)
         self.assertIn('name="aws.eventName"', aws)
 
+    def test_category_event_ids_survive_every_target(self):
+        lsass = self.rules["win_lsass_dumping.yml"]  # process_access: no dedicated KQL table
+        self.assertIn("EventID in (10) and (", convert(lsass, "kql"))
+        self.assertIn('name="win.system.eventID" type="pcre2">(?i)(?:^10$)', convert(lsass, "wazuh"))
+        ps = self.rules["win_powershell_obfuscation.yml"]  # process_creation: DeviceProcessEvents implies it
+        self.assertNotIn("EventID in", convert(ps, "kql"))
+        self.assertIn("(?:^1$|^4688$)", convert(ps, "wazuh"))
+
+    def test_log_source_filter_wraps_the_whole_query(self):
+        """`event.code:1 AND (a) OR (b)` would let branch b match any event; the query must be one group."""
+        for name, rule in self.rules.items():
+            body = convert(rule, "elastic").splitlines()[1]
+            if not body.startswith("(event.code:"):
+                continue
+            query = body.split(") AND ", 1)[1]
+            depth = 0
+            for i, ch in enumerate(query):
+                depth += {"(": 1, ")": -1}.get(ch, 0)
+                if depth == 0:
+                    self.assertEqual(i, len(query) - 1, f"{name}: query is not one parenthesised group")
+                    break
+
     def test_committed_conversions_are_current(self):
         stale = []
         for rel, body in render_all().items():

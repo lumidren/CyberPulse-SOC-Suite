@@ -136,6 +136,7 @@
 <!-- SOC-RULE-034: Active Directory Reconnaissance Commands (generated from rules/sigma/win_ad_reconnaissance.yml; review before use) -->
 <rule id="110340" level="8">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\net\.exe$|\\net1\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:group\ "domain\ admins"|group\ "enterprise\ admins"|group\ domain\ admins)</field>
     <description>SOC-RULE-034: Active Directory Reconnaissance Commands</description>
@@ -143,6 +144,7 @@
 </rule>
 <rule id="110341" level="8">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\nltest\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:/domain_trusts|/dclist)</field>
     <description>SOC-RULE-034: Active Directory Reconnaissance Commands</description>
@@ -150,6 +152,7 @@
 </rule>
 <rule id="110342" level="8">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:adfind|\-sc\ trustdmp|objectcategory=person)</field>
     <description>SOC-RULE-034: Active Directory Reconnaissance Commands</description>
     <group>cyberpulse,sigma_generated,</group>
@@ -158,6 +161,7 @@
 <!-- SOC-RULE-038: Password-Protected Archive Created with 7-Zip or WinRAR (generated from rules/sigma/win_archive_with_password.yml; review before use) -->
 <rule id="110380" level="8">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\7z\.exe$|\\7za\.exe$|\\rar\.exe$|\\WinRAR\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:\ a\ |\ \-a\ )</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:\ \-p|\ \-hp)</field>
@@ -198,6 +202,7 @@
 <!-- SOC-RULE-005: Windows Defender Real-Time Protection Disabled via PowerShell (generated from rules/sigma/win_defender_tamper.yml; review before use) -->
 <rule id="110050" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\powershell\.exe$|\\pwsh\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:Set\-MpPreference|\-DisableRealtimeMonitoring|\-DisableBehaviorMonitoring|\-DisableIOAVProtection|\-DisableScriptScanning)</field>
     <description>SOC-RULE-005: Windows Defender Real-Time Protection Disabled via PowerShell</description>
@@ -216,6 +221,7 @@
 <!-- SOC-RULE-030: Windows Firewall Disabled via netsh or PowerShell (generated from rules/sigma/win_firewall_disabled.yml; review before use) -->
 <rule id="110300" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\netsh\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?=.*advfirewall)(?=.*state\ off)</field>
     <description>SOC-RULE-030: Windows Firewall Disabled via netsh or PowerShell</description>
@@ -223,6 +229,7 @@
 </rule>
 <rule id="110301" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?=.*Set\-NetFirewallProfile)(?=.*\-Enabled)(?=.*False)</field>
     <description>SOC-RULE-030: Windows Firewall Disabled via netsh or PowerShell</description>
     <group>cyberpulse,sigma_generated,</group>
@@ -281,6 +288,7 @@
 <!-- SOC-RULE-018: BITSAdmin Download or Job Creation (generated from rules/sigma/win_lolbas_bitsadmin_transfer.yml; review before use) -->
 <rule id="110180" level="8">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\bitsadmin\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:/transfer|/addfile|/SetNotifyCmdLine|/download)</field>
     <description>SOC-RULE-018: BITSAdmin Download or Job Creation</description>
@@ -290,6 +298,7 @@
 <!-- SOC-RULE-014: Certutil Used to Download or Decode a Payload (generated from rules/sigma/win_lolbas_certutil_download.yml; review before use) -->
 <rule id="110140" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\certutil\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:urlcache|\-decode|/decode|\-decodehex)</field>
     <description>SOC-RULE-014: Certutil Used to Download or Decode a Payload</description>
@@ -299,6 +308,7 @@
 <!-- SOC-RULE-015: Mshta Executing Remote or Inline Script (generated from rules/sigma/win_lolbas_mshta_remote_script.yml; review before use) -->
 <rule id="110150" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\mshta\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:http://|https://|javascript:|vbscript:)</field>
     <description>SOC-RULE-015: Mshta Executing Remote or Inline Script</description>
@@ -308,6 +318,7 @@
 <!-- SOC-RULE-016: Regsvr32 Loading a Remote Scriptlet (Squiblydoo) (generated from rules/sigma/win_lolbas_regsvr32_squiblydoo.yml; review before use) -->
 <rule id="110160" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\regsvr32\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:/i:http|\-i:http|/i:ftp)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:scrobj)</field>
@@ -318,6 +329,7 @@
 <!-- SOC-RULE-017: Rundll32 Executing Script or Remote Content (generated from rules/sigma/win_lolbas_rundll32_script.yml; review before use) -->
 <rule id="110170" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\rundll32\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:javascript:|RunHTMLApplication|http://|https://)</field>
     <description>SOC-RULE-017: Rundll32 Executing Script or Remote Content</description>
@@ -327,6 +339,7 @@
 <!-- SOC-RULE-001: OS Credential Dumping via LSASS Memory Access (generated from rules/sigma/win_lsass_dumping.yml; review before use) -->
 <rule id="110010" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^10$)</field>
     <field name="win.eventdata.targetImage" type="pcre2">(?i)(?:\\lsass\.exe$)</field>
     <field name="win.eventdata.grantedAccess" type="pcre2">(?i)(?:0x1010|0x1400|0x1F0FFF)</field>
     <field name="win.eventdata.sourceImage" type="pcre2" negate="yes">(?i)(?:\\svchost\.exe$|\\csrss\.exe$|\\MsMpEng\.exe$)</field>
@@ -337,6 +350,7 @@
 <!-- SOC-RULE-032: NTDS.dit Extraction via ntdsutil IFM (generated from rules/sigma/win_ntds_extraction.yml; review before use) -->
 <rule id="110320" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\ntdsutil\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?=.*ifm)(?=.*create)</field>
     <description>SOC-RULE-032: NTDS.dit Extraction via ntdsutil IFM</description>
@@ -346,6 +360,7 @@
 <!-- SOC-RULE-021: Office Application Spawning a Shell or Script Host (generated from rules/sigma/win_office_spawns_shell.yml; review before use) -->
 <rule id="110210" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.parentImage" type="pcre2">(?i)(?:\\WINWORD\.EXE$|\\EXCEL\.EXE$|\\POWERPNT\.EXE$|\\OUTLOOK\.EXE$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\cmd\.exe$|\\powershell\.exe$|\\pwsh\.exe$|\\wscript\.exe$|\\cscript\.exe$|\\mshta\.exe$)</field>
     <description>SOC-RULE-021: Office Application Spawning a Shell or Script Host</description>
@@ -378,6 +393,7 @@
 <!-- SOC-RULE-004: Obfuscated PowerShell Execution Cradle (generated from rules/sigma/win_powershell_obfuscation.yml; review before use) -->
 <rule id="110040" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\powershell\.exe$|\\pwsh\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:\-EncodedCommand|\-enc\ |\-nop|\-NoProfile|\-WindowStyle\ Hidden|IEX\(|Invoke\-Expression|DownloadString)</field>
     <description>SOC-RULE-004: Obfuscated PowerShell Execution Cradle</description>
@@ -387,12 +403,14 @@
 <!-- SOC-RULE-035: PsExec-Style Remote Service Execution (generated from rules/sigma/win_psexec_service.yml; review before use) -->
 <rule id="110350" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\PSEXESVC\.exe$)</field>
     <description>SOC-RULE-035: PsExec-Style Remote Service Execution</description>
     <group>cyberpulse,sigma_generated,</group>
 </rule>
 <rule id="110351" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.parentImage" type="pcre2">(?i)(?:\\PSEXESVC\.exe$)</field>
     <description>SOC-RULE-035: PsExec-Style Remote Service Execution</description>
     <group>cyberpulse,sigma_generated,</group>
@@ -401,6 +419,7 @@
 <!-- SOC-RULE-006: Rapid File Encryption and Ransomware Canary Modification (generated from rules/sigma/win_ransomware_canary.yml; review before use) -->
 <rule id="110060" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^11$)</field>
     <field name="win.eventdata.targetFilename" type="pcre2">(?i)(?:\.locked$|\.encrypted$|\.crypted$|HOW_TO_DECRYPT\.txt$|README_RESTORE\.txt$)</field>
     <description>SOC-RULE-006: Rapid File Encryption and Ransomware Canary Modification</description>
     <group>cyberpulse,sigma_generated,</group>
@@ -409,6 +428,7 @@
 <!-- SOC-RULE-020: Backup Catalog Deletion or Boot Recovery Disabled (generated from rules/sigma/win_ransomware_recovery_inhibition.yml; review before use) -->
 <rule id="110200" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\wbadmin\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:delete\ catalog|delete\ systemstatebackup)</field>
     <description>SOC-RULE-020: Backup Catalog Deletion or Boot Recovery Disabled</description>
@@ -416,6 +436,7 @@
 </rule>
 <rule id="110201" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\bcdedit\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:recoveryenabled\ no|bootstatuspolicy\ ignoreallfailures)</field>
     <description>SOC-RULE-020: Backup Catalog Deletion or Boot Recovery Disabled</description>
@@ -425,6 +446,7 @@
 <!-- SOC-RULE-019: Volume Shadow Copy Deletion or Resizing (generated from rules/sigma/win_ransomware_shadow_copy_deletion.yml; review before use) -->
 <rule id="110190" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\vssadmin\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:delete\ shadows|resize\ shadowstorage)</field>
     <description>SOC-RULE-019: Volume Shadow Copy Deletion or Resizing</description>
@@ -432,6 +454,7 @@
 </rule>
 <rule id="110191" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\wmic\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?=.*shadowcopy)(?=.*delete)</field>
     <description>SOC-RULE-019: Volume Shadow Copy Deletion or Resizing</description>
@@ -439,6 +462,7 @@
 </rule>
 <rule id="110192" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\powershell\.exe$|\\pwsh\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?=.*Win32_ShadowCopy)(?=.*Delete)</field>
     <description>SOC-RULE-019: Volume Shadow Copy Deletion or Resizing</description>
@@ -448,6 +472,7 @@
 <!-- SOC-RULE-039: Rclone Copying Data to Cloud Storage (generated from rules/sigma/win_rclone_exfiltration.yml; review before use) -->
 <rule id="110390" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\rclone\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:\ copy\ |\ sync\ |\ move\ )</field>
     <description>SOC-RULE-039: Rclone Copying Data to Cloud Storage</description>
@@ -455,12 +480,14 @@
 </rule>
 <rule id="110391" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?=.*\-\-config)(?=.*\-\-no\-check\-certificate)</field>
     <description>SOC-RULE-039: Rclone Copying Data to Cloud Storage</description>
     <group>cyberpulse,sigma_generated,</group>
 </rule>
 <rule id="110392" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:mega:|s3:|drive:|dropbox:|ftp:)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?=.*\ copy\ )</field>
     <description>SOC-RULE-039: Rclone Copying Data to Cloud Storage</description>
@@ -470,6 +497,7 @@
 <!-- SOC-RULE-024: Run Key Persistence Added via reg.exe (generated from rules/sigma/win_registry_run_key_persistence.yml; review before use) -->
 <rule id="110240" level="8">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\reg\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?=.*\ add\ )(?=.*\\CurrentVersion\\Run)</field>
     <description>SOC-RULE-024: Run Key Persistence Added via reg.exe</description>
@@ -479,6 +507,7 @@
 <!-- SOC-RULE-037: Remote Access Tool Started from a User-Writable Path (generated from rules/sigma/win_remote_access_tool.yml; review before use) -->
 <rule id="110370" level="8">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\AnyDesk\.exe$|\\TeamViewer\.exe$|\\ScreenConnect\.ClientService\.exe$|\\AteraAgent\.exe$|\\rustdesk\.exe$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\Downloads\\|\\Temp\\|\\AppData\\|\\Users\\Public\\)</field>
     <description>SOC-RULE-037: Remote Access Tool Started from a User-Writable Path</description>
@@ -488,6 +517,7 @@
 <!-- SOC-RULE-031: SAM or SYSTEM Registry Hive Saved to Disk (generated from rules/sigma/win_sam_hive_export.yml; review before use) -->
 <rule id="110310" level="14">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\reg\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:save\ hklm\\sam|save\ hklm\\system|save\ hklm\\security)</field>
     <description>SOC-RULE-031: SAM or SYSTEM Registry Hive Saved to Disk</description>
@@ -506,6 +536,7 @@
 <!-- SOC-RULE-023: Script Host Running a Script from a User-Writable Path (generated from rules/sigma/win_script_host_user_writable.yml; review before use) -->
 <rule id="110230" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\wscript\.exe$|\\cscript\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:\\Downloads\\|\\AppData\\|\\Temp\\|\\Users\\Public\\)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:\.js|\.jse|\.vbs|\.vbe|\.wsf)</field>
@@ -533,6 +564,7 @@
 <!-- SOC-RULE-040: Backup or Security Service Stopped via net or sc (generated from rules/sigma/win_service_stop_backup_security.yml; review before use) -->
 <rule id="110400" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\net\.exe$|\\net1\.exe$|\\sc\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:stop|config)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?:veeam|backup|vss|sql|WinDefend|sophos|MsMpSvc|wbengine)</field>
@@ -543,6 +575,7 @@
 <!-- SOC-RULE-028: UAC Bypass via ms-settings Shell Open Command (generated from rules/sigma/win_uac_bypass_ms_settings.yml; review before use) -->
 <rule id="110280" level="12">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^13$)</field>
     <field name="win.eventdata.targetObject" type="pcre2">(?i)(?:\\ms\-settings\\shell\\open\\command)</field>
     <description>SOC-RULE-028: UAC Bypass via ms-settings Shell Open Command</description>
     <group>cyberpulse,sigma_generated,</group>
@@ -551,6 +584,7 @@
 <!-- SOC-RULE-036: Shell Spawned by WinRM Remote Session Host (generated from rules/sigma/win_winrm_remote_shell.yml; review before use) -->
 <rule id="110360" level="8">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.parentImage" type="pcre2">(?i)(?:\\wsmprovhost\.exe$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\cmd\.exe$|\\powershell\.exe$|\\whoami\.exe$|\\net\.exe$)</field>
     <description>SOC-RULE-036: Shell Spawned by WinRM Remote Session Host</description>
@@ -575,6 +609,7 @@
 <!-- SOC-RULE-022: Process Creation via WMIC process call create (generated from rules/sigma/win_wmic_process_call_create.yml; review before use) -->
 <rule id="110220" level="8">
     <if_group>windows</if_group>
+    <field name="win.system.eventID" type="pcre2">(?i)(?:^1$|^4688$)</field>
     <field name="win.eventdata.image" type="pcre2">(?i)(?:\\wmic\.exe$)</field>
     <field name="win.eventdata.commandLine" type="pcre2">(?i)(?=.*process)(?=.*call)(?=.*create)</field>
     <description>SOC-RULE-022: Process Creation via WMIC process call create</description>

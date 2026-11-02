@@ -1,2 +1,2 @@
 // SOC-RULE-036: Shell Spawned by WinRM Remote Session Host (generated from rules/sigma/win_winrm_remote_shell.yml; review before use)
-(event.code:1 OR event.code:4688) AND ((process.parent.executable:*\\wsmprovhost.exe AND (process.executable:*\\cmd.exe OR process.executable:*\\powershell.exe OR process.executable:*\\whoami.exe OR process.executable:*\\net.exe)))
+(event.code:1 OR event.code:4688) AND (((process.parent.executable:*\\wsmprovhost.exe AND (process.executable:*\\cmd.exe OR process.executable:*\\powershell.exe OR process.executable:*\\whoami.exe OR process.executable:*\\net.exe))))

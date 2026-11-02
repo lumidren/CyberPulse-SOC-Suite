@@ -1,2 +1,2 @@
 // SOC-RULE-032: NTDS.dit Extraction via ntdsutil IFM (generated from rules/sigma/win_ntds_extraction.yml; review before use)
-(event.code:1 OR event.code:4688) AND ((process.executable:*\\ntdsutil.exe AND (process.command_line:*ifm* AND process.command_line:*create*)))
+(event.code:1 OR event.code:4688) AND (((process.executable:*\\ntdsutil.exe AND (process.command_line:*ifm* AND process.command_line:*create*))))

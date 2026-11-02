@@ -1,2 +1,2 @@
 // SOC-RULE-024: Run Key Persistence Added via reg.exe (generated from rules/sigma/win_registry_run_key_persistence.yml; review before use)
-(event.code:1 OR event.code:4688) AND ((process.executable:*\\reg.exe AND (process.command_line:*\ add\ * AND process.command_line:*\\CurrentVersion\\Run*)))
+(event.code:1 OR event.code:4688) AND (((process.executable:*\\reg.exe AND (process.command_line:*\ add\ * AND process.command_line:*\\CurrentVersion\\Run*))))

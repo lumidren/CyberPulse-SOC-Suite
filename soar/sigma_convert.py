@@ -200,8 +200,11 @@ def _logsource_prefix(target, rule):
             parts.append("(" + " OR ".join(f"event.code:{i}" for i in ids) + ")")
         return (" AND ".join(parts) + " AND ") if parts else ""
     if target == "kql":
-        table = KQL_TABLES.get(key_cat) or KQL_TABLES.get(key_svc) or "SecurityEvent"
-        return f"{table}\n| where "
+        table = KQL_TABLES.get(key_cat) or KQL_TABLES.get(key_svc)
+        if table:  # a dedicated table already implies the event type
+            return f"{table}\n| where "
+        clause = f"EventID in ({', '.join(str(i) for i in ids)}) and " if ids else ""
+        return f"SecurityEvent\n| where {clause}"
     return ""
 
 
@@ -212,7 +215,10 @@ def convert(rule, target):
         return to_wazuh(rule)
     header = {"splunk": "``` {} ```", "elastic": "// {}", "kql": "// {}"}[target].format(
         f"{rule.soar.get('soc_rule_id', rule.id)}: {rule.title} (generated from {rule.file}; review before use)")
-    return header + "\n" + _logsource_prefix(target, rule) + _query(target, rule) + "\n"
+    prefix, query = _logsource_prefix(target, rule), _query(target, rule)
+    if prefix.endswith((" AND ", " and ")):
+        query = f"({query})"  # keep a multi-branch OR inside the log source filter
+    return header + "\n" + prefix + query + "\n"
 
 
 def to_wazuh(rule, base_id=None):
@@ -222,6 +228,7 @@ def to_wazuh(rule, base_id=None):
     base_id = base_id or 110000 + number * 10
     level = {"low": 5, "medium": 8, "high": 12, "critical": 14}.get(rule.level, 8)
     group, prefix = WAZUH_PRODUCTS.get(rule.logsource.get("product"), ("windows", "win.eventdata."))
+    category_ids = sorted(LOGSOURCE_EVENT_IDS.get((rule.logsource.get("product"), rule.logsource.get("category")), set()))
     out = [f"<!-- {soc}: {xml_escape(rule.title)} (generated from {rule.file}; review before use) -->"]
     branches = [b for c in rule.conditions for b in _dnf(c, rule.selections)]
     rule_no = 0
@@ -251,6 +258,9 @@ def to_wazuh(rule, base_id=None):
                     fields.append(f'    <field name="{name}" type="pcre2"{neg_attr}>(?i){xml_escape(pattern)}</field>')
             out.append(f'<rule id="{base_id + rule_no}" level="{level}">')
             out.append(f"    <if_group>{group}</if_group>")
+            if category_ids and not any('name="win.system.eventID"' in f for f in fields):
+                ids = "|".join(_regex_for(i, []) for i in category_ids)
+                fields.insert(0, f'    <field name="win.system.eventID" type="pcre2">(?i){xml_escape("(?:" + ids + ")")}</field>')
             out.extend(fields)
             out.append(f"    <description>{xml_escape(soc)}: {xml_escape(rule.title)}</description>")
             out.append("    <group>cyberpulse,sigma_generated,</group>")

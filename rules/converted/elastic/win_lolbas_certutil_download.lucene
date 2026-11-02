@@ -1,2 +1,2 @@
 // SOC-RULE-014: Certutil Used to Download or Decode a Payload (generated from rules/sigma/win_lolbas_certutil_download.yml; review before use)
-(event.code:1 OR event.code:4688) AND ((process.executable:*\\certutil.exe) AND ((process.command_line:*urlcache* OR process.command_line:*\-decode* OR process.command_line:*\/decode* OR process.command_line:*\-decodehex*)))
+(event.code:1 OR event.code:4688) AND (((process.executable:*\\certutil.exe) AND ((process.command_line:*urlcache* OR process.command_line:*\-decode* OR process.command_line:*\/decode* OR process.command_line:*\-decodehex*))))

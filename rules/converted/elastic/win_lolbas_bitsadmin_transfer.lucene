@@ -1,2 +1,2 @@
 // SOC-RULE-018: BITSAdmin Download or Job Creation (generated from rules/sigma/win_lolbas_bitsadmin_transfer.yml; review before use)
-(event.code:1 OR event.code:4688) AND ((process.executable:*\\bitsadmin.exe) AND ((process.command_line:*\/transfer* OR process.command_line:*\/addfile* OR process.command_line:*\/SetNotifyCmdLine* OR process.command_line:*\/download*)))
+(event.code:1 OR event.code:4688) AND (((process.executable:*\\bitsadmin.exe) AND ((process.command_line:*\/transfer* OR process.command_line:*\/addfile* OR process.command_line:*\/SetNotifyCmdLine* OR process.command_line:*\/download*))))

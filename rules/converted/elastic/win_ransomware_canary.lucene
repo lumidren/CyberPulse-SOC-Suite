@@ -1,2 +1,2 @@
 // SOC-RULE-006: Rapid File Encryption and Ransomware Canary Modification (generated from rules/sigma/win_ransomware_canary.yml; review before use)
-(event.code:11) AND (((file.path:*.locked OR file.path:*.encrypted OR file.path:*.crypted OR file.path:*HOW_TO_DECRYPT.txt OR file.path:*README_RESTORE.txt)))
+(event.code:11) AND ((((file.path:*.locked OR file.path:*.encrypted OR file.path:*.crypted OR file.path:*HOW_TO_DECRYPT.txt OR file.path:*README_RESTORE.txt))))

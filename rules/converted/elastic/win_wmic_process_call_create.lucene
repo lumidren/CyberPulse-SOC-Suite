@@ -1,2 +1,2 @@
 // SOC-RULE-022: Process Creation via WMIC process call create (generated from rules/sigma/win_wmic_process_call_create.yml; review before use)
-(event.code:1 OR event.code:4688) AND ((process.executable:*\\wmic.exe AND (process.command_line:*process* AND process.command_line:*call* AND process.command_line:*create*)))
+(event.code:1 OR event.code:4688) AND (((process.executable:*\\wmic.exe AND (process.command_line:*process* AND process.command_line:*call* AND process.command_line:*create*))))

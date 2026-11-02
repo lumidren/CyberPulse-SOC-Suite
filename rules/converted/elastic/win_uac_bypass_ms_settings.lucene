@@ -1,2 +1,2 @@
 // SOC-RULE-028: UAC Bypass via ms-settings Shell Open Command (generated from rules/sigma/win_uac_bypass_ms_settings.yml; review before use)
-(event.code:13) AND ((winlog.event_data.TargetObject:*\\ms\-settings\\shell\\open\\command*))
+(event.code:13) AND (((winlog.event_data.TargetObject:*\\ms\-settings\\shell\\open\\command*)))
