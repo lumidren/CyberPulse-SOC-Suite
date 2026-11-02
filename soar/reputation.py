@@ -63,7 +63,7 @@ def _signals(intel: Dict[str, Any]) -> List[Dict[str, Any]]:
     vt = fixture.get("virustotal_positives") or 0
     abuse = fixture.get("abuse_score") or 0
     if vt or abuse:
-        signals.append({"source": "lab-fixture:vt-style (synthetic)", "score": min(100.0, vt / 72.0 * 100.0),
+        signals.append({"source": "lab-fixture:vt-style (synthetic)", "score": round(min(100.0, vt / 72.0 * 100.0), 1),
                         "flags": vt >= VT_FLAG_ENGINES, "observed_at": FIXTURE_TIMESTAMP})
         signals.append({"source": "lab-fixture:abuse-style (synthetic)", "score": float(abuse),
                         "flags": abuse >= ABUSE_FLAG_CONFIDENCE, "observed_at": FIXTURE_TIMESTAMP})
@@ -75,7 +75,7 @@ def _signals(intel: Dict[str, Any]) -> List[Dict[str, Any]]:
                 continue
             if v.get("source") == "VirusTotal" and v.get("malicious") is not None:
                 engines = v["malicious"]
-                signals.append({"source": "VirusTotal", "score": min(100.0, engines / 72.0 * 100.0 * 2),
+                signals.append({"source": "VirusTotal", "score": round(min(100.0, engines / 72.0 * 100.0 * 2), 1),
                                 "flags": engines >= VT_FLAG_ENGINES, "observed_at": v.get("fetched_at"),
                                 "cached": part.get("cached", False), "attribution": v.get("attribution")})
             elif v.get("source") == "AbuseIPDB" and v.get("abuse_confidence") is not None:

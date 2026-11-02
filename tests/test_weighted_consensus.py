@@ -27,6 +27,14 @@ class TestWeightedConsensus(unittest.TestCase):
         self.assertAlmostEqual(r["raw_score"], (70 * 1.0 + 100 * 0.6) / 1.6, places=1)
         self.assertEqual(r["score"], r["raw_score"])
 
+    def test_engine_ratio_scores_are_rounded_for_display(self):
+        r = consensus({"ip_reputation": {"virustotal_positives": 49, "abuse_score": 90},
+                       "external": {"ip": {"verdicts": [{"source": "VirusTotal", "malicious": 19,
+                                                         "fetched_at": "t", "attribution": "a"}]}}})
+        scores = {s["source"]: s["score"] for s in r["sources"]}
+        self.assertEqual(scores["lab-fixture:vt-style (synthetic)"], 68.1)  # 49 / 72 engines, not 68.0555...
+        self.assertEqual(scores["VirusTotal"], 52.8)
+
     def test_dissent_dilutes(self):
         agree = consensus(intel(v("URLhaus", 80.0, True), v("GreyNoise", 80.0, True)))
         dissent = consensus(intel(v("URLhaus", 80.0, True), v("GreyNoise", 80.0, True),
