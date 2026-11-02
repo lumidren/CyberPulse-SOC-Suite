@@ -30,8 +30,8 @@ REPORT = os.path.join(ROOT, "docs", "WHAT_I_MISSED.md")
 # Maintained by hand: things that exist in the repo but have never been run for real.
 # Remove an entry only after running it and recording how.
 NOT_VERIFIED = [
-    "Container images: `compose.yaml` and `deploy/docker-compose.yml` pass `docker compose config`, but no image "
-    "has been built or run here (Docker daemon unavailable).",
+    "Full SIEM stack (`deploy/docker-compose.yml`: Wazuh, OpenSearch, TheHive): passes `docker compose config` but "
+    "has never been started. (The lab image in `compose.yaml` is built and smoke-tested in CI since 2026-11-02.)",
     "Vagrant and Ansible lab provisioning (`deploy/vagrant`, `deploy/ansible`): neither tool was installed.",
     "`sigma check` reports 0 errors and 0 issues under sigma-cli 1.x / pySigma 0.11 (CI, and locally on "
     "2026-11-02), but the rules have not been checked with sigma-cli 2 or later.",

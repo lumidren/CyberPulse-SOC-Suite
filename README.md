@@ -72,8 +72,10 @@ docker compose up --build
 Open **http://127.0.0.1:5000** and sign in with the key printed in the log
 (`docker compose logs cyberpulse | grep "Development API key"`). The container is a
 declared lab (`CYBERPULSE_LAB_MODE=true`), runs read-only without capabilities, defaults
-to approval-required containment and is published on loopback only. The full Wazuh /
-OpenSearch / TheHive stack is in `deploy/docker-compose.yml`.
+to approval-required containment and is published on loopback only. CI runs this exact
+command on every push (job `docker-smoke`) and checks the healthcheck, the hardening and
+the API. The full Wazuh / OpenSearch / TheHive stack is in `deploy/docker-compose.yml`;
+it has not been run.
 
 **Local Python**
 
