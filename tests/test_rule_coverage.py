@@ -11,8 +11,8 @@ from soar.input_validation import DETAIL_FIELD_ALLOWLIST  # noqa: E402
 from soar.sigma_correlation import CorrelationEngine  # noqa: E402
 from soar.sigma_engine import SigmaEngine  # noqa: E402
 
-TACTICS = {"initial_access", "execution", "persistence", "privilege_escalation", "defense_evasion",
-           "credential_access", "discovery", "lateral_movement", "collection", "command_and_control",
+TACTICS = {"initial-access", "execution", "persistence", "privilege-escalation", "defense-evasion",
+           "credential-access", "discovery", "lateral-movement", "collection", "command-and-control",
            "exfiltration", "impact"}
 
 

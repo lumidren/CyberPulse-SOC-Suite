@@ -9,7 +9,7 @@ description: >-
 author: lumidren (CyberPulse SOC Suite)
 date: 2026-11-01
 tags:
-    - attack.credential_access
+    - attack.credential-access
     - attack.t1110
 logsource:
     product: windows
@@ -38,7 +38,7 @@ references:
 author: lumidren (CyberPulse SOC Suite)
 date: 2026-11-01
 tags:
-    - attack.credential_access
+    - attack.credential-access
     - attack.t1110.001
 correlation:
     type: event_count

@@ -10,8 +10,8 @@ author: lumidren (CyberPulse SOC Suite)
 date: '2026-11-01'
 modified: '2026-11-01'
 tags:
-- attack.command_and_control
-- attack.defense_evasion
+- attack.command-and-control
+- attack.defense-evasion
 - attack.t1105
 - attack.t1140
 logsource:

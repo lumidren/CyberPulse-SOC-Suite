@@ -9,7 +9,7 @@ author: lumidren (CyberPulse SOC Suite)
 date: '2026-11-01'
 modified: '2026-11-01'
 tags:
-- attack.credential_access
+- attack.credential-access
 - attack.t1003.002
 logsource:
     product: windows

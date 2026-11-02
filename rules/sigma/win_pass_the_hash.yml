@@ -11,8 +11,8 @@ author: lumidren (CyberPulse SOC Suite)
 date: '2026-11-01'
 modified: '2026-11-01'
 tags:
-- attack.lateral_movement
-- attack.defense_evasion
+- attack.lateral-movement
+- attack.defense-evasion
 - attack.t1550.002
 logsource:
     product: windows

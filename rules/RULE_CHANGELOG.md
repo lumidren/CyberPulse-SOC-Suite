@@ -5,6 +5,10 @@ changes meaning, MINOR = broadens/adds coverage, PATCH = metadata only).
 `tests/test_rule_versioning.py` fails if a rule's detection logic changes without a version
 bump here and in `rules/soar_mapping.yml`.
 
+2026-11-02, all rules: ATT&CK tactic tags use the current hyphenated form
+(`attack.credential-access`, not `attack.credential_access`). This is metadata only,
+so no rule version changed.
+
 ## SOC-RULE-001: OS Credential Dumping via LSASS Memory Access (`win_lsass_dumping.yml`)
 
 * **1.0.1** (2026-11-01): Metadata only: date normalised to ISO format; added `modified`.
