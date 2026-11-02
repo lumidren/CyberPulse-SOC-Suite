@@ -29,6 +29,30 @@ class TestMasking(unittest.TestCase):
         self.assertEqual(masked["incident"]["observables"][1]["value"], "10.0.0.5")
         self.assertEqual(payload["incident"]["telemetry"]["user"], r"CORP\j.doe")  # original untouched
 
+    def test_account_names_masked_outside_account_fields(self):
+        payload = {"telemetry": {"user": r"CORP\finance_admin",
+                                 "details": {"Image": r"C:\Users\finance_admin\AppData\Local\Temp\locker.exe"}},
+                   "recommended_containment": ["Disable account finance_admin immediately."],
+                   "graph": {"nodes": [{"id": r"CORP\finance_admin", "label": r"User: CORP\finance_admin"}],
+                             "edges": [{"source": r"CORP\finance_admin", "target": "host:WS-01"}]}}
+        masked = mask_identities(payload)
+        self.assertNotIn("finance_admin", repr(masked))
+        self.assertEqual(masked["telemetry"]["details"]["Image"], r"C:\Users\f******n\AppData\Local\Temp\locker.exe")
+        self.assertEqual(masked["recommended_containment"], ["Disable account f******n immediately."])
+        node, edge = masked["graph"]["nodes"][0], masked["graph"]["edges"][0]
+        self.assertEqual(node["id"], edge["source"])  # edges still reach their node
+        self.assertEqual(node["label"], r"User: CORP\f******n")
+
+    def test_profile_paths_masked_without_a_known_account(self):
+        masked = mask_identities({"details": {"TargetFilename": r"C:\Users\m.worker\Documents\a.docx",
+                                              "Shared": r"C:\Users\Public\Desktop\note.txt"}})
+        self.assertEqual(masked["details"]["TargetFilename"], r"C:\Users\m******r\Documents\a.docx")
+        self.assertEqual(masked["details"]["Shared"], r"C:\Users\Public\Desktop\note.txt")
+
+    def test_names_inside_longer_words_are_left_alone(self):
+        payload = {"user": r"CORP\Administrator", "RoleArn": "arn:aws:iam::000000000000:role/AdministratorAccess"}
+        self.assertEqual(mask_identities(payload)["RoleArn"], payload["RoleArn"])
+
     def test_api_masks_by_default(self):
         import threading
         import urllib.request
