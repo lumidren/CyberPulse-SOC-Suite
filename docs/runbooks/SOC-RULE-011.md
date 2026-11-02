@@ -8,7 +8,7 @@
 Detects loading of known vulnerable signed drivers (e.g., gdrv.sys, mhyprot2.sys) commonly leveraged in Bring Your Own Vulnerable Driver (BYOVD) attacks to disable endpoint security agents from kernel-mode.
 
 - Severity: **CRITICAL** · ATT&CK: T1068
-- Rule file: `rules/sigma/win_driver_byovd_load.yml` · Data source: Sysmon (driver load, Event 6)
+- Rule file: `rules/sigma/win_driver_byovd_load.yml` · Data source: Sysmon Event 6 (driver load)
 
 ## Triage
 
@@ -19,7 +19,7 @@ Playbook: `default-triage`.
 3. Decide true or false positive and record why in the analyst notes
 4. If false positive, propose a rule exception (rules/exceptions.yml) with an owner and expiry
 
-Fields to check in the event: `EventID`, `ImageLoaded`, `SignatureStatus`, `Signed`.
+Fields to check in the event: `ImageLoaded`, `SignatureStatus`, `Signed`.
 
 ## Response
 

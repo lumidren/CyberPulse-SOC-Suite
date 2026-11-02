@@ -42,7 +42,7 @@ DATA_SOURCE_NAMES = {
     ("windows", "registry_set"): "Sysmon Event 13 (registry value set)",
     ("windows", "wmi_event"): "Sysmon Events 19-21 (WMI activity)",
     ("windows", "security"): "Windows Security log (Advanced Audit Policy)",
-    ("windows", "sysmon"): "Sysmon (driver load, Event 6)",
+    ("windows", "driver_load"): "Sysmon Event 6 (driver load)",
     ("windows", "system"): "Windows System log (Service Control Manager)",
     ("aws", "cloudtrail"): "AWS CloudTrail (management events)",
     ("azure", "signinlogs"): "Entra ID sign-in logs",

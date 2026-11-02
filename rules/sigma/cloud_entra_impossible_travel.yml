@@ -6,7 +6,7 @@ references:
     - https://attack.mitre.org/techniques/T1078/
 author: lumidren (CyberPulse SOC Suite)
 date: 2026-09-09
-modified: 2026-11-01
+modified: 2026-11-02
 tags:
     - attack.initial-access
     - attack.credential-access
@@ -18,7 +18,7 @@ detection:
     selection:
         Category: 'SignInLogs'
         OperationName: 'Sign-in activity'
-        ResultType: '0' # Successful signin
+        ResultType: 0 # Successful signin
     anomaly:
         RiskLevelDuringSignIn: 'high'
         RiskEventTypes|contains: 'impossibleTravel'

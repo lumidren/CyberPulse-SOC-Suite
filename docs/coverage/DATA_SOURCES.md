@@ -20,7 +20,7 @@ those techniques lose all coverage.
 | Suricata EVE alerts (network IDS) | 1 | 1 | T1071 |
 | Zeek http.log (network sensor) | 1 | 1 | - |
 | Zeek ssl.log (network sensor) | 1 | 2 | T1071.001, T1573.002 |
-| Sysmon (driver load, Event 6) | 1 | 1 | T1068 |
+| Sysmon Event 6 (driver load) | 1 | 1 | T1068 |
 | Sysmon Event 10 (process access) | 1 | 1 | T1003.001 |
 | Windows System log (Service Control Manager) | 1 | 1 | T1543.003 |
 | Sysmon Event 13 (registry value set) | 1 | 1 | T1548.002 |

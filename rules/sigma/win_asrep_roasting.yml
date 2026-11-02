@@ -7,7 +7,7 @@ references:
 - https://attack.mitre.org/techniques/T1558/004/
 author: lumidren (CyberPulse SOC Suite)
 date: '2026-11-01'
-modified: '2026-11-01'
+modified: '2026-11-02'
 tags:
 - attack.credential-access
 - attack.t1558.004
@@ -17,7 +17,7 @@ logsource:
 detection:
     selection:
         EventID: 4768
-        PreAuthType: '0'
+        PreAuthType: 0
         TicketEncryptionType: '0x17'
     condition: selection
 falsepositives:

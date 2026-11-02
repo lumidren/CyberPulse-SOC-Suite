@@ -57,11 +57,13 @@ so no rule version changed.
 
 ## SOC-RULE-010: Microsoft Entra ID Impossible Travel Anomaly (`cloud_entra_impossible_travel.yml`)
 
+* **1.0.2** (2026-11-02): `ResultType` is written as the number 0 instead of the string '0' (sigma check NumberAsStringIssue). Matching is unchanged: the rule samples give the same results.
 * **1.0.1** (2026-11-01): Metadata only: date normalised to ISO format; added `modified`.
 * **1.0.0** (2026-09-09): Initial rule.
 
 ## SOC-RULE-011: Vulnerable Signed Driver Load (BYOVD Evasion) (`win_driver_byovd_load.yml`)
 
+* **1.1.0** (2026-11-02): Uses the generic `driver_load` log source instead of the Sysmon service plus `EventID: 6` (sigma check SpecificInsteadOfGenericLogsourceIssue). Slightly broader: any Windows driver-load event (ID 6) qualifies, not only events from the Sysmon channel.
 * **1.0.1** (2026-11-01): Metadata only: date normalised to ISO format; added `modified`.
 * **1.0.0** (2026-09-09): Initial rule.
 
@@ -151,6 +153,7 @@ so no rule version changed.
 
 ## SOC-RULE-033: AS-REP Roasting: TGT Without Pre-Authentication over RC4 (`win_asrep_roasting.yml`)
 
+* **1.0.1** (2026-11-02): `PreAuthType` is written as the number 0 instead of the string '0' (sigma check NumberAsStringIssue). Matching is unchanged: the rule samples give the same results.
 * **1.0.0** (2026-11-01): Initial rule.
 
 ## SOC-RULE-034: Active Directory Reconnaissance Commands (`win_ad_reconnaissance.yml`)

@@ -63,14 +63,14 @@ rules:
     soc_rule_id: SOC-RULE-010
     name: Microsoft Entra ID Impossible Travel Anomaly
     action_recommended: REVOKE_ENTRA_REFRESH_TOKENS_AND_FORCE_MFA
-    version: 1.0.1
-    detection_sha256: 841148dafda94cafc94517f551bbe84e5e4579e4c0df8325c084646f14a0be39
+    version: 1.0.2
+    detection_sha256: 2991b577cc94ff22eed6c3d06803c62bd46cdecec92c8ba87387916397dfb13d
   f1a2b3c4-d5e6-4789-a012-3456789abcde:
     soc_rule_id: SOC-RULE-011
     name: Vulnerable Kernel Driver Load (BYOVD Defense Evasion)
     action_recommended: UNLOAD_DRIVER_AND_ENFORCE_WDAC_BLOCK
-    version: 1.0.1
-    detection_sha256: b8692a0413ac118021e8272e5598cf7acf1656fd8cb9427f1cd437d8e7a66a00
+    version: 1.1.0
+    detection_sha256: 4cb554c9e18bcec9f2e8eb46fc292f4dab544f177dee9e1b425c625f91b315d5
   348c0c82-bd9b-427a-bc05-11d9157700e9:
     soc_rule_id: SOC-RULE-012
     name: Pass-the-Hash Logon Detected
@@ -201,8 +201,8 @@ rules:
     soc_rule_id: SOC-RULE-033
     name: 'AS-REP Roasting: TGT Without Pre-Authentication over RC4'
     action_recommended: ENRICH_AND_ALERT_ANALYST
-    version: 1.0.0
-    detection_sha256: d89b88590c3ec50a04346abd108e6b3f1fac13016c4e57f282612f7dd7750fa5
+    version: 1.0.1
+    detection_sha256: 5857bdb1144054454fd2a9272d5055855d5cb80391e1946ceb1343e91da0c1ba
   4df90a3f-121f-4e5e-b371-301acbac1442:
     soc_rule_id: SOC-RULE-034
     name: Active Directory Reconnaissance Commands
